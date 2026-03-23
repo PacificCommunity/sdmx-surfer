@@ -70,17 +70,6 @@ Install Python dependencies with uv:
 uv sync
 ```
 
-We patched `build_data_url` to include `dimensionAtObservation=AllDimensions` in generated URLs. If you're using a fresh clone, apply this one-line change in `tools/sdmx_tools.py`:
-
-```python
-# Line ~711: change
-params: list[str] = []
-# to
-params: list[str] = ["dimensionAtObservation=AllDimensions"]
-```
-
-This ensures the SDMX API returns flat observations, which `sdmx-dashboard-components` requires.
-
 ### 2. Start the MCP gateway
 
 ```bash
