@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import dynamic from "next/dynamic";
+import { exportToPdf, exportToHtml, exportToHtmlLive, exportToJson } from "@/lib/export-dashboard";
 import type {
   SDMXDashboardConfig,
   SDMXDashboardRow,
@@ -1073,6 +1074,8 @@ export const DashboardPreview = memo(function DashboardPreview({
 }: DashboardPreviewProps) {
   const [tab, setTab] = useState<"preview" | "json">("preview");
   const [showSkeleton, setShowSkeleton] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportMenu, setExportMenu] = useState(false);
   const errorsRef = useRef<Set<string>>(new Set());
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const skeletonTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1282,11 +1285,120 @@ export const DashboardPreview = memo(function DashboardPreview({
           )}
         </div>
 
-        {tab === "preview" && (
-          <span className="type-label-md rounded-full bg-tertiary-fixed px-2.5 py-0.5 text-tertiary-container">
-            Live
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {tab === "preview" && (
+            <span className="type-label-md rounded-full bg-tertiary-fixed px-2.5 py-0.5 text-tertiary-container">
+              Live
+            </span>
+          )}
+
+          {/* Export dropdown */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setExportMenu((v) => !v)}
+              disabled={exporting}
+              className="ghost-border flex items-center gap-1.5 rounded-full bg-surface-card px-3 py-1 text-xs font-semibold text-primary transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
+            >
+              {exporting ? (
+                <>
+                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  Export
+                </>
+              )}
+            </button>
+
+            {exportMenu && (
+              <>
+                {/* Backdrop to close menu */}
+                <div
+                  className="fixed inset-0 z-20"
+                  onClick={() => setExportMenu(false)}
+                />
+                <div className="absolute right-0 z-30 mt-1 w-48 rounded-[var(--radius-lg)] bg-surface-card p-1 shadow-ambient">
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 rounded-[var(--radius-md)] px-3 py-2 text-left text-xs font-medium text-on-surface transition-colors hover:bg-surface-low"
+                    onClick={async () => {
+                      setExportMenu(false);
+                      if (!dashboardRootRef.current || !config) return;
+                      setExporting(true);
+                      try {
+                        await exportToPdf(dashboardRootRef.current, config);
+                      } finally {
+                        setExporting(false);
+                      }
+                    }}
+                  >
+                    <svg className="h-4 w-4 text-on-surface-variant" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                    <div>
+                      <div>PDF</div>
+                      <div className="text-[10px] text-on-surface-variant">Snapshot of current view</div>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 rounded-[var(--radius-md)] px-3 py-2 text-left text-xs font-medium text-on-surface transition-colors hover:bg-surface-low"
+                    onClick={() => {
+                      setExportMenu(false);
+                      if (config && dashboardRootRef.current)
+                        exportToHtml(dashboardRootRef.current, config);
+                    }}
+                  >
+                    <svg className="h-4 w-4 text-on-surface-variant" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                    </svg>
+                    <div>
+                      <div>HTML (static)</div>
+                      <div className="text-[10px] text-on-surface-variant">Snapshot — works offline, from file://</div>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 rounded-[var(--radius-md)] px-3 py-2 text-left text-xs font-medium text-on-surface transition-colors hover:bg-surface-low"
+                    onClick={() => {
+                      setExportMenu(false);
+                      if (config) exportToHtmlLive(config);
+                    }}
+                  >
+                    <svg className="h-4 w-4 text-on-surface-variant" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5a17.92 17.92 0 01-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                    </svg>
+                    <div>
+                      <div>HTML (live)</div>
+                      <div className="text-[10px] text-on-surface-variant">Interactive — needs HTTP server + internet</div>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 rounded-[var(--radius-md)] px-3 py-2 text-left text-xs font-medium text-on-surface transition-colors hover:bg-surface-low"
+                    onClick={() => {
+                      setExportMenu(false);
+                      if (config) exportToJson(config);
+                    }}
+                  >
+                    <svg className="h-4 w-4 text-on-surface-variant" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776" />
+                    </svg>
+                    <div>
+                      <div>JSON Config</div>
+                      <div className="text-[10px] text-on-surface-variant">Raw dashboard config</div>
+                    </div>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Tab content */}

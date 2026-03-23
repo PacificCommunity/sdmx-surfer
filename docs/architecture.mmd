@@ -1,0 +1,89 @@
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#004467",
+    "primaryTextColor": "#ffffff",
+    "primaryBorderColor": "#005c8a",
+    "secondaryColor": "#006970",
+    "secondaryTextColor": "#ffffff",
+    "secondaryBorderColor": "#006970",
+    "tertiaryColor": "#f1f4f6",
+    "tertiaryTextColor": "#181c1e",
+    "tertiaryBorderColor": "#e5e9eb",
+    "noteBkgColor": "#8aeff9",
+    "noteTextColor": "#006e75",
+    "noteBorderColor": "#6fd6df",
+    "lineColor": "#40484f",
+    "textColor": "#181c1e",
+    "mainBkg": "#f7fafc",
+    "nodeBorder": "#c0c7d0",
+    "clusterBkg": "#f1f4f6",
+    "clusterBorder": "#e5e9eb",
+    "fontFamily": "Inter, system-ui, sans-serif"
+  }
+}}%%
+
+flowchart TB
+  subgraph Browser["Browser (React 19)"]
+    direction LR
+    subgraph ChatUI["Chat Panel"]
+      UC[useChat hook]
+      MI[Message Input]
+      ML[Message List]
+    end
+    subgraph Preview["Dashboard Preview"]
+      SDX[SDMXDashboard\nComponent]
+      JE[JSON Editor]
+    end
+  end
+
+  subgraph Server["Next.js Server"]
+    API["/api/chat\nRoute Handler"]
+    ST["streamText()\nClaude Sonnet 4.6"]
+    UD["update_dashboard\n(custom tool)"]
+    PS["prepareStep\n(step budget nudge)"]
+    Cache["Prompt Cache\n(Tier 1)"]
+  end
+
+  subgraph MCP["MCP Gateway (Python)"]
+    direction TB
+    MCPSrv["sdmx-mcp-gateway\nlocalhost:8000/mcp"]
+    Tools["18 SDMX Tools:\nlist_dataflows\nget_dataflow_structure\nget_dimension_codes\nbuild_data_url\n..."]
+  end
+
+  STAT[(".Stat API\nstats-sdmx-disseminate\n.pacificdata.org")]
+
+  %% User flow
+  MI -->|"user message"| UC
+  UC -->|"POST /api/chat"| API
+  API --> ST
+  ST -->|"tool calls"| MCPSrv
+  MCPSrv --> Tools
+  ST --> UD
+  UD -->|"config in\ntool output"| UC
+  UC -->|"extract config\nfrom message parts"| SDX
+  ST -->|"SSE stream"| UC
+  UC --> ML
+  Cache -.->|"cached system\nprompt"| ST
+  PS -.->|"nudge at\nstep 18"| ST
+
+  %% Data flow
+  SDX -->|"fetch data\n(client-side)"| STAT
+  Tools -->|"discover\nmetadata"| STAT
+
+  %% Error feedback
+  SDX -.->|"render errors"| UC
+  UC -.->|"auto-message\nto fix config"| API
+
+  %% Styling
+  classDef primary fill:#004467,stroke:#005c8a,color:#fff
+  classDef secondary fill:#006970,stroke:#006970,color:#fff
+  classDef surface fill:#ffffff,stroke:#c0c7d0,color:#181c1e
+  classDef external fill:#f1f4f6,stroke:#e5e9eb,color:#181c1e
+  classDef accent fill:#8aeff9,stroke:#6fd6df,color:#006e75
+
+  class API,ST primary
+  class MCPSrv,Tools secondary
+  class UC,MI,ML,SDX,JE surface
+  class STAT external
+  class UD,PS,Cache accent

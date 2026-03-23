@@ -128,34 +128,77 @@ Click the **JSON** tab in the preview pane to inspect or manually edit the dashb
 
 ## Architecture
 
-```
-Browser (React 19)
-+-----------------------+---------------------------+
-|  ChatPanel            |  DashboardPreview          |
-|  (useChat hook)       |  (SDMXDashboard component) |
-|                       |                            |
-|  sends messages to    |  receives config via       |
-|  /api/chat            |  tool output in messages   |
-+-----------+-----------+-----------+----------------+
-            | SSE stream            | SDMX REST
-            |                       | (direct to .Stat)
-Server      |                       |
-+-----------+-----------------------+    +-----------+
-| /api/chat (Route Handler)         |    | .Stat API |
-|                                   |    +-----------+
-| streamText() with:                |
-|  - Claude Sonnet 4.6              |
-|  - MCP tools via @ai-sdk/mcp     |
-|  - update_dashboard (custom tool) |
-|  - Cached system prompt           |
-+-------+---------------------------+
-        | streamable-http
-        v
-  sdmx-mcp-gateway (Python)
-  localhost:8000/mcp
+```mermaid
+flowchart TB
+  subgraph Browser["🌊 Browser — React 19"]
+    direction LR
+    subgraph Chat["Chat Panel"]
+      UC["useChat hook"]
+      Input["Message Input"]
+      Messages["Message List\n+ Markdown"]
+    end
+    subgraph Preview["Dashboard Preview"]
+      SDX["SDMXDashboard\nComponent"]
+      JSON["JSON Editor"]
+      Skel["Loading\nSkeleton"]
+    end
+  end
+
+  subgraph Server["⚙️ Next.js Server — /api/chat"]
+    ST["streamText()\nClaude Sonnet 4.6"]
+    UD["update_dashboard\n🔧 custom tool"]
+    PS["prepareStep\n⏱️ nudge at step 18"]
+    Cache["Prompt Cache\n📋 Tier 1"]
+  end
+
+  subgraph Gateway["🐍 MCP Gateway — Python"]
+    MCP["sdmx-mcp-gateway\nlocalhost:8000/mcp"]
+    Tools["SDMX Tools\nlist_dataflows\nget_structure\nget_codes\nbuild_data_url\n..."]
+  end
+
+  STAT[("🌐 .Stat API\nstats-sdmx-disseminate\n.pacificdata.org")]
+
+  Input -->|"user message"| UC
+  UC -->|"POST SSE"| ST
+  Cache -.->|"cached prefix"| ST
+  PS -.->|"system prompt\noverride"| ST
+  ST -->|"tool calls\n(streamable-http)"| MCP
+  MCP --- Tools
+  ST --> UD
+  UD -->|"config in\ntool output"| UC
+  UC -->|"extract config"| SDX
+  ST -->|"text deltas"| Messages
+
+  SDX -->|"fetch data\n(client-side)"| STAT
+  Tools -->|"discover\nmetadata"| STAT
+
+  SDX -.->|"render errors"| UC
+  UC -.->|"auto-fix\nmessage"| ST
+
+  style Browser fill:#f7fafc,stroke:#e5e9eb,color:#181c1e
+  style Chat fill:#f1f4f6,stroke:#c0c7d0,color:#181c1e
+  style Preview fill:#ffffff,stroke:#c0c7d0,color:#181c1e
+  style Server fill:#004467,stroke:#005c8a,color:#ffffff
+  style Gateway fill:#006970,stroke:#006970,color:#ffffff
+  style STAT fill:#f1f4f6,stroke:#c0c7d0,color:#181c1e
+  style ST fill:#005c8a,stroke:#004467,color:#ffffff
+  style UD fill:#8aeff9,stroke:#6fd6df,color:#006e75
+  style PS fill:#8aeff9,stroke:#6fd6df,color:#006e75
+  style Cache fill:#8aeff9,stroke:#6fd6df,color:#006e75
+  style MCP fill:#244445,stroke:#006970,color:#abcdcd
+  style Tools fill:#244445,stroke:#006970,color:#abcdcd
 ```
 
-**Key flow:** User types -> `useChat` POSTs to `/api/chat` -> `streamText` calls Claude with MCP tools + `update_dashboard` -> Claude does progressive discovery via MCP -> Claude calls `update_dashboard` with JSON config -> tool output flows to client via SSE -> client extracts config from tool output -> `SDMXDashboard` re-renders with live data from .Stat.
+### Data flow
+
+1. User types a message → `useChat` POSTs to `/api/chat` via SSE
+2. `streamText` calls Claude with MCP tools + the custom `update_dashboard` tool
+3. Claude does progressive discovery via MCP (list dataflows → get structure → build URL)
+4. Claude calls `update_dashboard` with the dashboard JSON config
+5. The tool output flows back to the client via the SSE stream
+6. The client extracts the config from the tool output in the message parts
+7. `SDMXDashboard` renders the config, fetching live data directly from .Stat
+8. If rendering fails, the error is automatically sent back to the AI to fix
 
 ## Key Technical Decisions
 
