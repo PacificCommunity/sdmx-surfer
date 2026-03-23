@@ -19,12 +19,31 @@ Built on three existing components:
 
 You also need an **Anthropic API key** with access to Claude Sonnet 4.6.
 
+## Quick Start
+
+```bash
+# 1. Clone and start the MCP gateway
+git clone https://github.com/Baffelan/sdmx-mcp-gateway.git
+cd sdmx-mcp-gateway
+uv sync
+uv run python main_server.py --transport streamable-http --host 0.0.0.0 --port 8000
+
+# 2. In another terminal — install and start the dashboard builder
+cd dashboarder
+cp .env.example .env.local
+# Edit .env.local with your ANTHROPIC_API_KEY
+npm install
+npm run dev
+
+# 3. Open http://localhost:3000/builder
+```
+
 ## Repository Layout
 
 ```
 dashboarder/
 ├── app/
-│   ├── layout.tsx                  # Root layout (fonts, CSS imports)
+│   ├── layout.tsx                  # Root layout (CSS imports)
 │   ├── globals.css                 # Tailwind v4 + Oceanic design tokens
 │   ├── page.tsx                    # Redirect to /builder
 │   ├── builder/
@@ -34,103 +53,38 @@ dashboarder/
 │           └── route.ts            # Agent loop: streamText + MCP + tools
 ├── components/
 │   ├── chat-panel.tsx              # Chat UI (message list, input, suggestions)
-│   ├── message-bubble.tsx          # Chat message rendering with markdown
-│   └── dashboard-preview.tsx       # SDMXDashboard wrapper, JSON editor, skeleton
+│   ├── message-bubble.tsx          # Message rendering with markdown + tables
+│   └── dashboard-preview.tsx       # Preview, JSON editor, inspector, export
 ├── lib/
-│   ├── system-prompt.ts            # AI system prompt (schema, workflow, strategy)
-│   ├── dashboard-examples.ts       # Example configs for few-shot prompting
-│   └── types.ts                    # Dashboard config TypeScript types
+│   ├── system-prompt.ts            # AI system prompt (strategy + schema + examples)
+│   ├── dashboard-examples.ts       # Working example configs for few-shot prompting
+│   ├── types.ts                    # Dashboard config TypeScript types
+│   ├── export-dashboard.ts         # PDF, HTML, JSON export
+│   ├── session.ts                  # localStorage session persistence
+│   ├── use-config-history.ts       # Undo/redo hook
+│   ├── tier2-knowledge.ts          # Session knowledge extraction for context
+│   └── logger.ts                   # Server-side JSONL request logging
 ├── patches/
-│   └── sdmx-dashboard-components+0.4.5.patch  # Null-guard for dimension lookup
+│   └── sdmx-dashboard-components+0.4.5.patch
+├── logs/                           # Server-side chat logs (gitignored)
+├── docs/
+│   ├── architecture.mmd            # Mermaid source for architecture diagram
+│   └── technical-reference.md      # Detailed technical documentation
 ├── stitch_assets/                  # UI mockups and design system spec
-│   └── stitch/oceanic_logic/DESIGN.md          # Oceanic Data-Scapes design system
 ├── CLAUDE.md                       # Instructions for Claude Code
-├── .env.local                      # API keys (not committed)
+├── .env.example                    # Environment template
+├── .env.local                      # API keys (gitignored)
 ├── next.config.ts
 ├── tsconfig.json
 ├── postcss.config.mjs
 └── package.json
 ```
 
-## Setup
-
-### 1. Clone the MCP gateway
-
-The AI agent needs the SDMX MCP gateway running locally. Clone it next to this repo:
-
-```bash
-cd /path/to/your/repos
-git clone https://github.com/Baffelan/sdmx-mcp-gateway.git
-cd sdmx-mcp-gateway
-```
-
-Install Python dependencies with uv:
-
-```bash
-uv sync
-```
-
-### 2. Start the MCP gateway
-
-```bash
-cd /path/to/sdmx-mcp-gateway
-uv run python main_server.py --transport streamable-http --host 0.0.0.0 --port 8000
-```
-
-You should see output confirming the server is running on `http://0.0.0.0:8000`. The MCP endpoint is at `/mcp`.
-
-### 3. Install the dashboard builder
-
-```bash
-cd /path/to/dashboarder
-npm install
-```
-
-The `postinstall` script automatically applies `patches/sdmx-dashboard-components+0.4.5.patch`, which adds a null-guard for a dimension lookup bug in the library.
-
-### 4. Configure environment
-
-Create `.env.local` in the project root (or edit the existing one):
-
-```bash
-ANTHROPIC_API_KEY=sk-ant-...your-key-here...
-MCP_GATEWAY_URL=http://localhost:8000/mcp
-```
-
-### 5. Start the dev server
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000/builder](http://localhost:3000/builder).
-
-## Usage
-
-### Basic flow
-
-1. Type a request in the chat panel, e.g. "Show me population data for Pacific Islands"
-2. The AI discovers available data via MCP tools (you'll see tool status indicators)
-3. A dashboard config is produced and rendered live in the preview pane
-4. Ask follow-up questions to refine: "Change it to a line chart", "Add Fiji and Tonga", etc.
-
-### Complex dashboards
-
-For broad requests like "comprehensive health dashboard", the AI will:
-1. Survey available dataflows
-2. Propose a multi-panel structure and ask for confirmation
-3. Build panel by panel, showing progress after each one
-4. Offer next steps after each update
-
-### JSON editor
-
-Click the **JSON** tab in the preview pane to inspect or manually edit the dashboard config. Changes can be applied back to the live preview with the **Apply** button.
-
 ## Architecture
 
 ```mermaid
 flowchart TB
-  subgraph Browser["🌊 Browser — React 19"]
+  subgraph Browser["Browser — React 19"]
     direction LR
     subgraph Chat["Chat Panel"]
       UC["useChat hook"]
@@ -144,19 +98,19 @@ flowchart TB
     end
   end
 
-  subgraph Server["⚙️ Next.js Server — /api/chat"]
+  subgraph Server["Next.js Server — /api/chat"]
     ST["streamText()\nClaude Sonnet 4.6"]
-    UD["update_dashboard\n🔧 custom tool"]
-    PS["prepareStep\n⏱️ nudge at step 18"]
-    Cache["Prompt Cache\n📋 Tier 1"]
+    UD["update_dashboard\ncustom tool"]
+    PS["prepareStep\nnudge at step 18"]
+    Cache["Prompt Cache\nTier 1 + Tier 2"]
   end
 
-  subgraph Gateway["🐍 MCP Gateway — Python"]
+  subgraph Gateway["MCP Gateway — Python"]
     MCP["sdmx-mcp-gateway\nlocalhost:8000/mcp"]
     Tools["SDMX Tools\nlist_dataflows\nget_structure\nget_codes\nbuild_data_url\n..."]
   end
 
-  STAT[("🌐 .Stat API\nstats-sdmx-disseminate\n.pacificdata.org")]
+  STAT[(".Stat API\nstats-sdmx-disseminate\n.pacificdata.org")]
 
   Input -->|"user message"| UC
   UC -->|"POST SSE"| ST
@@ -181,60 +135,64 @@ flowchart TB
   style Server fill:#004467,stroke:#005c8a,color:#ffffff
   style Gateway fill:#006970,stroke:#006970,color:#ffffff
   style STAT fill:#f1f4f6,stroke:#c0c7d0,color:#181c1e
-  style ST fill:#005c8a,stroke:#004467,color:#ffffff
-  style UD fill:#8aeff9,stroke:#6fd6df,color:#006e75
-  style PS fill:#8aeff9,stroke:#6fd6df,color:#006e75
-  style Cache fill:#8aeff9,stroke:#6fd6df,color:#006e75
-  style MCP fill:#244445,stroke:#006970,color:#abcdcd
-  style Tools fill:#244445,stroke:#006970,color:#abcdcd
 ```
 
 ### Data flow
 
-1. User types a message → `useChat` POSTs to `/api/chat` via SSE
-2. `streamText` calls Claude with MCP tools + the custom `update_dashboard` tool
-3. Claude does progressive discovery via MCP (list dataflows → get structure → build URL)
-4. Claude calls `update_dashboard` with the dashboard JSON config
-5. The tool output flows back to the client via the SSE stream
-6. The client extracts the config from the tool output in the message parts
-7. `SDMXDashboard` renders the config, fetching live data directly from .Stat
-8. If rendering fails, the error is automatically sent back to the AI to fix
+1. User types a message in the chat panel
+2. `useChat` POSTs to `/api/chat` via SSE with session ID header
+3. `streamText` calls Claude Sonnet 4.6 with MCP tools + `update_dashboard`
+4. Claude does progressive discovery via MCP (list dataflows -> get structure -> build URL)
+5. Claude calls `update_dashboard` with the dashboard JSON config
+6. Tool output flows back to the client via the SSE stream
+7. Client extracts config from tool output in message parts
+8. `SDMXDashboard` renders the config, fetching live data directly from .Stat
+9. If rendering fails, the error is debounced and automatically sent back to the AI
 
-## Key Technical Decisions
+## Features
 
-### AI SDK v6 API
+### Conversational dashboard building
+- Natural language requests produce live SDMX dashboards
+- AI proposes structure for complex requests, builds panel-by-panel
+- Multi-turn conversation to refine charts, add panels, change data
 
-- `useChat` from `@ai-sdk/react` with `DefaultChatTransport`
-- Server returns `result.toUIMessageStreamResponse()` (SSE)
-- Dashboard config delivered via `update_dashboard` tool output (not data stream annotations)
-- `prepareStep` injects a "nudge" system message at step 18 if no dashboard has been emitted
-- Prompt caching via `providerOptions.anthropic.cacheControl`
+### Live preview with JSON editor
+- Real-time dashboard rendering via SDMXDashboard component
+- Syntax-highlighted JSON editor with inline editing and apply/reset
+- Loading skeleton matching the dashboard grid layout
 
-### Dashboard config schema
+### Session persistence
+- Conversation and dashboard config saved to localStorage
+- Survives page refresh; auto-saves with 1.5s debounce
+- "New Session" button to start fresh; up to 20 sessions stored
 
-The `update_dashboard` tool accepts a JSON config matching `sdmx-dashboard-components` v0.4.5. Key quirk: the library's TypeScript types say `colums` (typo) but the **runtime JavaScript uses `columns`** (correct spelling). We use `columns` everywhere.
+### Undo/redo
+- Every dashboard update (AI or manual) pushes to a 50-entry history stack
+- Undo/redo buttons in the preview header
+- History persisted across refreshes
 
-### Library patches
+### Export
+| Format | File | Offline | Interactive |
+|--------|------|---------|-------------|
+| PDF | `.pdf` | Yes | No |
+| HTML (static) | `.html` | Yes | No |
+| HTML (live) | `-live.html` | No | Yes |
+| JSON Config | `.json` | Yes | N/A |
 
-`sdmx-dashboard-components` has a bug where bar/column charts crash if `getActiveDimensions()` doesn't find the expected dimensions. The patch in `patches/` adds a null-guard that logs a warning instead of crashing.
+### Error feedback loop
+- Highcharts errors intercepted (no crashes)
+- Fetch failures caught via `unhandledrejection`
+- Errors debounced, deduplicated, and auto-sent to AI as system messages
+- AI attempts to fix the dashboard config and re-emit
 
-### Error handling
+### Tier 2 knowledge context
+- Conversation history scanned for already-discovered dataflows and URLs
+- Compact summary injected into system prompt each turn
+- Prevents redundant MCP discovery calls, saving tokens and steps
 
-- **Highcharts errors** (e.g. #14 "string data") are intercepted via a global `displayError` event handler that calls `preventDefault()` to avoid throwing
-- **Fetch errors** from `sdmx-json-parser` (e.g. "observations empty") are caught via `unhandledrejection` listener
-- Errors are debounced, deduplicated, and automatically sent back to the AI as a system message so it can fix the config
-
-## Design System
-
-The UI implements the "Oceanic Data-Scapes" design system from `stitch_assets/stitch/oceanic_logic/DESIGN.md`:
-
-- **No 1px borders** — regions separated via tonal surface shifts
-- **Surface hierarchy:** base `#f7fafc` -> low `#f1f4f6` -> card `#ffffff` -> high `#e5e9eb`
-- **Primary palette:** Deep Sea `#004467`, Reef Teal `#006970`, Lagoon `#6fd6df`
-- **Typography:** Manrope (headlines) + Inter (interface/data)
-- **Glassmorphism:** 85% opacity + 20px backdrop-blur for the app bar
-- **Ambient shadows:** `0 12px 40px rgba(24,28,30,0.06)` instead of hard borders
-- **Ocean gradient:** 135deg `#004467` -> `#005c8a` for primary CTAs
+### Request logging
+- Every chat request logged to `logs/chat-YYYY-MM-DD.jsonl`
+- Captures: session ID, user message, AI response, tool calls, configs, errors, token usage, duration
 
 ## Development
 
@@ -244,59 +202,45 @@ npm run build     # Production build (Webpack)
 npm run lint      # ESLint
 ```
 
-### Adding new MCP tools
+### Environment variables
 
-The agent loop in `app/api/chat/route.ts` automatically picks up all tools from the MCP gateway via `mcpClient.tools()`. To add custom tools (like `update_dashboard`), define them inline in the `tools` object.
+```bash
+ANTHROPIC_API_KEY=sk-ant-...   # Required
+MCP_GATEWAY_URL=http://localhost:8000/mcp  # Default
+```
 
-### Modifying the AI behavior
+## Design System
 
-Edit `lib/system-prompt.ts`. The prompt has sections for:
-- **Conversation strategy** — how the AI proposes, builds incrementally, and asks questions
-- **Config schema docs** — what the dashboard JSON looks like
-- **Discovery workflow** — how to use MCP tools
-- **SDMX conventions** — domain knowledge about SPC .Stat
-- **Tool instructions** — pacing rules and error handling
+The UI implements the **Oceanic Data-Scapes** design system (`stitch_assets/stitch/oceanic_logic/DESIGN.md`):
+
+- **No 1px borders** — regions separated via tonal surface shifts
+- **Surface hierarchy:** base `#f7fafc` -> low `#f1f4f6` -> card `#ffffff` -> high `#e5e9eb`
+- **Primary palette:** Deep Sea `#004467`, Reef Teal `#006970`, Lagoon `#6fd6df`
+- **Typography:** Manrope (headlines) + Inter (interface/data)
+- **Glassmorphism:** 85% opacity + 20px backdrop-blur for app bar
+- **Ambient shadows:** `0 12px 40px rgba(24,28,30,0.06)`
+- **Ocean gradient:** 135deg `#004467` -> `#005c8a` for primary CTAs
 
 ## Troubleshooting
 
 ### MCP gateway won't start
-
-Make sure Python >= 3.12 is available and uv is installed:
-
-```bash
-python3 --version   # should be 3.12+
-uv --version        # install from https://docs.astral.sh/uv/
-```
+Ensure Python >= 3.12 and uv are installed. Run `uv sync` before starting.
 
 ### "Error while fetching data please provide valid api url"
-
-The data URL returned no data or is malformed. Common causes:
-- The MCP gateway wasn't restarted after the `dimensionAtObservation` patch
-- The AI constructed a URL manually instead of using `build_data_url`
-- The SDMX query filters are too restrictive (no matching data)
-
-The error is automatically fed back to the AI, which should attempt a fix.
-
-### "Series not found and observations empty"
-
-The SDMX API returned a valid response but with no observations. The query matched a dataflow but no data exists for the requested dimension combination. The AI should broaden the query.
-
-### Highcharts error #14
-
-String values were sent to a chart expecting numbers. This is intercepted and logged as a warning — it won't crash the app.
+The data URL is malformed or returned no data. The error is auto-sent to the AI for fixing.
 
 ### Dashboard shows "Loading..." forever
-
-Check browser devtools Network tab. If the SDMX REST requests to `stats-sdmx-disseminate.pacificdata.org` are failing, it could be a CORS or network issue. The dashboard components fetch data client-side directly from the .Stat API.
+Check the browser Network tab — SDMX REST requests to `stats-sdmx-disseminate.pacificdata.org` may be failing (CORS or network).
 
 ### Hydration mismatch after code changes
-
-Clear the Next.js cache and restart:
-
 ```bash
 rm -rf .next && npm run dev
 ```
 
+## Technical Reference
+
+See [`docs/technical-reference.md`](docs/technical-reference.md) for detailed architecture documentation, module descriptions, and design decisions.
+
 ## License
 
-See the architecture document in `dashboard-architecture.md` for project context and phased delivery plan.
+See `dashboard-architecture.md` for project context and phased delivery plan.

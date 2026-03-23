@@ -135,9 +135,49 @@ Each VisualConfig in \`columns\` has:
   decimals?: number;
 
   // Map options
-  colorScheme?: string;          // Color scheme for choropleth maps
+  colorScheme?: string;          // Color scheme: Blues, Greens, Reds, Viridis, RdYlBu, Spectral, etc.
 }
 \`\`\`
+
+### Map (Choropleth) — Special Data Syntax
+
+Maps use a COMPLETELY DIFFERENT \`data\` format from other chart types. The \`data\` field must be a pipe-separated string:
+
+\`\`\`
+"SDMX_URL, {GEO_DIMENSION_ID} | GEOJSON_URL, EPSG_CODE, {GEO_PROPERTY}"
+\`\`\`
+
+Where:
+- **SDMX_URL** — the data URL (from build_data_url, with dimensionAtObservation=AllDimensions)
+- **{GEO_DIMENSION_ID}** — the SDMX dimension holding geographic codes, wrapped in curly braces (e.g., \`{GEO_PICT}\`)
+- **GEOJSON_URL** — URL to a GeoJSON file with country/territory geometries
+- **EPSG_CODE** — map projection (use \`EPSG:3832\` for Pacific-centred, or \`EPSG:4326\` for world)
+- **{GEO_PROPERTY}** — the GeoJSON feature property that matches the SDMX dimension codes, wrapped in curly braces (e.g., \`{ISO3}\` or \`{GEO_PICT}\`)
+
+Example:
+\`\`\`json
+{
+  "id": "pop_map",
+  "type": "map",
+  "colSize": 3,
+  "title": { "text": "Population by Country" },
+  "xAxisConcept": "GEO_PICT",
+  "colorScheme": "Blues",
+  "data": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_PROJ,3.0/A..MIDYEARPOPEST._T._T?dimensionAtObservation=AllDimensions&lastNObservations=1, {GEO_PICT} | https://www.spc.int/modules/contrib/spc_dot_stat_data/modules/spc_dot_stat_map/maps/eez.json, EPSG:3832, {id}"
+}
+\`\`\`
+
+**Important map rules:**
+- The \`data\` field is a SINGLE STRING with \` | \` (space-pipe-space) separating the SDMX part from the GeoJSON part
+- The SDMX part has a comma-space before the geo dimension: \`URL, {DIM}\`
+- The GeoJSON part has comma-space separators: \`URL, PROJECTION, {PROPERTY}\`
+- For the SDMX URL in map data, use the full agency+version format: \`SPC,DF_NAME,VERSION\` (e.g., \`SPC,DF_POP_PROJ,3.0\`)
+- For Pacific maps, use this GeoJSON of EEZ boundaries: \`https://www.spc.int/modules/contrib/spc_dot_stat_data/modules/spc_dot_stat_map/maps/eez.json\`
+- The GeoJSON property to join on is \`{id}\` (ISO2 country codes matching SDMX GEO_PICT codes like AS, FJ, PG, etc.)
+- Use projection \`EPSG:3832\` for Pacific-centred maps
+- \`colorScheme\` is required (one of: Blues, Greens, Reds, Viridis, RdYlBu, RdYlGn, Spectral, Turbo, Purples, Oranges, Greys, BrBg, PiYG, PRGn, PuOr, RdGy)
+- \`xAxisConcept\` should be the geographic dimension (e.g., "GEO_PICT")
+- Do NOT set yAxisConcept for maps
 
 CRITICAL RULES:
 - The "data" field must be a valid SDMX REST data URL. Use build_data_url to construct it.
@@ -192,9 +232,13 @@ const TOOL_INSTRUCTIONS = `## Tool Usage Rules
 - When updating an existing dashboard, send the COMPLETE updated config including all previous panels plus the new one.
 - Give each component a unique, descriptive id (e.g., "trade_bar_fiji", "pop_line_time").
 - Always include a header with title and subtitle describing what the dashboard shows.
+- Do NOT include a footer in the config — the app automatically generates a data sources table with API and Data Explorer links for each component.
 - Default to download: true so users can export chart data.
 - If a data URL returns no data, try broadening the query (fewer dimension filters, wider time range).
-- If the dashboard preview reports an error, diagnose the problem (wrong URL, missing dimension, bad structure) and emit a corrected config.
+- If the dashboard preview reports an error, it will include the component names and their data URLs. Use this to identify WHICH component failed. Do NOT blindly rebuild the entire dashboard — fix only the broken component(s).
+- When fixing errors, try at most 2 attempts per component. If a data URL consistently fails, tell the user the data may not be available and suggest alternatives.
+
+DATA AVAILABILITY CAVEAT: The check_time_availability and get_data_availability tools report the theoretical range and dimension values, but this does NOT guarantee data exists for every combination. Data can be sparse — e.g., a dataflow might report "1990-2020" for Fiji but have actual observations only for 2000, 2005, 2010. If a chart renders empty despite the availability check, the data simply doesn't exist for that specific combination. Don't retry the same query — try a different indicator, broader time range, or fewer country filters.
 
 PACING RULE: Never make more than 5-6 consecutive tool calls without either:
   (a) calling update_dashboard to show something, or

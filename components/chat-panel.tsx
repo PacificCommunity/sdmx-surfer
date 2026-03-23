@@ -8,6 +8,7 @@ interface ChatPanelProps {
   messages: UIMessage[];
   status: ChatStatus;
   sendMessage: (message: { text: string }) => Promise<void>;
+  onStop?: () => void;
 }
 
 const SUGGESTIONS = [
@@ -16,7 +17,7 @@ const SUGGESTIONS = [
   "Create a dashboard comparing GDP across Pacific Islands",
 ];
 
-export function ChatPanel({ messages, status, sendMessage }: ChatPanelProps) {
+export function ChatPanel({ messages, status, sendMessage, onStop }: ChatPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -124,29 +125,24 @@ export function ChatPanel({ messages, status, sendMessage }: ChatPanelProps) {
         {submitError && (
           <p className="mt-2 text-xs text-red-600">{submitError}</p>
         )}
-        <div className="mt-2 flex items-center justify-between">
-          <div className="flex gap-1.5">
-            {["Population", "Trade", "Health"].map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                disabled={isStreaming}
-                className="ghost-border rounded-full bg-surface-card px-3 py-1 text-xs font-medium text-on-surface-variant transition-colors hover:bg-surface-high"
-                onClick={() =>
-                  setInput("Show me " + tag.toLowerCase() + " data for Pacific Islands")
-                }
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
-          <button
-            type="submit"
-            disabled={isStreaming || !input.trim()}
-            className="ocean-gradient rounded-full px-5 py-2 text-sm font-semibold text-on-primary shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95 disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100"
-          >
-            Send
-          </button>
+        <div className="mt-2 flex items-center justify-end gap-2">
+          {isStreaming && onStop ? (
+            <button
+              type="button"
+              onClick={onStop}
+              className="rounded-full bg-red-50 px-5 py-2 text-sm font-semibold text-red-600 transition-transform hover:scale-105 hover:bg-red-100 active:scale-95"
+            >
+              Stop
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={!input.trim()}
+              className="ocean-gradient rounded-full px-5 py-2 text-sm font-semibold text-on-primary shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95 disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100"
+            >
+              Send
+            </button>
+          )}
         </div>
       </form>
     </div>
