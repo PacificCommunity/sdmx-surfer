@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SPC SDMX Navigator - Welcome</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed": "#cbe6ff",
+              "on-tertiary-fixed": "#002020",
+              "surface-container-low": "#f1f4f6",
+              "tertiary-fixed": "#c6e9e9",
+              "surface-container-highest": "#e0e3e5",
+              "primary": "#004467",
+              "on-surface-variant": "#40484f",
+              "outline-variant": "#c0c7d0",
+              "error": "#ba1a1a",
+              "secondary": "#006970",
+              "secondary-fixed": "#8df2fc",
+              "on-secondary-fixed-variant": "#004f54",
+              "secondary-container": "#8aeff9",
+              "error-container": "#ffdad6",
+              "primary-container": "#005c8a",
+              "on-secondary-container": "#006e75",
+              "surface": "#f7fafc",
+              "on-secondary": "#ffffff",
+              "on-primary-fixed-variant": "#004b72",
+              "on-primary-fixed": "#001e30",
+              "on-primary": "#ffffff",
+              "tertiary-fixed-dim": "#abcdcd",
+              "surface-container-lowest": "#ffffff",
+              "surface-dim": "#d7dadc",
+              "on-tertiary-container": "#b0d3d2",
+              "on-error-container": "#93000a",
+              "background": "#f7fafc",
+              "surface-tint": "#146492",
+              "surface-container": "#ebeef0",
+              "tertiary": "#244445",
+              "inverse-on-surface": "#eef1f3",
+              "tertiary-container": "#3c5c5c",
+              "surface-bright": "#f7fafc",
+              "outline": "#717880",
+              "on-tertiary": "#ffffff",
+              "secondary-fixed-dim": "#6fd6df",
+              "surface-variant": "#e0e3e5",
+              "on-primary-container": "#9fd3ff",
+              "inverse-surface": "#2d3133",
+              "inverse-primary": "#90cdff",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed-variant": "#2c4c4c",
+              "on-surface": "#181c1e",
+              "primary-fixed-dim": "#90cdff",
+              "on-secondary-fixed": "#002022",
+              "surface-container-high": "#e5e9eb",
+              "on-background": "#181c1e"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .oceanic-gradient {
+            background: linear-gradient(135deg, #004467 0%, #005c8a 100%);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .mesh-background {
+            background-color: #f7fafc;
+            background-image: radial-gradient(at 0% 0%, hsla(201,100%,92%,1) 0, transparent 50%), 
+                              radial-gradient(at 50% 0%, hsla(184,100%,90%,1) 0, transparent 50%), 
+                              radial-gradient(at 100% 0%, hsla(202,100%,88%,1) 0, transparent 50%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface selection:bg-secondary-container selection:text-on-secondary-container overflow-hidden">
+<!-- Suppressed Navigation Shell for Welcome/Onboarding focused journey -->
+<main class="relative min-h-screen flex items-center justify-center p-6 mesh-background">
+<!-- Background Data Connectivity Visual -->
+<div aria-hidden="true" class="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
+<div class="absolute top-1/4 left-10 w-64 h-64 border-2 border-primary rounded-full opacity-20"></div>
+<div class="absolute bottom-1/4 right-20 w-96 h-96 border-4 border-secondary rounded-full opacity-10"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 grid grid-cols-8 gap-4 rotate-12">
+<div class="h-16 w-1 text-primary-container bg-current rounded-full"></div>
+<div class="h-24 w-1 text-secondary bg-current rounded-full"></div>
+<div class="h-12 w-1 text-tertiary bg-current rounded-full"></div>
+<div class="h-32 w-1 text-primary bg-current rounded-full"></div>
+<div class="h-20 w-1 text-secondary-container bg-current rounded-full"></div>
+<div class="h-28 w-1 text-outline bg-current rounded-full"></div>
+<div class="h-14 w-1 text-primary-fixed-dim bg-current rounded-full"></div>
+<div class="h-24 w-1 text-secondary-fixed-dim bg-current rounded-full"></div>
+</div>
+</div>
+<section class="relative z-10 w-full max-w-4xl text-center">
+<!-- Logo Section -->
+<div class="mb-12 flex flex-col items-center justify-center space-y-4">
+<div class="w-20 h-20 oceanic-gradient rounded-xl flex items-center justify-center shadow-lg transform rotate-3">
+<span class="material-symbols-outlined text-white text-5xl" data-icon="hub" style="font-variation-settings: 'FILL' 1;">hub</span>
+</div>
+<div class="space-y-1">
+<h2 class="font-headline font-extrabold text-2xl tracking-tighter text-primary">Pacific Community (SPC)</h2>
+<p class="font-label text-sm uppercase tracking-[0.2em] text-on-tertiary-fixed-variant font-semibold">Statistics for Development</p>
+</div>
+</div>
+<!-- Content Section -->
+<div class="space-y-6 mb-12">
+<h1 class="font-headline font-extrabold text-5xl md:text-7xl text-on-surface tracking-tight leading-none">
+                    Discover Pacific Data <br/>
+<span class="text-secondary italic">via Conversation.</span>
+</h1>
+<p class="max-w-xl mx-auto text-lg text-on-surface-variant font-medium leading-relaxed">
+                    Connect to the .Stat platform and build interactive SDMX dashboards with the help of an AI agent. Navigating regional insights has never been more intuitive.
+                </p>
+</div>
+<!-- Primary Action -->
+<div class="flex flex-col items-center space-y-8">
+<button class="group relative px-10 py-5 oceanic-gradient text-white rounded-full font-headline font-bold text-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] active:scale-95 flex items-center space-x-3">
+<span>Start New Dashboard</span>
+<span class="material-symbols-outlined transition-transform group-hover:translate-x-1" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<!-- Secondary Actions -->
+<div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-12">
+<button class="flex items-center space-x-2 text-primary font-semibold hover:text-secondary transition-colors py-2 px-4 rounded-lg hover:bg-surface-container-low">
+<span class="material-symbols-outlined" data-icon="folder_open">folder_open</span>
+<span class="font-label">Open Saved Dashboard</span>
+</button>
+<div class="hidden sm:block h-1 w-1 bg-outline-variant rounded-full opacity-50"></div>
+<button class="flex items-center space-x-2 text-primary font-semibold hover:text-secondary transition-colors py-2 px-4 rounded-lg hover:bg-surface-container-low">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-label">Explore Regional Dataflows</span>
+</button>
+</div>
+</div>
+<!-- Visual Hint: Floating Data Cards (Asymmetric Bento Lite) -->
+<div class="mt-20 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto opacity-40">
+<div class="glass-panel p-4 rounded-lg shadow-sm border border-white/20 transform -rotate-2">
+<span class="material-symbols-outlined text-primary mb-2" data-icon="bar_chart">bar_chart</span>
+<div class="h-2 w-full bg-surface-container-highest rounded mb-1"></div>
+<div class="h-2 w-2/3 bg-surface-container-highest rounded"></div>
+</div>
+<div class="glass-panel p-4 rounded-lg shadow-sm border border-white/20 transform translate-y-4">
+<span class="material-symbols-outlined text-secondary mb-2" data-icon="map">map</span>
+<div class="h-2 w-full bg-surface-container-highest rounded mb-1"></div>
+<div class="h-2 w-1/2 bg-surface-container-highest rounded"></div>
+</div>
+<div class="glass-panel p-4 rounded-lg shadow-sm border border-white/20 transform rotate-3 -translate-y-2">
+<span class="material-symbols-outlined text-tertiary mb-2" data-icon="pie_chart">pie_chart</span>
+<div class="h-2 w-full bg-surface-container-highest rounded mb-1"></div>
+<div class="h-2 w-3/4 bg-surface-container-highest rounded"></div>
+</div>
+<div class="glass-panel p-4 rounded-lg shadow-sm border border-white/20 transform -translate-y-6">
+<span class="material-symbols-outlined text-primary-container mb-2" data-icon="query_stats">query_stats</span>
+<div class="h-2 w-full bg-surface-container-highest rounded mb-1"></div>
+<div class="h-2 w-2/3 bg-surface-container-highest rounded"></div>
+</div>
+</div>
+</section>
+<!-- Connectivity Badge -->
+<div class="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center space-x-2 bg-white/50 border border-white/40 px-4 py-2 rounded-full backdrop-blur-md">
+<span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant font-label">Connected to .Stat Platform</span>
+</div>
+</main>
+<!-- Background Images / Textures placeholders as required -->
+<div class="hidden">
+<img data-alt="Abstract connectivity pattern with oceanic blue gradients" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvksQJAnJAjR3VXpIAgbTcpXWh6kPxtG6fHHkZpvq54DtKsXCbMnt6sGUYQhnrknOLdAGXKn1Z8oUWzcp7atQEUiwHB2yyRkenfaC_LJBwi0g1vBS026A3L7_ibpHn-TE4uBte5YcmdtzTjmcXt2yVmNjZvZKVjGwd_1o1GWdNeMh2d0IKG8H2GtVZFETmWEyv5c2AfBxrfzgbgiUHNADt-xxqYgIKotXzMvDdYEiRAVJp6juzBhhctGUPqhqsuVDSrujiGw4_8mM"/>
+<img data-alt="Subtle topographical map lines of the Pacific Islands" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYnTHnd-gQotZS-gG-9fPNE8RxbUNhqm_PZK33m6KoF6DRpfAG-ZDWHKqFaXo7_tGcfdkLM8-VP4wLlgneRTRD1OZOBhNpQuPu5woMeC0wGG8RCtlnHdhqR3f40kO3t06RVZt0KzNai80vgNdofiivcTPj1EAFV9WZwrqfJwaYR6xFzBfugUtj_xiSZZQTfphkvVj3yCX3zWy4vloEuEPQIVng29-oCLD1h8VbxM_0cQs93VFs6f0MGvd_ULVNYZ130tIxbJuqnjY"/>
+</div>
+</body></html>

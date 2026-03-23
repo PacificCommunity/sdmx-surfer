@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Modern Navigator | Conversational Builder</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed": "#cbe6ff",
+              "on-tertiary-fixed": "#002020",
+              "surface-container-low": "#f1f4f6",
+              "tertiary-fixed": "#c6e9e9",
+              "surface-container-highest": "#e0e3e5",
+              "primary": "#004467",
+              "on-surface-variant": "#40484f",
+              "outline-variant": "#c0c7d0",
+              "error": "#ba1a1a",
+              "secondary": "#006970",
+              "secondary-fixed": "#8df2fc",
+              "on-secondary-fixed-variant": "#004f54",
+              "secondary-container": "#8aeff9",
+              "error-container": "#ffdad6",
+              "primary-container": "#005c8a",
+              "on-secondary-container": "#006e75",
+              "surface": "#f7fafc",
+              "on-secondary": "#ffffff",
+              "on-primary-fixed-variant": "#004b72",
+              "on-primary-fixed": "#001e30",
+              "on-primary": "#ffffff",
+              "tertiary-fixed-dim": "#abcdcd",
+              "surface-container-lowest": "#ffffff",
+              "surface-dim": "#d7dadc",
+              "on-tertiary-container": "#b0d3d2",
+              "on-error-container": "#93000a",
+              "background": "#f7fafc",
+              "surface-tint": "#146492",
+              "surface-container": "#ebeef0",
+              "tertiary": "#244445",
+              "inverse-on-surface": "#eef1f3",
+              "tertiary-container": "#3c5c5c",
+              "surface-bright": "#f7fafc",
+              "outline": "#717880",
+              "on-tertiary": "#ffffff",
+              "secondary-fixed-dim": "#6fd6df",
+              "surface-variant": "#e0e3e5",
+              "on-primary-container": "#9fd3ff",
+              "inverse-surface": "#2d3133",
+              "inverse-primary": "#90cdff",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed-variant": "#2c4c4c",
+              "on-surface": "#181c1e",
+              "primary-fixed-dim": "#90cdff",
+              "on-secondary-fixed": "#002022",
+              "surface-container-high": "#e5e9eb",
+              "on-background": "#181c1e"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-effect {
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .shimmer {
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        background-size: 200% 100%;
+      }
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+      .animate-shimmer {
+        animation: shimmer 2s infinite linear;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full flex justify-between items-center px-6 h-16 bg-slate-50/85 dark:bg-slate-900/85 backdrop-blur-xl z-50 shadow-[0_12px_40px_rgba(24,28,30,0.06)]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#004467] dark:text-[#8aeff9]" data-icon="explore">explore</span>
+<h1 class="font-manrope font-bold text-2xl tracking-tight text-[#004467] dark:text-[#8aeff9]">The Modern Navigator</h1>
+</div>
+<nav class="hidden md:flex gap-8">
+<a class="font-inter text-sm font-medium text-[#004467] dark:text-[#006970] border-b-2 border-[#004467] pb-1" href="#">Chat</a>
+<a class="font-inter text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-[#004467] transition-colors duration-300" href="#">Dashboard</a>
+<a class="font-inter text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-[#004467] transition-colors duration-300" href="#">Discovery</a>
+<a class="font-inter text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-[#004467] transition-colors duration-300" href="#">Export</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-colors duration-300 rounded-full">
+<span class="material-symbols-outlined text-[#004467] dark:text-[#8aeff9]" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<!-- Side Navigation Drawer (Desktop) -->
+<aside class="hidden md:flex fixed left-0 top-16 h-[calc(100vh-64px)] w-80 bg-slate-50 dark:bg-[#181c1e] z-40 flex-col py-6 px-4">
+<div class="mb-8 px-4">
+<span class="font-manrope font-bold text-lg text-[#004467]">SPC SDMX Navigator</span>
+</div>
+<div class="space-y-2">
+<div class="flex items-center gap-4 px-4 py-3 bg-slate-200 dark:bg-slate-800 text-[#004467] dark:text-[#8aeff9] font-semibold rounded-r-full transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-inter text-sm font-medium">Regional Dataflows</span>
+</div>
+<div class="flex items-center gap-4 px-4 py-3 text-slate-600 dark:text-slate-400 hover:pl-6 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="dashboard_customize">dashboard_customize</span>
+<span class="font-inter text-sm font-medium">Saved Dashboards</span>
+</div>
+<div class="flex items-center gap-4 px-4 py-3 text-slate-600 dark:text-slate-400 hover:pl-6 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="filter_alt">filter_alt</span>
+<span class="font-inter text-sm font-medium">Dimension Explorer</span>
+</div>
+<div class="flex items-center gap-4 px-4 py-3 text-slate-600 dark:text-slate-400 hover:pl-6 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-inter text-sm font-medium">System Status</span>
+</div>
+</div>
+<div class="mt-auto px-4 py-6">
+<div class="p-4 bg-primary rounded-xl text-white">
+<p class="text-xs uppercase tracking-widest font-bold opacity-80 mb-2">Current Session</p>
+<p class="text-sm font-semibold truncate">Pacific Economic Indicators 2024</p>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="pt-16 md:pl-80 h-screen flex flex-col md:flex-row overflow-hidden">
+<!-- Left Section: Conversational Builder -->
+<section class="flex-1 flex flex-col h-1/2 md:h-full bg-surface-container-low/50 relative">
+<!-- Chat History Area -->
+<div class="flex-1 overflow-y-auto p-6 space-y-8 scroll-smooth"><!-- User Message -->
+<div class="flex justify-end items-start gap-3">
+<div class="bg-[#004467] text-white p-4 rounded-2xl rounded-tr-none shadow-sm max-w-[80%] border border-[#00334d]">
+<p class="font-headline text-sm leading-relaxed font-medium">Show me trade balance by country.</p>
+</div>
+<div class="w-9 h-9 rounded-full bg-[#005c8a] flex items-center justify-center shrink-0 border-2 border-white shadow-sm">
+<span class="material-symbols-outlined text-sm text-white" data-icon="person">person</span>
+</div>
+</div>
+<!-- Agent Message -->
+<div class="flex justify-start items-start gap-3">
+<div class="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="smart_toy">smart_toy</span>
+</div>
+<div class="space-y-3 max-w-[85%]">
+<div class="bg-white border border-slate-200 text-slate-800 p-4 rounded-2xl rounded-tl-none shadow-sm">
+<p class="font-headline text-sm leading-relaxed font-medium">I've found the International Trade Dataflow. Let's explore the available dimensions.</p>
+</div>
+<!-- Action Chips -->
+<div class="flex flex-wrap gap-2 pt-1">
+<button class="px-3 py-1.5 bg-white text-[#004467] text-xs font-bold rounded-full border border-slate-200 hover:border-[#004467] hover:bg-slate-50 transition-all duration-200 flex items-center gap-2 shadow-sm group">
+<span class="material-symbols-outlined text-[16px] text-[#004467] opacity-70 group-hover:opacity-100" data-icon="layers">layers</span>
+        Explore Dimensions
+      </button>
+<button class="px-3 py-1.5 bg-white text-[#004467] text-xs font-bold rounded-full border border-slate-200 hover:border-[#004467] hover:bg-slate-50 transition-all duration-200 flex items-center gap-2 shadow-sm group">
+<span class="material-symbols-outlined text-[16px] text-[#004467] opacity-70 group-hover:opacity-100" data-icon="event_available">event_available</span>
+        Check Availability
+      </button>
+<button class="px-3 py-1.5 bg-white text-[#004467] text-xs font-bold rounded-full border border-slate-200 hover:border-[#004467] hover:bg-slate-50 transition-all duration-200 flex items-center gap-2 shadow-sm group">
+<span class="material-symbols-outlined text-[16px] text-[#004467] opacity-70 group-hover:opacity-100" data-icon="monitoring">monitoring</span>
+        Build Chart
+      </button>
+</div>
+</div>
+</div></div>
+<!-- Chat Input Area -->
+<div class="p-6 bg-white/40 backdrop-blur-md">
+<div class="max-w-3xl mx-auto">
+<div class="relative group">
+<input class="w-full pl-6 pr-14 py-4 bg-surface-container-lowest rounded-full border-none shadow-[0_8px_30px_rgba(0,0,0,0.04)] focus:ring-2 focus:ring-primary/20 transition-all text-sm placeholder:text-slate-400 font-medium" placeholder="Ask about data..." type="text"/>
+<button class="absolute right-2 top-2 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="arrow_upward">arrow_upward</span>
+</button>
+</div>
+<div class="flex justify-center mt-3">
+<p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Natural Language SDMX Engine v2.4</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Section: Live Dashboard Preview -->
+<section class="flex-1 h-1/2 md:h-full bg-surface-container flex flex-col border-l border-slate-200/20">
+<!-- Header/Status Bar -->
+<div class="px-6 py-4 bg-surface-container-high/80 flex items-center justify-between border-b border-white/10">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+<span class="text-[10px] font-bold text-secondary uppercase tracking-wider">SDMX Connection: Active</span>
+</div>
+<span class="text-slate-300 text-xs">|</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="hub">hub</span>
+<span class="text-[10px] font-bold text-primary uppercase tracking-wider">Dataflow: TRADE_BALANCE</span>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="p-1.5 rounded-lg hover:bg-white/50 transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="fullscreen">fullscreen</span>
+</button>
+<button class="p-1.5 rounded-lg hover:bg-white/50 transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Preview Canvas -->
+<div class="flex-1 p-8 overflow-y-auto">
+<div class="max-w-2xl mx-auto space-y-6">
+<!-- Dashboard Title Placeholder -->
+<div class="mb-10">
+<div class="h-8 w-64 bg-slate-200 rounded-lg mb-2 animate-pulse"></div>
+<div class="h-4 w-40 bg-slate-100 rounded-lg animate-pulse"></div>
+</div>
+<!-- Main Loading Card -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_12px_40px_rgba(24,28,30,0.06)] overflow-hidden">
+<div class="p-6 border-b border-surface-container-low flex justify-between items-center">
+<div class="h-4 w-32 bg-slate-200 rounded animate-pulse"></div>
+<div class="h-4 w-12 bg-slate-100 rounded animate-pulse"></div>
+</div>
+<div class="p-10 flex flex-col items-center justify-center text-center relative h-64">
+<!-- Skeleton Chart Lines -->
+<div class="absolute inset-x-10 bottom-10 h-32 flex items-end gap-2 opacity-20">
+<div class="w-full bg-primary-fixed-dim rounded-t h-[40%] animate-pulse"></div>
+<div class="w-full bg-primary-fixed-dim rounded-t h-[70%] animate-pulse" style="animation-delay: 0.2s"></div>
+<div class="w-full bg-primary-fixed-dim rounded-t h-[50%] animate-pulse" style="animation-delay: 0.4s"></div>
+<div class="w-full bg-primary-fixed-dim rounded-t h-[90%] animate-pulse" style="animation-delay: 0.6s"></div>
+<div class="w-full bg-primary-fixed-dim rounded-t h-[60%] animate-pulse" style="animation-delay: 0.8s"></div>
+</div>
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-12 h-12 bg-primary-container rounded-full flex items-center justify-center mb-4 overflow-hidden relative">
+<div class="absolute inset-0 shimmer animate-shimmer opacity-30"></div>
+<span class="material-symbols-outlined text-white" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<h3 class="font-headline font-bold text-on-surface mb-2">Building your dashboard...</h3>
+<p class="text-sm text-slate-500 max-w-xs">Synthesizing trade flow dimensions for Regional Economic Overview.</p>
+</div>
+</div>
+</div>
+<!-- Secondary Stats Grid Skeleton -->
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm space-y-3">
+<div class="h-3 w-20 bg-slate-100 rounded"></div>
+<div class="h-6 w-24 bg-slate-200 rounded"></div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm space-y-3">
+<div class="h-3 w-20 bg-slate-100 rounded"></div>
+<div class="h-6 w-24 bg-slate-200 rounded"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 px-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg md:hidden border-t border-slate-200/20 shadow-[0_-8px_30px_rgba(0,0,0,0.04)]">
+<div class="flex flex-col items-center justify-center bg-[#004467] text-white rounded-xl py-1 px-3 active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
+<span class="font-inter text-[10px] uppercase tracking-widest font-bold">Chat</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-[#006970] active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="font-inter text-[10px] uppercase tracking-widest font-bold">Dashboard</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-[#006970] active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="manage_search">manage_search</span>
+<span class="font-inter text-[10px] uppercase tracking-widest font-bold">Discovery</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-[#006970] active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="ios_share">ios_share</span>
+<span class="font-inter text-[10px] uppercase tracking-widest font-bold">Export</span>
+</div>
+</nav>
+</body></html>

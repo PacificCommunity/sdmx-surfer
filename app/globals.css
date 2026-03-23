@@ -1,0 +1,201 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Oceanic Data-Scapes: Full Token Set ── */
+
+  /* Primary */
+  --color-primary: #004467;
+  --color-primary-container: #005c8a;
+  --color-primary-fixed-dim: #90cdff;
+  --color-on-primary: #ffffff;
+
+  /* Secondary */
+  --color-secondary: #006970;
+  --color-secondary-container: #8aeff9;
+  --color-secondary-fixed-dim: #6fd6df;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #006e75;
+
+  /* Tertiary */
+  --color-tertiary: #244445;
+  --color-tertiary-container: #3c5c5c;
+  --color-tertiary-fixed: #c6e9e9;
+  --color-tertiary-fixed-dim: #abcdcd;
+  --color-on-tertiary-fixed-variant: #2c4c4c;
+
+  /* Surface hierarchy */
+  --color-surface: #f7fafc;
+  --color-surface-low: #f1f4f6;
+  --color-surface-card: #ffffff;
+  --color-surface-high: #e5e9eb;
+  --color-surface-tint: #146492;
+
+  /* Text / on-surface */
+  --color-on-surface: #181c1e;
+  --color-on-surface-variant: #40484f;
+  --color-text-muted: #718096;
+
+  /* Outline */
+  --color-outline: #717880;
+  --color-outline-variant: #c0c7d0;
+
+  /* Semantic aliases */
+  --color-deep-sea: #004467;
+  --color-reef-teal: #006970;
+  --color-lagoon: #6fd6df;
+  --color-kelp: #244445;
+  --color-soft-mist: #abcdcd;
+
+  /* Chart palette (Highcharts-compatible) */
+  --color-chart-1: #004467;
+  --color-chart-2: #006970;
+  --color-chart-3: #6fd6df;
+  --color-chart-4: #244445;
+  --color-chart-5: #abcdcd;
+  --color-chart-6: #005c8a;
+  --color-chart-7: #90cdff;
+
+  /* Spacing */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+
+  /* Shadows */
+  --shadow-ambient: 0 12px 40px rgba(24, 28, 30, 0.06);
+}
+
+/* ── Base styles ── */
+
+:root {
+  --font-inter: "Inter";
+  --font-manrope: "Manrope";
+}
+
+html {
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+}
+
+body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-manrope), system-ui, sans-serif;
+}
+
+/* ── Typography scale ── */
+
+.type-display-lg {
+  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.type-headline-sm {
+  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.type-label-md {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.type-body-sm {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+/* ── Scrollbar ── */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-high);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-soft-mist);
+}
+
+/* ── Utility classes ── */
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.ocean-gradient {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-container) 100%);
+}
+
+.shadow-ambient {
+  box-shadow: var(--shadow-ambient);
+}
+
+.ghost-border {
+  border: 1px solid rgba(192, 199, 208, 0.2);
+}
+
+/* ── Focus state: architectural bottom-border ── */
+
+.focus-architectural:focus {
+  outline: none;
+  border-color: transparent;
+  border-bottom: 2px solid var(--color-primary);
+}
+
+/* ── Submerged overlay for empty states ── */
+
+.submerged-overlay {
+  position: relative;
+}
+
+.submerged-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--color-surface-tint);
+  opacity: 0.05;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* ── Shimmer loading effect ── */
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-high) 25%,
+    var(--color-surface-low) 50%,
+    var(--color-surface-high) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}

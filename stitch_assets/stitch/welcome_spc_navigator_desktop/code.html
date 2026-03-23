@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SDMX Navigator | SPC Pacific Data Hub</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface": "#f7fafc",
+              "outline-variant": "#c0c7d0",
+              "on-tertiary-fixed": "#002020",
+              "on-surface-variant": "#40484f",
+              "on-secondary": "#ffffff",
+              "on-secondary-fixed": "#002022",
+              "surface-tint": "#146492",
+              "primary-fixed": "#cbe6ff",
+              "inverse-on-surface": "#eef1f3",
+              "tertiary-fixed-dim": "#abcdcd",
+              "surface-container-low": "#f1f4f6",
+              "tertiary-container": "#3c5c5c",
+              "on-primary-fixed-variant": "#004b72",
+              "surface-container-highest": "#e0e3e5",
+              "on-background": "#181c1e",
+              "tertiary-fixed": "#c6e9e9",
+              "error-container": "#ffdad6",
+              "error": "#ba1a1a",
+              "secondary": "#006970",
+              "primary-container": "#005c8a",
+              "surface-container": "#ebeef0",
+              "inverse-primary": "#90cdff",
+              "secondary-fixed": "#8df2fc",
+              "on-tertiary-fixed-variant": "#2c4c4c",
+              "on-tertiary": "#ffffff",
+              "outline": "#717880",
+              "tertiary": "#244445",
+              "surface-container-lowest": "#ffffff",
+              "secondary-fixed-dim": "#6fd6df",
+              "on-primary": "#ffffff",
+              "on-error-container": "#93000a",
+              "secondary-container": "#8aeff9",
+              "primary-fixed-dim": "#90cdff",
+              "on-primary-fixed": "#001e30",
+              "surface-container-high": "#e5e9eb",
+              "background": "#f7fafc",
+              "on-secondary-fixed-variant": "#004f54",
+              "on-error": "#ffffff",
+              "surface-dim": "#d7dadc",
+              "primary": "#004467",
+              "on-secondary-container": "#006e75",
+              "surface-variant": "#e0e3e5",
+              "on-tertiary-container": "#b0d3d2",
+              "on-primary-container": "#9fd3ff",
+              "surface-bright": "#f7fafc",
+              "on-surface": "#181c1e",
+              "inverse-surface": "#2d3133"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .ocean-gradient {
+            background: linear-gradient(135deg, #004467 0%, #005c8a 100%);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+<!-- SideNavBar (Execution from JSON) -->
+<aside class="fixed top-0 left-0 h-screen w-64 z-50 bg-slate-50 border-r border-slate-100 flex flex-col py-6 px-4 space-y-2">
+<div class="px-4 mb-8">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 ocean-gradient rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="tsunami">tsunami</span>
+</div>
+<div>
+<h1 class="font-headline font-black text-sky-900 leading-tight">SPC SDMX</h1>
+<p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Pacific Data Hub</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Active: Overview -->
+<a class="flex items-center gap-3 py-3 px-4 text-sky-700 font-bold bg-sky-50 rounded-lg mr-2 transition-all translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-['Inter'] text-sm font-medium">Overview</span>
+</a>
+<a class="flex items-center gap-3 py-3 px-4 text-slate-600 hover:bg-slate-200/50 hover:text-sky-800 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-['Inter'] text-sm font-medium">Data Explorer</span>
+</a>
+<a class="flex items-center gap-3 py-3 px-4 text-slate-600 hover:bg-slate-200/50 hover:text-sky-800 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="tsunami">tsunami</span>
+<span class="font-['Inter'] text-sm font-medium">Pacific Metrics</span>
+</a>
+<a class="flex items-center gap-3 py-3 px-4 text-slate-600 hover:bg-slate-200/50 hover:text-sky-800 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-['Inter'] text-sm font-medium">Regional Reports</span>
+</a>
+<a class="flex items-center gap-3 py-3 px-4 text-slate-600 hover:bg-slate-200/50 hover:text-sky-800 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
+<span class="font-['Inter'] text-sm font-medium">AI Chat Navigator</span>
+</a>
+</nav>
+<div class="pt-4 border-t border-slate-100 space-y-1">
+<a class="flex items-center gap-3 py-2 px-4 text-slate-600 hover:bg-slate-200/50 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-['Inter'] text-sm font-medium">System Settings</span>
+</a>
+<a class="flex items-center gap-3 py-2 px-4 text-slate-600 hover:bg-slate-200/50 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-['Inter'] text-sm font-medium">Documentation</span>
+</a>
+</div>
+<button class="mt-6 w-full py-3 ocean-gradient text-white rounded-xl font-bold text-sm shadow-lg shadow-sky-900/10 active:scale-95 transition-transform">
+            Download Dataset
+        </button>
+</aside>
+<!-- TopAppBar (Execution from JSON) -->
+<header class="fixed top-0 right-0 left-64 h-16 z-40 bg-white/85 backdrop-blur-xl border-b border-slate-200/20 shadow-sm flex items-center justify-between px-8">
+<div class="flex items-center gap-6">
+<span class="font-['Manrope'] font-semibold tracking-tight text-sky-900 text-lg">SDMX Navigator</span>
+<div class="hidden md:flex items-center gap-4">
+<a class="text-sky-700 font-bold border-b-2 border-sky-700 py-4 transition-all duration-300" href="#">Overview</a>
+<a class="text-slate-500 hover:text-sky-600 transition-all duration-300" href="#">Resources</a>
+<a class="text-slate-500 hover:text-sky-600 transition-all duration-300" href="#">Community</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<span class="absolute inset-y-0 left-3 flex items-center text-slate-400">
+<span class="material-symbols-outlined text-sm" data-icon="search">search</span>
+</span>
+<input class="pl-10 pr-4 py-1.5 bg-slate-100 border-none rounded-full text-sm w-64 focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Search Pacific data..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-500 hover:text-sky-600 transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:text-sky-600 transition-all">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<button class="p-1 border border-slate-200 rounded-full">
+<span class="material-symbols-outlined text-sky-900" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pl-64 pt-16 min-h-screen">
+<div class="max-w-7xl mx-auto p-12">
+<!-- Hero Section: The Modern Navigator -->
+<section class="relative mb-16 overflow-hidden rounded-[2rem] bg-slate-900 h-[500px] flex items-center">
+<div class="absolute inset-0 z-0">
+<img alt="Ocean waves from above" class="w-full h-full object-cover opacity-40 mix-blend-overlay" data-alt="Abstract aerial view of deep blue pacific ocean waves" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSFns3c0PaB_M7vxX51izt3GQLXzQtOtKoq5EdX83OQCdMMZd1o3xz5zG70eyFdpTqq2zRZsXq6-YjAPs4sxtMWJeswShMqdOGpTgP-k2LHik2Dp8Y0v1VmqutGdTIqatP0Y-ahMUiUfwCgwZVSXvERSo28JuuOQNNEq7uq5h_Ihov_-86ZlaTdRQOR8YXgLCXch9j0g6lhlV9vlsvq8z0eJJJeV1WKiGi5ZDGh4zv_WCnxJ1IOsTJyaCR6E1hioZkhkJaiCAVVJA"/>
+<div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/80 to-transparent"></div>
+</div>
+<div class="relative z-10 px-16 max-w-2xl">
+<div class="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-400/20 backdrop-blur-md">
+<span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+<span class="text-xs font-bold text-sky-300 uppercase tracking-widest">v4.0 Live Intelligence</span>
+</div>
+<h2 class="font-headline text-6xl font-extrabold text-white leading-[1.1] mb-6">
+                        The Modern <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 to-teal-300">Navigator</span>
+</h2>
+<p class="text-lg text-slate-300 font-body mb-10 leading-relaxed">
+                        Navigate the vast ocean of Pacific statistical data. Our SDMX-powered engine provides real-time access to the region's most critical economic and social indicators.
+                    </p>
+<div class="flex items-center gap-4">
+<button class="px-8 py-4 ocean-gradient text-white rounded-full font-bold text-lg shadow-xl shadow-sky-900/40 hover:scale-105 active:scale-95 transition-all">
+                            Start New Dashboard
+                        </button>
+<button class="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20 rounded-full font-bold text-lg transition-all">
+                            Open Saved Dashboard
+                        </button>
+</div>
+</div>
+<!-- Abstract Data Shapes -->
+<div class="absolute right-0 top-0 bottom-0 w-1/3 flex items-center justify-center p-12">
+<div class="grid grid-cols-2 gap-4 w-full">
+<div class="h-48 bg-sky-400/10 backdrop-blur-xl rounded-2xl border border-white/10 p-6 flex flex-col justify-end">
+<span class="text-3xl font-black text-sky-300">22</span>
+<span class="text-xs text-slate-400 uppercase font-bold tracking-tighter">Pacific Countries</span>
+</div>
+<div class="h-64 bg-teal-400/10 backdrop-blur-xl rounded-2xl border border-white/10 p-6 flex flex-col justify-end -mt-12">
+<span class="text-3xl font-black text-teal-300">1.2M</span>
+<span class="text-xs text-slate-400 uppercase font-bold tracking-tighter">Data Points</span>
+</div>
+<div class="h-64 bg-slate-400/10 backdrop-blur-xl rounded-2xl border border-white/10 p-6 flex flex-col justify-end">
+<span class="text-3xl font-black text-slate-200">SDMX</span>
+<span class="text-xs text-slate-400 uppercase font-bold tracking-tighter">Native Protocol</span>
+</div>
+<div class="h-48 bg-sky-500/20 backdrop-blur-xl rounded-2xl border border-white/10 p-6 flex flex-col justify-end -mt-12">
+<span class="text-3xl font-black text-sky-100">Live</span>
+<span class="text-xs text-slate-400 uppercase font-bold tracking-tighter">Registry Sync</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Bento Grid: Regional Dataflows -->
+<div class="grid grid-cols-12 gap-8 mb-16">
+<div class="col-span-12 lg:col-span-8">
+<div class="flex items-end justify-between mb-8">
+<div>
+<span class="text-on-tertiary-fixed-variant font-bold text-sm tracking-widest uppercase">Statistical Ecosystem</span>
+<h3 class="font-headline text-3xl font-extrabold text-sky-900 mt-2">Active Dataflows</h3>
+</div>
+<button class="text-sky-700 font-bold flex items-center gap-2 hover:underline">
+                            View All Streams
+                            <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-8 transition-all hover:shadow-xl hover:shadow-sky-900/5 group">
+<div class="w-12 h-12 rounded-lg bg-sky-50 flex items-center justify-center text-sky-700 mb-6 group-hover:ocean-gradient group-hover:text-white transition-all">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+</div>
+<h4 class="font-headline font-bold text-xl text-sky-950 mb-2">Trade &amp; Investment</h4>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6">Cross-border flow analysis and regional trade competitiveness metrics.</p>
+<div class="flex items-center gap-4 text-[11px] font-bold text-slate-400">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs" data-icon="schedule">schedule</span> 12m ago</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs text-green-500" data-icon="check_circle">check_circle</span> Validated</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-8 transition-all hover:shadow-xl hover:shadow-sky-900/5 group">
+<div class="w-12 h-12 rounded-lg bg-teal-50 flex items-center justify-center text-teal-700 mb-6 group-hover:bg-teal-600 group-hover:text-white transition-all">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+</div>
+<h4 class="font-headline font-bold text-xl text-sky-950 mb-2">Population &amp; Social</h4>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6">Demographic shifts, health indicators, and education attainment benchmarks.</p>
+<div class="flex items-center gap-4 text-[11px] font-bold text-slate-400">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs" data-icon="schedule">schedule</span> 2h ago</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs text-green-500" data-icon="check_circle">check_circle</span> Validated</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sidebar Component: System Status -->
+<div class="col-span-12 lg:col-span-4">
+<div class="bg-surface-container-low rounded-xl p-8 h-full flex flex-col">
+<h4 class="font-headline font-bold text-sky-900 mb-6">Navigator Status</h4>
+<div class="space-y-6 flex-1">
+<div class="flex items-center justify-between p-4 bg-white rounded-lg border border-slate-100">
+<div class="flex items-center gap-3">
+<span class="w-3 h-3 rounded-full bg-green-500"></span>
+<span class="font-bold text-sm">SDMX Registry</span>
+</div>
+<span class="text-[10px] font-black text-green-600 bg-green-50 px-2 py-1 rounded">ONLINE</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-white rounded-lg border border-slate-100">
+<div class="flex items-center gap-3">
+<span class="w-3 h-3 rounded-full bg-green-500"></span>
+<span class="font-bold text-sm">Fusion Edge API</span>
+</div>
+<span class="text-[10px] font-black text-green-600 bg-green-50 px-2 py-1 rounded">ONLINE</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-white rounded-lg border border-slate-100">
+<div class="flex items-center gap-3">
+<span class="w-3 h-3 rounded-full bg-amber-500"></span>
+<span class="font-bold text-sm">WSDS Harvest</span>
+</div>
+<span class="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-1 rounded">SYNCING</span>
+</div>
+</div>
+<div class="mt-8 pt-8 border-t border-slate-200">
+<div class="flex items-center gap-4 mb-4">
+<div class="w-10 h-10 rounded-full bg-slate-200 overflow-hidden">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="Professional portrait of a male data analyst" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsy0tyisO8pjPWlkC_FLpFsphKVxonhCaVpVyH-d7A8BDl5pZNO2kkl-sBwLdmW9B8Va7W5t-CPLkgUAlozsfqiS3aDcl8wMEsUgcSes-ux3IcPZO3BZhttfYjIkxQ4ife_4m1FqFKTueouSDCSk_Eu2DAfSEUrwhD8aPBjSeG1sFt7wrnTKkJPICrgWI7GdrL4XXDugdTdZlHvGZJbSS_B2b0y-TajwvV04oItTnoReBRnMj0xUrQrMqhXDlIwSurmFj5mjQPRgI"/>
+</div>
+<div>
+<p class="font-bold text-sm">Regional Analyst</p>
+<p class="text-xs text-slate-500">Pacific Community (SPC)</p>
+</div>
+</div>
+<button class="w-full py-2 bg-slate-200/50 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-all">
+                                Account Settings
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Professional Data Table Preview -->
+<section class="mb-16">
+<div class="flex items-center justify-between mb-8">
+<h3 class="font-headline text-2xl font-extrabold text-sky-900">Recent Explorations</h3>
+</div>
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high">
+<th class="py-4 px-6 text-[11px] font-bold text-on-surface uppercase tracking-widest">Dashboard Name</th>
+<th class="py-4 px-6 text-[11px] font-bold text-on-surface uppercase tracking-widest">Primary Metric</th>
+<th class="py-4 px-6 text-[11px] font-bold text-on-surface uppercase tracking-widest">Coverage</th>
+<th class="py-4 px-6 text-[11px] font-bold text-on-surface uppercase tracking-widest text-right">Last Modified</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100">
+<tr class="hover:bg-surface-container-low transition-colors group cursor-pointer">
+<td class="py-5 px-6 font-bold text-sky-900">2024 GDP Outlook - Melanesia</td>
+<td class="py-5 px-6"><span class="px-3 py-1 bg-sky-50 text-sky-700 rounded-full text-xs font-medium">Real GDP Growth</span></td>
+<td class="py-5 px-6 text-sm text-slate-500">Fiji, PNG, Solomon Islands, Vanuatu</td>
+<td class="py-5 px-6 text-right text-xs font-bold text-slate-400 group-hover:text-sky-600 transition-colors">May 12, 2024</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group cursor-pointer">
+<td class="py-5 px-6 font-bold text-sky-900">Education Benchmarking v2</td>
+<td class="py-5 px-6"><span class="px-3 py-1 bg-teal-50 text-teal-700 rounded-full text-xs font-medium">Net Enrollment Rate</span></td>
+<td class="py-5 px-6 text-sm text-slate-500">Cook Islands, Niue, Samoa</td>
+<td class="py-5 px-6 text-right text-xs font-bold text-slate-400 group-hover:text-sky-600 transition-colors">May 09, 2024</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group cursor-pointer">
+<td class="py-5 px-6 font-bold text-sky-900">Coping with COVID: Tourism Recovery</td>
+<td class="py-5 px-6"><span class="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-medium">Arrival Figures</span></td>
+<td class="py-5 px-6 text-sm text-slate-500">Kiribati, Marshall Islands</td>
+<td class="py-5 px-6 text-right text-xs font-bold text-slate-400 group-hover:text-sky-600 transition-colors">May 02, 2024</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+<!-- FAB Suppression: This is a Dashboard/Welcome screen, FAB is relevant here -->
+<button class="fixed bottom-10 right-10 w-16 h-16 ocean-gradient text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-90 transition-all z-50">
+<span class="material-symbols-outlined text-3xl" data-icon="chat_bubble">chat_bubble</span>
+</button>
+</body></html>

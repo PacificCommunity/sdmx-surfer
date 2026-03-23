@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SPC SDMX Navigator - Dashboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary-fixed-variant": "#004f54",
+                        "surface-variant": "#e0e3e5",
+                        "surface": "#f7fafc",
+                        "on-secondary-fixed": "#002022",
+                        "surface-bright": "#f7fafc",
+                        "inverse-primary": "#90cdff",
+                        "inverse-on-surface": "#eef1f3",
+                        "on-tertiary-fixed-variant": "#2c4c4c",
+                        "surface-dim": "#d7dadc",
+                        "primary-fixed-dim": "#90cdff",
+                        "primary": "#004467",
+                        "tertiary-fixed-dim": "#abcdcd",
+                        "on-primary-fixed": "#001e30",
+                        "on-background": "#181c1e",
+                        "on-tertiary-container": "#b0d3d2",
+                        "tertiary-fixed": "#c6e9e9",
+                        "secondary-fixed-dim": "#6fd6df",
+                        "on-secondary-container": "#006e75",
+                        "secondary-fixed": "#8df2fc",
+                        "on-primary-fixed-variant": "#004b72",
+                        "on-primary-container": "#9fd3ff",
+                        "on-surface": "#181c1e",
+                        "tertiary-container": "#3c5c5c",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#40484f",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#244445",
+                        "inverse-surface": "#2d3133",
+                        "surface-container-high": "#e5e9eb",
+                        "outline-variant": "#c0c7d0",
+                        "on-tertiary-fixed": "#002020",
+                        "primary-fixed": "#cbe6ff",
+                        "secondary-container": "#8aeff9",
+                        "secondary": "#006970",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-container": "#ebeef0",
+                        "primary-container": "#005c8a",
+                        "outline": "#717880",
+                        "on-primary": "#ffffff",
+                        "surface-tint": "#146492",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "background": "#f7fafc",
+                        "surface-container-low": "#f1f4f6"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ocean-gradient {
+            background: linear-gradient(135deg, #004467 0%, #005c8a 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface antialiased mb-24">
+<!-- TopAppBar from JSON -->
+<header class="bg-slate-50/85 backdrop-blur-xl fixed top-0 w-full z-50 shadow-[0_12px_40px_rgba(24,28,30,0.06)] flex justify-between items-center px-6 py-3 w-full">
+<div class="flex items-center gap-3">
+<button class="text-sky-900 hover:bg-slate-200/50 transition-colors p-2 rounded-lg scale-95 duration-200 active:opacity-80">
+<span class="material-symbols-outlined">menu_open</span>
+</button>
+<h1 class="font-manrope font-extrabold text-sky-900 tracking-tighter text-lg">SPC SDMX Navigator</h1>
+</div>
+<button class="text-sky-900 hover:bg-slate-200/50 transition-colors p-2 rounded-lg scale-95 duration-200 active:opacity-80">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</header>
+<main class="mt-20 px-4 pb-12 max-w-md mx-auto">
+<!-- Header Section -->
+<div class="flex justify-between items-end mb-6">
+<div>
+<p class="font-label text-on-tertiary-fixed-variant text-[11px] uppercase tracking-wider font-semibold">Pacific Data Explorer</p>
+<h2 class="font-headline font-bold text-2xl text-on-surface tracking-tight">Multi-Dataflow</h2>
+</div>
+<button class="ocean-gradient text-white flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold shadow-lg hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm">ios_share</span>
+                Export
+            </button>
+</div>
+<!-- Bento Grid Layout -->
+<div class="space-y-4">
+<!-- International Trade Card -->
+<section class="bg-surface-container-lowest rounded-lg overflow-hidden shadow-sm">
+<div class="px-5 py-4 flex justify-between items-center border-b border-surface-container-low">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+<h3 class="font-headline font-bold text-sm text-on-surface">International Trade</h3>
+</div>
+<span class="font-label text-[10px] text-slate-400 font-medium uppercase tracking-widest">Live Data</span>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-baseline mb-4">
+<div>
+<p class="text-[11px] font-semibold text-slate-500 uppercase">Total Regional Trade</p>
+<h4 class="text-3xl font-bold text-primary tracking-tighter mt-1">$4.28B</h4>
+</div>
+<div class="text-right">
+<span class="text-green-600 flex items-center font-bold text-xs">
+<span class="material-symbols-outlined text-xs">trending_up</span>
+                                12.4%
+                            </span>
+</div>
+</div>
+<!-- Sparkline Placeholder -->
+<div class="h-16 w-full flex items-end gap-1">
+<div class="bg-primary/10 w-full h-8 rounded-sm"></div>
+<div class="bg-primary/10 w-full h-10 rounded-sm"></div>
+<div class="bg-primary/20 w-full h-6 rounded-sm"></div>
+<div class="bg-primary/10 w-full h-9 rounded-sm"></div>
+<div class="bg-primary/40 w-full h-12 rounded-sm"></div>
+<div class="bg-primary/60 w-full h-14 rounded-sm"></div>
+<div class="bg-primary w-full h-11 rounded-sm"></div>
+<div class="bg-primary/80 w-full h-13 rounded-sm"></div>
+<div class="bg-primary w-full h-16 rounded-sm"></div>
+</div>
+</div>
+</section>
+<!-- Health Expenditure Card -->
+<section class="bg-surface-container-lowest rounded-lg shadow-sm">
+<div class="px-5 py-4 flex justify-between items-center border-b border-surface-container-low">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+<h3 class="font-headline font-bold text-sm text-on-surface">Health Expenditure</h3>
+</div>
+<span class="font-label text-[10px] text-slate-400 font-medium uppercase tracking-widest">SDG 3.8.1</span>
+</div>
+<div class="p-5">
+<p class="text-[11px] font-semibold text-slate-500 uppercase mb-4">% of Total GDP</p>
+<div class="space-y-4">
+<!-- Fiji -->
+<div class="space-y-1.5">
+<div class="flex justify-between text-xs font-semibold">
+<span>Fiji</span>
+<span>4.2%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 42%;"></div>
+</div>
+</div>
+<!-- Samoa -->
+<div class="space-y-1.5">
+<div class="flex justify-between text-xs font-semibold">
+<span>Samoa</span>
+<span>5.1%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 51%;"></div>
+</div>
+</div>
+<!-- Vanuatu -->
+<div class="space-y-1.5">
+<div class="flex justify-between text-xs font-semibold">
+<span>Vanuatu</span>
+<span>3.8%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 38%;"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-2 gap-4">
+<!-- Education KPI -->
+<section class="bg-surface-container-lowest rounded-lg shadow-sm p-5 flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+<h3 class="font-headline font-bold text-[12px] text-on-surface uppercase">Education (NER)</h3>
+</div>
+<h4 class="text-2xl font-bold text-primary tracking-tighter">92.4%</h4>
+<p class="text-[10px] text-slate-500 font-medium mt-1">Net Enrolment Rate</p>
+</div>
+<div class="mt-4 flex items-center gap-1 text-[10px] font-bold text-secondary">
+<span class="material-symbols-outlined text-xs">check_circle</span>
+                        On Track
+                    </div>
+</section>
+<!-- Status Card -->
+<section class="bg-secondary-container/30 rounded-lg shadow-sm p-5 border border-secondary-container/50">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-secondary text-sm">sync</span>
+<h3 class="font-headline font-bold text-[12px] text-on-secondary-container uppercase">Updates</h3>
+</div>
+<p class="text-[10px] text-on-secondary-container font-semibold">3 Dataflows Syncing</p>
+<p class="text-[9px] text-on-secondary-container/70 mt-1">Last update 2 mins ago from SPC Node</p>
+</section>
+</div>
+<!-- Regional Highlights -->
+<section class="bg-primary text-white rounded-lg p-6 shadow-xl relative overflow-hidden">
+<div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
+<h3 class="font-headline font-bold text-lg mb-3 relative z-10">Regional Highlights</h3>
+<p class="text-sm text-on-primary-container leading-relaxed relative z-10 font-medium">
+                    Strong data reporting trends observed across Melanesia. Trade figures indicate a 12% surplus, while health and education metrics show steady alignment with 2030 development targets.
+                </p>
+<div class="mt-4 flex gap-3 relative z-10">
+<div class="bg-white/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Stability: High</div>
+<div class="bg-white/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Flows: Active</div>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar from JSON -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-white/90 backdrop-blur-2xl z-50 rounded-t-2xl shadow-[0_-8px_30px_rgba(0,0,0,0.04)]">
+<a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2 hover:text-sky-600 transition-all" href="#">
+<span class="material-symbols-outlined">forum</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider mt-1">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-sky-900 text-white rounded-full px-5 py-2 transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2 hover:text-sky-600 transition-all" href="#">
+<span class="material-symbols-outlined">explore_nearby</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider mt-1">Discovery</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2 hover:text-sky-600 transition-all" href="#">
+<span class="material-symbols-outlined">ios_share</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider mt-1">Export</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dimension Explorer - SPC SDMX Navigator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-fixed": "#cbe6ff",
+                        "on-tertiary-fixed": "#002020",
+                        "surface-container-low": "#f1f4f6",
+                        "tertiary-fixed": "#c6e9e9",
+                        "surface-container-highest": "#e0e3e5",
+                        "primary": "#004467",
+                        "on-surface-variant": "#40484f",
+                        "outline-variant": "#c0c7d0",
+                        "error": "#ba1a1a",
+                        "secondary": "#006970",
+                        "secondary-fixed": "#8df2fc",
+                        "on-secondary-fixed-variant": "#004f54",
+                        "secondary-container": "#8aeff9",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#005c8a",
+                        "on-secondary-container": "#006e75",
+                        "surface": "#f7fafc",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#004b72",
+                        "on-primary-fixed": "#001e30",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#abcdcd",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#d7dadc",
+                        "on-tertiary-container": "#b0d3d2",
+                        "on-error-container": "#93000a",
+                        "background": "#f7fafc",
+                        "surface-tint": "#146492",
+                        "surface-container": "#ebeef0",
+                        "tertiary": "#244445",
+                        "inverse-on-surface": "#eef1f3",
+                        "tertiary-container": "#3c5c5c",
+                        "surface-bright": "#f7fafc",
+                        "outline": "#717880",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#6fd6df",
+                        "surface-variant": "#e0e3e5",
+                        "on-primary-container": "#9fd3ff",
+                        "inverse-surface": "#2d3133",
+                        "inverse-primary": "#90cdff",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed-variant": "#2c4c4c",
+                        "on-surface": "#181c1e",
+                        "primary-fixed-dim": "#90cdff",
+                        "on-secondary-fixed": "#002022",
+                        "surface-container-high": "#e5e9eb",
+                        "on-background": "#181c1e"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full flex justify-between items-center px-6 h-16 bg-slate-50/85 backdrop-blur-xl z-50 shadow-[0_12px_40px_rgba(24,28,30,0.06)]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="explore">explore</span>
+<h1 class="font-headline font-bold text-2xl tracking-tight text-primary">The Modern Navigator</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-8">
+<a class="text-slate-500 font-medium hover:text-primary transition-colors" href="#">Regional Dataflows</a>
+<a class="text-primary border-b-2 border-primary font-semibold" href="#">Dimension Explorer</a>
+<a class="text-slate-500 font-medium hover:text-primary transition-colors" href="#">System Status</a>
+</nav>
+<button class="material-symbols-outlined text-slate-500 hover:bg-slate-200/50 p-2 rounded-full transition-all" data-icon="settings">settings</button>
+</div>
+</header>
+<!-- Sidebar Navigation (Desktop) -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-80 bg-slate-50 z-40 hidden md:block">
+<div class="p-6">
+<h2 class="font-headline font-bold text-lg text-primary mb-8">SPC SDMX Navigator</h2>
+<nav class="space-y-2">
+<a class="flex items-center gap-4 px-4 py-3 text-slate-600 hover:pl-6 hover:bg-slate-200/50 transition-all rounded-r-full group" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-medium text-sm">Regional Dataflows</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-slate-600 hover:pl-6 hover:bg-slate-200/50 transition-all rounded-r-full group" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard_customize">dashboard_customize</span>
+<span class="font-medium text-sm">Saved Dashboards</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 bg-slate-200 text-primary font-semibold rounded-r-full" href="#">
+<span class="material-symbols-outlined" data-icon="filter_alt">filter_alt</span>
+<span class="font-medium text-sm">Dimension Explorer</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 text-slate-600 hover:pl-6 hover:bg-slate-200/50 transition-all rounded-r-full group" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-medium text-sm">System Status</span>
+</a>
+</nav>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-20 md:pb-8 md:pl-80 min-h-screen">
+<div class="max-w-5xl mx-auto px-6">
+<!-- Progress Indicator -->
+<div class="mb-10 flex items-center justify-between">
+<div>
+<span class="text-on-tertiary-fixed-variant font-label text-xs uppercase tracking-widest font-bold">Progressive Discovery</span>
+<h2 class="text-2xl font-headline font-extrabold text-on-surface mt-1">Refining Your Query</h2>
+</div>
+<div class="text-right">
+<div class="flex items-center gap-2 mb-2">
+<div class="h-2 w-8 rounded-full bg-primary"></div>
+<div class="h-2 w-8 rounded-full bg-primary"></div>
+<div class="h-2 w-16 rounded-full bg-primary"></div>
+<div class="h-2 w-8 rounded-full bg-surface-container-highest"></div>
+<div class="h-2 w-8 rounded-full bg-surface-container-highest"></div>
+</div>
+<span class="text-sm font-medium text-outline">Step 3 of 5</span>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Chat & Dimension Interaction Column -->
+<div class="lg:col-span-12 space-y-6">
+<!-- Agent Message Card -->
+<div class="flex gap-4 items-start">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-secondary-container" data-icon="smart_toy">smart_toy</span>
+</div>
+<div class="glass-panel p-6 rounded-xl rounded-tl-none shadow-[0_12px_40px_rgba(24,28,30,0.06)] border border-white/20 max-w-2xl">
+<p class="text-on-surface font-medium leading-relaxed">
+                                Which countries and years should we include? I've filtered the available dimensions based on the health expenditure dataset we're exploring.
+                            </p>
+</div>
+</div>
+<!-- User Selection Interface (Dimension Explorer) -->
+<div class="bg-surface-container-lowest rounded-xl p-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-outline-variant/20">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+<!-- Searchable List: Countries -->
+<div class="space-y-6">
+<div class="flex items-center justify-between">
+<h3 class="font-headline font-bold text-lg text-primary">Countries</h3>
+<span class="text-xs font-bold text-outline-variant uppercase tracking-widest">Dimension: REF_AREA</span>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full pl-12 pr-4 py-3 bg-surface-container-low border-b-2 border-transparent focus:border-primary focus:ring-0 transition-all rounded-t-lg font-body text-sm outline-none" placeholder="Search countries..." type="text"/>
+</div>
+<div class="h-64 overflow-y-auto pr-2 space-y-1 custom-scrollbar">
+<label class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer group">
+<input checked="" class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-sm font-medium text-on-surface group-hover:text-primary">Fiji</span>
+<span class="ml-auto text-xs text-outline">FJI</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer group">
+<input checked="" class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-sm font-medium text-on-surface group-hover:text-primary">Samoa</span>
+<span class="ml-auto text-xs text-outline">WSM</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer group">
+<input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-sm font-medium text-on-surface group-hover:text-primary">Tonga</span>
+<span class="ml-auto text-xs text-outline">TON</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer group">
+<input checked="" class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-sm font-medium text-on-surface group-hover:text-primary">Vanuatu</span>
+<span class="ml-auto text-xs text-outline">VUT</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer group">
+<input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-sm font-medium text-on-surface group-hover:text-primary">Cook Islands</span>
+<span class="ml-auto text-xs text-outline">COK</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer group">
+<input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-sm font-medium text-on-surface group-hover:text-primary">Kiribati</span>
+<span class="ml-auto text-xs text-outline">KIR</span>
+</label>
+</div>
+</div>
+<!-- Multi-select Chips: Years -->
+<div class="space-y-6">
+<div class="flex items-center justify-between">
+<h3 class="font-headline font-bold text-lg text-primary">Time Period</h3>
+<span class="text-xs font-bold text-outline-variant uppercase tracking-widest">Dimension: TIME_PERIOD</span>
+</div>
+<div class="flex flex-wrap gap-3">
+<button class="px-5 py-2.5 rounded-full bg-primary text-white text-sm font-semibold flex items-center gap-2 shadow-md">
+                                        2023 <span class="material-symbols-outlined text-sm" data-icon="close">close</span>
+</button>
+<button class="px-5 py-2.5 rounded-full bg-primary text-white text-sm font-semibold flex items-center gap-2 shadow-md">
+                                        2022 <span class="material-symbols-outlined text-sm" data-icon="close">close</span>
+</button>
+<button class="px-5 py-2.5 rounded-full bg-primary text-white text-sm font-semibold flex items-center gap-2 shadow-md">
+                                        2021 <span class="material-symbols-outlined text-sm" data-icon="close">close</span>
+</button>
+<button class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant text-sm font-medium hover:bg-slate-300 transition-colors">
+                                        2020
+                                    </button>
+<button class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant text-sm font-medium hover:bg-slate-300 transition-colors">
+                                        2019
+                                    </button>
+<button class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant text-sm font-medium hover:bg-slate-300 transition-colors">
+                                        2018
+                                    </button>
+<button class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant text-sm font-medium hover:bg-slate-300 transition-colors">
+                                        2017
+                                    </button>
+<button class="px-5 py-2.5 rounded-full border border-dashed border-outline-variant text-outline-variant text-sm font-medium hover:border-primary hover:text-primary transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span> More Years
+                                    </button>
+</div>
+<div class="p-4 bg-secondary-container/20 rounded-lg border border-secondary-container/30">
+<div class="flex items-center gap-3 text-secondary mb-2">
+<span class="material-symbols-outlined text-sm" data-icon="info">info</span>
+<span class="text-xs font-bold uppercase tracking-wider">Availability Hint</span>
+</div>
+<p class="text-xs text-on-secondary-fixed-variant leading-relaxed">
+                                        Fiji and Vanuatu have the most complete records for the selected 2021-2023 range.
+                                    </p>
+</div>
+</div>
+</div>
+<!-- Action Footer -->
+<div class="mt-12 pt-8 border-t border-outline-variant/10 flex flex-col md:flex-row items-center justify-between gap-6">
+<div class="flex items-center gap-4">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-bold">FJ</div>
+<div class="w-8 h-8 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-bold">WS</div>
+<div class="w-8 h-8 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[10px] font-bold">VU</div>
+</div>
+<p class="text-sm text-outline font-medium">3 Countries, 3 Years Selected</p>
+</div>
+<div class="flex gap-4 w-full md:w-auto">
+<button class="flex-1 md:flex-none px-8 py-3 rounded-full text-primary font-bold hover:bg-slate-100 transition-colors">
+                                    Cancel
+                                </button>
+<button class="flex-1 md:flex-none px-10 py-3 rounded-full bg-gradient-to-br from-primary to-primary-container text-white font-bold shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
+                                    Check Data Availability
+                                    <span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Asymmetric Contextual Data Panel -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="md:col-span-2 glass-panel p-6 rounded-xl border border-white/40">
+<div class="flex items-center justify-between mb-4">
+<h4 class="font-headline font-bold text-on-surface">Data Completeness Heatmap</h4>
+<span class="text-xs font-bold text-secondary uppercase">Live Preview</span>
+</div>
+<!-- Mock Visualization -->
+<div class="h-32 flex items-end gap-1">
+<div class="flex-1 bg-primary/20 h-1/4 rounded-t-sm"></div>
+<div class="flex-1 bg-primary/40 h-2/4 rounded-t-sm"></div>
+<div class="flex-1 bg-primary/60 h-3/4 rounded-t-sm"></div>
+<div class="flex-1 bg-primary/80 h-full rounded-t-sm"></div>
+<div class="flex-1 bg-primary h-full rounded-t-sm"></div>
+<div class="flex-1 bg-primary/90 h-5/6 rounded-t-sm"></div>
+<div class="flex-1 bg-primary/50 h-2/4 rounded-t-sm"></div>
+<div class="flex-1 bg-primary/30 h-1/4 rounded-t-sm"></div>
+<div class="flex-1 bg-primary/10 h-1/6 rounded-t-sm"></div>
+<div class="flex-1 bg-primary/40 h-2/4 rounded-t-sm"></div>
+<div class="flex-1 bg-primary/70 h-3/4 rounded-t-sm"></div>
+<div class="flex-1 bg-primary h-full rounded-t-sm"></div>
+</div>
+<div class="flex justify-between mt-2 text-[10px] font-bold text-outline-variant uppercase">
+<span>2012</span>
+<span>2024 (Projected)</span>
+</div>
+</div>
+<div class="bg-primary p-6 rounded-xl flex flex-col justify-between text-white overflow-hidden relative group">
+<div class="relative z-10">
+<h4 class="font-headline font-bold text-lg mb-2">SDMX Tip</h4>
+<p class="text-xs text-primary-fixed leading-relaxed opacity-90">
+                                    Selecting fewer dimensions at this stage accelerates the initial fetch by up to 40%.
+                                </p>
+</div>
+<div class="mt-4 relative z-10">
+<button class="text-xs font-bold uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                                    Learn More <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<!-- Abstract Wave Decoration -->
+<div class="absolute -bottom-4 -right-4 w-24 h-24 bg-primary-container/30 rounded-full blur-2xl"></div>
+<div class="absolute -top-4 -left-4 w-16 h-16 bg-white/5 rounded-full blur-xl"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 px-4 md:hidden bg-white/90 backdrop-blur-lg border-t border-slate-200/20 shadow-[0_-8px_30px_rgba(0,0,0,0.04)] rounded-t-2xl">
+<a class="flex flex-col items-center justify-center text-slate-400" href="#">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
+<span class="font-inter text-[10px] uppercase tracking-widest font-bold mt-1">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="font-inter text-[10px] uppercase tracking-widest font-bold mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary text-white rounded-xl py-1 px-3 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="manage_search">manage_search</span>
+<span class="font-inter text-[10px] uppercase tracking-widest font-bold mt-1">Discovery</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400" href="#">
+<span class="material-symbols-outlined" data-icon="ios_share">ios_share</span>
+<span class="font-inter text-[10px] uppercase tracking-widest font-bold mt-1">Export</span>
+</a>
+</nav>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</body></html>
