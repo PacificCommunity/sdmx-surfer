@@ -79,6 +79,8 @@ export function useConfigHistory(): ConfigHistory {
         lastJsonRef.current = JSON.stringify(
           historyRef.current[pointerRef.current],
         );
+      } else {
+        lastJsonRef.current = "";
       }
       tick();
     },

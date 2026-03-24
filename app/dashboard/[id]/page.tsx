@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { loadSession } from "@/lib/session";
 import { exportToPdf, exportToHtml, exportToHtmlLive, exportToJson } from "@/lib/export-dashboard";
 import { extractDataSources } from "@/lib/data-explorer-url";
+import { getDashboardSubtitle, getDashboardTitle } from "@/lib/dashboard-text";
 import type { SDMXDashboardConfig } from "@/lib/types";
 
 const SDMXDashboard = dynamic(
@@ -46,7 +47,7 @@ export default function DashboardViewPage() {
   const [notFound, setNotFound] = useState(false);
   const [exportMenu, setExportMenu] = useState(false);
   const [exporting, setExporting] = useState(false);
-  const dashboardRef = { current: null as HTMLDivElement | null };
+  const dashboardRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const extracted = extractConfigFromSession(sessionId);
@@ -91,14 +92,8 @@ export default function DashboardViewPage() {
     );
   }
 
-  const title =
-    typeof config.header?.title?.text === "string"
-      ? config.header.title.text
-      : "Dashboard";
-  const subtitle =
-    typeof config.header?.subtitle?.text === "string"
-      ? config.header.subtitle.text
-      : null;
+  const title = getDashboardTitle(config);
+  const subtitle = getDashboardSubtitle(config);
 
   return (
     <div className="min-h-screen bg-surface">

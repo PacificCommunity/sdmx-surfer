@@ -12,10 +12,17 @@ import {
 import dynamic from "next/dynamic";
 import { exportToPdf, exportToHtml, exportToHtmlLive, exportToJson } from "@/lib/export-dashboard";
 import { extractDataSources, type DataSource } from "@/lib/data-explorer-url";
+import {
+  dashboardConfigSchema,
+  formatDashboardConfigError,
+} from "@/lib/dashboard-schema";
+import {
+  getDashboardTitle,
+  getTextConfigValue,
+} from "@/lib/dashboard-text";
 import type {
   SDMXDashboardConfig,
   SDMXDashboardRow,
-  SDMXTextConfig,
   SDMXVisualConfig,
 } from "@/lib/types";
 
@@ -309,19 +316,6 @@ function formatJsonPreview(value: unknown): ReactNode[] {
   return renderValue(value, 0, null);
 }
 
-function getTextValue(value?: SDMXTextConfig): string | null {
-  if (!value) {
-    return null;
-  }
-
-  if (typeof value.text === "string") {
-    return value.text;
-  }
-
-  const first = Object.values(value.text)[0];
-  return typeof first === "string" ? first : null;
-}
-
 function getKeyTone(key: string): string {
   if (STRUCTURAL_KEYS.has(key)) {
     return "bg-primary/8 text-primary";
@@ -528,10 +522,12 @@ function VisualCard({
   visual: SDMXVisualConfig;
   index: number;
 }) {
-  const title = getTextValue(visual.title) || visual.id;
-  const subtitle = getTextValue(visual.subtitle);
-  const note = getTextValue(visual.note);
-  const dataValues = Array.isArray(visual.data) ? visual.data : [visual.data];
+  const title = getTextConfigValue(visual.title) || visual.id;
+  const subtitle = getTextConfigValue(visual.subtitle);
+  const note = getTextConfigValue(visual.note);
+  const dataValues = (Array.isArray(visual.data) ? visual.data : [visual.data]).filter(
+    (value): value is string => typeof value === "string" && value.length > 0,
+  );
   const topLevelFields = ([
     ["id", visual.id],
     ["colSize", visual.colSize],
@@ -639,11 +635,11 @@ function ConfigInspector({ config }: { config: SDMXDashboardConfig }) {
               Dashboard Config
             </span>
             <h3 className="font-[family-name:var(--font-manrope)] text-lg font-semibold text-on-surface">
-              {getTextValue(config.header?.title) || config.id}
+              {getDashboardTitle(config)}
             </h3>
-            {getTextValue(config.header?.subtitle) && (
+            {getTextConfigValue(config.header?.subtitle) && (
               <p className="text-sm text-on-surface-variant">
-                {getTextValue(config.header?.subtitle)}
+                {getTextConfigValue(config.header?.subtitle)}
               </p>
             )}
           </div>
@@ -763,8 +759,11 @@ function JsonEditor({
     setText(value);
     setDirty(true);
     try {
-      JSON.parse(value);
-      setParseError(null);
+      const parsed = JSON.parse(value) as unknown;
+      const validation = dashboardConfigSchema.safeParse(parsed);
+      setParseError(
+        validation.success ? null : formatDashboardConfigError(validation.error),
+      );
     } catch (e) {
       setParseError((e as Error).message);
     }
@@ -772,12 +771,17 @@ function JsonEditor({
 
   const handleApply = () => {
     try {
-      const parsed = JSON.parse(text) as SDMXDashboardConfig;
+      const parsed = JSON.parse(text) as unknown;
+      const validation = dashboardConfigSchema.safeParse(parsed);
+      if (!validation.success) {
+        setParseError(formatDashboardConfigError(validation.error));
+        return;
+      }
       setParseError(null);
       setDirty(false);
       setEditing(false);
-      setText(JSON.stringify(parsed, null, 2));
-      onApply(parsed);
+      setText(JSON.stringify(validation.data, null, 2));
+      onApply(validation.data as SDMXDashboardConfig);
     } catch (e) {
       setParseError((e as Error).message);
     }
@@ -792,8 +796,13 @@ function JsonEditor({
 
   const handleFormat = () => {
     try {
-      const parsed = JSON.parse(text) as SDMXDashboardConfig;
-      setText(JSON.stringify(parsed, null, 2));
+      const parsed = JSON.parse(text) as unknown;
+      const validation = dashboardConfigSchema.safeParse(parsed);
+      if (!validation.success) {
+        setParseError(formatDashboardConfigError(validation.error));
+        return;
+      }
+      setText(JSON.stringify(validation.data, null, 2));
       setParseError(null);
       setDirty(true);
     } catch (e) {
@@ -1213,7 +1222,7 @@ export const DashboardPreview = memo(function DashboardPreview({
         if (config) {
           const components = config.rows.flatMap((r) =>
             r.columns.map((c) => {
-              const title = typeof c.title?.text === "string" ? c.title.text : c.id;
+              const title = getTextConfigValue(c.title) || c.id;
               const url = typeof c.data === "string" ? c.data : Array.isArray(c.data) ? c.data[0] : "";
               // Truncate URL for readability
               const shortUrl = url && url.length > 80 ? url.slice(0, 80) + "..." : url;
@@ -1268,10 +1277,7 @@ export const DashboardPreview = memo(function DashboardPreview({
     };
   }, []);
 
-  const title =
-    typeof config?.header?.title?.text === "string"
-      ? config.header.title.text
-      : null;
+  const title = config ? getDashboardTitle(config) : null;
 
   const hasValidRows = Boolean(
     config?.id &&

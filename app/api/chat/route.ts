@@ -2,6 +2,10 @@ import { streamText, tool, convertToModelMessages, stepCountIs } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { createMCPClient } from "@ai-sdk/mcp";
 import { z } from "zod";
+import {
+  dashboardConfigSchema,
+  getConfigTitle,
+} from "@/lib/dashboard-schema";
 import { getSystemPrompt } from "@/lib/system-prompt";
 import {
   extractKnowledgeFromMessages,
@@ -11,145 +15,8 @@ import { createRequestLogger } from "@/lib/logger";
 
 const chatRequestSchema = z.object({
   messages: z.array(z.unknown()),
+  previewError: z.string().optional(),
 });
-
-const textConfigSchema = z
-  .object({
-    text: z.union([z.string(), z.record(z.string(), z.string())]),
-    size: z.string().optional(),
-    weight: z.string().optional(),
-    align: z.enum(["center", "left", "right"]).optional(),
-    color: z.string().optional(),
-    font: z.string().optional(),
-    style: z.string().optional(),
-  })
-  .passthrough();
-
-const legendSchema = z
-  .object({
-    concept: z.string().optional(),
-    location: z.enum(["top", "bottom", "left", "right", "none"]).optional(),
-  })
-  .passthrough();
-
-const unitSchema = z
-  .object({
-    text: z.string(),
-    location: z.enum(["prefix", "suffix", "under"]).optional(),
-  })
-  .passthrough();
-
-const visualConfigSchema = z
-  .object({
-    id: z.string(),
-    type: z.enum([
-      "line",
-      "bar",
-      "column",
-      "pie",
-      "lollipop",
-      "treemap",
-      "value",
-      "drilldown",
-      "note",
-      "map",
-    ]),
-    colSize: z.number().optional(),
-    title: textConfigSchema.optional(),
-    subtitle: textConfigSchema.optional(),
-    note: textConfigSchema.optional(),
-    xAxisConcept: z.string().optional(),
-    yAxisConcept: z.string().optional(),
-    data: z.union([z.string(), z.array(z.string())]).optional(),
-    legend: legendSchema.optional(),
-    labels: z.boolean().optional(),
-    download: z.boolean().optional(),
-    sortByValue: z.enum(["asc", "desc"]).optional(),
-    unit: unitSchema.optional(),
-    decimals: z.union([z.number(), z.string()]).optional(),
-    colorScheme: z.string().optional(),
-    frame: z.boolean().optional(),
-    adaptiveTextSize: z.boolean().optional(),
-    dataLink: z.string().optional(),
-    metadataLink: z.string().optional(),
-    extraOptions: z.record(z.string(), z.unknown()).optional(),
-    colorPalette: z
-      .record(
-        z.string(),
-        z.record(z.string(), z.union([z.string(), z.number()])),
-      )
-      .optional(),
-    drilldown: z
-      .object({
-        xAxisConcept: z.string(),
-        legend: legendSchema.optional(),
-      })
-      .passthrough()
-      .optional(),
-  })
-  .passthrough()
-  .superRefine((config, ctx) => {
-    if (config.type !== "note") {
-      if (!config.xAxisConcept) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "xAxisConcept is required for non-note visuals",
-          path: ["xAxisConcept"],
-        });
-      }
-
-      if (!config.data) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "data is required for non-note visuals",
-          path: ["data"],
-        });
-      }
-    }
-  });
-
-const dashboardConfigSchema = z
-  .object({
-    id: z.string().describe("Unique dashboard identifier"),
-    languages: z.array(z.string()).optional(),
-    colCount: z.number().optional().describe("Number of grid columns, default 3"),
-    header: z
-      .object({
-        title: textConfigSchema.optional(),
-        subtitle: textConfigSchema.optional(),
-      })
-      .passthrough()
-      .optional(),
-    footer: z
-      .object({
-        title: textConfigSchema.optional(),
-        subtitle: textConfigSchema.optional(),
-      })
-      .passthrough()
-      .optional(),
-    rows: z.array(
-      z
-        .object({
-          columns: z.array(visualConfigSchema),
-        })
-        .passthrough(),
-    ),
-  })
-  .passthrough();
-
-function getConfigTitle(config: z.infer<typeof dashboardConfigSchema>) {
-  const title = config.header?.title?.text;
-  if (typeof title === "string") {
-    return title;
-  }
-  if (title && typeof title === "object") {
-    const first = Object.values(title)[0];
-    if (typeof first === "string") {
-      return first;
-    }
-  }
-  return config.id;
-}
 
 let mcpClientPromise: ReturnType<typeof createMCPClient> | null = null;
 
@@ -182,7 +49,7 @@ export async function POST(req: Request) {
   const logger = createRequestLogger(sessionId);
 
   try {
-    const { messages } = chatRequestSchema.parse(await req.json());
+    const { messages, previewError } = chatRequestSchema.parse(await req.json());
 
     // Extract last user message for logging
     const uiMessages = messages as Array<{ role?: string; parts?: Array<{ type?: string; text?: string }> }>;
@@ -205,9 +72,17 @@ export async function POST(req: Request) {
     const tier2Summary = formatKnowledgeSummary(tier2Knowledge);
 
     const systemPromptBase = getSystemPrompt();
-    const systemPrompt = tier2Summary
-      ? systemPromptBase + "\n\n" + tier2Summary
-      : systemPromptBase;
+    const previewRepairPrompt = previewError
+      ? "## Preview Repair Context\n\n" +
+        "The previous dashboard render failed in the live preview. " +
+        "Treat this as hidden system feedback, not as a user message. " +
+        "Fix only the broken component(s), then call update_dashboard again.\n\n" +
+        "Preview error details:\n" +
+        previewError
+      : "";
+    const systemPrompt = [systemPromptBase, tier2Summary, previewRepairPrompt]
+      .filter(Boolean)
+      .join("\n\n");
 
     let dashboardEmitted = false;
     let currentStep = 0;

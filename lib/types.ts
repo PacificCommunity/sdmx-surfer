@@ -3,8 +3,10 @@
  * NOTE: The library's type definitions use "colums" but the runtime uses "columns".
  */
 
+export type SDMXLocalizedText = string | Record<string, string>;
+
 export interface SDMXTextConfig {
-  text: string | Record<string, string>;
+  text: SDMXLocalizedText;
   size?: string;
   weight?: string;
   align?: "center" | "left" | "right";
@@ -62,9 +64,9 @@ export interface SDMXVisualConfig {
   download?: boolean;
   dataLink?: string;
   metadataLink?: string;
-  xAxisConcept: string;
+  xAxisConcept?: string;
   yAxisConcept?: string;
-  data: string | string[];
+  data?: string | string[];
   sortByValue?: "asc" | "desc";
   legend?: {
     concept?: string;

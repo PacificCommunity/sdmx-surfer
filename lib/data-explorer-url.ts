@@ -1,3 +1,5 @@
+import { getLocalizedTextValue } from "./dashboard-text";
+
 /**
  * Convert an SDMX REST API data URL to a Pacific Data Hub Data Explorer URL.
  *
@@ -144,12 +146,7 @@ export function extractDataSources(config: {
       if (!col.data) continue;
 
       const urls = Array.isArray(col.data) ? col.data : [col.data];
-      const title =
-        typeof col.title?.text === "string"
-          ? col.title.text
-          : col.title?.text
-            ? Object.values(col.title.text)[0] || col.id
-            : col.id;
+      const title = getLocalizedTextValue(col.title?.text) || col.id;
 
       for (const url of urls) {
         if (seen.has(url)) continue;

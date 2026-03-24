@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
@@ -17,6 +18,7 @@ import {
   type SessionData,
   type SessionSummary,
 } from "@/lib/session";
+import { getDashboardTitle } from "@/lib/dashboard-text";
 
 function extractDashboardConfig(
   messages: { parts: Array<Record<string, unknown>> }[],
@@ -77,11 +79,7 @@ function syncDashboardConfigIntoMessages(
         output: {
           success: true,
           dashboard: config,
-          message:
-            "Dashboard updated. The preview now shows: " +
-            (typeof config.header?.title?.text === "string"
-              ? config.header.title.text
-              : config.id),
+          message: "Dashboard updated. The preview now shows: " + getDashboardTitle(config),
         },
       };
     });
@@ -111,9 +109,7 @@ function syncDashboardConfigIntoMessages(
             dashboard: config,
             message:
               "Dashboard updated. The preview now shows: " +
-              (typeof config.header?.title?.text === "string"
-                ? config.header.title.text
-                : config.id),
+              getDashboardTitle(config),
           },
         },
       ],
@@ -129,6 +125,7 @@ export default function BuilderPage() {
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingPreviewErrorRef = useRef<string | null>(null);
+  const outgoingPreviewErrorRef = useRef<string | null>(null);
   const lastForwardedPreviewErrorRef = useRef<string | null>(null);
   const configJsonRef = useRef("");
 
@@ -147,6 +144,7 @@ export default function BuilderPage() {
           messages,
           trigger,
           messageId,
+          previewError: outgoingPreviewErrorRef.current ?? undefined,
         },
         headers: {
           ...(typeof headers === "object" && headers !== null && !Array.isArray(headers) ? headers : {}),
@@ -156,7 +154,7 @@ export default function BuilderPage() {
     }),
   );
 
-  const { messages, status, sendMessage, setMessages, stop } = useChat({
+  const { messages, status, sendMessage, setMessages, stop, regenerate } = useChat({
     transport: transportRef.current,
   });
 
@@ -165,8 +163,12 @@ export default function BuilderPage() {
   configHistoryRef.current = configHistory;
   const setMessagesRef = useRef(setMessages);
   setMessagesRef.current = setMessages;
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
   const sendMessageRef = useRef(sendMessage);
   sendMessageRef.current = sendMessage;
+  const regenerateRef = useRef(regenerate);
+  regenerateRef.current = regenerate;
   const statusRef = useRef(status);
   statusRef.current = status;
 
@@ -224,32 +226,40 @@ export default function BuilderPage() {
       setSessionId(generateSessionId());
     }
     setSessionLoaded(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Debounced session save ──
+  const clearScheduledSave = useCallback(() => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+  }, []);
+
   const doSave = useCallback(() => {
     if (!sessionIdRef.current) return;
     setSaveState("saving");
     const { history, pointer } = configHistoryRef.current.snapshot();
-    const title = configHistoryRef.current.current?.header?.title?.text;
+    const currentConfig = configHistoryRef.current.current;
     const data: SessionData = {
       sessionId: sessionIdRef.current,
-      messages,
+      messages: messagesRef.current,
       configHistory: history,
       configPointer: pointer,
-      title: typeof title === "string" ? title : "Untitled",
+      title: currentConfig ? getDashboardTitle(currentConfig) : "Untitled",
       updatedAt: new Date().toISOString(),
     };
     saveSession(data);
     setSaveState("saved");
     setTimeout(() => setSaveState("idle"), 2000);
-  }, [messages]);
+  }, []);
 
   const debouncedSave = useCallback(() => {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    clearScheduledSave();
     saveTimerRef.current = setTimeout(doSave, 1500);
-  }, [doSave]);
+  }, [clearScheduledSave, doSave]);
+
+  useEffect(() => clearScheduledSave, [clearScheduledSave]);
 
   useEffect(() => {
     if (sessionLoaded && sessionId) {
@@ -298,16 +308,18 @@ export default function BuilderPage() {
   // ── New session ──
   const handleNewSession = useCallback(() => {
     // Save current session first
+    clearScheduledSave();
     doSave();
     setSessionId(generateSessionId());
     setMessagesRef.current([]);
     configHistoryRef.current.restore([], -1);
     configJsonRef.current = "";
     setSaveState("idle");
-  }, [doSave]);
+  }, [clearScheduledSave, doSave]);
 
   // ── Switch to an existing session ──
   const handleLoadSession = useCallback((targetId: string) => {
+    clearScheduledSave();
     doSave(); // save current first
     const saved = loadSession(targetId);
     if (!saved) return;
@@ -321,10 +333,11 @@ export default function BuilderPage() {
     configJsonRef.current = "";
     setSessionMenu(false);
     setSaveState("idle");
-  }, [doSave]);
+  }, [clearScheduledSave, doSave]);
 
   // ── Delete a session ──
   const handleDeleteSession = useCallback((targetId: string) => {
+    clearScheduledSave();
     deleteSession(targetId);
     setSessions(listSessions());
     // If deleting the current session, start fresh
@@ -334,11 +347,11 @@ export default function BuilderPage() {
       configHistoryRef.current.restore([], -1);
       configJsonRef.current = "";
     }
-  }, []);
+  }, [clearScheduledSave]);
 
   // ── Error forwarding ──
   const forwardPreviewError = useCallback(
-    (error: string) => {
+    async (error: string) => {
       if (lastForwardedPreviewErrorRef.current === error) {
         pendingPreviewErrorRef.current = null;
         return;
@@ -346,15 +359,16 @@ export default function BuilderPage() {
 
       lastForwardedPreviewErrorRef.current = error;
       pendingPreviewErrorRef.current = null;
+      outgoingPreviewErrorRef.current = error;
 
-      void sendMessageRef.current({
-        text:
-          "[SYSTEM: The dashboard preview encountered an error: " +
-          error +
-          ". IMPORTANT: Every data URL MUST be constructed by calling build_data_url — never guess or construct URLs manually. " +
-          "If you haven't called build_data_url for each chart's data URL, do that now. " +
-          "Fix the broken component(s) and call update_dashboard again.]",
-      });
+      try {
+        await regenerateRef.current();
+      } catch {
+        lastForwardedPreviewErrorRef.current = null;
+        pendingPreviewErrorRef.current = error;
+      } finally {
+        outgoingPreviewErrorRef.current = null;
+      }
     },
     [],
   );
@@ -364,7 +378,7 @@ export default function BuilderPage() {
       pendingPreviewErrorRef.current = error;
 
       if (statusRef.current === "ready") {
-        forwardPreviewError(error);
+        void forwardPreviewError(error);
       }
     },
     [forwardPreviewError],
@@ -372,7 +386,7 @@ export default function BuilderPage() {
 
   useEffect(() => {
     if (status === "ready" && pendingPreviewErrorRef.current) {
-      forwardPreviewError(pendingPreviewErrorRef.current);
+      void forwardPreviewError(pendingPreviewErrorRef.current);
     }
   }, [forwardPreviewError, status]);
 
@@ -391,7 +405,7 @@ export default function BuilderPage() {
       <header className="glass-panel shadow-ambient z-50 shrink-0 px-6 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <a
+            <Link
               href="/"
               className="ocean-gradient flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] transition-transform hover:scale-105"
               title="Back to home"
@@ -409,7 +423,7 @@ export default function BuilderPage() {
                   d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5"
                 />
               </svg>
-            </a>
+            </Link>
             <div>
               <h1 className="font-[family-name:var(--font-manrope)] text-base font-bold tracking-tight text-primary">
                 SPC Dashboard Builder

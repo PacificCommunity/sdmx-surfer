@@ -1,10 +1,16 @@
 import type { SDMXDashboardConfig } from "./types";
+import {
+  getDashboardSubtitle,
+  getDashboardTitle,
+} from "./dashboard-text";
 
 /**
  * Convert an SVG element to a canvas element in-place.
  * Returns a restore function that puts the original SVG back.
  */
-function svgToCanvas(svg: SVGSVGElement): { canvas: HTMLCanvasElement; restore: () => void } {
+async function svgToCanvas(
+  svg: SVGSVGElement,
+): Promise<{ canvas: HTMLCanvasElement; restore: () => void }> {
   const rect = svg.getBoundingClientRect();
   const width = rect.width || svg.width.baseVal.value || 600;
   const height = rect.height || svg.height.baseVal.value || 400;
@@ -67,7 +73,7 @@ function svgToCanvas(svg: SVGSVGElement): { canvas: HTMLCanvasElement; restore: 
       resolve({ canvas, restore });
     };
     img.src = url;
-  }) as unknown as { canvas: HTMLCanvasElement; restore: () => void };
+  });
 }
 
 /**
@@ -78,7 +84,7 @@ async function replaceAllSvgsWithCanvases(element: HTMLElement): Promise<() => v
   const restoreFns: (() => void)[] = [];
 
   for (const svg of svgs) {
-    const { restore } = await (svgToCanvas(svg) as unknown as Promise<{ canvas: HTMLCanvasElement; restore: () => void }>);
+    const { restore } = await svgToCanvas(svg);
     restoreFns.push(restore);
   }
 
@@ -104,10 +110,7 @@ export async function exportToPdf(
     import("jspdf"),
   ]);
 
-  const title =
-    typeof config.header?.title?.text === "string"
-      ? config.header.title.text
-      : "Dashboard";
+  const title = getDashboardTitle(config);
 
   // Convert all SVGs (Highcharts charts) to canvas elements
   const restoreSvgs = await replaceAllSvgsWithCanvases(element);
@@ -148,10 +151,8 @@ export function exportToHtml(
   element: HTMLElement,
   config: SDMXDashboardConfig,
 ) {
-  const title =
-    typeof config.header?.title?.text === "string"
-      ? config.header.title.text
-      : "Dashboard";
+  const title = getDashboardTitle(config);
+  const subtitle = getDashboardSubtitle(config);
 
   // Grab the rendered dashboard HTML including inline SVGs
   const dashboardHtml = element.innerHTML;
@@ -250,7 +251,7 @@ export function exportToHtml(
   <div class="dashboard-header">
     <span class="export-badge">Exported Dashboard</span>
     <h1>${escapeHtml(title)}</h1>
-    ${config.header?.subtitle?.text ? "<p>" + escapeHtml(typeof config.header.subtitle.text === "string" ? config.header.subtitle.text : "") + "</p>" : ""}
+    ${subtitle ? "<p>" + escapeHtml(subtitle) + "</p>" : ""}
   </div>
 
   <div id="dashboard-content">
@@ -279,10 +280,8 @@ export function exportToHtml(
  * Charts are fully interactive (tooltips, hover, zoom).
  */
 export function exportToHtmlLive(config: SDMXDashboardConfig) {
-  const title =
-    typeof config.header?.title?.text === "string"
-      ? config.header.title.text
-      : "Dashboard";
+  const title = getDashboardTitle(config);
+  const subtitle = getDashboardSubtitle(config);
 
   const configJson = JSON.stringify(config, null, 2);
 
@@ -329,7 +328,7 @@ export function exportToHtmlLive(config: SDMXDashboardConfig) {
   <div class="header">
     <span class="badge">Live Dashboard</span>
     <h1>${escapeHtml(title)}</h1>
-    ${config.header?.subtitle?.text ? "<p>" + escapeHtml(typeof config.header.subtitle.text === "string" ? config.header.subtitle.text : "") + "</p>" : ""}
+    ${subtitle ? "<p>" + escapeHtml(subtitle) + "</p>" : ""}
   </div>
 
   <div id="root"><div class="loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
@@ -441,10 +440,7 @@ function safeQuerySelector(root: HTMLElement, selector: string): boolean {
  * Export the raw JSON config.
  */
 export function exportToJson(config: SDMXDashboardConfig) {
-  const title =
-    typeof config.header?.title?.text === "string"
-      ? config.header.title.text
-      : "dashboard";
+  const title = getDashboardTitle(config) || "dashboard";
 
   downloadFile(
     JSON.stringify(config, null, 2),
