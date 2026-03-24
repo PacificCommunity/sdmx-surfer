@@ -180,7 +180,8 @@ Example:
 - Do NOT set yAxisConcept for maps
 
 CRITICAL RULES:
-- The "data" field must be a valid SDMX REST data URL. Use build_data_url to construct it.
+- NEVER construct data URLs manually. You MUST call build_data_url for EVERY data URL. Manually guessed URLs WILL fail — the base domain, path format, and query parameters must come from the tool. If you emit a dashboard without calling build_data_url first, the charts will show "Error while fetching data".
+- For map type components, the SDMX URL portion of the data field must ALSO come from build_data_url. Build the URL first, then combine it with the GeoJSON syntax.
 - xAxisConcept and yAxisConcept must be actual dimension IDs from the dataflow structure
 - For time series charts, use xAxisConcept: "TIME_PERIOD"
 - For geographic comparisons, use xAxisConcept: "GEO_PICT" (or the geo dimension)
@@ -188,7 +189,15 @@ CRITICAL RULES:
 - For "value" type, use xAxisConcept: "OBS_VALUE" (no yAxisConcept needed)
 - For bar, column, lollipop, and treemap charts you MUST provide legend.concept set to a valid dimension ID from the dataflow (different from xAxisConcept). The component will crash without it.
 - For line charts, legend.concept should identify the series dimension (e.g. "GEO_PICT" if xAxisConcept is "TIME_PERIOD")
-- The data URL must return observations with at least 2 active dimensions for charts. If querying with fixed values for all dimensions except one, the chart may fail. Ensure at least xAxisConcept and legend.concept dimensions have multiple values in the query.`;
+- The data URL must return observations with at least 2 active dimensions for charts. If querying with fixed values for all dimensions except one, the chart may fail. Ensure at least xAxisConcept and legend.concept dimensions have multiple values in the query.
+
+DIMENSION PINNING RULE — prevent series explosion:
+- A chart has exactly TWO varying dimensions: xAxisConcept (the x-axis) and legend.concept (the series). ALL other dimensions in the dataflow MUST be pinned to a single value in the data query key.
+- If you leave a dimension open (empty slot in the key), the API returns all its values, and the library creates a series for every combination of unpinned dimensions. This causes dozens of overlapping lines/bars.
+- Example: dataflow has FREQ, GEO_PICT, INDICATOR, SEX, AGE. For a line chart with xAxisConcept=TIME_PERIOD and legend.concept=GEO_PICT, the key must pin FREQ, INDICATOR, SEX, and AGE to single values: "A..MIDYEARPOPEST._T._T" — only GEO_PICT is left open (empty slot = all countries).
+- WRONG: "A...._T" (INDICATOR and AGE left open → every INDICATOR × AGE combination becomes a separate series)
+- RIGHT: "A..MIDYEARPOPEST._T._T" (only GEO_PICT varies, one line per country)
+- After calling get_dataflow_structure, identify ALL dimensions. For each one, decide: is it xAxisConcept, legend.concept, or pinned? Pin everything that isn't x-axis or legend to a specific code (use _T for totals when available).`;
 
 const DISCOVERY_WORKFLOW = `## Progressive Discovery Workflow
 
@@ -199,7 +208,7 @@ When you need to find data for a panel, follow this workflow:
 3. **get_dimension_codes** — Get actual codes for a dimension (e.g., country codes).
 4. **build_data_url** — Construct the final data URL.
 
-You can often skip steps 3-4 if the structure gives you enough information. Don't over-discover — get what you need for one panel, build it, show it, then move to the next.
+You can often skip step 3 if the structure gives you enough information. But you MUST ALWAYS call build_data_url (step 4) for every panel — never skip it.
 
 CRITICAL: You MUST use build_data_url to generate every data URL. Never construct URLs manually or copy URLs from examples — the base domain and path structure must come from build_data_url.
 

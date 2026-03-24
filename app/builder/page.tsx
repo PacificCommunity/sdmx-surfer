@@ -351,7 +351,9 @@ export default function BuilderPage() {
         text:
           "[SYSTEM: The dashboard preview encountered an error: " +
           error +
-          ". Please fix the dashboard configuration and call update_dashboard again.]",
+          ". IMPORTANT: Every data URL MUST be constructed by calling build_data_url — never guess or construct URLs manually. " +
+          "If you haven't called build_data_url for each chart's data URL, do that now. " +
+          "Fix the broken component(s) and call update_dashboard again.]",
       });
     },
     [],
