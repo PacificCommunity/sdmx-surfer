@@ -31,7 +31,8 @@ export const maxDuration = 300;
 
 export async function POST(req: Request) {
   const sessionId = req.headers.get("x-session-id") || "anonymous";
-  const logger = createRequestLogger(sessionId);
+  const userId = "anonymous";
+  const logger = createRequestLogger(userId, sessionId);
 
   try {
     const { messages, previewError } = chatRequestSchema.parse(await req.json());

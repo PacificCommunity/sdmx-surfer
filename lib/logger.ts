@@ -1,8 +1,8 @@
-import { appendFile, mkdir } from "node:fs/promises";
-import { join } from "node:path";
+import { db, usageLogs } from "@/lib/db";
 
 export interface ChatLogEntry {
   timestamp: string;
+  userId: string;
   sessionId: string;
   requestId: string;
   userMessage: string;
@@ -18,25 +18,8 @@ export interface ChatLogEntry {
   tokenUsage?: { input: number; output: number };
   durationMs: number;
   stepCount: number;
-}
-
-const LOG_DIR = join(process.cwd(), "logs");
-
-let dirEnsured = false;
-
-async function ensureDir(): Promise<void> {
-  if (dirEnsured) return;
-  try {
-    await mkdir(LOG_DIR, { recursive: true });
-    dirEnsured = true;
-  } catch {
-    // ignore — directory might already exist
-  }
-}
-
-function getLogFile(): string {
-  const date = new Date().toISOString().slice(0, 10);
-  return join(LOG_DIR, "chat-" + date + ".jsonl");
+  model?: string;
+  provider?: string;
 }
 
 /** Truncate a value to a short preview string for logging */
@@ -46,18 +29,7 @@ function preview(value: unknown, maxLen = 300): string {
   return s.slice(0, maxLen) + "...";
 }
 
-export async function logChatEntry(entry: ChatLogEntry): Promise<void> {
-  try {
-    await ensureDir();
-    const line = JSON.stringify(entry) + "\n";
-    await appendFile(getLogFile(), line, "utf-8");
-  } catch (err) {
-    // Never let logging failures affect the request
-    console.warn("[logger] Failed to write log entry:", err);
-  }
-}
-
-export function createRequestLogger(sessionId: string) {
+export function createRequestLogger(userId: string, sessionId: string) {
   const requestId =
     Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   const startTime = Date.now();
@@ -67,12 +39,19 @@ export function createRequestLogger(sessionId: string) {
   let userMessage = "";
   let aiResponse = "";
   let stepCount = 0;
+  let model: string | undefined;
+  let provider: string | undefined;
 
   return {
     requestId,
 
     setUserMessage(msg: string) {
       userMessage = msg;
+    },
+
+    setModelInfo(m: string, p: string) {
+      model = m;
+      provider = p;
     },
 
     recordToolCall(
@@ -108,19 +87,27 @@ export function createRequestLogger(sessionId: string) {
     async flush(
       tokenUsage?: { input: number; output: number },
     ): Promise<void> {
-      await logChatEntry({
-        timestamp: new Date().toISOString(),
-        sessionId,
-        requestId,
-        userMessage: preview(userMessage, 500),
-        aiResponse: preview(aiResponse, 1000),
-        toolCalls,
-        dashboardConfigIds,
-        errors,
-        tokenUsage,
-        durationMs: Date.now() - startTime,
-        stepCount,
-      });
+      try {
+        await db.insert(usageLogs).values({
+          user_id: userId,
+          session_id: sessionId === "anonymous" ? null : sessionId,
+          request_id: requestId,
+          user_message: preview(userMessage, 500),
+          ai_response: preview(aiResponse, 1000),
+          tool_calls: toolCalls,
+          dashboard_config_ids: dashboardConfigIds,
+          errors: errors,
+          input_tokens: tokenUsage?.input ?? null,
+          output_tokens: tokenUsage?.output ?? null,
+          duration_ms: Date.now() - startTime,
+          step_count: stepCount,
+          model: model ?? null,
+          provider: provider ?? null,
+        });
+      } catch (err) {
+        // Never let logging failures affect the request
+        console.warn("[logger] Failed to insert usage log:", err);
+      }
     },
   };
 }
