@@ -1,0 +1,70 @@
+,Rank (Borda),Model,Zero-shot,Active Parameters (B),Total Parameters (B),Embedding Dimensions,Max Tokens,Mean (Task),Mean (TaskType),Bitext Mining,Classification,Clustering,Instruction Reranking,Multilabel Classification,Pair Classification,Reranking,Retrieval,STS
+0,1,[F2LLM-v2-80M](https://huggingface.co/codefuse-ai/F2LLM-v2-80M),88%,0.032,0.08,320,40960.0,55.23,48.62,61.86,55.54,47.66,-1.62,21.5,74.98,58.95,50.13,68.55
+1,2,[NoInstruct-small-Embedding-v0](https://huggingface.co/avsolatorio/NoInstruct-small-Embedding-v0),⚠️ NA,0.022,0.033,384,512.0,44.9,38.16,23.12,49.21,40.87,-2.53,16.9,71.73,43.59,37.81,62.7
+2,3,[e5-small-v2](https://huggingface.co/intfloat/e5-small-v2),100%,0.021,0.033,384,512.0,44.47,37.97,28.04,48.07,37.53,-2.85,15.14,72.13,44.44,39.38,59.87
+3,4,[GIST-small-Embedding-v0](https://huggingface.co/avsolatorio/GIST-small-Embedding-v0),96%,0.022,0.033,384,512.0,44.21,37.8,23.36,47.57,40.47,-2.75,16.79,71.54,43.25,37.22,62.71
+4,5,[bge-small-en-v1.5](https://huggingface.co/BAAI/bge-small-en-v1.5),99%,0.022,0.033,512,512.0,43.76,37.72,23.63,47.37,39.93,-1.86,17.01,71.56,45.89,36.26,59.73
+5,6,[gte-small](https://huggingface.co/thenlper/gte-small),⚠️ NA,0.022,0.033,384,512.0,44.1,38.02,23.94,47.28,40.28,-1.57,16.27,71.44,45.77,35.99,62.77
+6,7,[MedEmbed-small-v0.1](https://huggingface.co/abhinand/MedEmbed-small-v0.1),97%,0.022,0.033,384,512.0,43.34,37.27,22.96,47.34,40.23,-1.68,16.74,71.33,45.01,35.16,58.33
+7,8,[e5-small](https://huggingface.co/intfloat/e5-small),100%,0.021,0.033,384,512.0,43.46,37.18,28.07,46.57,36.3,-1.45,15.22,72.96,39.3,36.25,61.37
+8,9,[Ivysaur](https://huggingface.co/Mihaiii/Ivysaur),⚠️ NA,0.011,0.023,384,512.0,43.54,37.07,22.85,48.44,37.56,-2.22,15.63,71.53,44.07,34.42,61.32
+9,10,[all-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2),100%,0.022,0.033,384,256.0,42.28,36.39,22.91,46.74,36.67,-0.75,14.59,71.43,45.33,33.37,57.2
+10,11,[GIST-all-MiniLM-L6-v2](https://huggingface.co/avsolatorio/GIST-all-MiniLM-L6-v2),96%,0.011,0.023,384,512.0,42.7,36.47,22.75,46.49,38.34,-1.94,15.05,71.31,41.45,33.3,61.52
+11,12,[snowflake-arctic-embed-s](https://huggingface.co/Snowflake/snowflake-arctic-embed-s),100%,0.022,0.033,384,512.0,42.85,36.33,22.78,46.33,36.67,-3.09,14.84,71.53,40.03,39.84,58.08
+12,13,[gte-micro-v4](https://huggingface.co/Mihaiii/gte-micro-v4),⚠️ NA,0.007,0.019,384,512.0,41.53,34.66,20.46,47.97,35.89,-3.83,14.69,71.73,37.48,30.54,57.01
+13,14,[granite-embedding-30m-english](https://huggingface.co/ibm-granite/granite-embedding-30m-english),96%,0.011,0.03,384,512.0,42.48,36.3,25.26,46.28,38.27,-2.75,15.39,70.26,42.53,36.43,55.06
+14,15,[Bulbasaur](https://huggingface.co/Mihaiii/Bulbasaur),⚠️ NA,0.006,0.017,384,512.0,41.71,35.01,20.45,47.83,35.06,-3.22,14.37,71.94,39.06,29.88,59.72
+15,16,[slx-v0.1](https://huggingface.co/brahmairesearch/slx-v0.1),⚠️ NA,0.011,0.023,384,512.0,41.41,35.16,20.09,46.12,37.89,-2.84,15.05,71.23,40.28,32.51,56.08
+16,17,[all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2),100%,0.011,0.023,384,256.0,41.39,35.12,20.09,46.2,37.47,-2.84,15.05,71.23,40.28,32.51,56.08
+17,18,[Wartortle](https://huggingface.co/Mihaiii/Wartortle),99%,0.006,0.017,384,512.0,40.82,34.59,19.75,46.55,34.59,-1.54,14.01,71.23,39.59,27.21,59.97
+18,19,[Venusaur](https://huggingface.co/Mihaiii/Venusaur),⚠️ NA,0.004,0.016,384,512.0,39.95,33.48,19.16,47.66,32.15,-1.47,13.52,71.27,38.31,25.64,55.11
+19,20,[snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs),100%,0.011,0.023,384,512.0,41.13,34.89,20.12,45.21,35.34,-2.36,13.35,71.04,39.69,35.23,56.43
+20,21,[Squirtle](https://huggingface.co/Mihaiii/Squirtle),99%,0.004,0.016,384,512.0,39.69,33.61,18.08,45.89,33.66,-1.67,13.82,70.53,39.17,24.85,58.16
+21,22,[gte-micro](https://huggingface.co/Mihaiii/gte-micro),⚠️ NA,0.006,0.017,384,512.0,39.42,33.19,19.37,45.34,34.48,-1.8,13.49,71.39,35.22,26.16,55.08
+22,23,[potion-base-8M](https://huggingface.co/minishlab/potion-base-8M),99%,0.0,0.008,256,,38.56,32.76,16.11,44.5,32.39,0.24,11.63,71.08,39.08,28.63,51.2
+23,24,[jina-embedding-s-en-v1](https://huggingface.co/jinaai/jina-embedding-s-en-v1),100%,0.019,0.035,512,512.0,38.84,33.61,24.8,40.59,30.42,-3.22,12.4,71.52,39.16,34.7,52.16
+24,25,[rubert-tiny-turbo](https://huggingface.co/sergeyzh/rubert-tiny-turbo),99%,0.003,0.029,312,2048.0,38.77,34.27,42.63,41.8,29.26,-2.28,15.89,73.2,38.92,21.26,47.79
+25,26,[potion-base-4M](https://huggingface.co/minishlab/potion-base-4M),99%,0.0,0.004,128,,37.82,32.22,14.59,43.71,32.21,0.61,11.69,70.8,38.54,27.23,50.57
+26,27,[M2V_base_output](https://huggingface.co/minishlab/M2V_base_output),99%,0.0,0.008,256,,37.23,31.38,14.51,44.97,29.12,-0.13,11.53,70.97,38.11,24.74,48.58
+27,28,[rubert-tiny2](https://huggingface.co/cointegrated/rubert-tiny2),99%,0.003,0.029,312,2048.0,34.81,30.2,22.65,41.17,29.16,-0.09,15.27,69.6,34.58,14.35,45.13
+28,29,[jina-embeddings-v2-small-en](https://huggingface.co/jinaai/jina-embeddings-v2-small-en),100%,0.017,0.033,512,8192.0,35.22,29.11,12.61,43.81,27.31,-0.75,11.87,70.76,27.61,13.45,55.34
+29,30,[rubert-tiny](https://huggingface.co/cointegrated/rubert-tiny),99%,0.003,0.012,312,512.0,33.85,28.37,17.08,43.85,28.74,-0.89,13.86,67.0,33.18,12.09,40.44
+30,31,[potion-base-2M](https://huggingface.co/minishlab/potion-base-2M),99%,0.0,0.002,64,,36.27,30.97,12.19,42.25,31.0,0.59,11.53,70.43,37.38,23.99,49.34
+31,32,[ternary-weight-embedding](https://huggingface.co/malenia1/ternary-weight-embedding),⚠️ NA,,0.099,1024,512.0,31.06,26.58,12.65,38.87,23.89,0.92,12.14,64.88,32.09,10.63,43.16
+32,33,baseline-random-encoder,100%,,,32,,18.79,15.92,0.38,30.11,21.2,0.45,11.2,52.78,25.14,1.08,0.92
+33,34,[mdbr-leaf-mt](https://huggingface.co/MongoDB/mdbr-leaf-mt),100%,0.011,0.023,1024,512.0,,,,69.9,50.33,,,91.01,,47.35,82.67
+34,35,[granite-embedding-small-english-r2](https://huggingface.co/ibm-granite/granite-embedding-small-english-r2),96%,0.028,0.048,384,8192.0,,,,62.74,50.15,,,88.85,,50.49,75.35
+35,36,[mini-gte](https://huggingface.co/prdev/mini-gte),100%,0.043,0.066,768,512.0,,,,76.14,51.55,,,90.46,,50.65,81.15
+36,37,[miniac-embed](https://huggingface.co/ManiacLabs/miniac-embed),100%,0.021,0.033,1024,512.0,,,,69.24,49.73,,,90.92,,42.54,82.45
+37,38,[multi-qa-MiniLM-L6-cos-v1](https://huggingface.co/sentence-transformers/multi-qa-MiniLM-L6-cos-v1),100%,0.011,0.023,384,512.0,,,8.78,54.96,19.79,,2.4,79.76,75.46,35.4,67.27
+38,39,[static-retrieval-mrl-en-v1](https://huggingface.co/sentence-transformers/static-retrieval-mrl-en-v1),99%,0.0,0.031,1024,,,,,63.65,35.93,,,86.7,,31.85,71.44
+39,40,[potion-base-32M](https://huggingface.co/minishlab/potion-base-32M),99%,0.0,0.032,512,,,,,70.04,45.3,,,87.68,,32.79,73.48
+40,41,[potion-retrieval-32M](https://huggingface.co/minishlab/potion-retrieval-32M),99%,0.0,0.032,512,,,,,66.01,45.74,,,87.26,,34.42,72.62
+41,42,[bge-small-en](https://huggingface.co/BAAI/bge-small-en),99%,0.022,0.033,512,512.0,,,,73.0,,,,90.19,,50.73,82.48
+42,43,[e5-small-trm-nl](https://huggingface.co/clips/e5-small-trm-nl),99%,0.022,0.041,384,512.0,,,,58.55,38.87,,5.04,,87.09,90.56,
+43,44,[m2v-dfm-large](https://huggingface.co/rasgaard/m2v-dfm-large),100%,0.0,0.023,256,,,,38.02,53.64,5.68,,,,,33.45,
+44,45,[model2vecdk-stem](https://huggingface.co/andersborges/model2vecdk-stem),100%,0.0,0.049,256,,,,40.21,45.06,5.15,,,,,25.56,
+45,46,[Dmeta-embedding-zh-small](https://huggingface.co/DMetaSoul/Dmeta-embedding-zh-small/),⚠️ NA,0.058,0.074,768,1024.0,,,,48.95,,,,53.68,66.11,75.63,79.09
+46,47,[model2vecdk](https://huggingface.co/andersborges/model2vecdk),100%,0.0,0.048,256,,,,40.57,45.2,4.85,,,,,21.05,
+47,48,[bge-small-zh-v1.5](https://huggingface.co/BAAI/bge-small-zh-v1.5),100%,0.023,0.033,512,512.0,,,,46.9,,,,49.13,,30.68,76.73
+48,49,[gte-small-zh](https://huggingface.co/thenlper/gte-small-zh),⚠️ NA,0.019,0.03,1024,512.0,,,,47.0,,,,48.95,65.39,61.65,76.51
+49,50,[ruri-v3-70m](https://huggingface.co/cl-nagoya/ruri-v3-70m),99%,0.031,0.07,256,8192.0,,,,73.6,47.85,,,,,,75.85
+50,51,[rubert-mini-frida](https://huggingface.co/sergeyzh/rubert-mini-frida),100%,0.006,0.032,312,2048.0,,,,64.66,,,57.04,60.36,71.12,,
+51,52,[ruri-v3-30m](https://huggingface.co/cl-nagoya/ruri-v3-30m),100%,0.01,0.037,256,8192.0,,,,70.02,45.7,,,,,,81.4
+52,52,[USER2-small](https://huggingface.co/collections/deepvk/user2-6802650d7210f222ec60e05f),95%,,0.034,384,8192.0,,,,66.39,,,39.44,54.02,66.03,,
+53,54,[Hakim-small](https://huggingface.co/MCINext/Hakim-small),100%,,0.039,512,512.0,,,,63.95,,,,,86.69,64.99,
+54,55,[mdbr-leaf-ir](https://huggingface.co/MongoDB/mdbr-leaf-ir),100%,0.011,0.023,768,512.0,,,,,,,,,,46.67,
+55,56,[bge-small-zh](https://huggingface.co/BAAI/bge-small-zh),100%,0.023,0.033,512,512.0,,,,61.81,,,,,,68.95,76.48
+56,57,[opensearch-neural-sparse-encoding-doc-v3-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v3-distill),100%,0.043,0.066,30522,512.0,,,,,,,,,,46.81,
+57,58,[mxbai-embed-xsmall-v1](https://huggingface.co/mixedbread-ai/mxbai-embed-xsmall-v1),100%,0.012,0.024,384,512.0,,,,,,,,,,39.99,
+58,59,[opensearch-neural-sparse-encoding-doc-v2-distill](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v2-distill),100%,0.043,0.066,30522,512.0,,,,,,,,,,45.01,
+59,60,[opensearch-neural-sparse-encoding-doc-v2-mini](https://huggingface.co/opensearch-project/opensearch-neural-sparse-encoding-doc-v2-mini),100%,0.011,0.023,30522,512.0,,,,,,,,,,44.96,
+60,61,[PawanEmbd-68M](https://huggingface.co/dmedhi/PawanEmbd-68M),96%,0.004,0.068,768,512.0,,,,63.19,,,,78.13,,,49.2
+61,62,[m3e-small](https://huggingface.co/moka-ai/m3e-small),99%,0.013,0.024,512,512.0,,,,49.32,,,,46.65,,,
+62,63,[pubmedbert-base-embeddings-2M](https://huggingface.co/NeuML/pubmedbert-base-embeddings-2M),100%,0.0,0.002,64,,,,,,35.39,,,,,36.57,
+63,63,[pubmedbert-base-embeddings-1M](https://huggingface.co/NeuML/pubmedbert-base-embeddings-1M),100%,0.0,0.001,64,,,,,,35.07,,,,,37.32,
+64,65,[pubmedbert-base-embeddings-8M](https://huggingface.co/NeuML/pubmedbert-base-embeddings-8M),100%,0.0,0.008,256,,,,,,34.61,,,,,39.84,
+65,66,[pubmedbert-base-embeddings-500K](https://huggingface.co/NeuML/pubmedbert-base-embeddings-500K),100%,0.0,0.001,64,,,,,,34.25,,,,,35.37,
+66,67,[LateOn-Code-edge](https://huggingface.co/lightonai/LateOn-Code-edge),99%,0.004,0.017,48,7999.0,,,,,,,,,,85.63,
+67,68,[pubmedbert-base-embeddings-100K](https://huggingface.co/NeuML/pubmedbert-base-embeddings-100K),100%,0.0,0.0,64,,,,,,32.9,,,,,17.35,
+68,69,[LateOn-Code-edge-pretrain](https://huggingface.co/lightonai/LateOn-Code-edge-pretrain),100%,0.004,0.017,48,7999.0,,,,,,,,,,74.63,

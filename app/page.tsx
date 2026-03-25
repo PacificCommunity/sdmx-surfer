@@ -52,6 +52,13 @@ export default function WelcomePage() {
           >
             Open Builder
           </button>
+          <button
+            type="button"
+            onClick={() => { window.location.href = "/explore"; }}
+            className="ghost-border rounded-full bg-surface-card px-4 py-2 text-sm font-semibold text-primary transition-transform hover:scale-105 active:scale-95"
+          >
+            Data Catalogue
+          </button>
         </div>
       </header>
 
