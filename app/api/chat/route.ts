@@ -27,6 +27,8 @@ const NUDGE_MESSAGE =
   "you have built so far. Use what you have discovered — do not make more discovery calls. " +
   "After emitting the dashboard, tell the user this is a first draft and offer to refine it.";
 
+export const maxDuration = 300;
+
 export async function POST(req: Request) {
   const sessionId = req.headers.get("x-session-id") || "anonymous";
   const logger = createRequestLogger(sessionId);
