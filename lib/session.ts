@@ -1,15 +1,17 @@
 import type { UIMessage } from "ai";
 import type { SDMXDashboardConfig } from "./types";
 
-const STORAGE_PREFIX = "spc-dashboard-";
-const CURRENT_KEY = STORAGE_PREFIX + "current";
-const MAX_SESSIONS = 20;
-
 export interface SessionData {
   sessionId: string;
   messages: UIMessage[];
   configHistory: SDMXDashboardConfig[];
   configPointer: number;
+  title: string;
+  updatedAt: string;
+}
+
+export interface SessionSummary {
+  sessionId: string;
   title: string;
   updatedAt: string;
 }
@@ -20,122 +22,122 @@ export function generateSessionId(): string {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-function sessionKey(id: string): string {
-  return STORAGE_PREFIX + "session-" + id;
-}
+// ---------------------------------------------------------------------------
+// saveSession — PUT to existing session, fall back to POST if 404
+// ---------------------------------------------------------------------------
 
-export function saveSession(data: SessionData): void {
+export async function saveSession(data: SessionData): Promise<void> {
   try {
-    const json = JSON.stringify(data);
-    // Guard against localStorage quota (~5MB)
-    if (json.length > 4_000_000) {
-      // Trim tool outputs from older messages to fit
-      const trimmed = {
-        ...data,
-        messages: data.messages.map((m, i) =>
-          i < data.messages.length - 4 ? trimMessage(m) : m,
-        ),
-      };
-      localStorage.setItem(sessionKey(data.sessionId), JSON.stringify(trimmed));
-    } else {
-      localStorage.setItem(sessionKey(data.sessionId), json);
-    }
-    localStorage.setItem(CURRENT_KEY, data.sessionId);
-    pruneOldSessions();
-  } catch {
-    // localStorage full or unavailable — silently fail
-  }
-}
+    const url = "/api/sessions/" + data.sessionId;
+    const putRes = await fetch(url, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: data.title,
+        messages: data.messages,
+        configHistory: data.configHistory,
+        configPointer: data.configPointer,
+      }),
+    });
 
-export function loadSession(sessionId?: string): SessionData | null {
-  try {
-    const id = sessionId || localStorage.getItem(CURRENT_KEY);
-    if (!id) return null;
-    const raw = localStorage.getItem(sessionKey(id));
-    if (!raw) return null;
-    return JSON.parse(raw) as SessionData;
-  } catch {
-    return null;
-  }
-}
-
-export function getCurrentSessionId(): string | null {
-  try {
-    return localStorage.getItem(CURRENT_KEY);
-  } catch {
-    return null;
-  }
-}
-
-export interface SessionSummary {
-  sessionId: string;
-  title: string;
-  updatedAt: string;
-}
-
-export function listSessions(): SessionSummary[] {
-  const sessions: SessionSummary[] = [];
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key || !key.startsWith(STORAGE_PREFIX + "session-")) continue;
-      const raw = localStorage.getItem(key);
-      if (!raw) continue;
-      const data = JSON.parse(raw) as SessionData;
-      sessions.push({
-        sessionId: data.sessionId,
-        title: data.title || "Untitled",
-        updatedAt: data.updatedAt,
+    if (putRes.status === 404) {
+      // Session does not exist yet — create it
+      await fetch("/api/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: data.sessionId,
+          title: data.title,
+          messages: data.messages,
+          configHistory: data.configHistory,
+          configPointer: data.configPointer,
+        }),
       });
     }
   } catch {
-    // ignore
+    // Network or server error — silently fail (same behaviour as localStorage version)
   }
-  return sessions.sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-  );
 }
 
-export function deleteSession(sessionId: string): void {
+// ---------------------------------------------------------------------------
+// loadSession — GET by id, or GET list and return the most recent
+// ---------------------------------------------------------------------------
+
+export async function loadSession(sessionId?: string): Promise<SessionData | null> {
   try {
-    localStorage.removeItem(sessionKey(sessionId));
-    const current = localStorage.getItem(CURRENT_KEY);
-    if (current === sessionId) {
-      localStorage.removeItem(CURRENT_KEY);
+    if (sessionId) {
+      const res = await fetch("/api/sessions/" + sessionId);
+      if (!res.ok) return null;
+      const row = await res.json();
+      return rowToSessionData(row);
     }
+
+    // No id provided — return the most recent session
+    const res = await fetch("/api/sessions");
+    if (!res.ok) return null;
+    const { sessions } = await res.json() as { sessions: { id: string }[] };
+    if (!sessions || sessions.length === 0) return null;
+
+    const firstId = sessions[0].id;
+    const rowRes = await fetch("/api/sessions/" + firstId);
+    if (!rowRes.ok) return null;
+    const row = await rowRes.json();
+    return rowToSessionData(row);
   } catch {
-    // ignore
+    return null;
   }
 }
 
-function pruneOldSessions(): void {
-  const sessions = listSessions();
-  if (sessions.length <= MAX_SESSIONS) return;
-  const toDelete = sessions.slice(MAX_SESSIONS);
-  for (const s of toDelete) {
-    deleteSession(s.sessionId);
+// ---------------------------------------------------------------------------
+// listSessions — GET /api/sessions
+// ---------------------------------------------------------------------------
+
+export async function listSessions(): Promise<SessionSummary[]> {
+  try {
+    const res = await fetch("/api/sessions");
+    if (!res.ok) return [];
+    const { sessions } = await res.json() as {
+      sessions: Array<{ id: string; title: string; updatedAt: string | null }>;
+    };
+    if (!sessions) return [];
+    return sessions.map((s) => ({
+      sessionId: s.id,
+      title: s.title ?? "Untitled",
+      updatedAt: s.updatedAt ?? new Date().toISOString(),
+    }));
+  } catch {
+    return [];
   }
 }
 
-/** Strip large tool outputs from a message to save storage space */
-function trimMessage(message: UIMessage): UIMessage {
+// ---------------------------------------------------------------------------
+// deleteSession — DELETE /api/sessions/[id]
+// ---------------------------------------------------------------------------
+
+export async function deleteSession(sessionId: string): Promise<void> {
+  try {
+    await fetch("/api/sessions/" + sessionId, { method: "DELETE" });
+  } catch {
+    // Silently fail
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Internal helper — map DB row shape to SessionData
+// ---------------------------------------------------------------------------
+
+function rowToSessionData(row: Record<string, unknown>): SessionData {
   return {
-    ...message,
-    parts: message.parts.map((part) => {
-      const p = part as Record<string, unknown>;
-      if (
-        (typeof p.type === "string" && p.type.startsWith("tool-")) ||
-        p.type === "dynamic-tool"
-      ) {
-        const output = p.output;
-        if (typeof output === "object" && output !== null) {
-          const out = output as Record<string, unknown>;
-          // Keep dashboard configs, trim everything else
-          if (out.dashboard) return part;
-          return { ...p, output: { trimmed: true } } as unknown as typeof part;
-        }
-      }
-      return part;
-    }),
+    sessionId: row.id as string,
+    messages: (row.messages as UIMessage[]) ?? [],
+    configHistory: (row.config_history as SDMXDashboardConfig[]) ?? [],
+    configPointer: typeof row.config_pointer === "number" ? row.config_pointer : -1,
+    title: typeof row.title === "string" ? row.title : "Untitled",
+    updatedAt:
+      row.updated_at instanceof Date
+        ? row.updated_at.toISOString()
+        : typeof row.updated_at === "string"
+          ? row.updated_at
+          : new Date().toISOString(),
   };
 }

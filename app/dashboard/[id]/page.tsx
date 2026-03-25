@@ -30,8 +30,8 @@ const SDMXDashboard = dynamic(
   { ssr: false },
 );
 
-function extractConfigFromSession(sessionId: string): SDMXDashboardConfig | null {
-  const session = loadSession(sessionId);
+async function extractConfigFromSession(sessionId: string): Promise<SDMXDashboardConfig | null> {
+  const session = await loadSession(sessionId);
   if (!session) return null;
   const { configHistory, configPointer } = session;
   if (configHistory.length === 0 || configPointer < 0) return null;
@@ -50,12 +50,14 @@ export default function DashboardViewPage() {
   const dashboardRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const extracted = extractConfigFromSession(sessionId);
-    if (extracted) {
-      setConfig(extracted);
-    } else {
-      setNotFound(true);
-    }
+    void (async () => {
+      const extracted = await extractConfigFromSession(sessionId);
+      if (extracted) {
+        setConfig(extracted);
+      } else {
+        setNotFound(true);
+      }
+    })();
   }, [sessionId]);
 
   if (notFound) {

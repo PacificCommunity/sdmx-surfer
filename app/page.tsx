@@ -11,8 +11,10 @@ export default function WelcomePage() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    setSessions(listSessions());
-    setLoaded(true);
+    void (async () => {
+      setSessions(await listSessions());
+      setLoaded(true);
+    })();
   }, []);
 
   return (

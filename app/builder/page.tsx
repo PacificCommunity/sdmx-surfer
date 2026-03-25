@@ -202,30 +202,34 @@ export default function BuilderPage() {
 
     if (targetSession) {
       // Load a specific session (from "Open" button on welcome page)
-      const saved = loadSession(targetSession);
+      void (async () => {
+        const saved = await loadSession(targetSession);
+        if (saved) {
+          setSessionId(saved.sessionId);
+          setMessages(saved.messages);
+          if (saved.configHistory.length > 0) {
+            configHistoryRef.current.restore(saved.configHistory, saved.configPointer);
+          }
+        }
+        setSessionLoaded(true);
+      })();
+      return;
+    }
+
+    // Default: resume last session or start fresh
+    void (async () => {
+      const saved = await loadSession();
       if (saved) {
         setSessionId(saved.sessionId);
         setMessages(saved.messages);
         if (saved.configHistory.length > 0) {
-          configHistory.restore(saved.configHistory, saved.configPointer);
+          configHistoryRef.current.restore(saved.configHistory, saved.configPointer);
         }
-        setSessionLoaded(true);
-        return;
+      } else {
+        setSessionId(generateSessionId());
       }
-    }
-
-    // Default: resume last session or start fresh
-    const saved = loadSession();
-    if (saved) {
-      setSessionId(saved.sessionId);
-      setMessages(saved.messages);
-      if (saved.configHistory.length > 0) {
-        configHistory.restore(saved.configHistory, saved.configPointer);
-      }
-    } else {
-      setSessionId(generateSessionId());
-    }
-    setSessionLoaded(true);
+      setSessionLoaded(true);
+    })();
   }, []);
 
   // ── Debounced session save ──
@@ -249,9 +253,10 @@ export default function BuilderPage() {
       title: currentConfig ? getDashboardTitle(currentConfig) : "Untitled",
       updatedAt: new Date().toISOString(),
     };
-    saveSession(data);
-    setSaveState("saved");
-    setTimeout(() => setSaveState("idle"), 2000);
+    void saveSession(data).then(() => {
+      setSaveState("saved");
+      setTimeout(() => setSaveState("idle"), 2000);
+    });
   }, []);
 
   const debouncedSave = useCallback(() => {
@@ -321,32 +326,36 @@ export default function BuilderPage() {
   const handleLoadSession = useCallback((targetId: string) => {
     clearScheduledSave();
     doSave(); // save current first
-    const saved = loadSession(targetId);
-    if (!saved) return;
-    setSessionId(saved.sessionId);
-    setMessagesRef.current(saved.messages);
-    if (saved.configHistory.length > 0) {
-      configHistoryRef.current.restore(saved.configHistory, saved.configPointer);
-    } else {
-      configHistoryRef.current.restore([], -1);
-    }
-    configJsonRef.current = "";
-    setSessionMenu(false);
-    setSaveState("idle");
+    void (async () => {
+      const saved = await loadSession(targetId);
+      if (!saved) return;
+      setSessionId(saved.sessionId);
+      setMessagesRef.current(saved.messages);
+      if (saved.configHistory.length > 0) {
+        configHistoryRef.current.restore(saved.configHistory, saved.configPointer);
+      } else {
+        configHistoryRef.current.restore([], -1);
+      }
+      configJsonRef.current = "";
+      setSessionMenu(false);
+      setSaveState("idle");
+    })();
   }, [clearScheduledSave, doSave]);
 
   // ── Delete a session ──
   const handleDeleteSession = useCallback((targetId: string) => {
     clearScheduledSave();
-    deleteSession(targetId);
-    setSessions(listSessions());
-    // If deleting the current session, start fresh
-    if (targetId === sessionIdRef.current) {
-      setSessionId(generateSessionId());
-      setMessagesRef.current([]);
-      configHistoryRef.current.restore([], -1);
-      configJsonRef.current = "";
-    }
+    void (async () => {
+      await deleteSession(targetId);
+      setSessions(await listSessions());
+      // If deleting the current session, start fresh
+      if (targetId === sessionIdRef.current) {
+        setSessionId(generateSessionId());
+        setMessagesRef.current([]);
+        configHistoryRef.current.restore([], -1);
+        configJsonRef.current = "";
+      }
+    })();
   }, [clearScheduledSave]);
 
   // ── Error forwarding ──
@@ -470,7 +479,7 @@ export default function BuilderPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setSessions(listSessions());
+                  void listSessions().then((s) => setSessions(s));
                   setSessionMenu((v) => !v);
                 }}
                 className="ghost-border flex items-center gap-1.5 rounded-full bg-surface-card px-3 py-1.5 text-xs font-semibold text-primary transition-transform hover:scale-105 active:scale-95"
