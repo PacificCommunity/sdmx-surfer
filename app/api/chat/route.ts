@@ -18,23 +18,6 @@ const chatRequestSchema = z.object({
   previewError: z.string().optional(),
 });
 
-let mcpClientPromise: ReturnType<typeof createMCPClient> | null = null;
-
-function getMCPClient() {
-  if (!mcpClientPromise) {
-    mcpClientPromise = createMCPClient({
-      transport: {
-        type: "http",
-        url: process.env.MCP_GATEWAY_URL || "http://localhost:8000/mcp",
-      },
-    }).catch((error) => {
-      mcpClientPromise = null;
-      throw error;
-    });
-  }
-  return mcpClientPromise;
-}
-
 const STEP_LIMIT = 25;
 const NUDGE_AT = 18;
 
@@ -60,7 +43,12 @@ export async function POST(req: Request) {
       .join(" ") || "";
     logger.setUserMessage(lastUserText);
 
-    const mcpClient = await getMCPClient();
+    const mcpClient = await createMCPClient({
+      transport: {
+        type: "http",
+        url: process.env.MCP_GATEWAY_URL || "http://localhost:8000/mcp",
+      },
+    });
     const mcpTools = await mcpClient.tools();
 
     const modelMessages = await convertToModelMessages(
