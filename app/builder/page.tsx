@@ -117,12 +117,26 @@ function syncDashboardConfigIntoMessages(
   ];
 }
 
+interface ModelOption {
+  provider: string;
+  model: string;
+  label: string;
+}
+
+const FREE_TIER: ModelOption = {
+  provider: "google",
+  model: "gemini-3-flash-preview",
+  label: "Gemini 3 Flash (free)",
+};
+
 export default function BuilderPage() {
   const [sessionId, setSessionId] = useState<string>("");
   const [sessionLoaded, setSessionLoaded] = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [sessionMenu, setSessionMenu] = useState(false);
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
+  const [availableModels, setAvailableModels] = useState<ModelOption[]>([FREE_TIER]);
+  const [selectedModel, setSelectedModel] = useState<ModelOption>(FREE_TIER);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingPreviewErrorRef = useRef<string | null>(null);
   const outgoingPreviewErrorRef = useRef<string | null>(null);
@@ -131,9 +145,11 @@ export default function BuilderPage() {
 
   const configHistory = useConfigHistory();
 
-  // Stable transport — reads session ID from ref so it never recreates
+  // Stable transport — reads session ID + model from refs so it never recreates
   const sessionIdRef = useRef(sessionId);
   sessionIdRef.current = sessionId;
+  const selectedModelRef = useRef(selectedModel);
+  selectedModelRef.current = selectedModel;
   const transportRef = useRef(
     new DefaultChatTransport({
       api: "/api/chat",
@@ -145,6 +161,10 @@ export default function BuilderPage() {
           trigger,
           messageId,
           previewError: outgoingPreviewErrorRef.current ?? undefined,
+          modelOverride: {
+            provider: selectedModelRef.current.provider,
+            model: selectedModelRef.current.model,
+          },
         },
         headers: {
           ...(typeof headers === "object" && headers !== null && !Array.isArray(headers) ? headers : {}),
@@ -171,6 +191,48 @@ export default function BuilderPage() {
   regenerateRef.current = regenerate;
   const statusRef = useRef(status);
   statusRef.current = status;
+
+  // ── Load available models on mount ──
+  useEffect(() => {
+    fetch("/api/settings/keys")
+      .then((r) => r.json())
+      .then((data) => {
+        const models: ModelOption[] = [FREE_TIER];
+        const MODEL_LABELS: Record<string, Record<string, string>> = {
+          anthropic: {
+            "claude-haiku-4-5": "Claude Haiku 4.5",
+            "claude-sonnet-4-6": "Claude Sonnet 4.6",
+            "claude-opus-4-6": "Claude Opus 4.6",
+          },
+          openai: {
+            "gpt-4.1-nano": "GPT-4.1 Nano",
+            "gpt-4.1-mini": "GPT-4.1 Mini",
+            "gpt-5.4": "GPT-5.4",
+          },
+          google: {
+            "gemini-2.5-flash": "Gemini 2.5 Flash",
+            "gemini-3-flash-preview": "Gemini 3 Flash",
+            "gemini-3.1-pro-preview": "Gemini 3.1 Pro",
+          },
+        };
+        const DEFAULT_MODELS: Record<string, string> = {
+          anthropic: "claude-sonnet-4-6",
+          openai: "gpt-4.1-mini",
+          google: "gemini-3-flash-preview",
+        };
+        for (const key of data.keys || []) {
+          const modelId = key.modelPreference || DEFAULT_MODELS[key.provider] || "";
+          const label = MODEL_LABELS[key.provider]?.[modelId] || modelId;
+          models.push({
+            provider: key.provider,
+            model: modelId,
+            label: label + " (BYOK)",
+          });
+        }
+        setAvailableModels(models);
+      })
+      .catch(() => {});
+  }, []);
 
   // ── Session restore on mount (handles ?session= and ?prompt= query params) ──
   useEffect(() => {
@@ -444,6 +506,26 @@ export default function BuilderPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Model picker */}
+            <select
+              value={selectedModel.provider + ":" + selectedModel.model}
+              onChange={(e) => {
+                const [provider, model] = e.target.value.split(":");
+                const found = availableModels.find(
+                  (m) => m.provider === provider && m.model === model,
+                );
+                if (found) setSelectedModel(found);
+              }}
+              className="ghost-border rounded-full bg-surface-card px-3 py-1 text-xs font-medium text-on-surface-variant"
+              title="Active model"
+            >
+              {availableModels.map((m) => (
+                <option key={m.provider + ":" + m.model} value={m.provider + ":" + m.model}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+
             {/* Save indicator */}
             <span className="text-xs text-on-surface-variant">
               {saveState === "saving" && (

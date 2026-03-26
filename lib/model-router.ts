@@ -5,7 +5,7 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { type LanguageModel } from "ai";
 import { type ProviderOptions } from "@ai-sdk/provider-utils";
 import { db, userApiKeys } from "@/lib/db";
-import { eq, desc } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { decryptApiKey } from "@/lib/encryption";
 
 export interface ModelConfig {
@@ -21,7 +21,31 @@ const DEFAULT_MODELS: Record<string, string> = {
   google: "gemini-3-flash-preview",
 };
 
-export async function getModelForUser(userId: string): Promise<ModelConfig> {
+export async function getModelForUser(
+  userId: string,
+  override?: { provider: string; model: string },
+): Promise<ModelConfig> {
+  // If the user explicitly chose a provider+model in the UI, use that
+  if (override && override.provider && override.model) {
+    // Check if they have a BYOK key for this provider
+    const byokConfig = await tryByokProvider(userId, override.provider, override.model);
+    if (byokConfig) return byokConfig;
+
+    // If they chose the free-tier google, use platform key
+    if (override.provider === "google") {
+      const platformKey = process.env.GOOGLE_AI_API_KEY;
+      if (platformKey) {
+        const provider = createGoogleGenerativeAI({ apiKey: platformKey });
+        return {
+          model: provider(override.model),
+          modelId: override.model,
+          providerId: "google",
+        };
+      }
+    }
+    // Fall through to default logic if override can't be satisfied
+  }
+
   // Query all BYOK keys for this user
   let rows: Array<{
     provider: string;
@@ -105,4 +129,56 @@ export async function getModelForUser(userId: string): Promise<ModelConfig> {
       anthropic: { cacheControl: { type: "ephemeral" } },
     },
   };
+}
+
+/**
+ * Try to create a model config for a specific provider using the user's BYOK key.
+ * Returns null if no key is found for that provider.
+ */
+async function tryByokProvider(
+  userId: string,
+  providerId: string,
+  modelId: string,
+): Promise<ModelConfig | null> {
+  try {
+    const rows = await db
+      .select()
+      .from(userApiKeys)
+      .where(
+        and(
+          eq(userApiKeys.user_id, userId),
+          eq(userApiKeys.provider, providerId),
+        ),
+      )
+      .limit(1);
+
+    if (rows.length === 0) return null;
+
+    const apiKey = decryptApiKey(rows[0].encrypted_key, providerId);
+
+    if (providerId === "anthropic") {
+      const provider = createAnthropic({ apiKey });
+      return {
+        model: provider(modelId),
+        modelId,
+        providerId,
+        providerOptions: {
+          anthropic: { cacheControl: { type: "ephemeral" } },
+        },
+      };
+    }
+
+    if (providerId === "openai") {
+      const provider = createOpenAI({ apiKey });
+      return { model: provider(modelId), modelId, providerId };
+    }
+
+    if (providerId === "google") {
+      const provider = createGoogleGenerativeAI({ apiKey });
+      return { model: provider(modelId), modelId, providerId };
+    }
+  } catch {
+    // Decryption or DB error — skip
+  }
+  return null;
 }

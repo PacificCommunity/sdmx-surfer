@@ -18,6 +18,10 @@ import { createRequestLogger } from "@/lib/logger";
 const chatRequestSchema = z.object({
   messages: z.array(z.unknown()),
   previewError: z.string().optional(),
+  modelOverride: z.object({
+    provider: z.string(),
+    model: z.string(),
+  }).optional(),
 });
 
 const STEP_LIMIT = 25;
@@ -42,7 +46,7 @@ export async function POST(req: Request) {
   let mcpClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
 
   try {
-    const { messages, previewError } = chatRequestSchema.parse(await req.json());
+    const { messages, previewError, modelOverride } = chatRequestSchema.parse(await req.json());
 
     // Extract last user message for logging
     const uiMessages = messages as Array<{ role?: string; parts?: Array<{ type?: string; text?: string }> }>;
@@ -82,7 +86,7 @@ export async function POST(req: Request) {
     let dashboardEmitted = false;
     let currentStep = 0;
 
-    const modelConfig = await getModelForUser(userId);
+    const modelConfig = await getModelForUser(userId, modelOverride);
     logger.setModelInfo(modelConfig.modelId, modelConfig.providerId);
 
     const result = streamText({
