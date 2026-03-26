@@ -514,7 +514,31 @@ export default function BuilderPage() {
                 const found = availableModels.find(
                   (m) => m.provider === provider && m.model === model,
                 );
-                if (found) setSelectedModel(found);
+                if (!found) return;
+
+                // If there's an active conversation, switching models starts a new session
+                const hasUserMessages = messagesRef.current.some(
+                  (m: { role: string }) => m.role === "user",
+                );
+                if (hasUserMessages) {
+                  const ok = window.confirm(
+                    "Switching models will start a new session.\n\n" +
+                    "Your current session will be saved. Continue?",
+                  );
+                  if (!ok) {
+                    e.target.value = selectedModel.provider + ":" + selectedModel.model;
+                    return;
+                  }
+                  clearScheduledSave();
+                  doSave();
+                  setSessionId(generateSessionId());
+                  setMessagesRef.current([]);
+                  configHistoryRef.current.restore([], -1);
+                  configJsonRef.current = "";
+                  setSaveState("idle");
+                }
+
+                setSelectedModel(found);
               }}
               className="ghost-border rounded-full bg-surface-card px-3 py-1 text-xs font-medium text-on-surface-variant"
               title="Active model"

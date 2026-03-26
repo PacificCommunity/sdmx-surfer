@@ -64,6 +64,7 @@ export async function POST(req: Request) {
 
     const modelMessages = await convertToModelMessages(
       messages as Parameters<typeof convertToModelMessages>[0],
+      { ignoreIncompleteToolCalls: true },
     );
 
     // Tier 2: extract knowledge from conversation history
