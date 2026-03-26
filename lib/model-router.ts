@@ -5,7 +5,7 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { type LanguageModel } from "ai";
 import { type ProviderOptions } from "@ai-sdk/provider-utils";
 import { db, userApiKeys } from "@/lib/db";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { decryptApiKey } from "@/lib/encryption";
 
 export interface ModelConfig {
@@ -33,7 +33,9 @@ export async function getModelForUser(userId: string): Promise<ModelConfig> {
     rows = await db
       .select()
       .from(userApiKeys)
-      .where(eq(userApiKeys.user_id, userId));
+      .where(eq(userApiKeys.user_id, userId))
+      .orderBy(desc(userApiKeys.updated_at))
+      .limit(1);
   } catch (_err) {
     // DB unavailable — fall through to free tier
   }

@@ -1,5 +1,6 @@
 import { streamText, tool, convertToModelMessages, stepCountIs } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
+import { mcpTransportConfig } from "@/lib/mcp-client";
 import { getModelForUser } from "@/lib/model-router";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
@@ -38,6 +39,7 @@ export async function POST(req: Request) {
   const userId = session.user.userId;
   const sessionId = req.headers.get("x-session-id") || "anonymous";
   const logger = createRequestLogger(userId, sessionId);
+  let mcpClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
 
   try {
     const { messages, previewError } = chatRequestSchema.parse(await req.json());
@@ -51,11 +53,8 @@ export async function POST(req: Request) {
       .join(" ") || "";
     logger.setUserMessage(lastUserText);
 
-    const mcpClient = await createMCPClient({
-      transport: {
-        type: "http",
-        url: process.env.MCP_GATEWAY_URL || "http://localhost:8000/mcp",
-      },
+    mcpClient = await createMCPClient({
+      transport: mcpTransportConfig(),
     });
     const mcpTools = await mcpClient.tools();
 
@@ -161,6 +160,7 @@ export async function POST(req: Request) {
             ? { input: usage.inputTokens ?? 0, output: usage.outputTokens ?? 0 }
             : undefined,
         );
+        if (mcpClient) await mcpClient.close().catch(() => {});
       },
     });
 
@@ -169,6 +169,7 @@ export async function POST(req: Request) {
     console.error("[api/chat] Request failed", error);
     logger.recordError(error instanceof Error ? error.message : String(error));
     await logger.flush();
+    if (mcpClient) await mcpClient.close().catch(() => {});
 
     const message =
       error instanceof Error

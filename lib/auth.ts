@@ -103,10 +103,11 @@ export const authOptions: NextAuthOptions = {
     // Block sign-in for emails not in the allowlist
     async signIn({ user }) {
       if (!user.email) return false;
+      const normalizedEmail = user.email.toLowerCase();
       const rows = await db
         .select({ email: allowedEmails.email })
         .from(allowedEmails)
-        .where(eq(allowedEmails.email, user.email))
+        .where(eq(allowedEmails.email, normalizedEmail))
         .limit(1);
       return rows.length > 0;
     },
@@ -117,7 +118,7 @@ export const authOptions: NextAuthOptions = {
         const rows = await db
           .select({ id: authUsers.id, role: authUsers.role })
           .from(authUsers)
-          .where(eq(authUsers.email, user.email))
+          .where(eq(authUsers.email, user.email.toLowerCase()))
           .limit(1);
         if (rows.length > 0) {
           token.userId = rows[0].id;

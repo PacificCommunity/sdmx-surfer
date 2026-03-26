@@ -23,6 +23,19 @@ vi.mock("@/lib/encryption", () => ({
 import { getModelForUser } from "@/lib/model-router";
 import { db } from "@/lib/db";
 
+/** Build a mock chain: select().from().where().orderBy().limit() → rows */
+function mockDbRows(rows: unknown[]) {
+  (db.select as ReturnType<typeof vi.fn>).mockReturnValue({
+    from: vi.fn().mockReturnValue({
+      where: vi.fn().mockReturnValue({
+        orderBy: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue(rows),
+        }),
+      }),
+    }),
+  });
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   delete process.env.GOOGLE_AI_API_KEY;
@@ -54,17 +67,11 @@ describe("model-router", () => {
 
   describe("BYOK key selection", () => {
     it("uses Anthropic BYOK key when available", async () => {
-      // Mock DB to return an Anthropic key
-      const mockWhere = vi.fn().mockResolvedValue([
-        {
-          provider: "anthropic",
-          encrypted_key: "fake-encrypted-anthropic-key",
-          model_preference: "claude-opus-4-6",
-        },
-      ]);
-      (db.select as ReturnType<typeof vi.fn>).mockReturnValue({
-        from: vi.fn().mockReturnValue({ where: mockWhere }),
-      });
+      mockDbRows([{
+        provider: "anthropic",
+        encrypted_key: "fake-encrypted-anthropic-key",
+        model_preference: "claude-opus-4-6",
+      }]);
 
       const config = await getModelForUser("user-with-anthropic");
 
@@ -74,16 +81,11 @@ describe("model-router", () => {
     });
 
     it("uses OpenAI BYOK key when available", async () => {
-      const mockWhere = vi.fn().mockResolvedValue([
-        {
-          provider: "openai",
-          encrypted_key: "fake-encrypted-openai-key",
-          model_preference: null,
-        },
-      ]);
-      (db.select as ReturnType<typeof vi.fn>).mockReturnValue({
-        from: vi.fn().mockReturnValue({ where: mockWhere }),
-      });
+      mockDbRows([{
+        provider: "openai",
+        encrypted_key: "fake-encrypted-openai-key",
+        model_preference: null,
+      }]);
 
       const config = await getModelForUser("user-with-openai");
 
@@ -93,16 +95,11 @@ describe("model-router", () => {
     });
 
     it("uses Google BYOK key when available", async () => {
-      const mockWhere = vi.fn().mockResolvedValue([
-        {
-          provider: "google",
-          encrypted_key: "fake-encrypted-google-key",
-          model_preference: "gemini-3.1-pro-preview",
-        },
-      ]);
-      (db.select as ReturnType<typeof vi.fn>).mockReturnValue({
-        from: vi.fn().mockReturnValue({ where: mockWhere }),
-      });
+      mockDbRows([{
+        provider: "google",
+        encrypted_key: "fake-encrypted-google-key",
+        model_preference: "gemini-3.1-pro-preview",
+      }]);
 
       const config = await getModelForUser("user-with-google");
 
@@ -113,16 +110,11 @@ describe("model-router", () => {
     it("skips corrupt BYOK key and falls through to free tier", async () => {
       process.env.GOOGLE_AI_API_KEY = "test-google-key";
 
-      const mockWhere = vi.fn().mockResolvedValue([
-        {
-          provider: "anthropic",
-          encrypted_key: "CORRUPT", // triggers mock decryption failure
-          model_preference: null,
-        },
-      ]);
-      (db.select as ReturnType<typeof vi.fn>).mockReturnValue({
-        from: vi.fn().mockReturnValue({ where: mockWhere }),
-      });
+      mockDbRows([{
+        provider: "anthropic",
+        encrypted_key: "CORRUPT",
+        model_preference: null,
+      }]);
 
       const config = await getModelForUser("user-with-corrupt-key");
 
@@ -136,7 +128,11 @@ describe("model-router", () => {
 
       (db.select as ReturnType<typeof vi.fn>).mockReturnValue({
         from: vi.fn().mockReturnValue({
-          where: vi.fn().mockRejectedValue(new Error("DB connection failed")),
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockRejectedValue(new Error("DB connection failed")),
+            }),
+          }),
         }),
       });
 

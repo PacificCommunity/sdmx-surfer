@@ -4,6 +4,11 @@ const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 12;
 const TAG_LENGTH = 16;
 
+/**
+ * Derive a 256-bit key from ENCRYPTION_SECRET using HMAC-SHA256
+ * with a per-provider salt ("byok-{provider}") for domain separation.
+ * This is equivalent to HKDF-Extract with the provider as info.
+ */
 function deriveKey(provider: string): Buffer {
   const secret = process.env.ENCRYPTION_SECRET;
   if (!secret) {
