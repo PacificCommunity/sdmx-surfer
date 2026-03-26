@@ -1,6 +1,6 @@
 import { streamText, tool, convertToModelMessages, stepCountIs } from "ai";
-import { anthropic } from "@ai-sdk/anthropic";
 import { createMCPClient } from "@ai-sdk/mcp";
+import { getModelForUser } from "@/lib/model-router";
 import { z } from "zod";
 import {
   dashboardConfigSchema,
@@ -78,15 +78,14 @@ export async function POST(req: Request) {
     let dashboardEmitted = false;
     let currentStep = 0;
 
+    const modelConfig = await getModelForUser(userId);
+    logger.setModelInfo(modelConfig.modelId, modelConfig.providerId);
+
     const result = streamText({
-      model: anthropic("claude-sonnet-4-6"),
+      model: modelConfig.model,
       system: systemPrompt,
       messages: modelMessages,
-      providerOptions: {
-        anthropic: {
-          cacheControl: { type: "ephemeral" },
-        },
-      },
+      providerOptions: modelConfig.providerOptions || {},
       tools: {
         ...mcpTools,
         update_dashboard: tool({
