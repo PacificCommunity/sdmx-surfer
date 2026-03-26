@@ -22,7 +22,7 @@ function LoginForm() {
     setError(null);
     setLoading(true);
 
-    const result = await signIn("email", { email, redirect: false });
+    const result = await signIn("email", { email, redirect: false, callbackUrl: "/" });
 
     setLoading(false);
 
@@ -147,7 +147,7 @@ function LoginForm() {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                   />
                 </svg>
-                Sending\u2026
+                Sending...
               </span>
             ) : (
               "Send magic link"
@@ -190,7 +190,7 @@ export default function LoginPage() {
               SPC Dashboard Builder
             </h1>
             <p className="mt-1 text-sm text-on-surface-variant">
-              Pacific Community \u2014 Data Intelligence Platform
+              Pacific Community  - Data Intelligence Platform
             </p>
           </div>
         </div>
@@ -206,7 +206,7 @@ export default function LoginPage() {
         </Suspense>
 
         <p className="mt-6 text-center text-xs text-text-muted">
-          Pacific Community \u00b7 SPC Dashboard Builder
+          Pacific Community - SPC Dashboard Builder
         </p>
       </div>
     </div>

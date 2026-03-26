@@ -13,7 +13,6 @@ import NextAuth, { type NextAuthOptions, type DefaultSession } from "next-auth";
 import { getServerSession } from "next-auth/next";
 import EmailProvider from "next-auth/providers/email";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { Resend } from "resend";
 import { eq } from "drizzle-orm";
 import { db, authUsers, authAccounts, authVerificationTokens, allowedEmails } from "./db/index";
 
@@ -44,16 +43,29 @@ async function sendMagicLink(params: {
   url: string;
   provider: { from: string };
 }): Promise<void> {
-  const { identifier, url, provider } = params;
-  const host = new URL(url).host;
+  const { identifier, url } = params;
+
+  // In development (no RESEND_API_KEY): log the link to the server console
+  if (!process.env.RESEND_API_KEY) {
+    console.log("\n" +
+      "========================================\n" +
+      "  MAGIC LINK for " + identifier + "\n" +
+      "========================================\n" +
+      "  " + url + "\n" +
+      "========================================\n",
+    );
+    return;
+  }
+
+  // In production: send via Resend
+  const { Resend } = await import("resend");
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const from = provider.from ?? process.env.EMAIL_FROM ?? "noreply@example.com";
+  const from = process.env.EMAIL_FROM || "noreply@example.com";
+  const host = new URL(url).host;
   const subject = "Sign in to " + host;
   const body =
     "<p>Click the link below to sign in to the SPC Dashboard Builder:</p>" +
-    '<p><a href="' +
-    url +
-    '">Sign in</a></p>' +
+    '<p><a href="' + url + '">Sign in</a></p>' +
     "<p>This link expires in 15 minutes and can only be used once.</p>" +
     "<p>If you did not request this, you can safely ignore this email.</p>";
 

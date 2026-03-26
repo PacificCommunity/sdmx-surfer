@@ -5,12 +5,17 @@
  * Usage:
  *   npx tsx scripts/add-pilot-user.ts user@example.com [--admin]
  *
- * Environment variables required (same as the app):
- *   POSTGRES_URL  — Vercel Postgres connection string
- *
- * This script uses @vercel/postgres directly (not Drizzle) so it can run
- * standalone without the Next.js build.
+ * Reads DATABASE_URL from .env.local and maps it to POSTGRES_URL
+ * (which is what @vercel/postgres expects).
  */
+
+import { config } from "dotenv";
+config({ path: ".env.local" });
+
+// @vercel/postgres looks for POSTGRES_URL, not DATABASE_URL
+if (!process.env.POSTGRES_URL && process.env.DATABASE_URL) {
+  process.env.POSTGRES_URL = process.env.DATABASE_URL;
+}
 
 import { sql } from "@vercel/postgres";
 

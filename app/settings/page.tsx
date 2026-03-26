@@ -46,7 +46,7 @@ const PROVIDERS: ProviderConfig[] = [
     id: "google",
     name: "Google",
     badge: "Gemini",
-    models: ["gemini-2.5-flash", "gemini-3-flash", "gemini-3.1-pro-preview"],
+    models: ["gemini-2.5-flash", "gemini-3-flash-preview", "gemini-3.1-pro-preview"],
     placeholder: "AIza...",
   },
 ];

@@ -18,7 +18,7 @@ export interface ModelConfig {
 const DEFAULT_MODELS: Record<string, string> = {
   anthropic: "claude-sonnet-4-6",
   openai: "gpt-4.1-mini",
-  google: "gemini-3-flash",
+  google: "gemini-3-flash-preview",
 };
 
 export async function getModelForUser(userId: string): Promise<ModelConfig> {
@@ -86,7 +86,7 @@ export async function getModelForUser(userId: string): Promise<ModelConfig> {
   // No BYOK key found — try platform free tier (Google)
   const platformKey = process.env.GOOGLE_AI_API_KEY;
   if (platformKey) {
-    const modelId = "gemini-3-flash";
+    const modelId = "gemini-3-flash-preview";
     const provider = createGoogleGenerativeAI({ apiKey: platformKey });
     return {
       model: provider(modelId),

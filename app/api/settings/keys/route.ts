@@ -15,7 +15,7 @@ const providerEnum = z.enum(["anthropic", "openai", "google"]);
 const ALLOWED_MODELS: Record<string, string[]> = {
   anthropic: ["claude-haiku-4-5", "claude-sonnet-4-6", "claude-opus-4-6"],
   openai: ["gpt-4.1-nano", "gpt-4.1-mini", "gpt-5.4"],
-  google: ["gemini-2.5-flash", "gemini-3-flash", "gemini-3.1-pro-preview"],
+  google: ["gemini-2.5-flash", "gemini-3-flash-preview", "gemini-3.1-pro-preview"],
 };
 
 const addKeySchema = z
