@@ -3,6 +3,7 @@ import { z } from "zod";
 import { and, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, userApiKeys } from "@/lib/db";
+import { checkCsrf } from "@/lib/csrf";
 import { encryptApiKey } from "@/lib/encryption";
 
 // ---------------------------------------------------------------------------
@@ -11,11 +12,26 @@ import { encryptApiKey } from "@/lib/encryption";
 
 const providerEnum = z.enum(["anthropic", "openai", "google"]);
 
-const addKeySchema = z.object({
-  provider: providerEnum,
-  apiKey: z.string().min(1),
-  modelPreference: z.string().optional(),
-});
+const ALLOWED_MODELS: Record<string, string[]> = {
+  anthropic: ["claude-haiku-4-5", "claude-sonnet-4-6", "claude-opus-4-6"],
+  openai: ["gpt-4.1-nano", "gpt-4.1-mini", "gpt-5.4"],
+  google: ["gemini-2.5-flash", "gemini-3-flash", "gemini-3.1-pro-preview"],
+};
+
+const addKeySchema = z
+  .object({
+    provider: providerEnum,
+    apiKey: z.string().min(1),
+    modelPreference: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (!data.modelPreference) return true;
+      const allowed = ALLOWED_MODELS[data.provider];
+      return allowed ? allowed.includes(data.modelPreference) : false;
+    },
+    { message: "Invalid model for this provider", path: ["modelPreference"] },
+  );
 
 const deleteKeySchema = z.object({
   provider: providerEnum,
@@ -60,6 +76,8 @@ export async function GET() {
 // ---------------------------------------------------------------------------
 
 export async function POST(req: Request) {
+  const csrfError = checkCsrf(req);
+  if (csrfError) return csrfError;
   const session = await auth();
   if (!session?.user?.userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -113,6 +131,8 @@ export async function POST(req: Request) {
 // ---------------------------------------------------------------------------
 
 export async function DELETE(req: Request) {
+  const csrfError = checkCsrf(req);
+  if (csrfError) return csrfError;
   const session = await auth();
   if (!session?.user?.userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

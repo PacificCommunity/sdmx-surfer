@@ -29,6 +29,14 @@ function preview(value: unknown, maxLen = 300): string {
   return s.slice(0, maxLen) + "...";
 }
 
+/** Safely truncate args for logging — returns an object, never a broken JSON string */
+function safePreviewArgs(args: Record<string, unknown>, maxLen: number): Record<string, unknown> {
+  const json = JSON.stringify(args);
+  if (json.length <= maxLen) return args;
+  // Too large to store fully — store a truncated string representation instead
+  return { _truncated: json.slice(0, maxLen) + "..." };
+}
+
 export function createRequestLogger(userId: string, sessionId: string) {
   const requestId =
     Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -62,7 +70,7 @@ export function createRequestLogger(userId: string, sessionId: string) {
     ) {
       toolCalls.push({
         name,
-        args: JSON.parse(preview(args, 500)),
+        args: safePreviewArgs(args, 500),
         resultPreview: preview(result),
         stepNumber: step,
       });

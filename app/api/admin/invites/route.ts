@@ -3,6 +3,7 @@ import { z } from "zod";
 import { desc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, allowedEmails } from "@/lib/db";
+import { checkCsrf } from "@/lib/csrf";
 
 // ---------------------------------------------------------------------------
 // Input validation
@@ -42,6 +43,8 @@ export async function GET() {
 // ---------------------------------------------------------------------------
 
 export async function POST(req: Request) {
+  const csrfError = checkCsrf(req);
+  if (csrfError) return csrfError;
   const session = await auth();
   if (!session?.user?.userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

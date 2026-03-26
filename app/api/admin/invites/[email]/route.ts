@@ -2,15 +2,18 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, allowedEmails } from "@/lib/db";
+import { checkCsrf } from "@/lib/csrf";
 
 // ---------------------------------------------------------------------------
 // DELETE /api/admin/invites/[email] — remove an email from the allowlist
 // ---------------------------------------------------------------------------
 
 export async function DELETE(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ email: string }> },
 ) {
+  const csrfError = checkCsrf(req);
+  if (csrfError) return csrfError;
   const session = await auth();
   if (!session?.user?.userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
