@@ -198,36 +198,37 @@ export default function BuilderPage() {
       .then((r) => r.json())
       .then((data) => {
         const models: ModelOption[] = [FREE_TIER];
-        const MODEL_LABELS: Record<string, Record<string, string>> = {
-          anthropic: {
-            "claude-haiku-4-5": "Claude Haiku 4.5",
-            "claude-sonnet-4-6": "Claude Sonnet 4.6",
-            "claude-opus-4-6": "Claude Opus 4.6",
-          },
-          openai: {
-            "gpt-4.1-nano": "GPT-4.1 Nano",
-            "gpt-4.1-mini": "GPT-4.1 Mini",
-            "gpt-5.4": "GPT-5.4",
-          },
-          google: {
-            "gemini-2.5-flash": "Gemini 2.5 Flash",
-            "gemini-3-flash-preview": "Gemini 3 Flash",
-            "gemini-3.1-pro-preview": "Gemini 3.1 Pro",
-          },
+        const PROVIDER_MODELS: Record<string, Array<{ id: string; label: string }>> = {
+          anthropic: [
+            { id: "claude-haiku-4-5", label: "Claude Haiku 4.5" },
+            { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6" },
+            { id: "claude-opus-4-6", label: "Claude Opus 4.6" },
+          ],
+          openai: [
+            { id: "gpt-4.1-nano", label: "GPT-4.1 Nano" },
+            { id: "gpt-4.1-mini", label: "GPT-4.1 Mini" },
+            { id: "gpt-5.4", label: "GPT-5.4" },
+          ],
+          google: [
+            { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
+            { id: "gemini-3-flash-preview", label: "Gemini 3 Flash" },
+            { id: "gemini-3.1-pro-preview", label: "Gemini 3.1 Pro" },
+          ],
         };
-        const DEFAULT_MODELS: Record<string, string> = {
-          anthropic: "claude-sonnet-4-6",
-          openai: "gpt-4.1-mini",
-          google: "gemini-3-flash-preview",
-        };
-        for (const key of data.keys || []) {
-          const modelId = key.modelPreference || DEFAULT_MODELS[key.provider] || "";
-          const label = MODEL_LABELS[key.provider]?.[modelId] || modelId;
-          models.push({
-            provider: key.provider,
-            model: modelId,
-            label: label + " (BYOK)",
-          });
+        // For each provider the user has a key for, add all models
+        const providers = new Set<string>(
+          (data.keys || []).map((k: { provider: string }) => k.provider),
+        );
+        for (const provider of providers) {
+          const providerModels = PROVIDER_MODELS[provider];
+          if (!providerModels) continue;
+          for (const m of providerModels) {
+            models.push({
+              provider,
+              model: m.id,
+              label: m.label,
+            });
+          }
         }
         setAvailableModels(models);
       })
