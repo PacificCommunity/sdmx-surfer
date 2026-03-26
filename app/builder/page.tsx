@@ -421,6 +421,9 @@ export default function BuilderPage() {
   }, [clearScheduledSave]);
 
   // ── Error forwarding ──
+  const errorCountRef = useRef(0);
+  const MAX_AUTO_ERRORS = 2;
+
   const forwardPreviewError = useCallback(
     async (error: string) => {
       if (lastForwardedPreviewErrorRef.current === error) {
@@ -428,17 +431,27 @@ export default function BuilderPage() {
         return;
       }
 
+      // Limit auto-error forwarding to prevent loops
+      errorCountRef.current += 1;
+      if (errorCountRef.current > MAX_AUTO_ERRORS) {
+        pendingPreviewErrorRef.current = null;
+        return;
+      }
+
       lastForwardedPreviewErrorRef.current = error;
       pendingPreviewErrorRef.current = null;
-      outgoingPreviewErrorRef.current = error;
 
       try {
-        await regenerateRef.current();
+        await sendMessageRef.current({
+          text:
+            "[SYSTEM: The dashboard preview encountered an error: " +
+            error +
+            ". Please fix the broken component(s) and call update_dashboard again. " +
+            "Every data URL MUST come from build_data_url.]",
+        });
       } catch {
         lastForwardedPreviewErrorRef.current = null;
         pendingPreviewErrorRef.current = error;
-      } finally {
-        outgoingPreviewErrorRef.current = null;
       }
     },
     [],
@@ -468,6 +481,7 @@ export default function BuilderPage() {
 
   useEffect(() => {
     lastForwardedPreviewErrorRef.current = null;
+    errorCountRef.current = 0; // Reset error counter on new config
   }, [configHistory.current]);
 
   return (
