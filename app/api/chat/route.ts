@@ -1,6 +1,7 @@
 import { streamText, tool, convertToModelMessages, stepCountIs } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
 import { getModelForUser } from "@/lib/model-router";
+import { auth } from "@/lib/auth";
 import { z } from "zod";
 import {
   dashboardConfigSchema,
@@ -30,8 +31,12 @@ const NUDGE_MESSAGE =
 export const maxDuration = 300;
 
 export async function POST(req: Request) {
+  const session = await auth();
+  if (!session?.user?.userId) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const userId = session.user.userId;
   const sessionId = req.headers.get("x-session-id") || "anonymous";
-  const userId = "anonymous";
   const logger = createRequestLogger(userId, sessionId);
 
   try {
