@@ -58,14 +58,18 @@ async function sendMagicLink(params: {
   }
 
   // In production: send via Resend
+  // Wrap the callback URL through /login/verify to defeat Outlook SafeLinks
+  // (SafeLinks pre-fetches GET URLs but can't click buttons on a page)
   const { Resend } = await import("resend");
   const resend = new Resend(process.env.RESEND_API_KEY);
   const from = process.env.EMAIL_FROM || "noreply@example.com";
   const host = new URL(url).host;
+  const baseUrl = process.env.NEXTAUTH_URL || "https://" + host;
+  const verifyUrl = baseUrl + "/login/verify?url=" + encodeURIComponent(url);
   const subject = "Sign in to " + host;
   const body =
     "<p>Click the link below to sign in to the SPC Dashboard Builder:</p>" +
-    '<p><a href="' + url + '">Sign in</a></p>' +
+    '<p><a href="' + verifyUrl + '">Sign in</a></p>' +
     "<p>This link expires in 15 minutes and can only be used once.</p>" +
     "<p>If you did not request this, you can safely ignore this email.</p>";
 
