@@ -80,7 +80,22 @@ The config format is already defined and documented (`public/doc.md` in the demo
 | `colCount` | number | Number of grid columns; default is 3 (optional). |
 | `header` / `footer` | Text \| object | Dashboard header and footer (optional). |
 
-Each component (cell) within a column specifies: `type` (line, bar, column, pie, drilldown, value, map, note), `data` (one or more SDMX query URLs with optional arithmetic expressions), `legend`, `xAxisConcept`, `yAxisConcept`, and styling options. This is the target output format for the agent's `update_dashboard` tool.
+Each component (cell) within a column specifies: `type` (line, bar, column, pie, drilldown, value, map, note), `data` (one or more SDMX query URLs with optional arithmetic expressions), `legend`, `xAxisConcept`, `yAxisConcept`, and styling options. This remains the runtime format used by the plotting library.
+
+### 2.5 App-Level Dashboard Authoring Layer
+
+The application now inserts a translation layer between the agent and the plotting library:
+
+- The **LLM-facing contract** is a simplified authoring schema with intent visuals such as `kpi`, `chart`, `map`, and `note`.
+- The **runtime-facing contract** remains the native `sdmx-dashboard-components` config.
+- A **server-side compiler** turns authoring specs into native dashboard config before anything reaches the preview.
+- A **native passthrough mode** is retained for advanced cases, so library capabilities are not lost.
+
+This architecture deliberately moves brittle syntax out of the model's prompt burden and into code:
+
+- KPI cards compile to the correct native `value` visual automatically.
+- Maps no longer require the model to handcraft the packed `data` string.
+- Safer defaults and invariants live in the app compiler instead of only in prompt prose.
 
 ---
 
@@ -110,10 +125,11 @@ The sdmx-mcp-gateway currently uses stdio transport, designed for local CLI use 
 2. The frontend sends the message to the agent loop endpoint via SSE.
 3. The agent loop calls the Anthropic API with conversation history, MCP tool definitions, and the `update_dashboard` tool.
 4. The API returns `tool_use` requests. The agent loop executes these against the MCP gateway (e.g., `discover_dataflows_overview` with `keywords=["trade"]`, then `get_dataflow_structure`, then `explore_dimension_codes`, then `build_data_query`).
-5. The API eventually invokes `update_dashboard` with a JSON config conforming to the sdmx-dashboard-components schema.
-6. The agent loop streams the text response and pushes the config as a separate SSE event to the frontend.
-7. The frontend passes the config to the SDMXDashboard component, which renders the dashboard and fetches SDMX data from .Stat directly.
-8. The dashboard reports its render state back to the agent loop (see Section 6), closing the feedback loop.
+5. The API eventually invokes `update_dashboard` with either an authoring spec (preferred) or a native dashboard config.
+6. The agent loop validates and compiles authoring specs into native `sdmx-dashboard-components` config.
+7. The agent loop streams the text response and pushes the compiled config as a separate SSE event to the frontend.
+8. The frontend passes the compiled config to the SDMXDashboard component, which renders the dashboard and fetches SDMX data from .Stat directly.
+9. The dashboard reports its render state back to the agent loop (see Section 6), closing the feedback loop.
 
 ### 4.2 Component Architecture
 
@@ -131,7 +147,8 @@ Server  │                   │
 ┌───────┴─────────────────┐ │  ┌───────────┐
 │ Agent Loop [NEW]        │ │  │ .Stat API │
 │ Conversation + Tools    │ │  │ (SDMX)    │
-│ Config Gen / Patching   │ │  └───────────┘
+│ Authoring → Native      │ │  └───────────┘
+│ Config Compilation      │ │
 │ Cached system prompt    │ │
 └────┬──────────┬─────────┘ │
      │ API call │ stdio/HTTP│
@@ -151,12 +168,18 @@ The agent loop is the only component that is entirely new. It must:
 - Execute the tool-use loop: when the API returns `tool_use` blocks, dispatch them to the MCP gateway (via stdio subprocess for PoC, HTTP transport for production), feed results back, and re-call the API.
 - Stream the agent's text response to the browser via SSE.
 - Emit dashboard config events (separate from the text stream) when the agent invokes `update_dashboard`.
+- Compile authoring specs into native `sdmx-dashboard-components` config before emitting them.
 - Receive structured render state and user interaction events from the dashboard component (see Section 6) and include them as context in subsequent API calls.
-- Provide the agent with the sdmx-dashboard-components config schema (via cached system prompt) so it produces valid JSON.
+- Provide the agent with both the simplified authoring schema and the native config escape hatch (via cached system prompt).
 
 ### 5.1 The update_dashboard Tool
 
-This synthetic tool is intercepted by the agent loop, not forwarded to the MCP. It accepts a full dashboard JSON config (conforming to the existing schema) or a JSON Patch array for incremental edits. When invoked, the loop validates the config against the JSON schema that sdmx-dashboard-demo already uses, and pushes it to the frontend.
+This synthetic tool is intercepted by the agent loop, not forwarded to the MCP. It accepts either:
+
+- an **authoring spec** using intent visuals (`kpi`, `chart`, `map`, `note`)
+- or a **native dashboard config** for passthrough use
+
+When invoked, the loop validates the payload, compiles authoring specs into native dashboard config, validates the compiled result, and pushes the compiled config to the frontend.
 
 ### 5.2 Context Architecture and Prompt Caching
 

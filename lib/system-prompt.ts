@@ -83,121 +83,124 @@ For broad requests like "comprehensive dashboard about health in the Pacific":
 
 Never spend more than 5-6 tool calls without either (a) producing a visible dashboard update or (b) asking the user a question.`;
 
-const CONFIG_SCHEMA_DOCS = `## Dashboard Config Schema (sdmx-dashboard-components v0.4.5)
+const CONFIG_SCHEMA_DOCS = `## Dashboard Authoring Schema (Preferred)
 
-The dashboard config is a JSON object with this structure:
+The \`update_dashboard\` tool accepts a simplified authoring schema. The app compiles it into the native \`sdmx-dashboard-components\` config for you.
+
+Use the authoring schema by default. Only use native passthrough when you need a library feature the authoring schema cannot express.
+
+Top-level structure:
 
 \`\`\`typescript
 {
-  id: string;                    // Unique dashboard identifier (required)
-  colCount?: number;             // Grid columns, default 3
+  id: string;
+  colCount?: number;
   header?: {
-    title?: { text: string };    // Dashboard title
-    subtitle?: { text: string }; // Dashboard subtitle
+    title?: string | { text: string };
+    subtitle?: string | { text: string };
   };
   footer?: {
-    title?: { text: string };
-    subtitle?: { text: string };
+    title?: string | { text: string };
+    subtitle?: string | { text: string };
   };
   rows: Array<{
-    columns: Array<VisualConfig>
+    columns: Array<IntentVisual | NativeVisual>
   }>;
 }
 \`\`\`
 
-Each VisualConfig in \`columns\` has:
+### Intent Visuals
 
-\`\`\`typescript
-{
-  id: string;                    // Unique component ID (required)
-  type: "line" | "bar" | "column" | "pie" | "lollipop" | "treemap" | "value" | "drilldown" | "note" | "map";
-  colSize?: number;              // Width in grid units (out of colCount)
-  title?: { text: string };
-  subtitle?: { text: string };
-  note?: { text: string };
-
-  // Data binding (required for all except "note")
-  xAxisConcept: string;          // SDMX dimension for X-axis (e.g. "GEO_PICT", "TIME_PERIOD")
-  yAxisConcept?: string;         // SDMX dimension for Y-axis (usually "OBS_VALUE") — required for charts
-  data: string | string[];       // SDMX REST data URL(s)
-
-  // Chart options
-  legend?: {
-    concept?: string;            // Dimension to use for series legend (e.g. "INDICATOR")
-    location?: "top" | "bottom" | "left" | "right" | "none";
-  };
-  labels?: boolean;              // Show data labels
-  download?: boolean;            // Show download button
-  sortByValue?: "asc" | "desc"; // Sort bars/columns by value
-
-  // Value component options
-  unit?: { text: string; location?: "prefix" | "suffix" | "under" };
-  decimals?: number;
-
-  // Map options
-  colorScheme?: string;          // Color scheme: Blues, Greens, Reds, Viridis, RdYlBu, Spectral, etc.
-}
-\`\`\`
-
-### Map (Choropleth) — Special Data Syntax
-
-Maps use a COMPLETELY DIFFERENT \`data\` format from other chart types. The \`data\` field must be a pipe-separated string:
-
-\`\`\`
-"SDMX_URL, {GEO_DIMENSION_ID} | GEOJSON_URL, EPSG_CODE, {GEO_PROPERTY}"
-\`\`\`
-
-Where:
-- **SDMX_URL** — the data URL (from build_data_url, with dimensionAtObservation=AllDimensions)
-- **{GEO_DIMENSION_ID}** — the SDMX dimension holding geographic codes, wrapped in curly braces (e.g., \`{GEO_PICT}\`)
-- **GEOJSON_URL** — URL to a GeoJSON file with country/territory geometries
-- **EPSG_CODE** — map projection (use \`EPSG:3832\` for Pacific-centred, or \`EPSG:4326\` for world)
-- **{GEO_PROPERTY}** — the GeoJSON feature property that matches the SDMX dimension codes, wrapped in curly braces (e.g., \`{ISO3}\` or \`{GEO_PICT}\`)
-
-Example:
+#### KPI
 \`\`\`json
 {
-  "id": "pop_map",
-  "type": "map",
-  "colSize": 3,
-  "title": { "text": "Population by Country" },
-  "xAxisConcept": "GEO_PICT",
-  "colorScheme": "Blues",
-  "data": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_PROJ,3.0/A..MIDYEARPOPEST._T._T?dimensionAtObservation=AllDimensions&lastNObservations=1, {GEO_PICT} | https://www.spc.int/modules/contrib/spc_dot_stat_data/modules/spc_dot_stat_map/maps/eez.json, EPSG:3832, {id}"
+  "kind": "kpi",
+  "id": "fiji_population",
+  "title": "Fiji Population",
+  "dataUrl": "https://...built-by-build_data_url...",
+  "unit": { "text": "persons", "location": "suffix" },
+  "decimals": 0
 }
 \`\`\`
 
-**Important map rules:**
-- The \`data\` field is a SINGLE STRING with \` | \` (space-pipe-space) separating the SDMX part from the GeoJSON part
-- The SDMX part has a comma-space before the geo dimension: \`URL, {DIM}\`
-- The GeoJSON part has comma-space separators: \`URL, PROJECTION, {PROPERTY}\`
-- For the SDMX URL in map data, use the full agency+version format: \`SPC,DF_NAME,VERSION\` (e.g., \`SPC,DF_POP_PROJ,3.0\`)
-- For Pacific maps, use this GeoJSON of EEZ boundaries: \`https://www.spc.int/modules/contrib/spc_dot_stat_data/modules/spc_dot_stat_map/maps/eez.json\`
-- The GeoJSON property to join on is \`{id}\` (ISO2 country codes matching SDMX GEO_PICT codes like AS, FJ, PG, etc.)
-- Use projection \`EPSG:3832\` for Pacific-centred maps
-- \`colorScheme\` is required (one of: Blues, Greens, Reds, Viridis, RdYlBu, RdYlGn, Spectral, Turbo, Purples, Oranges, Greys, BrBg, PiYG, PRGn, PuOr, RdGy)
-- \`xAxisConcept\` should be the geographic dimension (e.g., "GEO_PICT")
-- Do NOT set yAxisConcept for maps
+The app compiles this to a native \`value\` visual with \`xAxisConcept: "OBS_VALUE"\`.
+
+#### Chart
+\`\`\`json
+{
+  "kind": "chart",
+  "id": "trade_line",
+  "chartType": "line",
+  "title": "Trade Over Time",
+  "dataUrl": "https://...built-by-build_data_url...",
+  "xAxis": "TIME_PERIOD",
+  "seriesBy": "GEO_PICT",
+  "legendLocation": "bottom"
+}
+\`\`\`
+
+Important chart rules:
+- \`xAxis\` is the dimension shown on the axis.
+- \`seriesBy\` is the legend / series dimension.
+- The compiler fills \`yAxisConcept: "OBS_VALUE"\` unless you override it.
+- For \`bar\`, \`column\`, \`lollipop\`, and \`treemap\`, you MUST provide \`seriesBy\`. The compiler rejects these charts if it is missing.
+
+#### Map
+\`\`\`json
+{
+  "kind": "map",
+  "id": "pop_map",
+  "title": "Population by Country",
+  "dataUrl": "https://...built-by-build_data_url...",
+  "geoDimension": "GEO_PICT",
+  "geoPreset": "pacific-eez",
+  "colorScheme": "Blues"
+}
+\`\`\`
+
+Important map rules:
+- Do NOT manually build the packed map \`data\` string.
+- Provide the SDMX \`dataUrl\` and the \`geoDimension\`.
+- Use \`geoPreset: "pacific-eez"\` for Pacific maps unless the user explicitly asks for something else.
+- The app compiler injects the GeoJSON URL, projection, join property, and native map syntax.
+
+#### Note
+\`\`\`json
+{
+  "kind": "note",
+  "id": "method_note",
+  "body": "This dashboard shows the latest annual observations available."
+}
+\`\`\`
+
+### Native Visual Escape Hatch
+
+If you need a capability the authoring schema cannot express, wrap a native visual:
+
+\`\`\`json
+{
+  "mode": "native",
+  "config": {
+    "id": "advanced_visual",
+    "type": "column",
+    "xAxisConcept": "GEO_PICT",
+    "yAxisConcept": "OBS_VALUE",
+    "legend": { "concept": "INDICATOR", "location": "none" },
+    "data": "https://..."
+  }
+}
+\`\`\`
 
 CRITICAL RULES:
-- NEVER construct data URLs manually. You MUST call build_data_url for EVERY data URL. Manually guessed URLs WILL fail — the base domain, path format, and query parameters must come from the tool. If you emit a dashboard without calling build_data_url first, the charts will show "Error while fetching data".
-- For map type components, the SDMX URL portion of the data field must ALSO come from build_data_url. Build the URL first, then combine it with the GeoJSON syntax.
-- xAxisConcept and yAxisConcept must be actual dimension IDs from the dataflow structure
-- For time series charts, use xAxisConcept: "TIME_PERIOD"
-- For geographic comparisons, use xAxisConcept: "GEO_PICT" (or the geo dimension)
-- yAxisConcept is typically "OBS_VALUE" for charts
-- For "value" type, use xAxisConcept: "OBS_VALUE" (no yAxisConcept needed)
-- For bar, column, lollipop, and treemap charts you MUST provide legend.concept set to a valid dimension ID from the dataflow (different from xAxisConcept). The component will crash without it.
-- For line charts, legend.concept should identify the series dimension (e.g. "GEO_PICT" if xAxisConcept is "TIME_PERIOD")
-- The data URL must return observations with at least 2 active dimensions for charts. If querying with fixed values for all dimensions except one, the chart may fail. Ensure at least xAxisConcept and legend.concept dimensions have multiple values in the query.
+- NEVER construct data URLs manually. You MUST call build_data_url for EVERY data URL.
+- The app compiler automatically appends \`dimensionAtObservation=AllDimensions\` if needed.
+- Prefer intent visuals because they are safer and less error-prone.
+- Use native passthrough only when necessary.
 
 DIMENSION PINNING RULE — prevent series explosion:
-- A chart has exactly TWO varying dimensions: xAxisConcept (the x-axis) and legend.concept (the series). ALL other dimensions in the dataflow MUST be pinned to a single value in the data query key.
-- If you leave a dimension open (empty slot in the key), the API returns all its values, and the library creates a series for every combination of unpinned dimensions. This causes dozens of overlapping lines/bars.
-- Example: dataflow has FREQ, GEO_PICT, INDICATOR, SEX, AGE. For a line chart with xAxisConcept=TIME_PERIOD and legend.concept=GEO_PICT, the key must pin FREQ, INDICATOR, SEX, and AGE to single values: "A..MIDYEARPOPEST._T._T" — only GEO_PICT is left open (empty slot = all countries).
-- WRONG: "A...._T" (INDICATOR and AGE left open → every INDICATOR × AGE combination becomes a separate series)
-- RIGHT: "A..MIDYEARPOPEST._T._T" (only GEO_PICT varies, one line per country)
-- After calling get_dataflow_structure, identify ALL dimensions. For each one, decide: is it xAxisConcept, legend.concept, or pinned? Pin everything that isn't x-axis or legend to a specific code (use _T for totals when available).`;
+- A chart has exactly TWO varying dimensions: \`xAxis\` and \`seriesBy\`. ALL other dimensions in the data query must be pinned to a single value.
+- If you leave extra dimensions open, the API returns multiple series combinations and the chart becomes unreadable.
+- After calling get_dataflow_structure, identify ALL dimensions. Pin everything that is not the x-axis or the series dimension.`;
 
 const DISCOVERY_WORKFLOW = `## Progressive Discovery Workflow
 
@@ -207,10 +210,32 @@ When you need to find data for a panel, follow this workflow:
 2. **get_dataflow_structure** — Get dimensions and codelists for a dataflow.
 3. **get_dimension_codes** — Get actual codes for a dimension (e.g., country codes).
 4. **build_data_url** — Construct the final data URL.
+5. **probe_data_url** — ALWAYS probe the URL before using it in a dashboard. This confirms the query actually returns data and tells you the result shape.
 
-You can often skip step 3 if the structure gives you enough information. But you MUST ALWAYS call build_data_url (step 4) for every panel — never skip it.
+You can often skip step 3 if the structure gives you enough information. But you MUST ALWAYS call build_data_url (step 4) AND probe_data_url (step 5) for every panel.
 
-CRITICAL: You MUST use build_data_url to generate every data URL. Never construct URLs manually or copy URLs from examples — the base domain and path structure must come from build_data_url.
+CRITICAL: You MUST use build_data_url to generate every data URL. Never construct URLs manually. After building the URL, ALWAYS call probe_data_url before emitting a dashboard panel.
+
+### Using Probe Results for Chart Type Selection
+
+The probe_data_url response tells you the exact shape of the data. Use it to pick the right visual:
+
+| Probe result shape | Best visual kind |
+|---|---|
+| observation_count = 1 | \`kpi\` — single value card |
+| observation_count > 1, has_time_dimension = true, time_period_count > 3 | \`chart\` with chartType \`line\` (xAxis = TIME_PERIOD) |
+| observation_count > 1, geo_dimension_id present, no time variation | \`chart\` with chartType \`bar\` (xAxis = geo dimension) or \`map\` |
+| observation_count > 1, geo_dimension_id present, time_period_count > 1 | \`chart\` with chartType \`line\`, or \`map\` for latest snapshot |
+| observation_count = 0 | Do NOT emit this panel. Call suggest_nonempty_queries to find a working alternative. |
+
+### Recovering from Empty Queries
+
+If probe_data_url returns status = "empty":
+1. Call **suggest_nonempty_queries** with the failing URL and intent_hint (kpi, timeseries, ranking, or map).
+2. It returns ranked alternatives that have been verified to return data.
+3. Pick the best suggestion and use its URL instead.
+4. Tell the user what changed: "The exact query had no data, so I broadened the filter to include all sexes."
+5. If no suggestions work, skip this panel and tell the user the data doesn't exist.
 
 Tips:
 - ALWAYS append dimensionAtObservation=AllDimensions as a query parameter to every data URL. The dashboard component requires flat observations. Example: if build_data_url returns "https://example.org/rest/data/DF_X/A..X", use "https://example.org/rest/data/DF_X/A..X?dimensionAtObservation=AllDimensions"
@@ -238,12 +263,14 @@ const SDMX_CONVENTIONS = `## SDMX Conventions for SPC .Stat
 const TOOL_INSTRUCTIONS = `## Tool Usage Rules
 
 - ALWAYS use the update_dashboard tool to send dashboard configs to the preview. Never paste JSON in your text response.
+- Prefer the simplified authoring schema (\`kind: "kpi"\`, \`kind: "chart"\`, \`kind: "map"\`, \`kind: "note"\`). Only use native passthrough when the authoring schema cannot express what you need.
 - When updating an existing dashboard, send the COMPLETE updated config including all previous panels plus the new one.
 - Give each component a unique, descriptive id (e.g., "trade_bar_fiji", "pop_line_time").
 - Always include a header with title and subtitle describing what the dashboard shows.
 - Do NOT include a footer in the config — the app automatically generates a data sources table with API and Data Explorer links for each component.
 - Default to download: true so users can export chart data.
 - If a data URL returns no data, try broadening the query (fewer dimension filters, wider time range).
+- If you are building a map, do NOT handcraft the native map string. Use the map intent visual and let the compiler build the native syntax.
 - If the dashboard preview reports an error, it will include the component names and their data URLs. Use this to identify WHICH component failed. Do NOT blindly rebuild the entire dashboard — fix only the broken component(s).
 - When fixing errors, try at most 2 attempts per component. If a data URL consistently fails, tell the user the data may not be available and suggest alternatives.
 

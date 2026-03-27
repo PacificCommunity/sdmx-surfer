@@ -5,9 +5,12 @@ import { getModelForUser } from "@/lib/model-router";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
 import {
-  dashboardConfigSchema,
   getConfigTitle,
 } from "@/lib/dashboard-schema";
+import {
+  compileDashboardToolConfig,
+  dashboardToolConfigSchema,
+} from "@/lib/dashboard-authoring";
 import { getSystemPrompt } from "@/lib/system-prompt";
 import {
   extractKnowledgeFromMessages,
@@ -100,23 +103,28 @@ export async function POST(req: Request) {
         update_dashboard: tool({
           description:
             "Send a dashboard configuration to the live preview. " +
-            "Call this tool whenever you want to create or update the dashboard. " +
+            "Prefer the simplified authoring schema (intent visuals like kpi, chart, map, note). " +
+            "The app will compile it to the native dashboard config. " +
+            "You may also use native passthrough when needed. " +
             "Always send the complete config, not just changed parts.",
-          inputSchema: z.object({ config: dashboardConfigSchema }),
+          inputSchema: z.object({ config: dashboardToolConfigSchema }),
           execute: async ({
             config,
           }: {
-            config: z.infer<typeof dashboardConfigSchema>;
+            config: z.infer<typeof dashboardToolConfigSchema>;
           }) => {
+            const compiledConfig = compileDashboardToolConfig(config);
             dashboardEmitted = true;
             const result = {
               success: true,
-              dashboard: config,
-              message: "Dashboard updated. The preview now shows: " + getConfigTitle(config),
+              dashboard: compiledConfig,
+              message:
+                "Dashboard updated. The preview now shows: " +
+                getConfigTitle(compiledConfig),
             };
             logger.recordToolCall(
               "update_dashboard",
-              { configId: config.id },
+              { configId: compiledConfig.id },
               result,
               currentStep,
             );

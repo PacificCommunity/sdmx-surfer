@@ -60,7 +60,7 @@ export async function getModelForUser(
       .where(eq(userApiKeys.user_id, userId))
       .orderBy(desc(userApiKeys.updated_at))
       .limit(1);
-  } catch (_err) {
+  } catch {
     // DB unavailable — fall through to free tier
   }
 
@@ -71,7 +71,7 @@ export async function getModelForUser(
     let apiKey: string;
     try {
       apiKey = decryptApiKey(row.encrypted_key, providerId);
-    } catch (_err) {
+    } catch {
       // Decryption failed — never log key material, skip this row
       continue;
     }

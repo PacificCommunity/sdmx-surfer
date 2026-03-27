@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 
 interface Dataflow {
@@ -51,7 +51,6 @@ export default function ExplorePage() {
   const [countryLoading, setCountryLoading] = useState(false);
   const [semanticResults, setSemanticResults] = useState<Dataflow[] | null>(null);
   const [semanticLoading, setSemanticLoading] = useState(false);
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load all dataflows on mount
   useEffect(() => {

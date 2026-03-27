@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { eq, and, ne, count } from "drizzle-orm";
+import { eq, count } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, authUsers } from "@/lib/db";
 import { checkCsrf } from "@/lib/csrf";

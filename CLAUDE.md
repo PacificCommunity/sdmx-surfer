@@ -22,10 +22,10 @@ The **new deliverable** is the AI agent loop: a server-side process that connect
 
 ## Key Architecture Decisions
 
-- **Agent produces JSON configs, not code.** Output conforms to the existing sdmx-dashboard-components schema. Validated via JSON schema before rendering.
+- **Agent produces dashboard specs, not code.** Preferred output is the app-level authoring schema (`kpi`, `chart`, `map`, `note` intent visuals), which is compiled server-side into the native sdmx-dashboard-components config. Native passthrough remains available for advanced cases.
 - **Recommended stack:** AI SDK v6 (TypeScript) with the agent loop as a Next.js API route inside sdmx-dashboard-demo. Alternative: LangGraph + FastAPI (Python) as a separate backend service.
 - **MCP transport:** stdio subprocess for Phase 1 PoC; HTTP transport (planned in gateway roadmap) for Phase 2+.
-- **`update_dashboard` synthetic tool** — intercepted by the agent loop (not forwarded to MCP), accepts full JSON config or JSON Patch for incremental edits.
+- **`update_dashboard` synthetic tool** — intercepted by the agent loop (not forwarded to MCP), accepts either authoring specs or native config passthrough and compiles authoring specs before preview.
 - **Three-tier context architecture:** Tier 1 (cached system prompt: library docs, SDMX conventions, dataflow catalogue, example configs ~10-15K tokens), Tier 2 (session-level: discovered dataflow summaries), Tier 3 (per-turn: fresh MCP calls).
 - **Dashboard-agent communication:** `onRenderComplete` and `onUserInteraction` callbacks feed structured state back to the agent loop.
 

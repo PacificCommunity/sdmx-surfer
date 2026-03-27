@@ -51,7 +51,7 @@ describe("model-router", () => {
       const config = await getModelForUser("user-no-keys");
 
       expect(config.providerId).toBe("google");
-      expect(config.modelId).toBe("gemini-3-flash");
+      expect(config.modelId).toBe("gemini-3-flash-preview");
     });
 
     it("falls back to Anthropic from env when no BYOK keys and no GOOGLE_AI_API_KEY", async () => {
@@ -120,7 +120,7 @@ describe("model-router", () => {
 
       // Should skip the corrupt key and fall back to free tier
       expect(config.providerId).toBe("google");
-      expect(config.modelId).toBe("gemini-3-flash");
+      expect(config.modelId).toBe("gemini-3-flash-preview");
     });
 
     it("handles DB errors gracefully and falls back to free tier", async () => {
@@ -139,7 +139,7 @@ describe("model-router", () => {
       const config = await getModelForUser("user-db-error");
 
       expect(config.providerId).toBe("google");
-      expect(config.modelId).toBe("gemini-3-flash");
+      expect(config.modelId).toBe("gemini-3-flash-preview");
     });
   });
 

@@ -1,29 +1,31 @@
-import type { SDMXDashboardConfig } from "./types";
+import type { DashboardAuthoringConfig } from "./dashboard-authoring";
 
 /**
- * Example dashboard configs for the system prompt.
- * These use real working URLs from stats-sdmx-disseminate.pacificdata.org.
+ * Example dashboard authoring specs for the system prompt.
+ * These compile into valid sdmx-dashboard-components configs server-side.
  */
 
-export const EXAMPLE_POPULATION_CHART: SDMXDashboardConfig = {
+export const EXAMPLE_POPULATION_CHART: DashboardAuthoringConfig = {
   id: "population_chart",
   colCount: 1,
   header: {
-    title: { text: "Pacific Island Population" },
-    subtitle: { text: "Mid-year population estimates (latest)" },
+    title: "Pacific Island Population",
+    subtitle: "Mid-year population estimates (latest)",
   },
   rows: [
     {
       columns: [
         {
+          kind: "chart",
           id: "pop_bar",
-          type: "bar",
+          chartType: "bar",
           colSize: 1,
-          title: { text: "Population by Country" },
-          xAxisConcept: "GEO_PICT",
-          yAxisConcept: "OBS_VALUE",
-          data: "https://stats-sdmx-disseminate.pacificdata.org/rest/data/DF_POP_PROJ/A..MIDYEARPOPEST._T._T?dimensionAtObservation=AllDimensions&lastNObservations=1",
-          legend: { concept: "INDICATOR", location: "none" },
+          title: "Population by Country",
+          xAxis: "GEO_PICT",
+          seriesBy: "INDICATOR",
+          legendLocation: "none",
+          dataUrl:
+            "https://stats-sdmx-disseminate.pacificdata.org/rest/data/DF_POP_PROJ/A..MIDYEARPOPEST._T._T?lastNObservations=1",
           labels: true,
           download: true,
           sortByValue: "desc",
@@ -33,26 +35,27 @@ export const EXAMPLE_POPULATION_CHART: SDMXDashboardConfig = {
   ],
 };
 
-export const EXAMPLE_TRADE_LINE: SDMXDashboardConfig = {
+export const EXAMPLE_TRADE_LINE: DashboardAuthoringConfig = {
   id: "trade_trends",
   colCount: 1,
   header: {
-    title: { text: "Trade Trends" },
-    subtitle: { text: "Fiji, Samoa, Tonga — Imports & Exports (USD)" },
+    title: "Trade Trends",
+    subtitle: "Fiji, Samoa, Tonga — Imports & Exports (USD)",
   },
   rows: [
     {
       columns: [
         {
+          kind: "chart",
           id: "trade_line",
-          type: "line",
+          chartType: "line",
           colSize: 1,
-          title: { text: "Trade Value Over Time" },
-          xAxisConcept: "TIME_PERIOD",
-          yAxisConcept: "OBS_VALUE",
-          data: "https://stats-sdmx-disseminate.pacificdata.org/rest/data/DF_IMTS/A.FJ+WS+TO.AMT.M+X._T._T._T.USD?dimensionAtObservation=AllDimensions&startPeriod=2010",
-          legend: { concept: "GEO_PICT", location: "bottom" },
-          labels: false,
+          title: "Trade Value Over Time",
+          xAxis: "TIME_PERIOD",
+          seriesBy: "GEO_PICT",
+          legendLocation: "bottom",
+          dataUrl:
+            "https://stats-sdmx-disseminate.pacificdata.org/rest/data/DF_IMTS/A.FJ+WS+TO.AMT.M+X._T._T._T.USD?startPeriod=2010",
           download: true,
         },
       ],
@@ -60,35 +63,36 @@ export const EXAMPLE_TRADE_LINE: SDMXDashboardConfig = {
   ],
 };
 
-export const EXAMPLE_KPI_DASHBOARD: SDMXDashboardConfig = {
-  id: "kpi_overview",
+export const EXAMPLE_KPI_AND_MAP: DashboardAuthoringConfig = {
+  id: "population_overview",
   colCount: 3,
   header: {
-    title: { text: "Key Indicators" },
+    title: "Population Snapshot",
+    subtitle: "Latest available values",
   },
   rows: [
     {
       columns: [
         {
+          kind: "kpi",
           id: "pop_value",
-          type: "value",
           colSize: 1,
-          title: { text: "Fiji Population" },
-          xAxisConcept: "OBS_VALUE",
-          data: "https://stats-sdmx-disseminate.pacificdata.org/rest/data/DF_POP_PROJ/A.FJ.MIDYEARPOPEST._T._T?dimensionAtObservation=AllDimensions&lastNObservations=1",
+          title: "Fiji Population",
+          dataUrl:
+            "https://stats-sdmx-disseminate.pacificdata.org/rest/data/DF_POP_PROJ/A.FJ.MIDYEARPOPEST._T._T?lastNObservations=1",
           unit: { text: "persons", location: "suffix" },
           decimals: 0,
         },
         {
-          id: "pop_chart",
-          type: "column",
+          kind: "map",
+          id: "pop_map",
           colSize: 2,
-          title: { text: "Population by Country" },
-          xAxisConcept: "GEO_PICT",
-          yAxisConcept: "OBS_VALUE",
-          data: "https://stats-sdmx-disseminate.pacificdata.org/rest/data/DF_POP_PROJ/A..MIDYEARPOPEST._T._T?dimensionAtObservation=AllDimensions&lastNObservations=1",
-          legend: { concept: "INDICATOR", location: "none" },
-          sortByValue: "desc",
+          title: "Population by Country",
+          dataUrl:
+            "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_PROJ,3.0/A..MIDYEARPOPEST._T._T?lastNObservations=1",
+          geoDimension: "GEO_PICT",
+          geoPreset: "pacific-eez",
+          colorScheme: "Blues",
           download: true,
         },
       ],
@@ -98,11 +102,11 @@ export const EXAMPLE_KPI_DASHBOARD: SDMXDashboardConfig = {
 
 export function examplesAsText(): string {
   return [
-    "Example 1 - Bar chart of population:\n" +
+    "Example 1 - Bar chart of population (authoring schema):\n" +
       JSON.stringify(EXAMPLE_POPULATION_CHART, null, 2),
-    "Example 2 - Line chart of trade trends:\n" +
+    "Example 2 - Line chart of trade trends (authoring schema):\n" +
       JSON.stringify(EXAMPLE_TRADE_LINE, null, 2),
-    "Example 3 - KPI + column chart dashboard:\n" +
-      JSON.stringify(EXAMPLE_KPI_DASHBOARD, null, 2),
+    "Example 3 - KPI + map dashboard (authoring schema):\n" +
+      JSON.stringify(EXAMPLE_KPI_AND_MAP, null, 2),
   ].join("\n\n");
 }
