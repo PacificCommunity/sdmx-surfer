@@ -1,67 +1,47 @@
 /**
- * Semantic search for SDMX dataflows using local embeddings.
+ * Semantic search for SDMX dataflows using Google Gemini embeddings.
  *
- * Model: ibm-granite/granite-embedding-small-english-r2 (47M params, 384 dims, 8K tokens)
- * ONNX quantized version from sirasagi62/granite-embedding-small-english-r2-ONNX
- * Stored locally in models/granite-embedding-small-r2/
+ * Model: gemini-embedding-001 via @ai-sdk/google (API-based, no local ONNX)
+ * Index stored at models/dataflow-index.json (pre-built via scripts/build-index.ts)
  */
 
-import { pipeline, type FeatureExtractionPipeline, env } from "@huggingface/transformers";
+import { embed as aiEmbed, embedMany as aiEmbedMany } from "ai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
-// Point transformers.js to our local model files, not HuggingFace CDN
-env.localModelPath = join(process.cwd(), "models");
-env.allowRemoteModels = false;
-
 const INDEX_PATH = join(process.cwd(), "models", "dataflow-index.json");
-const MODEL_ID = "granite-embedding-small-r2";
 
-// Singleton pipeline
-let pipelinePromise: Promise<FeatureExtractionPipeline> | null = null;
-
-function getEmbedder(): Promise<FeatureExtractionPipeline> {
-  if (!pipelinePromise) {
-    pipelinePromise = pipeline("feature-extraction", MODEL_ID, {
-      dtype: "q8",
-      device: "cpu",
-    } as Record<string, unknown>).catch((err: Error) => {
-      pipelinePromise = null;
-      throw err;
-    });
+function getEmbeddingModel() {
+  const apiKey = process.env.GOOGLE_AI_API_KEY;
+  if (!apiKey) {
+    throw new Error("GOOGLE_AI_API_KEY is required for semantic search");
   }
-  return pipelinePromise;
+  const google = createGoogleGenerativeAI({ apiKey });
+  return google.embeddingModel("gemini-embedding-001");
 }
 
 /**
- * Embed a single text string, returning a normalized 384-dim vector.
+ * Embed a single text string, returning a vector.
  */
 export async function embed(text: string): Promise<number[]> {
-  const extractor = await getEmbedder();
-  const output = await extractor(text, {
-    pooling: "mean",
-    normalize: true,
-  });
-  return Array.from(output.data as Float32Array).slice(0, 384);
+  const model = getEmbeddingModel();
+  const { embedding } = await aiEmbed({ model, value: text });
+  return embedding;
 }
 
 /**
- * Embed multiple texts in batch.
+ * Embed multiple texts in batch (chunks of 100 due to Google API limit).
  */
 export async function embedBatch(texts: string[]): Promise<number[][]> {
-  const extractor = await getEmbedder();
+  const model = getEmbeddingModel();
+  const BATCH_SIZE = 100;
   const results: number[][] = [];
 
-  // Process in batches of 8 to avoid memory issues
-  for (let i = 0; i < texts.length; i += 8) {
-    const batch = texts.slice(i, i + 8);
-    for (const text of batch) {
-      const output = await extractor(text, {
-        pooling: "mean",
-        normalize: true,
-      });
-      results.push(Array.from(output.data as Float32Array).slice(0, 384));
-    }
+  for (let i = 0; i < texts.length; i += BATCH_SIZE) {
+    const chunk = texts.slice(i, i + BATCH_SIZE);
+    const { embeddings } = await aiEmbedMany({ model, values: chunk });
+    results.push(...embeddings);
   }
 
   return results;
@@ -97,15 +77,19 @@ export function loadIndex(): DataflowIndex | null {
 }
 
 /**
- * Cosine similarity between two normalized vectors.
- * Since both are already normalized (from the embed function), dot product = cosine.
+ * Cosine similarity between two vectors.
  */
 function cosineSimilarity(a: number[], b: number[]): number {
   let dot = 0;
+  let normA = 0;
+  let normB = 0;
   for (let i = 0; i < a.length; i++) {
     dot += a[i] * b[i];
+    normA += a[i] * a[i];
+    normB += b[i] * b[i];
   }
-  return dot;
+  const denom = Math.sqrt(normA) * Math.sqrt(normB);
+  return denom === 0 ? 0 : dot / denom;
 }
 
 export interface SearchResult {
@@ -116,7 +100,7 @@ export interface SearchResult {
 }
 
 /**
- * Semantic search: embed the query, compare against the index, return top-k.
+ * Semantic search: embed the query via Google API, compare against the pre-built index, return top-k.
  */
 export async function semanticSearch(
   query: string,

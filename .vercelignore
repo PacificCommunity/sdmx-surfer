@@ -1,0 +1,3 @@
+# Exclude ONNX model files from deployment (too large for serverless)
+# Only the pre-built index (dataflow-index.json) is needed at runtime
+models/granite-embedding-small-r2/

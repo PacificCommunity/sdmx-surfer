@@ -5,15 +5,20 @@
  * Usage:
  *   npm run build-index
  *
- * Requires the MCP gateway running on localhost:8000.
+ * Requires:
+ *   - MCP gateway running (locally or on Railway)
+ *   - GOOGLE_AI_API_KEY set (for embedding via Gemini)
  *
  * This script:
  * 1. Fetches all dataflows from the MCP gateway via AI SDK's MCP client
  * 2. For each, fetches the structure (dimensions, codelists)
  * 3. Builds a rich text description for embedding
- * 4. Embeds each description with granite-embedding-small-r2
+ * 4. Embeds each description with Google gemini-embedding-001
  * 5. Saves the index to models/dataflow-index.json
  */
+
+import { config } from "dotenv";
+config({ path: ".env.local" });
 
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
