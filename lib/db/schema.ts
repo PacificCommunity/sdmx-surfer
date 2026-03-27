@@ -133,3 +133,12 @@ export const userApiKeys = pgTable(
   },
   (table) => [primaryKey({ columns: [table.user_id, table.provider] })],
 );
+
+// Magic link reference IDs — stores callback URLs server-side
+// so they never appear in email links (defeats Outlook SafeLinks)
+export const authMagicLinkRefs = pgTable("auth_magic_link_refs", {
+  refId: text("ref_id").primaryKey(),
+  callbackUrl: text("callback_url").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+});

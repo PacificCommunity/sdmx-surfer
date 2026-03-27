@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 /**
@@ -13,9 +13,43 @@ import { useSearchParams } from "next/navigation";
 
 function VerifyContent() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("url");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!callbackUrl) {
+  // Support both ?ref=<id> (production) and ?url=<callback> (dev fallback)
+  const refId = searchParams.get("ref");
+  const directUrl = searchParams.get("url");
+
+  async function handleSignIn() {
+    setLoading(true);
+    setError(null);
+
+    if (directUrl) {
+      // Dev fallback — URL passed directly
+      window.location.href = directUrl;
+      return;
+    }
+
+    if (!refId) return;
+
+    try {
+      const res = await fetch("/api/auth/magic-link-ref?ref=" + encodeURIComponent(refId));
+      const data = await res.json();
+
+      if (!res.ok || !data.url) {
+        setError(data.error || "This link has expired or already been used.");
+        setLoading(false);
+        return;
+      }
+
+      window.location.href = data.url;
+    } catch {
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
+    }
+  }
+
+  if (!refId && !directUrl) {
     return (
       <div className="rounded-[var(--radius-xl)] bg-surface-card shadow-ambient ghost-border p-8 text-center">
         <p className="text-sm text-on-surface-variant">
@@ -54,12 +88,19 @@ function VerifyContent() {
       <p className="mt-2 text-sm text-on-surface-variant">
         Click the button below to complete your sign in to the SPC Dashboard Builder.
       </p>
-      <a
-        href={callbackUrl}
-        className="ocean-gradient mt-6 inline-block rounded-full px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95"
+      {error && (
+        <p className="mt-4 rounded-[var(--radius-sm)] bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
+          {error}
+        </p>
+      )}
+      <button
+        type="button"
+        onClick={handleSignIn}
+        disabled={loading}
+        className="ocean-gradient mt-6 inline-block rounded-full px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
       >
-        Sign in now
-      </a>
+        {loading ? "Signing in..." : "Sign in now"}
+      </button>
       <p className="mt-4 text-xs text-on-surface-variant">
         This link expires in 15 minutes.
       </p>

@@ -58,14 +58,43 @@ async function sendMagicLink(params: {
   }
 
   // In production: send via Resend
-  // Wrap the callback URL through /login/verify to defeat Outlook SafeLinks
-  // (SafeLinks pre-fetches GET URLs but can't click buttons on a page)
+  // Store the callback URL server-side and send only a reference ID in the email.
+  // This defeats Outlook SafeLinks which extracts and pre-fetches URLs from emails,
+  // consuming the single-use NextAuth token before the user clicks.
   const { Resend } = await import("resend");
+  const crypto = await import("node:crypto");
   const resend = new Resend(process.env.RESEND_API_KEY);
   const from = process.env.EMAIL_FROM || "noreply@example.com";
   const host = new URL(url).host;
   const baseUrl = process.env.NEXTAUTH_URL || "https://" + host;
-  const verifyUrl = baseUrl + "/login/verify?url=" + encodeURIComponent(url);
+
+  // Store the callback URL in the database with a random reference ID
+  const refId = crypto.randomBytes(16).toString("hex");
+  try {
+    const { db } = await import("./db/index");
+    const { sql } = await import("drizzle-orm");
+    await db.execute(
+      sql`INSERT INTO auth_magic_link_refs (ref_id, callback_url, expires_at)
+          VALUES (${refId}, ${url}, NOW() + INTERVAL '15 minutes')`
+    );
+  } catch (err) {
+    // If DB storage fails, fall back to direct URL (less safe but functional)
+    console.error("Failed to store magic link ref:", err);
+    const verifyUrl = baseUrl + "/login/verify?url=" + encodeURIComponent(url);
+    const { error } = await resend.emails.send({
+      from,
+      to: identifier,
+      subject: "Sign in to " + host,
+      html: "<p>Click the link below to sign in:</p>" +
+        '<p><a href="' + verifyUrl + '">Sign in</a></p>' +
+        "<p>This link expires in 15 minutes.</p>",
+    });
+    if (error) throw new Error("Failed to send magic link: " + error.message);
+    return;
+  }
+
+  // The email contains only the ref ID — no auth token or callback URL
+  const verifyUrl = baseUrl + "/login/verify?ref=" + refId;
   const subject = "Sign in to " + host;
   const body =
     "<p>Click the link below to sign in to the SPC Dashboard Builder:</p>" +
