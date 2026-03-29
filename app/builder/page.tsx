@@ -124,9 +124,9 @@ interface ModelOption {
 }
 
 const FREE_TIER: ModelOption = {
-  provider: "google",
-  model: "gemini-3-flash-preview",
-  label: "Gemini 3 Flash (free)",
+  provider: "anthropic",
+  model: "claude-sonnet-4-6",
+  label: "Sonnet 4.6 (free)",
 };
 
 export default function BuilderPage() {

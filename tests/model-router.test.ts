@@ -38,25 +38,13 @@ function mockDbRows(rows: unknown[]) {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  delete process.env.GOOGLE_AI_API_KEY;
   process.env.ANTHROPIC_API_KEY = "test-anthropic-key";
   process.env.ENCRYPTION_SECRET = "test-secret-at-least-16-chars-long";
 });
 
 describe("model-router", () => {
   describe("fallback chain", () => {
-    it("returns Gemini free tier when user has no BYOK keys and GOOGLE_AI_API_KEY is set", async () => {
-      process.env.GOOGLE_AI_API_KEY = "test-google-key";
-
-      const config = await getModelForUser("user-no-keys");
-
-      expect(config.providerId).toBe("google");
-      expect(config.modelId).toBe("gemini-3-flash-preview");
-    });
-
-    it("falls back to Anthropic from env when no BYOK keys and no GOOGLE_AI_API_KEY", async () => {
-      // No GOOGLE_AI_API_KEY set (deleted in beforeEach)
-
+    it("returns Anthropic Sonnet free tier when user has no BYOK keys", async () => {
       const config = await getModelForUser("user-no-keys");
 
       expect(config.providerId).toBe("anthropic");
@@ -107,9 +95,7 @@ describe("model-router", () => {
       expect(config.modelId).toBe("gemini-3.1-pro-preview");
     });
 
-    it("skips corrupt BYOK key and falls through to free tier", async () => {
-      process.env.GOOGLE_AI_API_KEY = "test-google-key";
-
+    it("skips corrupt BYOK key and falls through to platform Anthropic", async () => {
       mockDbRows([{
         provider: "anthropic",
         encrypted_key: "CORRUPT",
@@ -118,14 +104,11 @@ describe("model-router", () => {
 
       const config = await getModelForUser("user-with-corrupt-key");
 
-      // Should skip the corrupt key and fall back to free tier
-      expect(config.providerId).toBe("google");
-      expect(config.modelId).toBe("gemini-3-flash-preview");
+      expect(config.providerId).toBe("anthropic");
+      expect(config.modelId).toBe("claude-sonnet-4-6");
     });
 
-    it("handles DB errors gracefully and falls back to free tier", async () => {
-      process.env.GOOGLE_AI_API_KEY = "test-google-key";
-
+    it("handles DB errors gracefully and falls back to platform Anthropic", async () => {
       (db.select as ReturnType<typeof vi.fn>).mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
@@ -138,8 +121,8 @@ describe("model-router", () => {
 
       const config = await getModelForUser("user-db-error");
 
-      expect(config.providerId).toBe("google");
-      expect(config.modelId).toBe("gemini-3-flash-preview");
+      expect(config.providerId).toBe("anthropic");
+      expect(config.modelId).toBe("claude-sonnet-4-6");
     });
   });
 

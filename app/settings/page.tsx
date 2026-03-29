@@ -303,8 +303,8 @@ export default function SettingsPage() {
               </div>
             </div>
             <p className="text-sm text-on-surface-variant">
-              <span className="font-semibold text-on-surface">Free tier uses Gemini 3 Flash.</span>
-              {" "}Add your own API key for premium models and higher rate limits.
+              <span className="font-semibold text-on-surface">Free tier uses Claude Sonnet 4.6.</span>
+              {" "}Add your own API key for alternative models or higher rate limits.
             </p>
           </div>
         </div>

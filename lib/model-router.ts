@@ -31,15 +31,18 @@ export async function getModelForUser(
     const byokConfig = await tryByokProvider(userId, override.provider, override.model);
     if (byokConfig) return byokConfig;
 
-    // If they chose the free-tier google, use platform key
-    if (override.provider === "google") {
-      const platformKey = process.env.GOOGLE_AI_API_KEY;
+    // If they chose the free-tier anthropic, use platform key
+    if (override.provider === "anthropic") {
+      const platformKey = process.env.ANTHROPIC_API_KEY;
       if (platformKey) {
-        const provider = createGoogleGenerativeAI({ apiKey: platformKey });
+        const provider = createAnthropic({ apiKey: platformKey });
         return {
           model: provider(override.model),
           modelId: override.model,
-          providerId: "google",
+          providerId: "anthropic",
+          providerOptions: {
+            anthropic: { cacheControl: { type: "ephemeral" } },
+          },
         };
       }
     }
@@ -107,19 +110,7 @@ export async function getModelForUser(
     }
   }
 
-  // No BYOK key found — try platform free tier (Google)
-  const platformKey = process.env.GOOGLE_AI_API_KEY;
-  if (platformKey) {
-    const modelId = "gemini-3-flash-preview";
-    const provider = createGoogleGenerativeAI({ apiKey: platformKey });
-    return {
-      model: provider(modelId),
-      modelId,
-      providerId: "google",
-    };
-  }
-
-  // Last resort: Anthropic from environment (development fallback)
+  // No BYOK key found — use platform Anthropic key (Sonnet 4.6)
   const modelId = "claude-sonnet-4-6";
   return {
     model: anthropic(modelId),
