@@ -145,6 +145,7 @@ export default function ExplorePage() {
   const [semanticResults, setSemanticResults] = useState<Dataflow[] | null>(null);
   const [semanticLoading, setSemanticLoading] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   // Load all dataflows on mount
   useEffect(() => {
@@ -488,23 +489,45 @@ export default function ExplorePage() {
         {/* Dataflow grid — grouped or flat */}
         {!loading && !error && showGrouped && (
           <div className="space-y-8">
-            {grouped.groups.map((group) => (
-              <section key={group.key}>
-                <div className="mb-3 flex items-center gap-2">
-                  <h2 className="font-[family-name:var(--font-manrope)] text-sm font-bold text-on-surface">
-                    {group.label}
-                  </h2>
-                  <span className="rounded-full bg-surface-high px-2 py-0.5 text-[10px] font-medium text-on-surface-variant">
-                    {group.dataflows.length}
-                  </span>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {group.dataflows.map((df) => (
-                    <DataflowCard key={df.id} df={df} />
-                  ))}
-                </div>
-              </section>
-            ))}
+            {grouped.groups.map((group) => {
+              const isExpanded = expandedGroups.has(group.key);
+              return (
+                <section key={group.key}>
+                  <button
+                    onClick={() => setExpandedGroups((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(group.key)) next.delete(group.key);
+                      else next.add(group.key);
+                      return next;
+                    })}
+                    className="mb-3 flex w-full items-center gap-2 text-left"
+                  >
+                    <svg
+                      className={"h-4 w-4 shrink-0 text-on-surface-variant transition-transform " + (isExpanded ? "rotate-90" : "")}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                    <h2 className="font-[family-name:var(--font-manrope)] text-sm font-bold text-on-surface">
+                      {group.label}
+                    </h2>
+                    <span className="rounded-full bg-surface-high px-2 py-0.5 text-[10px] font-medium text-on-surface-variant">
+                      {group.dataflows.length}
+                    </span>
+                  </button>
+                  {isExpanded && (
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {group.dataflows.map((df) => (
+                        <DataflowCard key={df.id} df={df} />
+                      ))}
+                    </div>
+                  )}
+                </section>
+              );
+            })}
 
             {/* Ungrouped dataflows — flat list, no "Other" heading */}
             {grouped.remaining.length > 0 && (

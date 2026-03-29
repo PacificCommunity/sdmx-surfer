@@ -49,7 +49,6 @@ export async function GET(
     );
 
     if (entry?.structure) {
-      // Serve structure from index — matches the shape the detail page expects
       return Response.json({
         structure: {
           dataflow: {
@@ -59,6 +58,7 @@ export async function GET(
           },
           structure: entry.structure,
         },
+        categories: entry.categories || [],
         diagram,
       });
     }

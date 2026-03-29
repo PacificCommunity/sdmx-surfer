@@ -11,6 +11,12 @@ interface Dimension {
   codelist: string | null;
 }
 
+interface Category {
+  scheme: string;
+  id: string;
+  name: string;
+}
+
 interface Structure {
   dataflow: {
     id: string;
@@ -43,11 +49,45 @@ interface DimensionCode {
   description?: string;
 }
 
+// Topic badge colors (same as explore page)
+const TOPIC_COLORS: Record<string, { bg: string; text: string; ring: string }> = {
+  ECO: { bg: "bg-amber-50",  text: "text-amber-700",   ring: "ring-amber-200" },
+  ENV: { bg: "bg-emerald-50", text: "text-emerald-700", ring: "ring-emerald-200" },
+  HEA: { bg: "bg-rose-50",   text: "text-rose-700",    ring: "ring-rose-200" },
+  IND: { bg: "bg-slate-50",  text: "text-slate-700",   ring: "ring-slate-200" },
+  POP: { bg: "bg-blue-50",   text: "text-blue-700",    ring: "ring-blue-200" },
+  SOC: { bg: "bg-violet-50", text: "text-violet-700",  ring: "ring-violet-200" },
+  XDO: { bg: "bg-teal-50",   text: "text-teal-700",    ring: "ring-teal-200" },
+};
+
+const DEV_FRAMEWORK_SHORT: Record<string, string> = {
+  SDG: "SDGs",
+  NMDI: "NMDI",
+  BP50: "BP2050",
+};
+
+function CategoryBadge({ category }: { category: Category }) {
+  if (category.scheme === "CAS_COM_DEV") {
+    return (
+      <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary ring-1 ring-inset ring-primary/20">
+        {DEV_FRAMEWORK_SHORT[category.id] || category.name}
+      </span>
+    );
+  }
+  const colors = TOPIC_COLORS[category.id] || { bg: "bg-gray-50", text: "text-gray-700", ring: "ring-gray-200" };
+  return (
+    <span className={"inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset " + colors.bg + " " + colors.text + " " + colors.ring}>
+      {category.name}
+    </span>
+  );
+}
+
 export default function DataflowDetailPage() {
   const params = useParams();
   const dataflowId = params.id as string;
 
   const [structure, setStructure] = useState<Structure | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [diagram, setDiagram] = useState<DiagramData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,20 +97,23 @@ export default function DataflowDetailPage() {
   const [dimCodes, setDimCodes] = useState<Record<string, DimensionCode[]>>({});
   const [codesLoading, setCodesLoading] = useState<string | null>(null);
 
-  // Load structure + diagram on mount
+  // Collapsible sections
+  const [showTechnical, setShowTechnical] = useState(false);
+  const [showDiagram, setShowDiagram] = useState(false);
+
   useEffect(() => {
     fetch("/api/explore/" + dataflowId)
       .then((r) => r.json())
       .then((data) => {
         if (data.error) throw new Error(data.error);
         setStructure(data.structure);
+        setCategories(data.categories || []);
         setDiagram(data.diagram);
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [dataflowId]);
 
-  // Load dimension codes when expanded
   const toggleDimension = (dimId: string) => {
     if (expandedDim === dimId) {
       setExpandedDim(null);
@@ -78,7 +121,7 @@ export default function DataflowDetailPage() {
     }
     setExpandedDim(dimId);
 
-    if (dimCodes[dimId]) return; // already loaded
+    if (dimCodes[dimId]) return;
 
     setCodesLoading(dimId);
     fetch("/api/explore/" + dataflowId + "?codes=" + dimId)
@@ -97,11 +140,16 @@ export default function DataflowDetailPage() {
     return (
       <div className="min-h-screen bg-surface">
         <Header dataflowId={dataflowId} />
-        <main className="mx-auto max-w-6xl px-6 py-8">
+        <main className="mx-auto max-w-4xl px-6 py-8">
           <div className="space-y-6">
             <div className="shimmer h-8 w-96 rounded-[var(--radius-md)]" />
             <div className="shimmer h-4 w-full rounded-[var(--radius-sm)]" />
-            <div className="shimmer h-64 w-full rounded-[var(--radius-xl)]" />
+            <div className="shimmer h-4 w-2/3 rounded-[var(--radius-sm)]" />
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 4 }, (_, i) => (
+                <div key={i} className="shimmer h-20 rounded-[var(--radius-xl)]" />
+              ))}
+            </div>
           </div>
         </main>
       </div>
@@ -112,7 +160,7 @@ export default function DataflowDetailPage() {
     return (
       <div className="min-h-screen bg-surface">
         <Header dataflowId={dataflowId} />
-        <main className="mx-auto max-w-6xl px-6 py-8">
+        <main className="mx-auto max-w-4xl px-6 py-8">
           <div className="submerged-overlay rounded-[var(--radius-2xl)] bg-surface-low p-12 text-center">
             <p className="text-sm text-on-surface-variant">
               {error || "Dataflow not found"}
@@ -134,9 +182,17 @@ export default function DataflowDetailPage() {
     <div className="min-h-screen bg-surface">
       <Header dataflowId={dataflowId} name={structure.dataflow.name} />
 
-      <main className="mx-auto max-w-6xl px-6 py-8">
-        {/* Title + actions */}
+      <main className="mx-auto max-w-4xl px-6 py-8">
+        {/* Title + description + categories */}
         <div className="mb-8">
+          {categories.length > 0 && (
+            <div className="mb-3 flex flex-wrap gap-1.5">
+              {categories.map((c) => (
+                <CategoryBadge key={c.scheme + ":" + c.id} category={c} />
+              ))}
+            </div>
+          )}
+
           <p className="type-label-md mb-1 text-on-tertiary-fixed-variant">
             {dataflowId}
           </p>
@@ -144,11 +200,12 @@ export default function DataflowDetailPage() {
             {structure.dataflow.name}
           </h2>
           {structure.dataflow.description && (
-            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-on-surface-variant">
+            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-on-surface-variant">
               {structure.dataflow.description}
             </p>
           )}
-          <div className="mt-4 flex gap-2">
+
+          <div className="mt-5 flex gap-2">
             <button
               type="button"
               onClick={() => {
@@ -172,7 +229,7 @@ export default function DataflowDetailPage() {
               }}
               className="ocean-gradient rounded-full px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95"
             >
-              Explore
+              Explore in Builder
             </button>
             <Link
               href="/explore"
@@ -183,90 +240,67 @@ export default function DataflowDetailPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Left: Dimensions + Attributes */}
-          <div className="space-y-4 lg:col-span-1">
-            {/* Key template */}
-            <div className="rounded-[var(--radius-xl)] bg-surface-card p-5 shadow-ambient">
-              <h3 className="type-label-md mb-3 text-on-tertiary-fixed-variant">
-                Key Structure
-              </h3>
-              <code className="block rounded-[var(--radius-md)] bg-surface-high/50 px-3 py-2 text-xs text-on-surface">
-                {structure.structure.key_template}
-              </code>
-            </div>
-
-            {/* Dimensions */}
-            <div className="rounded-[var(--radius-xl)] bg-surface-card p-5 shadow-ambient">
-              <h3 className="type-label-md mb-3 text-on-tertiary-fixed-variant">
-                Dimensions ({dims.length + (timeDim ? 1 : 0)})
-              </h3>
-              <div className="space-y-1">
-                {dims.map((dim) => (
-                  <div key={dim.id}>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        dim.codelist ? toggleDimension(dim.id) : undefined
-                      }
-                      className={
-                        "flex w-full items-center justify-between rounded-[var(--radius-md)] px-3 py-2 text-left transition-colors " +
-                        (expandedDim === dim.id
-                          ? "bg-primary/5 text-primary"
-                          : "text-on-surface hover:bg-surface-low") +
-                        (dim.codelist ? " cursor-pointer" : " cursor-default")
-                      }
-                    >
-                      <div>
-                        <span className="text-xs font-semibold">
-                          [{dim.position}] {dim.id}
-                        </span>
-                        {dim.codelist && (
-                          <span className="ml-2 text-[10px] text-on-surface-variant">
-                            {dim.codelist.split(":").pop()?.split("(")[0]}
-                          </span>
-                        )}
-                      </div>
-                      {dim.codelist && (
-                        <svg
-                          className={
-                            "h-3 w-3 transition-transform " +
-                            (expandedDim === dim.id ? "rotate-180" : "")
-                          }
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-                          />
-                        </svg>
+        {/* Dimensions — the main thing users care about */}
+        <section className="mb-6">
+          <h3 className="mb-3 font-[family-name:var(--font-manrope)] text-sm font-bold text-on-surface">
+            What you can explore
+          </h3>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {dims.map((dim) => {
+              const isExpanded = expandedDim === dim.id;
+              const codelistName = dim.codelist
+                ? dim.codelist.split(":").pop()?.split("(")[0] || ""
+                : "";
+              return (
+                <div
+                  key={dim.id}
+                  className={"rounded-[var(--radius-xl)] bg-surface-card shadow-ambient transition-all " +
+                    (isExpanded ? "sm:col-span-2 lg:col-span-3" : "")}
+                >
+                  <button
+                    type="button"
+                    onClick={() => dim.codelist ? toggleDimension(dim.id) : undefined}
+                    className={"flex w-full items-center justify-between p-4 text-left " +
+                      (dim.codelist ? "cursor-pointer" : "cursor-default")}
+                  >
+                    <div>
+                      <span className="text-sm font-semibold text-on-surface">
+                        {dim.id}
+                      </span>
+                      {codelistName && (
+                        <p className="mt-0.5 text-xs text-on-surface-variant">
+                          {codelistName}
+                        </p>
                       )}
-                    </button>
+                    </div>
+                    {dim.codelist && (
+                      <svg
+                        className={"h-4 w-4 shrink-0 text-on-surface-variant transition-transform " +
+                          (isExpanded ? "rotate-180" : "")}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                      </svg>
+                    )}
+                  </button>
 
-                    {/* Expanded codes */}
-                    {expandedDim === dim.id && (
-                      <div className="ml-3 mt-1 max-h-60 overflow-y-auto rounded-[var(--radius-md)] bg-surface-low p-2">
-                        {codesLoading === dim.id ? (
-                          <div className="space-y-1 p-2">
-                            {Array.from({ length: 5 }, (_, i) => (
-                              <div
-                                key={i}
-                                className="shimmer h-3 w-full rounded-[var(--radius-sm)]"
-                              />
-                            ))}
-                          </div>
-                        ) : dimCodes[dim.id]?.length ? (
+                  {isExpanded && (
+                    <div className="border-t border-surface-high px-4 pb-4 pt-2">
+                      {codesLoading === dim.id ? (
+                        <div className="space-y-1.5 py-2">
+                          {Array.from({ length: 5 }, (_, i) => (
+                            <div key={i} className="shimmer h-3 w-full rounded-[var(--radius-sm)]" />
+                          ))}
+                        </div>
+                      ) : dimCodes[dim.id]?.length ? (
+                        <div className="max-h-72 overflow-y-auto">
                           <table className="w-full text-xs">
                             <tbody>
                               {dimCodes[dim.id].map((code) => (
-                                <tr
-                                  key={code.id}
-                                  className="transition-colors hover:bg-surface-card"
-                                >
+                                <tr key={code.id} className="transition-colors hover:bg-surface-low">
                                   <td className="px-2 py-1 font-mono font-semibold text-primary">
                                     {code.id}
                                   </td>
@@ -277,96 +311,131 @@ export default function DataflowDetailPage() {
                               ))}
                             </tbody>
                           </table>
-                        ) : (
-                          <p className="p-2 text-xs text-on-surface-variant">
-                            No codes available
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
-
-                {/* Time dimension */}
-                {timeDim && (
-                  <div className="flex items-center rounded-[var(--radius-md)] px-3 py-2 text-on-surface">
-                    <span className="text-xs font-semibold">
-                      [{timeDim.position}] {timeDim.id}
-                    </span>
-                    <span className="ml-2 rounded-full bg-secondary-container px-2 py-0.5 text-[10px] font-semibold text-on-secondary-container">
-                      Time
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Attributes */}
-            <div className="rounded-[var(--radius-xl)] bg-surface-card p-5 shadow-ambient">
-              <h3 className="type-label-md mb-3 text-on-tertiary-fixed-variant">
-                Attributes ({structure.structure.attributes.length})
-              </h3>
-              <div className="space-y-1">
-                {structure.structure.attributes.map((attr) => (
-                  <div
-                    key={attr.id}
-                    className="flex items-center justify-between rounded-[var(--radius-md)] px-3 py-1.5"
-                  >
-                    <span className="text-xs font-semibold text-on-surface">
-                      {attr.id}
-                    </span>
-                    <span className="rounded-full bg-surface-high px-2 py-0.5 text-[10px] text-on-surface-variant">
-                      {attr.assignment_status}
-                    </span>
-                  </div>
-                ))}
-                <div className="flex items-center rounded-[var(--radius-md)] px-3 py-1.5">
-                  <span className="text-xs font-semibold text-on-surface">
-                    {structure.structure.measure}
-                  </span>
-                  <span className="ml-2 rounded-full bg-tertiary-fixed px-2 py-0.5 text-[10px] font-semibold text-tertiary-container">
-                    Measure
-                  </span>
+                        </div>
+                      ) : (
+                        <p className="py-2 text-xs text-on-surface-variant">
+                          No codes available
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
-              </div>
-            </div>
-          </div>
+              );
+            })}
 
-          {/* Right: Structure diagram + interpretation */}
-          <div className="space-y-4 lg:col-span-2">
-            {/* Mermaid diagram */}
-            {diagram && (
+            {/* Time dimension */}
+            {timeDim && (
+              <div className="flex items-center gap-2 rounded-[var(--radius-xl)] bg-surface-card p-4 shadow-ambient">
+                <span className="text-sm font-semibold text-on-surface">
+                  {timeDim.id}
+                </span>
+                <span className="rounded-full bg-secondary-container px-2 py-0.5 text-[10px] font-semibold text-on-secondary-container">
+                  Time
+                </span>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Structure diagram — collapsible */}
+        {diagram && (
+          <section className="mb-6">
+            <button
+              onClick={() => setShowDiagram((v) => !v)}
+              className="mb-3 flex items-center gap-2"
+            >
+              <svg
+                className={"h-4 w-4 shrink-0 text-on-surface-variant transition-transform " + (showDiagram ? "rotate-90" : "")}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+              <h3 className="font-[family-name:var(--font-manrope)] text-sm font-bold text-on-surface">
+                Structure Diagram
+              </h3>
+            </button>
+            {showDiagram && (
               <div className="rounded-[var(--radius-xl)] bg-surface-card p-6 shadow-ambient">
-                <h3 className="type-label-md mb-4 text-on-tertiary-fixed-variant">
-                  Structure Diagram
-                </h3>
                 <MermaidDiagram code={diagram.mermaid_diagram} />
               </div>
             )}
+          </section>
+        )}
 
-            {/* Interpretation */}
-            {diagram && diagram.interpretation.length > 0 && (
-              <div className="rounded-[var(--radius-xl)] bg-surface-card p-6 shadow-ambient">
-                <h3 className="type-label-md mb-3 text-on-tertiary-fixed-variant">
-                  Structure Summary
-                </h3>
-                <div className="space-y-1 text-xs leading-relaxed text-on-surface-variant">
-                  {diagram.interpretation.map((line, i) => {
-                    if (!line.trim()) return <div key={i} className="h-2" />;
-                    if (line.startsWith("**")) {
-                      return (
-                        <p key={i} className="font-semibold text-on-surface">
-                          {line.replace(/\*\*/g, "")}
-                        </p>
-                      );
-                    }
-                    return <p key={i}>{line.replace(/^\s+-\s/, "  ")}</p>;
-                  })}
+        {/* Technical details — collapsible */}
+        <section className="mb-6">
+          <button
+            onClick={() => setShowTechnical((v) => !v)}
+            className="mb-3 flex items-center gap-2"
+          >
+            <svg
+              className={"h-4 w-4 shrink-0 text-on-surface-variant transition-transform " + (showTechnical ? "rotate-90" : "")}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+            <h3 className="font-[family-name:var(--font-manrope)] text-sm font-bold text-on-surface">
+              Technical Details
+            </h3>
+          </button>
+          {showTechnical && (
+            <div className="space-y-4">
+              {/* Key template */}
+              <div className="rounded-[var(--radius-xl)] bg-surface-card p-5 shadow-ambient">
+                <h4 className="type-label-md mb-2 text-on-tertiary-fixed-variant">
+                  Key Structure
+                </h4>
+                <code className="block rounded-[var(--radius-md)] bg-surface-high/50 px-3 py-2 text-xs text-on-surface">
+                  {structure.structure.key_template}
+                </code>
+              </div>
+
+              {/* Attributes */}
+              <div className="rounded-[var(--radius-xl)] bg-surface-card p-5 shadow-ambient">
+                <h4 className="type-label-md mb-2 text-on-tertiary-fixed-variant">
+                  Attributes ({structure.structure.attributes.length})
+                </h4>
+                <div className="space-y-1">
+                  {structure.structure.attributes.map((attr) => (
+                    <div
+                      key={attr.id}
+                      className="flex items-center justify-between rounded-[var(--radius-md)] px-3 py-1.5"
+                    >
+                      <span className="text-xs font-semibold text-on-surface">
+                        {attr.id}
+                      </span>
+                      <span className="rounded-full bg-surface-high px-2 py-0.5 text-[10px] text-on-surface-variant">
+                        {attr.assignment_status}
+                      </span>
+                    </div>
+                  ))}
+                  <div className="flex items-center rounded-[var(--radius-md)] px-3 py-1.5">
+                    <span className="text-xs font-semibold text-on-surface">
+                      {structure.structure.measure}
+                    </span>
+                    <span className="ml-2 rounded-full bg-tertiary-fixed px-2 py-0.5 text-[10px] font-semibold text-tertiary-container">
+                      Measure
+                    </span>
+                  </div>
                 </div>
               </div>
-            )}
-          </div>
-        </div>
+
+              {/* DSD ID */}
+              <div className="rounded-[var(--radius-xl)] bg-surface-card p-5 shadow-ambient">
+                <h4 className="type-label-md mb-2 text-on-tertiary-fixed-variant">
+                  Data Structure Definition
+                </h4>
+                <code className="text-xs text-on-surface">{structure.structure.id}</code>
+              </div>
+            </div>
+          )}
+        </section>
       </main>
     </div>
   );
@@ -383,7 +452,7 @@ function Header({
 }) {
   return (
     <header className="glass-panel shadow-ambient sticky top-0 z-50 px-6 py-3">
-      <div className="mx-auto flex max-w-6xl items-center justify-between">
+      <div className="mx-auto flex max-w-4xl items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
             href="/explore"
