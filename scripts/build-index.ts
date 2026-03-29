@@ -165,7 +165,7 @@ async function main() {
   // 5. Save index
   console.log("5. Saving index...");
   const index = {
-    modelId: "granite-embedding-small-english-r2 (quantized ONNX)",
+    modelId: "gemini-embedding-001",
     createdAt: new Date().toISOString(),
     entries: entries.map((e, i) => ({
       ...e,
