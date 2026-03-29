@@ -49,12 +49,40 @@ export async function embedBatch(texts: string[]): Promise<number[][]> {
 
 // ── Index types ──
 
+export interface DataflowDimension {
+  id: string;
+  position: number;
+  type: string;
+  codelist: string | null;
+}
+
+export interface DataflowAttribute {
+  id: string;
+  assignment_status: string;
+}
+
+export interface DataflowStructure {
+  id: string;
+  key_template: string;
+  dimensions: DataflowDimension[];
+  attributes: DataflowAttribute[];
+  measure: string;
+}
+
+export interface DataflowCategory {
+  scheme: string;
+  id: string;
+  name: string;
+}
+
 export interface DataflowIndexEntry {
   id: string;
   name: string;
   description: string;
   richText: string;
   embedding: number[];
+  categories: DataflowCategory[];
+  structure: DataflowStructure | null;
 }
 
 export interface DataflowIndex {
@@ -122,4 +150,13 @@ export async function semanticSearch(
 
   scored.sort((a, b) => b.score - a.score);
   return scored.slice(0, topK);
+}
+
+/**
+ * Look up a single dataflow entry by ID (including its pre-built structure).
+ */
+export function getDataflowEntry(dataflowId: string): DataflowIndexEntry | null {
+  const index = loadIndex();
+  if (!index) return null;
+  return index.entries.find((e) => e.id === dataflowId) || null;
 }

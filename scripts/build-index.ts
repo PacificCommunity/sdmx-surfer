@@ -26,6 +26,71 @@ import { createMCPClient } from "@ai-sdk/mcp";
 
 const MCP_URL = process.env.MCP_GATEWAY_URL || "http://localhost:8000/mcp";
 const INDEX_PATH = join(process.cwd(), "models", "dataflow-index.json");
+const STAT_BASE = "https://stats-nsi-stable.pacificdata.org/rest";
+
+// ── Category fetching from .Stat SDMX REST API ──
+
+interface CategoryTag {
+  scheme: string;
+  id: string;
+  name: string;
+}
+
+/**
+ * Fetch category-to-dataflow mappings from SPC .Stat category schemes.
+ * Returns a map: dataflow ID → array of category tags.
+ */
+async function fetchCategories(): Promise<Map<string, CategoryTag[]>> {
+  const map = new Map<string, CategoryTag[]>();
+  const schemes = ["CAS_COM_TOPIC", "CAS_COM_DEV"];
+
+  for (const scheme of schemes) {
+    const url = STAT_BASE + "/categoryscheme/SPC/" + scheme + "/latest?references=all";
+    try {
+      const resp = await fetch(url, { headers: { Accept: "application/json", "Accept-Language": "en" } });
+      if (!resp.ok) {
+        console.warn("  Warning: could not fetch " + scheme + " (" + String(resp.status) + ")");
+        continue;
+      }
+      const data = (await resp.json()) as {
+        references?: Record<string, {
+          items?: Array<{
+            id: string;
+            name: string;
+            links?: Array<{ href: string; rel: string }>;
+          }>;
+        }>;
+      };
+
+      const refs = data.references || {};
+      for (const ref of Object.values(refs)) {
+        for (const item of ref.items || []) {
+          const dfLinks = (item.links || [])
+            .filter((l) => l.rel === "dataflow")
+            .map((l) => {
+              const m = l.href.match(/Dataflow=SPC:([^(]+)/);
+              return m ? m[1] : null;
+            })
+            .filter((id): id is string => id !== null);
+
+          for (const dfId of dfLinks) {
+            const existing = map.get(dfId) || [];
+            // Deduplicate within the same scheme+id
+            if (!existing.some((t) => t.scheme === scheme && t.id === item.id)) {
+              existing.push({ scheme, id: item.id, name: item.name });
+            }
+            map.set(dfId, existing);
+          }
+        }
+      }
+      console.log("  Fetched " + scheme + ": " + String(map.size) + " dataflows categorised so far");
+    } catch (err) {
+      console.warn("  Warning: failed to fetch " + scheme + ":", err instanceof Error ? err.message : err);
+    }
+  }
+
+  return map;
+}
 
 // ── Main ──
 
@@ -35,11 +100,30 @@ interface Dataflow {
   description?: string;
 }
 
-interface Structure {
-  structure?: {
-    dimensions?: Array<{ id: string; codelist?: string | null }>;
-    attributes?: Array<{ id: string }>;
-  };
+interface Dimension {
+  id: string;
+  position: number;
+  type: string;
+  codelist: string | null;
+}
+
+interface Attribute {
+  id: string;
+  assignment_status: string;
+}
+
+interface StructureDetail {
+  id: string;
+  key_template: string;
+  key_example?: string;
+  dimensions: Dimension[];
+  attributes: Attribute[];
+  measure: string;
+}
+
+interface StructureResponse {
+  dataflow?: { id: string; name: string; description?: string; version?: string };
+  structure?: StructureDetail;
 }
 
 async function main() {
@@ -95,7 +179,7 @@ async function main() {
 
   // 2. Fetch structures
   console.log("2. Fetching structures...");
-  const structures = new Map<string, Structure | null>();
+  const structures = new Map<string, StructureResponse | null>();
   for (let i = 0; i < allDataflows.length; i++) {
     const df = allDataflows[i];
     process.stdout.write(
@@ -110,7 +194,7 @@ async function main() {
     try {
       const s = (await call("get_dataflow_structure", {
         dataflow_id: df.id,
-      })) as Structure;
+      })) as StructureResponse;
       structures.set(df.id, s);
     } catch {
       structures.set(df.id, null);
@@ -118,21 +202,31 @@ async function main() {
   }
   console.log("\n");
 
-  // 3. Build rich texts
-  console.log("3. Building rich text descriptions...");
+  // 3. Fetch categories from .Stat REST API
+  console.log("3. Fetching categories from .Stat...");
+  const categoryMap = await fetchCategories();
+  const uncategorised = allDataflows.filter((df) => !categoryMap.has(df.id));
+  if (uncategorised.length > 0) {
+    console.log("  Uncategorised: " + uncategorised.map((d) => d.id).join(", "));
+  }
+  console.log("");
+
+  // 4. Build rich texts + persist structure metadata
+  console.log("4. Building rich text descriptions...");
   const entries = allDataflows.map((df) => {
-    const structure = structures.get(df.id) || null;
+    const resp = structures.get(df.id) || null;
+    const struct = resp?.structure || null;
     const parts: string[] = [df.name];
 
     if (df.description) {
       parts.push(df.description);
     }
 
-    if (structure?.structure?.dimensions) {
-      const dimNames = structure.structure.dimensions.map((d) => d.id);
+    if (struct?.dimensions) {
+      const dimNames = struct.dimensions.map((d) => d.id);
       parts.push("Dimensions: " + dimNames.join(", "));
 
-      const codelists = structure.structure.dimensions
+      const codelists = struct.dimensions
         .filter((d) => d.codelist)
         .map((d) => {
           const clName =
@@ -149,12 +243,20 @@ async function main() {
       name: df.name,
       description: df.description || "",
       richText: parts.join(". "),
+      categories: categoryMap.get(df.id) || [],
+      structure: struct ? {
+        id: struct.id,
+        key_template: struct.key_template,
+        dimensions: struct.dimensions,
+        attributes: struct.attributes,
+        measure: struct.measure,
+      } : null,
     };
   });
   console.log("  Built " + String(entries.length) + " descriptions\n");
 
-  // 4. Embed
-  console.log("4. Embedding descriptions...");
+  // 5. Embed
+  console.log("5. Embedding descriptions...");
   console.log("   (Loading model — first run may take a moment)\n");
 
   const { embedBatch } = await import("../lib/embeddings.js");
@@ -162,8 +264,8 @@ async function main() {
   const embeddings = await embedBatch(texts);
   console.log("  Embedded " + String(embeddings.length) + " texts\n");
 
-  // 5. Save index
-  console.log("5. Saving index...");
+  // 6. Save index
+  console.log("6. Saving index...");
   const index = {
     modelId: "gemini-embedding-001",
     createdAt: new Date().toISOString(),

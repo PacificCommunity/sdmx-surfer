@@ -3,10 +3,17 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 
+interface Category {
+  scheme: string;
+  id: string;
+  name: string;
+}
+
 interface Dataflow {
   id: string;
   name: string;
   description?: string;
+  categories?: Category[];
 }
 
 interface CountryResult {
@@ -41,6 +48,92 @@ const COUNTRIES = [
   { code: "PN", name: "Pitcairn Islands" },
 ];
 
+// Color palette for topic categories (CAS_COM_TOPIC)
+const TOPIC_COLORS: Record<string, { bg: string; text: string; ring: string }> = {
+  ECO: { bg: "bg-amber-50",  text: "text-amber-700",   ring: "ring-amber-200" },
+  ENV: { bg: "bg-emerald-50", text: "text-emerald-700", ring: "ring-emerald-200" },
+  HEA: { bg: "bg-rose-50",   text: "text-rose-700",    ring: "ring-rose-200" },
+  IND: { bg: "bg-slate-50",  text: "text-slate-700",   ring: "ring-slate-200" },
+  POP: { bg: "bg-blue-50",   text: "text-blue-700",    ring: "ring-blue-200" },
+  SOC: { bg: "bg-violet-50", text: "text-violet-700",  ring: "ring-violet-200" },
+  XDO: { bg: "bg-teal-50",   text: "text-teal-700",    ring: "ring-teal-200" },
+};
+
+// Development framework grouping labels (CAS_COM_DEV)
+const DEV_FRAMEWORK_LABELS: Record<string, { label: string; short: string }> = {
+  SDG:  { label: "Sustainable Development Goals", short: "SDGs" },
+  NMDI: { label: "National Minimum Development Indicators", short: "NMDI" },
+  BP50: { label: "Blue Pacific 2050 Indicators", short: "BP2050" },
+};
+
+function getTopicColor(id: string) {
+  return TOPIC_COLORS[id] || { bg: "bg-gray-50", text: "text-gray-700", ring: "ring-gray-200" };
+}
+
+function CategoryBadge({ category }: { category: Category }) {
+  if (category.scheme === "CAS_COM_DEV") {
+    const fw = DEV_FRAMEWORK_LABELS[category.id];
+    return (
+      <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary ring-1 ring-inset ring-primary/20">
+        {fw?.short || category.name}
+      </span>
+    );
+  }
+  const colors = getTopicColor(category.id);
+  return (
+    <span className={"inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ring-inset " + colors.bg + " " + colors.text + " " + colors.ring}>
+      {category.name}
+    </span>
+  );
+}
+
+function DataflowCard({ df }: { df: Dataflow }) {
+  const topics = (df.categories || []).filter((c) => c.scheme === "CAS_COM_TOPIC");
+  const devFrameworks = (df.categories || []).filter((c) => c.scheme === "CAS_COM_DEV");
+
+  return (
+    <Link
+      href={"/explore/" + df.id}
+      className="group flex flex-col rounded-[var(--radius-xl)] bg-surface-card p-5 shadow-ambient transition-all hover:shadow-lg hover:shadow-primary/5"
+    >
+      {/* Category badges */}
+      {(topics.length > 0 || devFrameworks.length > 0) && (
+        <div className="mb-2.5 flex flex-wrap gap-1">
+          {topics.map((c) => (
+            <CategoryBadge key={c.scheme + ":" + c.id} category={c} />
+          ))}
+          {devFrameworks.map((c) => (
+            <CategoryBadge key={c.scheme + ":" + c.id} category={c} />
+          ))}
+        </div>
+      )}
+
+      <div className="mb-1.5 flex items-start justify-between gap-2">
+        <h3 className="font-[family-name:var(--font-manrope)] text-sm font-bold leading-snug text-on-surface group-hover:text-primary">
+          {df.name}
+        </h3>
+        <svg
+          className="mt-0.5 h-4 w-4 shrink-0 text-on-surface-variant opacity-0 transition-opacity group-hover:opacity-100"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+        </svg>
+      </div>
+      <p className="type-label-md mb-1.5 text-on-tertiary-fixed-variant">
+        {df.id}
+      </p>
+      {df.description && (
+        <p className="line-clamp-2 text-xs leading-relaxed text-on-surface-variant">
+          {df.description}
+        </p>
+      )}
+    </Link>
+  );
+}
+
 export default function ExplorePage() {
   const [dataflows, setDataflows] = useState<Dataflow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,6 +144,7 @@ export default function ExplorePage() {
   const [countryLoading, setCountryLoading] = useState(false);
   const [semanticResults, setSemanticResults] = useState<Dataflow[] | null>(null);
   const [semanticLoading, setSemanticLoading] = useState(false);
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
 
   // Load all dataflows on mount
   useEffect(() => {
@@ -88,7 +182,6 @@ export default function ExplorePage() {
 
   // Debounced semantic search when text is long enough
   useEffect(() => {
-    // Only trigger semantic search for queries with 3+ words
     const words = searchText.trim().split(/\s+/).filter(Boolean);
     if (words.length < 3) {
       setSemanticResults(null);
@@ -129,45 +222,92 @@ export default function ExplorePage() {
     };
   }, [searchText]);
 
-  // Is a semantic search in flight?
   const isSemanticQuery = searchText.trim().split(/\s+/).filter(Boolean).length >= 3;
+
+  // Collect available topic filters from loaded data
+  const availableTopics = useMemo(() => {
+    const counts = new Map<string, { name: string; count: number }>();
+    for (const df of dataflows) {
+      for (const c of df.categories || []) {
+        if (c.scheme === "CAS_COM_TOPIC") {
+          const existing = counts.get(c.id);
+          if (existing) {
+            existing.count++;
+          } else {
+            counts.set(c.id, { name: c.name, count: 1 });
+          }
+        }
+      }
+    }
+    return Array.from(counts.entries())
+      .map(([id, { name, count }]) => ({ id, name, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [dataflows]);
 
   // Filter dataflows
   const filtered = useMemo(() => {
-    // If semantic search returned results, use those
+    let result: Dataflow[];
+
     if (semanticResults) {
-      let result = semanticResults;
-      if (countryDataflows) {
-        result = result.filter((df) => countryDataflows.has(df.id));
-      }
-      return result;
-    }
-
-    // If a semantic search is loading, don't show keyword-filtered results
-    // (they'd be misleading — "0 results" when the real results are coming)
-    if (isSemanticQuery && semanticLoading) {
+      result = semanticResults;
+    } else if (isSemanticQuery && semanticLoading) {
       return [];
-    }
+    } else {
+      result = dataflows;
 
-    // Keyword filtering for short queries
-    let result = dataflows;
-
-    if (searchText.trim()) {
-      const q = searchText.toLowerCase();
-      result = result.filter(
-        (df) =>
-          df.id.toLowerCase().includes(q) ||
-          df.name.toLowerCase().includes(q) ||
-          (df.description || "").toLowerCase().includes(q),
-      );
+      if (searchText.trim()) {
+        const q = searchText.toLowerCase();
+        result = result.filter(
+          (df) =>
+            df.id.toLowerCase().includes(q) ||
+            df.name.toLowerCase().includes(q) ||
+            (df.description || "").toLowerCase().includes(q),
+        );
+      }
     }
 
     if (countryDataflows) {
       result = result.filter((df) => countryDataflows.has(df.id));
     }
 
+    if (selectedTopic) {
+      result = result.filter((df) =>
+        (df.categories || []).some(
+          (c) => c.scheme === "CAS_COM_TOPIC" && c.id === selectedTopic,
+        ),
+      );
+    }
+
     return result;
-  }, [dataflows, searchText, countryDataflows, semanticResults, semanticLoading, isSemanticQuery]);
+  }, [dataflows, searchText, countryDataflows, semanticResults, semanticLoading, isSemanticQuery, selectedTopic]);
+
+  // Group filtered dataflows by development framework (CAS_COM_DEV)
+  const grouped = useMemo(() => {
+    const groups: Array<{ key: string; label: string; dataflows: Dataflow[] }> = [];
+    const used = new Set<string>();
+
+    // Group by each dev framework in order
+    for (const fwId of ["SDG", "NMDI", "BP50"]) {
+      const fw = DEV_FRAMEWORK_LABELS[fwId];
+      const members = filtered.filter((df) =>
+        (df.categories || []).some(
+          (c) => c.scheme === "CAS_COM_DEV" && c.id === fwId,
+        ),
+      );
+      if (members.length > 0) {
+        groups.push({ key: fwId, label: fw.label, dataflows: members });
+        for (const df of members) used.add(df.id);
+      }
+    }
+
+    // Remaining dataflows not in any dev framework — kept separate
+    const remaining = filtered.filter((df) => !used.has(df.id));
+
+    return { groups, remaining };
+  }, [filtered]);
+
+  // Determine if we should show grouped view (not during search)
+  const showGrouped = !searchText.trim() && !semanticResults;
 
   return (
     <div className="min-h-screen bg-surface">
@@ -214,7 +354,7 @@ export default function ExplorePage() {
 
       <main className="mx-auto max-w-6xl px-6 py-8">
         {/* Search + filter bar */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row">
+        <div className="mb-4 flex flex-col gap-4 sm:flex-row">
           {/* Text search */}
           <div className="flex-1">
             <input
@@ -254,6 +394,38 @@ export default function ExplorePage() {
           </div>
         </div>
 
+        {/* Topic filter chips */}
+        {availableTopics.length > 0 && (
+          <div className="mb-4 flex flex-wrap gap-1.5">
+            <button
+              onClick={() => setSelectedTopic(null)}
+              className={"rounded-full px-3 py-1 text-xs font-medium transition-colors " +
+                (selectedTopic === null
+                  ? "bg-primary text-white"
+                  : "bg-surface-card text-on-surface-variant shadow-ambient hover:text-on-surface")}
+            >
+              All
+            </button>
+            {availableTopics.map((t) => {
+              const colors = getTopicColor(t.id);
+              const active = selectedTopic === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setSelectedTopic(active ? null : t.id)}
+                  className={"rounded-full px-3 py-1 text-xs font-medium transition-colors ring-1 ring-inset " +
+                    (active
+                      ? colors.bg + " " + colors.text + " " + colors.ring + " ring-2"
+                      : "bg-surface-card text-on-surface-variant ring-transparent shadow-ambient hover:text-on-surface hover:" + colors.ring)}
+                >
+                  {t.name}
+                  <span className="ml-1 opacity-60">{t.count}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* Status bar */}
         <div className="mb-4 flex items-center gap-2 text-xs text-on-surface-variant">
           {(countryLoading || semanticLoading) && (
@@ -289,7 +461,8 @@ export default function ExplorePage() {
                 key={i}
                 className="rounded-[var(--radius-xl)] bg-surface-card p-6 shadow-ambient"
               >
-                <div className="shimmer mb-3 h-4 w-32 rounded-[var(--radius-sm)]" />
+                <div className="shimmer mb-3 h-4 w-20 rounded-full" />
+                <div className="shimmer mb-2 h-4 w-48 rounded-[var(--radius-sm)]" />
                 <div className="shimmer mb-2 h-3 w-full rounded-[var(--radius-sm)]" />
                 <div className="shimmer h-3 w-2/3 rounded-[var(--radius-sm)]" />
               </div>
@@ -312,38 +485,43 @@ export default function ExplorePage() {
           </div>
         )}
 
-        {/* Dataflow grid */}
-        {!loading && !error && (
+        {/* Dataflow grid — grouped or flat */}
+        {!loading && !error && showGrouped && (
+          <div className="space-y-8">
+            {grouped.groups.map((group) => (
+              <section key={group.key}>
+                <div className="mb-3 flex items-center gap-2">
+                  <h2 className="font-[family-name:var(--font-manrope)] text-sm font-bold text-on-surface">
+                    {group.label}
+                  </h2>
+                  <span className="rounded-full bg-surface-high px-2 py-0.5 text-[10px] font-medium text-on-surface-variant">
+                    {group.dataflows.length}
+                  </span>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {group.dataflows.map((df) => (
+                    <DataflowCard key={df.id} df={df} />
+                  ))}
+                </div>
+              </section>
+            ))}
+
+            {/* Ungrouped dataflows — flat list, no "Other" heading */}
+            {grouped.remaining.length > 0 && (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {grouped.remaining.map((df) => (
+                  <DataflowCard key={df.id} df={df} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Flat grid for search results */}
+        {!loading && !error && !showGrouped && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((df) => (
-              <Link
-                key={df.id}
-                href={"/explore/" + df.id}
-                className="group rounded-[var(--radius-xl)] bg-surface-card p-6 shadow-ambient transition-all hover:shadow-lg hover:shadow-primary/5"
-              >
-                <div className="mb-2 flex items-start justify-between gap-2">
-                  <h3 className="font-[family-name:var(--font-manrope)] text-sm font-bold text-on-surface group-hover:text-primary">
-                    {df.name}
-                  </h3>
-                  <svg
-                    className="mt-0.5 h-4 w-4 shrink-0 text-on-surface-variant opacity-0 transition-opacity group-hover:opacity-100"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                  </svg>
-                </div>
-                <p className="type-label-md mb-2 text-on-tertiary-fixed-variant">
-                  {df.id}
-                </p>
-                {df.description && (
-                  <p className="line-clamp-2 text-xs leading-relaxed text-on-surface-variant">
-                    {df.description}
-                  </p>
-                )}
-              </Link>
+              <DataflowCard key={df.id} df={df} />
             ))}
           </div>
         )}
@@ -354,9 +532,9 @@ export default function ExplorePage() {
             <p className="text-sm text-on-surface-variant">
               No dataflows match your search.
             </p>
-            {selectedCountry && (
+            {(selectedCountry || selectedTopic) && (
               <p className="mt-2 text-xs text-on-surface-variant">
-                Try removing the country filter or searching with different terms.
+                Try removing filters or searching with different terms.
               </p>
             )}
           </div>
