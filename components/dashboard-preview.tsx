@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import dynamic from "next/dynamic";
+import { json as jsonLang } from "@codemirror/lang-json";
 import { exportToPdf, exportToHtml, exportToHtmlLive, exportToJson } from "@/lib/export-dashboard";
 import { extractDataSources, type DataSource } from "@/lib/data-explorer-url";
 import {
@@ -70,13 +71,20 @@ class DashboardErrorBoundary extends Component<
 
   render() {
     if (this.state.error) {
+      const rawMsg = this.state.error.message;
+      const isDataError = rawMsg.includes("toFixed") ||
+        rawMsg.includes("Cannot read properties of undefined") ||
+        rawMsg.includes("Cannot read properties of null");
+      const friendlyMsg = isDataError
+        ? "Some data points are missing or in an unexpected format. The AI will try to fix this."
+        : rawMsg;
       return (
         <div className="rounded-[var(--radius-lg)] bg-surface-high p-6">
           <p className="type-label-md text-on-surface">
             Dashboard render error
           </p>
           <p className="mt-2 text-sm text-on-surface-variant">
-            {this.state.error.message}
+            {friendlyMsg}
           </p>
           <button
             type="button"
@@ -93,8 +101,6 @@ class DashboardErrorBoundary extends Component<
 }
 
 // ── JSON Editor Tab ──
-
-const JSON_INDENT = "  ";
 
 const STRUCTURAL_KEYS = new Set([
   "id",
@@ -149,172 +155,7 @@ const COMPONENT_TYPES = new Set([
   "map",
 ]);
 
-function getKeyClassName(key: string): string {
-  if (STRUCTURAL_KEYS.has(key)) {
-    return "font-semibold text-primary";
-  }
-
-  if (DATA_KEYS.has(key)) {
-    return "font-medium text-secondary";
-  }
-
-  if (CONTENT_KEYS.has(key)) {
-    return "font-medium text-tertiary";
-  }
-
-  return "text-kelp";
-}
-
-function getStringClassName(key: string | null, value: string): string {
-  if (/^https?:\/\//.test(value)) {
-    return "text-primary-container";
-  }
-
-  if (key === "type" && COMPONENT_TYPES.has(value)) {
-    return "font-semibold text-tertiary-container";
-  }
-
-  if (
-    key === "xAxisConcept" ||
-    key === "yAxisConcept" ||
-    key === "concept" ||
-    /^[A-Z0-9_]+$/.test(value)
-  ) {
-    return "font-medium text-secondary";
-  }
-
-  if (key === "id") {
-    return "font-medium text-primary-container";
-  }
-
-  return "text-on-surface";
-}
-
-function formatJsonPreview(value: unknown): ReactNode[] {
-  let nodeIndex = 0;
-
-  const nextKey = (prefix: string) => prefix + String(nodeIndex++);
-  const indent = (depth: number) => JSON_INDENT.repeat(depth);
-  const punctuation = (value: string) => (
-    <span key={nextKey("p")} className="text-outline-variant">
-      {value}
-    </span>
-  );
-
-  const renderPrimitive = (
-    primitive: string | number | boolean | null,
-    keyName: string | null,
-  ) => {
-    if (typeof primitive === "string") {
-      return (
-        <span
-          key={nextKey("s")}
-          className={getStringClassName(keyName, primitive)}
-        >
-          {JSON.stringify(primitive)}
-        </span>
-      );
-    }
-
-    if (typeof primitive === "number") {
-      return (
-        <span key={nextKey("n")} className="font-medium text-reef-teal">
-          {String(primitive)}
-        </span>
-      );
-    }
-
-    if (typeof primitive === "boolean") {
-      return (
-        <span key={nextKey("b")} className="font-medium text-tertiary">
-          {String(primitive)}
-        </span>
-      );
-    }
-
-    return (
-      <span key={nextKey("null")} className="text-text-muted">
-        null
-      </span>
-    );
-  };
-
-  const renderValue = (
-    currentValue: unknown,
-    depth: number,
-    keyName: string | null,
-  ): ReactNode[] => {
-    if (
-      currentValue === null ||
-      typeof currentValue === "string" ||
-      typeof currentValue === "number" ||
-      typeof currentValue === "boolean"
-    ) {
-      return [
-        renderPrimitive(
-          currentValue as string | number | boolean | null,
-          keyName,
-        ),
-      ];
-    }
-
-    if (Array.isArray(currentValue)) {
-      if (currentValue.length === 0) {
-        return [punctuation("[]")];
-      }
-
-      const nodes: ReactNode[] = [punctuation("["), "\n"];
-
-      currentValue.forEach((item, index) => {
-        nodes.push(indent(depth + 1));
-        nodes.push(...renderValue(item, depth + 1, null));
-        if (index < currentValue.length - 1) {
-          nodes.push(punctuation(","));
-        }
-        nodes.push("\n");
-      });
-
-      nodes.push(indent(depth), punctuation("]"));
-      return nodes;
-    }
-
-    if (typeof currentValue !== "object") {
-      return [
-        <span key={nextKey("unknown")} className="text-on-surface-variant">
-          {JSON.stringify(currentValue)}
-        </span>,
-      ];
-    }
-
-    const entries = Object.entries(currentValue as Record<string, unknown>);
-
-    if (entries.length === 0) {
-      return [punctuation("{}")];
-    }
-
-    const nodes: ReactNode[] = [punctuation("{"), "\n"];
-
-    entries.forEach(([entryKey, entryValue], index) => {
-      nodes.push(indent(depth + 1));
-      nodes.push(
-        <span key={nextKey("k")} className={getKeyClassName(entryKey)}>
-          {JSON.stringify(entryKey)}
-        </span>,
-      );
-      nodes.push(punctuation(": "));
-      nodes.push(...renderValue(entryValue, depth + 1, entryKey));
-      if (index < entries.length - 1) {
-        nodes.push(punctuation(","));
-      }
-      nodes.push("\n");
-    });
-
-    nodes.push(indent(depth), punctuation("}"));
-    return nodes;
-  };
-
-  return renderValue(value, 0, null);
-}
+// getKeyClassName, getStringClassName, formatJsonPreview removed — CodeMirror handles editing
 
 function getKeyTone(key: string): string {
   if (STRUCTURAL_KEYS.has(key)) {
@@ -678,60 +519,11 @@ function ConfigInspector({ config }: { config: SDMXDashboardConfig }) {
   );
 }
 
-/** Syntax-highlight the current raw JSON text while editing or on invalid JSON */
-function highlightJson(json: string): ReactNode[] {
-  const nodes: ReactNode[] = [];
-  const re = /("(?:\\.|[^"\\])*")\s*:/g;
-  const keySet = new Set<number>();
 
-  // First pass: find key positions
-  let km;
-  while ((km = re.exec(json)) !== null) {
-    keySet.add(km.index);
-  }
-
-  // Token regex
-  const tokenRe =
-    /"(?:\\.|[^"\\])*"|(?:true|false|null)|\b-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b/g;
-  let lastIndex = 0;
-  let m;
-  let idx = 0;
-  while ((m = tokenRe.exec(json)) !== null) {
-    // Text before token
-    if (m.index > lastIndex) {
-      nodes.push(
-        <span key={"t" + String(idx++)} className="text-on-surface-variant">
-          {json.slice(lastIndex, m.index)}
-        </span>,
-      );
-    }
-    const token = m[0];
-    let cls: string;
-    if (token.startsWith('"')) {
-      cls = keySet.has(m.index)
-        ? "text-primary font-medium" // keys
-        : "text-secondary"; // string values
-    } else if (token === "true" || token === "false" || token === "null") {
-      cls = "text-tertiary";
-    } else {
-      cls = "text-reef-teal font-medium"; // numbers
-    }
-    nodes.push(
-      <span key={"v" + String(idx++)} className={cls}>
-        {token}
-      </span>,
-    );
-    lastIndex = m.index + token.length;
-  }
-  if (lastIndex < json.length) {
-    nodes.push(
-      <span key={"e" + String(idx)} className="text-on-surface-variant">
-        {json.slice(lastIndex)}
-      </span>,
-    );
-  }
-  return nodes;
-}
+const LazyCodeMirror = dynamic(() => import("@uiw/react-codemirror"), {
+  ssr: false,
+  loading: () => <div className="shimmer h-full w-full rounded-[var(--radius-lg)]" />,
+});
 
 function JsonEditor({
   config,
@@ -744,8 +536,6 @@ function JsonEditor({
   const [parseError, setParseError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [dirty, setDirty] = useState(false);
-  const preRef = useRef<HTMLPreElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const prettyConfigText = JSON.stringify(config, null, 2);
 
   // Sync when external config changes (new AI output)
@@ -810,31 +600,13 @@ function JsonEditor({
     }
   };
 
-  const parsedText = (() => {
+  const isPrettyFormatted = (() => {
     try {
-      return JSON.parse(text) as unknown;
+      return text === JSON.stringify(JSON.parse(text), null, 2);
     } catch {
-      return null;
+      return false;
     }
   })();
-
-  const isPrettyFormatted =
-    parsedText !== null && text === JSON.stringify(parsedText, null, 2);
-
-  const editorContent =
-    parsedText !== null && isPrettyFormatted
-      ? formatJsonPreview(parsedText)
-      : highlightJson(text);
-
-  const lineCount = text.split("\n").length;
-
-  // Sync scroll between textarea and highlighted pre
-  const handleScroll = () => {
-    if (textareaRef.current && preRef.current) {
-      preRef.current.scrollTop = textareaRef.current.scrollTop;
-      preRef.current.scrollLeft = textareaRef.current.scrollLeft;
-    }
-  };
 
   return (
     <div className="flex h-full flex-col">
@@ -844,10 +616,7 @@ function JsonEditor({
           {!editing && !dirty && (
             <button
               type="button"
-              onClick={() => {
-                setEditing(true);
-                setTimeout(() => textareaRef.current?.focus(), 0);
-              }}
+              onClick={() => setEditing(true)}
               className="ghost-border rounded-full bg-surface-card px-3 py-1 text-xs font-medium text-on-surface-variant transition-transform hover:scale-105 active:scale-95"
             >
               Edit
@@ -899,7 +668,7 @@ function JsonEditor({
         {editing || dirty ? (
           <div
             className={
-              "relative h-full overflow-hidden rounded-[var(--radius-lg)] bg-surface-card shadow-ambient " +
+              "h-full overflow-hidden rounded-[var(--radius-lg)] bg-surface-card shadow-ambient " +
               (parseError
                 ? "ring-2 ring-red-400/50"
                 : dirty
@@ -907,47 +676,27 @@ function JsonEditor({
                   : "")
             }
           >
-            {/* Line numbers */}
-            <div
-              className="pointer-events-none absolute left-0 top-0 flex h-full w-10 flex-col items-end overflow-hidden bg-surface-high/30 pt-4 pr-2"
-              aria-hidden
-            >
-              {Array.from({ length: lineCount }, (_, i) => (
-                <span
-                  key={i}
-                  className="block h-[1.35rem] text-[10px] leading-[1.35rem] text-outline-variant"
-                >
-                  {i + 1}
-                </span>
-              ))}
-            </div>
-
-            <>
-              <pre
-                ref={preRef}
-                className="pointer-events-none absolute inset-0 overflow-hidden pl-12 pr-4 pt-4 pb-4 font-mono text-xs leading-[1.35rem] whitespace-pre"
-                aria-hidden
-              >
-                <code>{editorContent}</code>
-              </pre>
-              <textarea
-                ref={textareaRef}
-                value={text}
-                onChange={(e) => handleChange(e.target.value)}
-                onScroll={handleScroll}
-                spellCheck={false}
-                className="relative z-10 h-full w-full resize-none bg-transparent pl-12 pr-4 pt-4 pb-4 font-mono text-xs leading-[1.35rem] text-transparent caret-primary focus:outline-none"
-              />
-            </>
+            <LazyCodeMirror
+              value={text}
+              onChange={(val) => handleChange(val)}
+              extensions={[jsonLang()]}
+              theme="light"
+              basicSetup={{
+                lineNumbers: true,
+                foldGutter: true,
+                highlightActiveLine: true,
+                bracketMatching: true,
+                closeBrackets: true,
+                autocompletion: false,
+              }}
+              style={{ height: "100%", fontSize: "12px" }}
+            />
           </div>
         ) : (
           <button
             type="button"
             className="block h-full w-full overflow-auto rounded-[var(--radius-lg)] bg-surface-card p-4 text-left shadow-ambient transition-shadow hover:shadow-none focus:outline-none"
-            onClick={() => {
-              setEditing(true);
-              setTimeout(() => textareaRef.current?.focus(), 0);
-            }}
+            onClick={() => setEditing(true)}
           >
             <ConfigInspector config={config} />
           </button>
@@ -1251,7 +1000,10 @@ export const DashboardPreview = memo(function DashboardPreview({
         msg.includes("Highcharts") ||
         msg.includes("not found in dataflow") ||
         msg.includes("observations empty") ||
-        msg.includes("dimension")
+        msg.includes("dimension") ||
+        msg.includes("toFixed") ||
+        msg.includes("Cannot read properties of undefined") ||
+        msg.includes("Cannot read properties of null")
       ) {
         event.preventDefault();
         reportError(msg);
