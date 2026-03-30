@@ -145,6 +145,9 @@ export default function BuilderPage() {
 
   const configHistory = useConfigHistory();
 
+  // Dataflow context — injected into system prompt on first message, then cleared
+  const dataflowContextRef = useRef<string | null>(null);
+
   // Stable transport — reads session ID + model from refs so it never recreates
   const sessionIdRef = useRef(sessionId);
   sessionIdRef.current = sessionId;
@@ -153,24 +156,31 @@ export default function BuilderPage() {
   const transportRef = useRef(
     new DefaultChatTransport({
       api: "/api/chat",
-      prepareSendMessagesRequest: ({ body, headers, messages, id, trigger, messageId }) => ({
-        body: {
-          ...(body ?? {}),
-          id,
-          messages,
-          trigger,
-          messageId,
-          previewError: outgoingPreviewErrorRef.current ?? undefined,
-          modelOverride: {
-            provider: selectedModelRef.current.provider,
-            model: selectedModelRef.current.model,
+      prepareSendMessagesRequest: ({ body, headers, messages, id, trigger, messageId }) => {
+        // Consume dataflow context on first send, then clear it
+        const ctx = dataflowContextRef.current;
+        if (ctx) dataflowContextRef.current = null;
+
+        return {
+          body: {
+            ...(body ?? {}),
+            id,
+            messages,
+            trigger,
+            messageId,
+            previewError: outgoingPreviewErrorRef.current ?? undefined,
+            dataflowContext: ctx ?? undefined,
+            modelOverride: {
+              provider: selectedModelRef.current.provider,
+              model: selectedModelRef.current.model,
+            },
           },
-        },
-        headers: {
-          ...(typeof headers === "object" && headers !== null && !Array.isArray(headers) ? headers : {}),
-          "x-session-id": sessionIdRef.current || "anonymous",
-        },
-      }),
+          headers: {
+            ...(typeof headers === "object" && headers !== null && !Array.isArray(headers) ? headers : {}),
+            "x-session-id": sessionIdRef.current || "anonymous",
+          },
+        };
+      },
     }),
   );
 
@@ -241,9 +251,10 @@ export default function BuilderPage() {
     const targetSession = params.get("session");
     const initialPrompt = params.get("prompt");
     const forceNew = params.get("new") === "1";
+    const dfContext = params.get("dfContext");
 
     // Clean URL without reloading
-    if (targetSession || initialPrompt || forceNew) {
+    if (targetSession || initialPrompt || forceNew || dfContext) {
       window.history.replaceState({}, "", "/builder");
     }
 
@@ -254,6 +265,11 @@ export default function BuilderPage() {
       configHistory.restore([], -1);
       configJsonRef.current = "";
       setSessionLoaded(true);
+
+      // Set dataflow context before sending — it'll be consumed on first send
+      if (dfContext) {
+        dataflowContextRef.current = dfContext;
+      }
 
       if (initialPrompt) {
         setTimeout(() => {
@@ -565,32 +581,22 @@ export default function BuilderPage() {
               ))}
             </select>
 
-            {/* Save indicator */}
-            <span className="text-xs text-on-surface-variant">
-              {saveState === "saving" && (
-                <span className="flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-secondary" />
-                  Saving...
-                </span>
-              )}
-              {saveState === "saved" && (
-                <span className="flex items-center gap-1 text-secondary">
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                  </svg>
-                  Saved
-                </span>
-              )}
-            </span>
-
-            {/* Save button */}
+            {/* Save indicator — filled when saved, outline when unsaved, pulsing when saving */}
             <button
               type="button"
               onClick={doSave}
-              title="Save session"
-              className="ghost-border rounded-full bg-surface-card p-1.5 text-on-surface-variant transition-transform hover:scale-105 hover:text-primary active:scale-95"
+              title={saveState === "saved" ? "Session saved" : saveState === "saving" ? "Saving..." : "Save session"}
+              className={"ghost-border rounded-full bg-surface-card p-1.5 transition-all hover:scale-105 active:scale-95 " +
+                (saveState === "saved"
+                  ? "text-primary"
+                  : saveState === "saving"
+                    ? "animate-pulse text-on-surface-variant"
+                    : "text-on-surface-variant hover:text-primary")}
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="h-4 w-4" viewBox="0 0 24 24" strokeWidth={1.5}
+                fill={saveState === "saved" ? "currentColor" : "none"}
+                stroke={saveState === "saved" ? "none" : "currentColor"}
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
               </svg>
             </button>

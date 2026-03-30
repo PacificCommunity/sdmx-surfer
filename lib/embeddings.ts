@@ -75,6 +75,27 @@ export interface DataflowCategory {
   name: string;
 }
 
+export interface CountryAvailability {
+  code: string;
+  obsCount: number;
+  timeStart: string | null;
+  timeEnd: string | null;
+}
+
+export interface DimensionAvailability {
+  id: string;
+  values: string[];
+}
+
+export interface AvailabilityInfo {
+  obsCount: number;
+  timeStart: string | null;
+  timeEnd: string | null;
+  frequencies: string[];
+  dimensions: DimensionAvailability[];
+  countries: CountryAvailability[];
+}
+
 export interface DataflowIndexEntry {
   id: string;
   name: string;
@@ -83,6 +104,7 @@ export interface DataflowIndexEntry {
   embedding: number[];
   categories: DataflowCategory[];
   structure: DataflowStructure | null;
+  availability: AvailabilityInfo | null;
 }
 
 export interface DataflowIndex {

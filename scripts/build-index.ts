@@ -92,6 +92,160 @@ async function fetchCategories(): Promise<Map<string, CategoryTag[]>> {
   return map;
 }
 
+// ── Availability fetching from .Stat REST API ──
+
+interface DimensionAvailability {
+  id: string;
+  values: string[];
+}
+
+interface CountryAvailability {
+  code: string;
+  obsCount: number;
+  timeStart: string | null;
+  timeEnd: string | null;
+}
+
+interface AvailabilityInfo {
+  obsCount: number;
+  timeStart: string | null;
+  timeEnd: string | null;
+  frequencies: string[];
+  dimensions: DimensionAvailability[];
+  countries: CountryAvailability[];
+}
+
+/**
+ * Fetch availability constraint for a dataflow from .Stat REST API.
+ * Returns the overall envelope + per-country breakdown.
+ */
+async function fetchAvailability(dataflowId: string, geoCodes: string[]): Promise<AvailabilityInfo | null> {
+  const ACCEPT = "application/vnd.sdmx.structure+json; version=1.0";
+  const HEADERS = { Accept: ACCEPT, "Accept-Language": "en" };
+
+  // 1. Overall constraint
+  const overallUrl = STAT_BASE + "/availableconstraint/" + dataflowId + "/all/all/all?mode=exact";
+  let obsCount = 0;
+  let timeStart: string | null = null;
+  let timeEnd: string | null = null;
+  let frequencies: string[] = [];
+  const dimensions: DimensionAvailability[] = [];
+
+  try {
+    const resp = await fetch(overallUrl, { headers: HEADERS });
+    if (!resp.ok) return null;
+
+    const data = (await resp.json()) as {
+      data: {
+        contentConstraints: Array<{
+          annotations?: Array<{ id?: string; title?: string }>;
+          cubeRegions?: Array<{
+            keyValues?: Array<{
+              id: string;
+              values?: string[];
+              timeRange?: {
+                startPeriod: { period: string };
+                endPeriod: { period: string };
+              };
+            }>;
+          }>;
+        }>;
+      };
+    };
+
+    const constraint = data.data.contentConstraints[0];
+    if (!constraint) return null;
+
+    // Observation count from annotations
+    const obsAnnot = (constraint.annotations || []).find((a) => a.id === "obs_count");
+    obsCount = obsAnnot?.title ? parseInt(obsAnnot.title, 10) : 0;
+
+    // Dimension values + time range
+    for (const region of constraint.cubeRegions || []) {
+      for (const kv of region.keyValues || []) {
+        if (kv.timeRange) {
+          timeStart = kv.timeRange.startPeriod.period.slice(0, 4);
+          timeEnd = kv.timeRange.endPeriod.period.slice(0, 4);
+        } else if (kv.values) {
+          dimensions.push({ id: kv.id, values: kv.values });
+          if (kv.id === "FREQ") frequencies = kv.values;
+        }
+      }
+    }
+  } catch {
+    return null;
+  }
+
+  // 2. Per-country breakdown (if GEO_PICT dimension exists with reasonable count)
+  const countries: CountryAvailability[] = [];
+
+  if (geoCodes.length > 0 && geoCodes.length <= 40) {
+    // Build the key position for GEO_PICT from the dimensions list
+    // Key format: empty segments for wildcard, country code for GEO_PICT
+    // We need to know which position GEO_PICT is in the key
+    const geoIndex = dimensions.findIndex((d) => d.id === "GEO_PICT");
+    if (geoIndex >= 0) {
+      const keyParts = dimensions.map(() => "");
+
+      for (const cc of geoCodes) {
+        keyParts[geoIndex] = cc;
+        const key = keyParts.join(".");
+        const url = STAT_BASE + "/availableconstraint/" + dataflowId + "/" + key + "/all/TIME_PERIOD?mode=exact";
+
+        try {
+          const resp = await fetch(url, { headers: HEADERS });
+          if (!resp.ok) {
+            countries.push({ code: cc, obsCount: 0, timeStart: null, timeEnd: null });
+            continue;
+          }
+
+          const cData = (await resp.json()) as {
+            data: {
+              contentConstraints: Array<{
+                annotations?: Array<{ id?: string; title?: string }>;
+                cubeRegions?: Array<{
+                  keyValues?: Array<{
+                    id: string;
+                    timeRange?: {
+                      startPeriod: { period: string };
+                      endPeriod: { period: string };
+                    };
+                  }>;
+                }>;
+              }>;
+            };
+          };
+
+          const cc_constraint = cData.data.contentConstraints[0];
+          const cc_obs = (cc_constraint?.annotations || []).find((a) => a.id === "obs_count");
+          let cc_start: string | null = null;
+          let cc_end: string | null = null;
+
+          for (const region of cc_constraint?.cubeRegions || []) {
+            for (const kv of region.keyValues || []) {
+              if (kv.timeRange) {
+                cc_start = kv.timeRange.startPeriod.period.slice(0, 4);
+                cc_end = kv.timeRange.endPeriod.period.slice(0, 4);
+              }
+            }
+          }
+
+          countries.push({
+            code: cc,
+            obsCount: cc_obs?.title ? parseInt(cc_obs.title, 10) : 0,
+            timeStart: cc_start,
+            timeEnd: cc_end,
+          });
+        } catch {
+          countries.push({ code: cc, obsCount: 0, timeStart: null, timeEnd: null });
+        }
+      }
+    }
+  }
+
+  return { obsCount, timeStart, timeEnd, frequencies, dimensions, countries };
+}
+
 // ── Main ──
 
 interface Dataflow {
@@ -177,6 +331,36 @@ async function main() {
   }
   console.log("\n  Found " + String(allDataflows.length) + " dataflows\n");
 
+  // 1b. Enrich descriptions from .Stat REST API (list_dataflows truncates them)
+  console.log("   Fetching full descriptions from .Stat REST API...");
+  try {
+    const dfResp = await fetch(
+      STAT_BASE + "/dataflow/SPC?references=none",
+      { headers: { Accept: "application/json", "Accept-Language": "en" } },
+    );
+    if (dfResp.ok) {
+      const dfData = (await dfResp.json()) as {
+        references?: Record<string, { id: string; description?: string }>;
+      };
+      const refs = dfData.references || {};
+      let enriched = 0;
+      for (const ref of Object.values(refs)) {
+        if (ref.description) {
+          const df = allDataflows.find((d) => d.id === ref.id);
+          if (df && (!df.description || df.description.endsWith("..."))) {
+            df.description = ref.description;
+            enriched++;
+          }
+        }
+      }
+      console.log("  Enriched " + String(enriched) + " truncated descriptions\n");
+    } else {
+      console.log("  Warning: .Stat returned " + String(dfResp.status) + ", using truncated descriptions\n");
+    }
+  } catch (err) {
+    console.log("  Warning: could not fetch full descriptions:", err instanceof Error ? err.message : err, "\n");
+  }
+
   // 2. Fetch structures
   console.log("2. Fetching structures...");
   const structures = new Map<string, StructureResponse | null>();
@@ -211,8 +395,33 @@ async function main() {
   }
   console.log("");
 
-  // 4. Build rich texts + persist structure metadata
-  console.log("4. Building rich text descriptions...");
+  // 4. Fetch availability from .Stat REST API
+  console.log("4. Fetching availability from .Stat...");
+  const availabilityMap = new Map<string, AvailabilityInfo>();
+  for (let i = 0; i < allDataflows.length; i++) {
+    const df = allDataflows[i];
+    process.stdout.write(
+      "\r  [" + String(i + 1) + "/" + String(allDataflows.length) + "] " + df.id + "                    ",
+    );
+    // First get the overall envelope (no per-country), then use the
+    // GEO_PICT values from the envelope to do per-country calls
+    const envelope = await fetchAvailability(df.id, []);
+    if (envelope) {
+      const geoDimAvail = envelope.dimensions.find((d) => d.id === "GEO_PICT");
+      if (geoDimAvail && geoDimAvail.values.length > 0 && geoDimAvail.values.length <= 40) {
+        // Re-fetch with per-country breakdown — the overall part is re-fetched
+        // but it's one extra lightweight call to avoid storing intermediate state
+        const detailed = await fetchAvailability(df.id, geoDimAvail.values);
+        availabilityMap.set(df.id, detailed || envelope);
+      } else {
+        availabilityMap.set(df.id, envelope);
+      }
+    }
+  }
+  console.log("\n  Fetched availability for " + String(availabilityMap.size) + " dataflows\n");
+
+  // 5. Build rich texts + persist structure metadata
+  console.log("5. Building rich text descriptions...");
   const entries = allDataflows.map((df) => {
     const resp = structures.get(df.id) || null;
     const struct = resp?.structure || null;
@@ -251,12 +460,13 @@ async function main() {
         attributes: struct.attributes,
         measure: struct.measure,
       } : null,
+      availability: availabilityMap.get(df.id) || null,
     };
   });
   console.log("  Built " + String(entries.length) + " descriptions\n");
 
-  // 5. Embed
-  console.log("5. Embedding descriptions...");
+  // 6. Embed
+  console.log("6. Embedding descriptions...");
   console.log("   (Loading model — first run may take a moment)\n");
 
   const { embedBatch } = await import("../lib/embeddings.js");
@@ -264,8 +474,8 @@ async function main() {
   const embeddings = await embedBatch(texts);
   console.log("  Embedded " + String(embeddings.length) + " texts\n");
 
-  // 6. Save index
-  console.log("6. Saving index...");
+  // 7. Save index
+  console.log("7. Saving index...");
   const index = {
     modelId: "gemini-embedding-001",
     createdAt: new Date().toISOString(),

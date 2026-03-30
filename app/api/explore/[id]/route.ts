@@ -59,6 +59,7 @@ export async function GET(
           structure: entry.structure,
         },
         categories: entry.categories || [],
+        availability: entry.availability || null,
         diagram,
       });
     }

@@ -25,6 +25,7 @@ const chatRequestSchema = z.object({
     provider: z.string(),
     model: z.string(),
   }).optional(),
+  dataflowContext: z.string().optional(),
 });
 
 const STEP_LIMIT = 25;
@@ -49,7 +50,7 @@ export async function POST(req: Request) {
   let mcpClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
 
   try {
-    const { messages, previewError, modelOverride } = chatRequestSchema.parse(await req.json());
+    const { messages, previewError, modelOverride, dataflowContext } = chatRequestSchema.parse(await req.json());
 
     // Extract last user message for logging
     const uiMessages = messages as Array<{ role?: string; parts?: Array<{ type?: string; text?: string }> }>;
@@ -83,7 +84,7 @@ export async function POST(req: Request) {
         "Preview error details:\n" +
         previewError
       : "";
-    const systemPrompt = [systemPromptBase, tier2Summary, previewRepairPrompt]
+    const systemPrompt = [systemPromptBase, tier2Summary, dataflowContext, previewRepairPrompt]
       .filter(Boolean)
       .join("\n\n");
 

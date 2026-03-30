@@ -88,6 +88,14 @@ export default function DataflowDetailPage() {
 
   const [structure, setStructure] = useState<Structure | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [availability, setAvailability] = useState<{
+    obsCount: number;
+    timeStart: string | null;
+    timeEnd: string | null;
+    frequencies: string[];
+    dimensions: Array<{ id: string; values: string[] }>;
+    countries: Array<{ code: string; obsCount: number; timeStart: string | null; timeEnd: string | null }>;
+  } | null>(null);
   const [diagram, setDiagram] = useState<DiagramData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -108,6 +116,7 @@ export default function DataflowDetailPage() {
         if (data.error) throw new Error(data.error);
         setStructure(data.structure);
         setCategories(data.categories || []);
+        setAvailability(data.availability || null);
         setDiagram(data.diagram);
       })
       .catch((e) => setError(e.message))
@@ -209,23 +218,89 @@ export default function DataflowDetailPage() {
             <button
               type="button"
               onClick={() => {
-                const dimList = dims.map((d) => d.id).join(", ");
-                const desc = structure.dataflow.description
-                  ? " Description: " + structure.dataflow.description + "."
-                  : "";
-                const prompt =
-                  "I'd like to explore the " +
-                  dataflowId +
-                  " dataflow (" +
-                  structure.dataflow.name +
-                  ")." +
-                  desc +
-                  " Dimensions: " +
-                  dimList +
-                  (timeDim ? ", " + timeDim.id : "") +
-                  ".";
+                // Short, natural user message
+                const prompt = "Build me a dashboard exploring " +
+                  structure.dataflow.name + ".";
+
+                // Structured context injected into system prompt (user doesn't see this)
+                const topicCats = categories
+                  .filter((c) => c.scheme === "CAS_COM_TOPIC")
+                  .map((c) => c.name);
+                const devCats = categories
+                  .filter((c) => c.scheme === "CAS_COM_DEV")
+                  .map((c) => c.name);
+
+                const codelistHints = dims
+                  .filter((d) => d.codelist)
+                  .map((d) => {
+                    const clName = (d.codelist || "").split(":").pop()?.split("(")[0] || "";
+                    return d.id + " (" + clName + ")";
+                  });
+
+                const contextLines: string[] = [
+                  "## Dataflow Context (pre-loaded from catalogue)",
+                  "",
+                  "The user wants to explore **" + dataflowId + "** (" + structure.dataflow.name + ").",
+                ];
+
+                if (structure.dataflow.description) {
+                  contextLines.push("", "**Description:** " + structure.dataflow.description);
+                }
+
+                if (topicCats.length > 0 || devCats.length > 0) {
+                  contextLines.push("", "**Categories:** " + [...topicCats, ...devCats].join(", "));
+                }
+
+                if (codelistHints.length > 0) {
+                  contextLines.push("", "**Dimensions:** " + codelistHints.join(", ") +
+                    (timeDim ? ", " + timeDim.id + " (time)" : ""));
+                }
+
+                contextLines.push(
+                  "",
+                  "**Key template:** " + structure.structure.key_template,
+                );
+
+                // Availability — crucial for avoiding empty queries
+                if (availability) {
+                  contextLines.push(
+                    "",
+                    "**Data availability:**",
+                    "- Total observations: " + String(availability.obsCount),
+                    "- Time range: " + (availability.timeStart || "?") + " to " + (availability.timeEnd || "?"),
+                    "- Frequency: " + (availability.frequencies.join(", ") || "unknown"),
+                  );
+
+                  if (availability.countries.length > 0) {
+                    contextLines.push(
+                      "- Countries with data (" + String(availability.countries.length) + "):",
+                    );
+                    for (const c of availability.countries) {
+                      if (c.obsCount > 0) {
+                        contextLines.push(
+                          "  - " + c.code + ": " + String(c.obsCount) + " obs, " +
+                          (c.timeStart || "?") + "-" + (c.timeEnd || "?"),
+                        );
+                      }
+                    }
+                  }
+                }
+
+                contextLines.push(
+                  "",
+                  "**Strategy:** Start with a headline KPI for the most recent data point, " +
+                  "then show the trend over time, " +
+                  "then break down by geography or the most interesting categorical dimension. " +
+                  "Aim for a 3-4 panel dashboard that tells the story of this data. " +
+                  "Use the availability data above to pick countries and time periods that actually have data.",
+                );
+
+                const dfContext = contextLines.join("\n");
+
                 window.location.href =
-                  "/builder?new=1&prompt=" + encodeURIComponent(prompt);
+                  "/builder?new=1" +
+                  "&prompt=" + encodeURIComponent(prompt) +
+                  "&dfContext=" + encodeURIComponent(dfContext);
               }}
               className="ocean-gradient rounded-full px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95"
             >
@@ -240,10 +315,99 @@ export default function DataflowDetailPage() {
           </div>
         </div>
 
-        {/* Dimensions — the main thing users care about */}
+        {/* At a glance — availability stats */}
+        {availability && (
+          <section className="mb-6">
+            <h3 className="mb-3 font-[family-name:var(--font-manrope)] text-sm font-bold text-on-surface">
+              At a glance
+            </h3>
+            <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="rounded-[var(--radius-xl)] bg-surface-card p-4 shadow-ambient">
+                <p className="type-label-md text-on-tertiary-fixed-variant">Observations</p>
+                <p className="mt-1 font-[family-name:var(--font-manrope)] text-2xl font-extrabold text-on-surface">
+                  {availability.obsCount.toLocaleString()}
+                </p>
+              </div>
+              <div className="rounded-[var(--radius-xl)] bg-surface-card p-4 shadow-ambient">
+                <p className="type-label-md text-on-tertiary-fixed-variant">Time range</p>
+                <p className="mt-1 font-[family-name:var(--font-manrope)] text-2xl font-extrabold text-on-surface">
+                  {availability.timeStart || "?"} - {availability.timeEnd || "?"}
+                </p>
+              </div>
+              <div className="rounded-[var(--radius-xl)] bg-surface-card p-4 shadow-ambient">
+                <p className="type-label-md text-on-tertiary-fixed-variant">Countries</p>
+                <p className="mt-1 font-[family-name:var(--font-manrope)] text-2xl font-extrabold text-on-surface">
+                  {availability.countries.length > 0
+                    ? availability.countries.filter((c) => c.obsCount > 0).length
+                    : availability.dimensions.find((d) => d.id === "GEO_PICT")?.values.length || "-"}
+                </p>
+              </div>
+              <div className="rounded-[var(--radius-xl)] bg-surface-card p-4 shadow-ambient">
+                <p className="type-label-md text-on-tertiary-fixed-variant">Frequency</p>
+                <p className="mt-1 font-[family-name:var(--font-manrope)] text-2xl font-extrabold text-on-surface">
+                  {availability.frequencies.length > 0
+                    ? availability.frequencies.map((f) =>
+                        f === "A" ? "Annual" : f === "Q" ? "Quarterly" : f === "M" ? "Monthly" : f
+                      ).join(", ")
+                    : "-"}
+                </p>
+              </div>
+            </div>
+
+            {/* Country coverage table */}
+            {availability.countries.length > 0 && (
+              <div className="rounded-[var(--radius-xl)] bg-surface-card p-5 shadow-ambient">
+                <h4 className="type-label-md mb-3 text-on-tertiary-fixed-variant">
+                  Country coverage
+                </h4>
+                <div className="max-h-80 overflow-y-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-surface-high text-left">
+                        <th className="px-2 py-1.5 font-semibold text-on-surface-variant">Country</th>
+                        <th className="px-2 py-1.5 text-right font-semibold text-on-surface-variant">Obs</th>
+                        <th className="px-2 py-1.5 font-semibold text-on-surface-variant">Period</th>
+                        <th className="px-2 py-1.5 font-semibold text-on-surface-variant">Coverage</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {availability.countries
+                        .filter((c) => c.obsCount > 0)
+                        .sort((a, b) => b.obsCount - a.obsCount)
+                        .map((c) => {
+                          // Compute coverage bar width relative to the max obs count
+                          const maxObs = Math.max(...availability.countries.map((x) => x.obsCount));
+                          const pct = maxObs > 0 ? (c.obsCount / maxObs) * 100 : 0;
+                          return (
+                            <tr key={c.code} className="transition-colors hover:bg-surface-low">
+                              <td className="px-2 py-1.5 font-mono font-semibold text-primary">{c.code}</td>
+                              <td className="px-2 py-1.5 text-right tabular-nums text-on-surface">{c.obsCount}</td>
+                              <td className="px-2 py-1.5 tabular-nums text-on-surface-variant">
+                                {c.timeStart || "?"} - {c.timeEnd || "?"}
+                              </td>
+                              <td className="px-2 py-1.5">
+                                <div className="h-2 w-full rounded-full bg-surface-high">
+                                  <div
+                                    className="h-2 rounded-full bg-primary/60"
+                                    style={{ width: pct + "%" }}
+                                  />
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Dimensions — expandable codelists */}
         <section className="mb-6">
           <h3 className="mb-3 font-[family-name:var(--font-manrope)] text-sm font-bold text-on-surface">
-            What you can explore
+            Dimensions
           </h3>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {dims.map((dim) => {
