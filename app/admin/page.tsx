@@ -16,12 +16,17 @@ interface UserRecord {
   requestCount: number;
   totalTokens: number;
   sessionCount: number;
+  lastActive: string | null;
 }
 
 interface InviteRecord {
   email: string;
   invited_by: string | null;
   created_at: string | null;
+  invite_email_sent: boolean;
+  signed_up: boolean;
+  signed_up_at: string | null;
+  last_active: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -246,36 +251,72 @@ export default function AdminPage() {
             </div>
           ) : (
             <div className="overflow-hidden rounded-[var(--radius-xl)] bg-surface-card shadow-ambient">
-              <div className="grid grid-cols-12 gap-4 bg-surface-high/50 px-6 py-3">
-                <div className="type-label-md col-span-6 text-on-surface">Email</div>
-                <div className="type-label-md col-span-4 text-on-surface">Invited</div>
-                <div className="type-label-md col-span-2 text-right text-on-surface">Action</div>
+              <div className="grid grid-cols-12 gap-3 bg-surface-high/50 px-6 py-3">
+                <div className="type-label-md col-span-3 text-on-surface">Email</div>
+                <div className="type-label-md col-span-2 text-on-surface">Status</div>
+                <div className="type-label-md col-span-2 text-on-surface">Invited</div>
+                <div className="type-label-md col-span-2 text-on-surface">Signed up</div>
+                <div className="type-label-md col-span-2 text-on-surface">Last active</div>
+                <div className="type-label-md col-span-1 text-right text-on-surface"></div>
               </div>
               {invites.map((invite) => (
                 <div
                   key={invite.email}
-                  className="grid grid-cols-12 items-center gap-4 border-t border-surface-high/30 px-6 py-3 transition-colors hover:bg-surface-low"
+                  className="grid grid-cols-12 items-center gap-3 border-t border-surface-high/30 px-6 py-3 transition-colors hover:bg-surface-low"
                 >
-                  <div className="col-span-6 truncate text-sm font-medium text-on-surface">
+                  <div className="col-span-3 truncate text-sm font-medium text-on-surface">
                     {invite.email}
                   </div>
-                  <div className="col-span-4 text-sm text-on-surface-variant">
+                  <div className="col-span-2">
+                    {invite.signed_up ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                        Active
+                      </span>
+                    ) : invite.invite_email_sent ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">
+                        Invited
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-surface-high px-2 py-0.5 text-[10px] font-semibold text-on-surface-variant">
+                        Pending
+                      </span>
+                    )}
+                  </div>
+                  <div className="col-span-2 text-xs text-on-surface-variant">
                     {invite.created_at
                       ? new Date(invite.created_at).toLocaleDateString("en-GB", {
                           day: "numeric",
                           month: "short",
                           year: "numeric",
                         })
-                      : "—"}
+                      : "-"}
                   </div>
-                  <div className="col-span-2 flex justify-end">
+                  <div className="col-span-2 text-xs text-on-surface-variant">
+                    {invite.signed_up_at
+                      ? new Date(invite.signed_up_at).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })
+                      : "-"}
+                  </div>
+                  <div className="col-span-2 text-xs text-on-surface-variant">
+                    {invite.last_active
+                      ? new Date(invite.last_active).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })
+                      : "-"}
+                  </div>
+                  <div className="col-span-1 flex justify-end">
                     <button
                       type="button"
                       onClick={() => void handleRemoveInvite(invite.email)}
                       disabled={removingEmail === invite.email}
-                      className="ghost-border rounded-full px-3 py-1 text-xs font-semibold text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="ghost-border rounded-full px-2 py-1 text-xs font-semibold text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {removingEmail === invite.email ? "Removing..." : "Remove"}
+                      {removingEmail === invite.email ? "..." : "Remove"}
                     </button>
                   </div>
                 </div>
@@ -304,9 +345,10 @@ export default function AdminPage() {
               {/* Table header */}
               <div className="grid grid-cols-12 gap-3 bg-surface-high/50 px-6 py-3">
                 <div className="type-label-md col-span-3 text-on-surface">Email</div>
-                <div className="type-label-md col-span-2 text-on-surface">Role</div>
-                <div className="type-label-md col-span-2 text-on-surface">Sessions</div>
-                <div className="type-label-md col-span-3 text-on-surface">Tokens Used</div>
+                <div className="type-label-md col-span-1 text-on-surface">Role</div>
+                <div className="type-label-md col-span-2 text-on-surface">Usage</div>
+                <div className="type-label-md col-span-2 text-on-surface">Joined</div>
+                <div className="type-label-md col-span-2 text-on-surface">Last active</div>
                 <div className="type-label-md col-span-2 text-right text-on-surface">Actions</div>
               </div>
 
@@ -323,29 +365,42 @@ export default function AdminPage() {
                     )}
                   </div>
 
-                  <div className="col-span-2">
+                  <div className="col-span-1">
                     {user.role === "admin" ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                      <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
                         Admin
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-surface-high px-2.5 py-0.5 text-xs font-semibold text-on-surface-variant">
+                      <span className="inline-flex items-center rounded-full bg-surface-high px-2 py-0.5 text-[10px] font-semibold text-on-surface-variant">
                         User
                       </span>
                     )}
                   </div>
 
-                  <div className="col-span-2 text-sm text-on-surface-variant">
-                    {user.sessionCount.toLocaleString()}
+                  <div className="col-span-2 text-xs text-on-surface-variant">
+                    <span className="tabular-nums">{user.sessionCount}</span> sessions
+                    <br />
+                    <span className="tabular-nums">{user.totalTokens.toLocaleString()}</span> tokens
                   </div>
 
-                  <div className="col-span-3 text-sm text-on-surface-variant">
-                    {user.totalTokens.toLocaleString()}
-                    {user.requestCount > 0 && (
-                      <span className="ml-1.5 text-xs text-text-muted">
-                        {"(" + user.requestCount.toLocaleString() + " req)"}
-                      </span>
-                    )}
+                  <div className="col-span-2 text-xs text-on-surface-variant">
+                    {user.createdAt
+                      ? new Date(user.createdAt).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })
+                      : "-"}
+                  </div>
+
+                  <div className="col-span-2 text-xs text-on-surface-variant">
+                    {user.lastActive
+                      ? new Date(user.lastActive).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })
+                      : "-"}
                   </div>
 
                   <div className="col-span-2 flex justify-end">
@@ -356,7 +411,7 @@ export default function AdminPage() {
                       className="ghost-border rounded-full px-3 py-1 text-xs font-semibold text-on-surface-variant transition-colors hover:bg-surface-high disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {togglingId === user.id
-                        ? "Updating..."
+                        ? "..."
                         : user.role === "admin"
                         ? "Make User"
                         : "Make Admin"}

@@ -5,6 +5,7 @@ import {
   integer,
   serial,
   jsonb,
+  boolean,
   index,
   primaryKey,
 } from "drizzle-orm/pg-core";
@@ -64,6 +65,7 @@ export const allowedEmails = pgTable("allowed_emails", {
   email: text("email").primaryKey(),
   invited_by: text("invited_by").references(() => authUsers.id),
   created_at: timestamp("created_at").defaultNow(),
+  invite_email_sent: boolean("invite_email_sent").default(false),
 });
 
 // ---------------------------------------------------------------------------

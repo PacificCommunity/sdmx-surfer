@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { count, sum } from "drizzle-orm";
+import { count, sum, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, authUsers, usageLogs, dashboardSessions } from "@/lib/db";
 
@@ -28,13 +28,14 @@ export async function GET() {
       })
       .from(authUsers);
 
-    // Aggregate usage logs per user: request count, total tokens
+    // Aggregate usage logs per user: request count, total tokens, last active
     const usageRows = await db
       .select({
         userId: usageLogs.user_id,
         requestCount: count(usageLogs.id),
         totalInputTokens: sum(usageLogs.input_tokens),
         totalOutputTokens: sum(usageLogs.output_tokens),
+        lastActive: sql<string>`max(${usageLogs.created_at})`,
       })
       .from(usageLogs)
       .groupBy(usageLogs.user_id);
@@ -66,6 +67,7 @@ export async function GET() {
         requestCount: Number(usage?.requestCount ?? 0),
         totalTokens: inputTokens + outputTokens,
         sessionCount: Number(sess?.sessionCount ?? 0),
+        lastActive: usage?.lastActive || null,
       };
     });
 

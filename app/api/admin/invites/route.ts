@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { desc } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
-import { db, allowedEmails } from "@/lib/db";
+import { db, allowedEmails, authUsers, usageLogs } from "@/lib/db";
 import { checkCsrf } from "@/lib/csrf";
 
 // ---------------------------------------------------------------------------
@@ -32,8 +32,38 @@ export async function GET() {
       .from(allowedEmails)
       .orderBy(desc(allowedEmails.created_at));
 
-    return NextResponse.json({ invites });
-  } catch {
+    // Look up which invited emails have registered (have an auth_users record)
+    const allUsers = await db
+      .select({ email: authUsers.email, id: authUsers.id, createdAt: authUsers.created_at })
+      .from(authUsers);
+    const userMap = new Map(allUsers.map((u) => [u.email, u]));
+
+    // Get last activity per user from usage_logs
+    const lastActivityRows = await db
+      .select({
+        userId: usageLogs.user_id,
+        lastActive: sql<string>`max(${usageLogs.created_at})`,
+      })
+      .from(usageLogs)
+      .groupBy(usageLogs.user_id);
+    const activityMap = new Map(lastActivityRows.map((r) => [r.userId, r.lastActive]));
+
+    const enriched = invites.map((inv) => {
+      const user = userMap.get(inv.email);
+      return {
+        email: inv.email,
+        invited_by: inv.invited_by,
+        created_at: inv.created_at,
+        invite_email_sent: inv.invite_email_sent ?? false,
+        signed_up: !!user,
+        signed_up_at: user?.createdAt || null,
+        last_active: user ? (activityMap.get(user.id) || null) : null,
+      };
+    });
+
+    return NextResponse.json({ invites: enriched });
+  } catch (err) {
+    console.error("[admin/invites] GET error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -73,6 +103,43 @@ export async function POST(req: Request) {
       .insert(allowedEmails)
       .values({ email, invited_by: invitedBy })
       .onConflictDoNothing();
+
+    // Send invitation email via Resend (if configured)
+    if (process.env.RESEND_API_KEY) {
+      try {
+        const { Resend } = await import("resend");
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        const from = process.env.EMAIL_FROM || "noreply@example.com";
+        const loginUrl = (process.env.NEXTAUTH_URL || "https://sdmx-surfer.vercel.app") + "/login";
+
+        await resend.emails.send({
+          from,
+          to: email,
+          subject: "You're invited to SDMX Dashboard Builder",
+          html:
+            '<div style="font-family: Inter, system-ui, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 16px;">' +
+            '<h2 style="color: #004467; margin: 0 0 16px;">You\'ve been invited!</h2>' +
+            '<p style="color: #181c1e; line-height: 1.6; margin: 0 0 24px;">' +
+            "You've been invited to the <strong>SPC Conversational Dashboard Builder</strong> pilot. " +
+            "Describe the data dashboards you want in plain language, and an AI agent will build them for you." +
+            "</p>" +
+            '<a href="' + loginUrl + '" style="display: inline-block; background: #004467; color: #fff; ' +
+            'padding: 12px 24px; border-radius: 999px; text-decoration: none; font-weight: 600;">Sign in</a>' +
+            '<p style="color: #6b7280; font-size: 12px; margin: 24px 0 0;">Sign in with this email address: <strong>' +
+            email + "</strong></p>" +
+            "</div>",
+        });
+
+        // Mark invite email as sent
+        await db
+          .update(allowedEmails)
+          .set({ invite_email_sent: true })
+          .where(eq(allowedEmails.email, email));
+      } catch (emailErr) {
+        // Log but don't fail — the invite was created, email is a bonus
+        console.error("[admin/invites] Failed to send invitation email:", emailErr);
+      }
+    }
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch {
