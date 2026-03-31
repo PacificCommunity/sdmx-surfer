@@ -166,7 +166,7 @@ export async function exportToPdf(
   config: SDMXDashboardConfig,
 ) {
   const [html2canvas, { jsPDF }] = await Promise.all([
-    import("html2canvas").then((m) => m.default),
+    import("html2canvas").then((m) => m.default ?? m),
     import("jspdf"),
   ]);
 
@@ -180,7 +180,7 @@ export async function exportToPdf(
       scale: 2,
       useCORS: true,
       allowTaint: true,
-      backgroundColor: "#f7fafc",
+      backgroundColor: BRAND_THEME.colors.surface,
       logging: false,
     });
 

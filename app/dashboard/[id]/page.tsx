@@ -171,6 +171,7 @@ export default function DashboardViewPage() {
                         if (!dashboardRef.current) return;
                         setExporting(true);
                         try { await exportToPdf(dashboardRef.current, config); }
+                        catch (err) { console.error("PDF export failed:", err); alert("PDF export failed: " + (err instanceof Error ? err.message : String(err))); }
                         finally { setExporting(false); }
                       }},
                       { label: "HTML (static)", sub: "Works offline", fn: () => {

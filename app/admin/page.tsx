@@ -288,6 +288,7 @@ export default function AdminPage() {
                           day: "numeric",
                           month: "short",
                           year: "numeric",
+                          timeZone: "UTC",
                         })
                       : "-"}
                   </div>
@@ -297,6 +298,7 @@ export default function AdminPage() {
                           day: "numeric",
                           month: "short",
                           year: "numeric",
+                          timeZone: "UTC",
                         })
                       : "-"}
                   </div>
@@ -306,6 +308,7 @@ export default function AdminPage() {
                           day: "numeric",
                           month: "short",
                           year: "numeric",
+                          timeZone: "UTC",
                         })
                       : "-"}
                   </div>
@@ -389,6 +392,7 @@ export default function AdminPage() {
                           day: "numeric",
                           month: "short",
                           year: "numeric",
+                          timeZone: "UTC",
                         })
                       : "-"}
                   </div>
@@ -399,6 +403,7 @@ export default function AdminPage() {
                           day: "numeric",
                           month: "short",
                           year: "numeric",
+                          timeZone: "UTC",
                         })
                       : "-"}
                   </div>
