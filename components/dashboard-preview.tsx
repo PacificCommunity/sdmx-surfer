@@ -1211,12 +1211,6 @@ export const DashboardPreview = memo(function DashboardPreview({
             </a>
           )}
 
-          {tab === "preview" && (
-            <span className="type-label-md rounded-full bg-tertiary-fixed px-2.5 py-0.5 text-tertiary-container">
-              Live
-            </span>
-          )}
-
           {/* Export dropdown */}
           <div className="relative">
             <button

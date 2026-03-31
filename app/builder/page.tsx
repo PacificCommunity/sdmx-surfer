@@ -138,6 +138,7 @@ export default function BuilderPage() {
   const [availableModels, setAvailableModels] = useState<ModelOption[]>([FREE_TIER]);
   const [selectedModel, setSelectedModel] = useState<ModelOption>(FREE_TIER);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autosaveSessionRef = useRef<string | null>(null);
   const pendingPreviewErrorRef = useRef<string | null>(null);
   const outgoingPreviewErrorRef = useRef<string | null>(null);
   const lastForwardedPreviewErrorRef = useRef<string | null>(null);
@@ -289,6 +290,7 @@ export default function BuilderPage() {
           if (saved.configHistory.length > 0) {
             configHistoryRef.current.restore(saved.configHistory, saved.configPointer);
           }
+          setSaveState("saved");
         }
         setSessionLoaded(true);
       })();
@@ -304,6 +306,7 @@ export default function BuilderPage() {
         if (saved.configHistory.length > 0) {
           configHistoryRef.current.restore(saved.configHistory, saved.configPointer);
         }
+        setSaveState("saved");
       } else {
         setSessionId(generateSessionId());
       }
@@ -334,7 +337,6 @@ export default function BuilderPage() {
     };
     void saveSession(data).then(() => {
       setSaveState("saved");
-      setTimeout(() => setSaveState("idle"), 2000);
     });
   }, []);
 
@@ -347,6 +349,11 @@ export default function BuilderPage() {
 
   useEffect(() => {
     if (sessionLoaded && sessionId) {
+      if (autosaveSessionRef.current !== sessionId) {
+        autosaveSessionRef.current = sessionId;
+        return;
+      }
+      setSaveState("idle");
       debouncedSave();
     }
   }, [messages, configHistory.current, sessionLoaded, sessionId, debouncedSave]);
@@ -581,25 +588,25 @@ export default function BuilderPage() {
               ))}
             </select>
 
-            {/* Save indicator — filled when saved, outline when unsaved, pulsing when saving */}
-            <button
-              type="button"
-              onClick={doSave}
-              title={saveState === "saved" ? "Session saved" : saveState === "saving" ? "Saving..." : "Save session"}
-              className={"ghost-border rounded-full bg-surface-card p-1.5 transition-all hover:scale-105 active:scale-95 " +
-                (saveState === "saved"
-                  ? "text-primary"
-                  : saveState === "saving"
-                    ? "animate-pulse text-on-surface-variant"
-                    : "text-on-surface-variant hover:text-primary")}
-            >
-              <svg className="h-4 w-4" viewBox="0 0 24 24" strokeWidth={1.5}
-                fill={saveState === "saved" ? "currentColor" : "none"}
-                stroke={saveState === "saved" ? "none" : "currentColor"}
+            {(saveState === "saving" || saveState === "saved") && (
+              <span
+                title={saveState === "saved" ? "Session autosaved" : "Session is being autosaved"}
+                className={
+                  "ghost-border inline-flex items-center gap-1.5 rounded-full bg-surface-card px-3 py-1 text-xs font-semibold " +
+                  (saveState === "saved"
+                    ? "text-primary"
+                    : "animate-pulse text-on-surface-variant")
+                }
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
-              </svg>
-            </button>
+                <span
+                  className={
+                    "h-2 w-2 rounded-full " +
+                    (saveState === "saved" ? "bg-primary" : "bg-on-surface-variant")
+                  }
+                />
+                {saveState === "saved" ? "Saved" : "Saving..."}
+              </span>
+            )}
 
             {/* Settings link */}
             <Link
