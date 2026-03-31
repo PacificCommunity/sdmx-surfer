@@ -195,7 +195,19 @@ export async function exportToPdf(
     });
 
     pdf.addImage(imgData, "PNG", 0, 0, imgWidth / 2, imgHeight / 2);
-    pdf.save(slugify(title) + ".pdf");
+
+    // Use blob + anchor download instead of pdf.save() —
+    // pdf.save() gets blocked by browsers after multiple awaits
+    // lose the "user gesture" context.
+    const blob = pdf.output("blob");
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = slugify(title) + ".pdf";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   } finally {
     // Put the original SVGs back so the live dashboard still works
     restoreSvgs();
