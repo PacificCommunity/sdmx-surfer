@@ -509,7 +509,7 @@ export default function BuilderPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="ocean-gradient flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] transition-transform hover:scale-105"
+              className="brand-gradient flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] transition-transform hover:scale-105"
               title="Back to home"
             >
               <svg
@@ -527,7 +527,7 @@ export default function BuilderPage() {
               </svg>
             </Link>
             <div>
-              <h1 className="font-[family-name:var(--font-manrope)] text-base font-bold tracking-tight text-primary">
+              <h1 className="font-[family-name:var(--font-display)] text-base font-bold tracking-tight text-primary">
                 SPC Dashboard Builder
               </h1>
               <p className="type-label-md text-on-tertiary-fixed-variant">

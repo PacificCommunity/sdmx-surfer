@@ -51,7 +51,7 @@ export function ChatPanel({ messages, status, sendMessage, onStop }: ChatPanelPr
     <div className="flex h-full flex-col">
       {/* Header — tonal shift instead of border */}
       <div className="shrink-0 bg-surface-low px-5 pb-3 pt-4">
-        <h2 className="font-[family-name:var(--font-manrope)] text-lg font-bold tracking-tight text-primary">
+        <h2 className="font-[family-name:var(--font-display)] text-lg font-bold tracking-tight text-primary">
           Dashboard Builder
         </h2>
         <p className="type-label-md mt-0.5 text-on-tertiary-fixed-variant">
@@ -138,7 +138,7 @@ export function ChatPanel({ messages, status, sendMessage, onStop }: ChatPanelPr
             <button
               type="submit"
               disabled={!input.trim()}
-              className="ocean-gradient rounded-full px-5 py-2 text-sm font-semibold text-on-primary shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95 disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100"
+              className="brand-gradient rounded-full px-5 py-2 text-sm font-semibold text-on-primary shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95 disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100"
             >
               Send
             </button>

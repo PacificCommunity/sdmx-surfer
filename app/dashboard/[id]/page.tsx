@@ -73,7 +73,7 @@ export default function DashboardViewPage() {
           <button
             type="button"
             onClick={() => router.push("/")}
-            className="ocean-gradient mt-6 rounded-full px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95"
+            className="brand-gradient mt-6 rounded-full px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95"
           >
             Go Home
           </button>
@@ -114,7 +114,7 @@ export default function DashboardViewPage() {
               </svg>
             </button>
             <div>
-              <h1 className="font-[family-name:var(--font-manrope)] text-base font-bold tracking-tight text-primary">
+              <h1 className="font-[family-name:var(--font-display)] text-base font-bold tracking-tight text-primary">
                 {title}
               </h1>
               {subtitle && (
@@ -144,7 +144,7 @@ export default function DashboardViewPage() {
                 type="button"
                 onClick={() => setExportMenu((v) => !v)}
                 disabled={exporting}
-                className="ocean-gradient flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
+                className="brand-gradient flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
               >
                 {exporting ? (
                   <>
@@ -211,7 +211,7 @@ export default function DashboardViewPage() {
           <span className="type-label-md rounded-full bg-secondary-container px-2.5 py-0.5 text-on-secondary-container">
             Live SDMX Dashboard
           </span>
-          <h2 className="mt-2 font-[family-name:var(--font-manrope)] text-3xl font-extrabold tracking-tight text-on-surface">
+          <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-extrabold tracking-tight text-on-surface">
             {title}
           </h2>
           {subtitle && (

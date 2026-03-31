@@ -24,7 +24,7 @@ export default function WelcomePage() {
       <header className="glass-panel shadow-ambient sticky top-0 z-50 px-6 py-3">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="ocean-gradient flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)]">
+            <div className="brand-gradient flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)]">
               <svg
                 className="h-5 w-5 text-white"
                 fill="none"
@@ -40,7 +40,7 @@ export default function WelcomePage() {
               </svg>
             </div>
             <div>
-              <h1 className="font-[family-name:var(--font-manrope)] text-base font-bold tracking-tight text-primary">
+              <h1 className="font-[family-name:var(--font-display)] text-base font-bold tracking-tight text-primary">
                 SPC SDMX Navigator
               </h1>
               <p className="type-label-md text-on-tertiary-fixed-variant">
@@ -51,7 +51,7 @@ export default function WelcomePage() {
           <button
             type="button"
             onClick={() => { window.location.href = "/builder"; }}
-            className="ocean-gradient rounded-full px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95"
+            className="brand-gradient rounded-full px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95"
           >
             Open Builder
           </button>
@@ -91,19 +91,19 @@ export default function WelcomePage() {
         <section className="relative overflow-hidden rounded-[var(--radius-2xl)] bg-gradient-to-br from-primary via-primary-container to-primary p-12 text-white">
           {/* Decorative elements */}
           <div className="pointer-events-none absolute inset-0 opacity-10">
-            <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-lagoon blur-3xl" />
+            <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-accent-light blur-3xl" />
             <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-secondary blur-3xl" />
           </div>
 
           <div className="relative z-10 grid gap-8 lg:grid-cols-5">
             <div className="lg:col-span-3">
               <span className="type-label-md mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 backdrop-blur-md">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-lagoon" />
+                <span className="h-2 w-2 animate-pulse rounded-full bg-accent-light" />
                 Live Intelligence
               </span>
-              <h2 className="font-[family-name:var(--font-manrope)] text-4xl font-extrabold leading-tight tracking-tight lg:text-5xl">
+              <h2 className="font-[family-name:var(--font-display)] text-4xl font-extrabold leading-tight tracking-tight lg:text-5xl">
                 The Modern{" "}
-                <span className="bg-gradient-to-r from-lagoon to-secondary-fixed-dim bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-accent-light to-secondary-fixed-dim bg-clip-text text-transparent">
                   Navigator
                 </span>
               </h2>
@@ -138,7 +138,7 @@ export default function WelcomePage() {
             {/* Stat cards */}
             <div className="hidden gap-4 lg:col-span-2 lg:grid lg:grid-cols-2">
               {[
-                { value: "121", label: "Dataflows", color: "bg-lagoon/20" },
+                { value: "121", label: "Dataflows", color: "bg-accent-light/20" },
                 { value: "22", label: "Pacific Nations", color: "bg-secondary-fixed-dim/20" },
                 { value: "18", label: "SDMX Tools", color: "bg-white/10" },
                 { value: "Live", label: "Data Access", color: "bg-white/10" },
@@ -147,7 +147,7 @@ export default function WelcomePage() {
                   key={stat.label}
                   className={"flex flex-col justify-end rounded-[var(--radius-xl)] border border-white/10 p-6 backdrop-blur-xl " + stat.color}
                 >
-                  <span className="font-[family-name:var(--font-manrope)] text-3xl font-black">
+                  <span className="font-[family-name:var(--font-display)] text-3xl font-black">
                     {stat.value}
                   </span>
                   <span className="type-label-md mt-1 text-white/60">
@@ -166,7 +166,7 @@ export default function WelcomePage() {
               <p className="type-label-md text-on-tertiary-fixed-variant">
                 Quick Start
               </p>
-              <h3 className="font-[family-name:var(--font-manrope)] text-2xl font-extrabold tracking-tight text-primary">
+              <h3 className="font-[family-name:var(--font-display)] text-2xl font-extrabold tracking-tight text-primary">
                 Explore Pacific Data
               </h3>
             </div>
@@ -213,7 +213,7 @@ export default function WelcomePage() {
                 onClick={() => { window.location.href = "/builder?new=1&prompt=" + encodeURIComponent(topic.prompt); }}
                 className="group rounded-[var(--radius-xl)] bg-surface-card p-6 text-left shadow-ambient transition-all hover:shadow-lg hover:shadow-primary/5"
               >
-                <div className={"mb-4 flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)] transition-colors group-hover:ocean-gradient group-hover:text-white " + topic.bg}>
+                <div className={"mb-4 flex h-12 w-12 items-center justify-center rounded-[var(--radius-lg)] transition-colors group-hover:brand-gradient group-hover:text-white " + topic.bg}>
                   <svg
                     className={"h-6 w-6 transition-colors group-hover:text-white " + (topic.iconColor || "")}
                     fill="none"
@@ -224,7 +224,7 @@ export default function WelcomePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d={topic.icon} />
                   </svg>
                 </div>
-                <h4 className="font-[family-name:var(--font-manrope)] text-lg font-bold text-on-surface">
+                <h4 className="font-[family-name:var(--font-display)] text-lg font-bold text-on-surface">
                   {topic.title}
                 </h4>
                 <p className="mt-1 text-sm text-on-surface-variant">
@@ -242,7 +242,7 @@ export default function WelcomePage() {
               <p className="type-label-md text-on-tertiary-fixed-variant">
                 Recent Explorations
               </p>
-              <h3 className="font-[family-name:var(--font-manrope)] text-2xl font-extrabold tracking-tight text-primary">
+              <h3 className="font-[family-name:var(--font-display)] text-2xl font-extrabold tracking-tight text-primary">
                 Saved Dashboards
               </h3>
             </div>
@@ -273,7 +273,7 @@ export default function WelcomePage() {
                       onClick={() => { window.location.href = "/builder?session=" + session.sessionId; }}
                       className="text-left"
                     >
-                      <span className="font-[family-name:var(--font-manrope)] text-sm font-semibold text-primary hover:underline">
+                      <span className="font-[family-name:var(--font-display)] text-sm font-semibold text-primary hover:underline">
                         {session.title}
                       </span>
                     </button>

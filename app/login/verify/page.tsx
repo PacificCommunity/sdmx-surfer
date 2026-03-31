@@ -97,7 +97,7 @@ function VerifyContent() {
         type="button"
         onClick={handleSignIn}
         disabled={loading}
-        className="ocean-gradient mt-6 inline-block rounded-full px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
+        className="brand-gradient mt-6 inline-block rounded-full px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
       >
         {loading ? "Signing in..." : "Sign in now"}
       </button>
@@ -113,7 +113,7 @@ export default function VerifyPage() {
     <div className="flex min-h-screen items-center justify-center bg-surface px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
-          <div className="ocean-gradient flex h-14 w-14 items-center justify-center rounded-[var(--radius-lg)] shadow-ambient">
+          <div className="brand-gradient flex h-14 w-14 items-center justify-center rounded-[var(--radius-lg)] shadow-ambient">
             <svg
               className="h-8 w-8 text-white"
               fill="none"

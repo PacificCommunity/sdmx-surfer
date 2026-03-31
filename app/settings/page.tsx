@@ -106,7 +106,7 @@ function ProviderCard({ config, keyRecord, onSave, onRemove }: ProviderCardProps
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="ocean-gradient flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)]">
+          <div className="brand-gradient flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)]">
             <span className="text-xs font-bold text-white">{config.badge.slice(0, 2)}</span>
           </div>
           <div>
@@ -181,7 +181,7 @@ function ProviderCard({ config, keyRecord, onSave, onRemove }: ProviderCardProps
           type="button"
           onClick={() => void handleSave()}
           disabled={saving || !apiKey.trim()}
-          className="ocean-gradient flex-1 rounded-[var(--radius-sm)] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="brand-gradient flex-1 rounded-[var(--radius-sm)] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saving ? "Saving..." : "Save key"}
         </button>

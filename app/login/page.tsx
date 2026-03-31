@@ -124,7 +124,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading || email.trim() === ""}
-            className="ocean-gradient w-full rounded-full py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+            className="brand-gradient w-full rounded-full py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -170,7 +170,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo + title */}
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
-          <div className="ocean-gradient flex h-14 w-14 items-center justify-center rounded-[var(--radius-lg)] shadow-ambient">
+          <div className="brand-gradient flex h-14 w-14 items-center justify-center rounded-[var(--radius-lg)] shadow-ambient">
             <svg
               className="h-8 w-8 text-white"
               fill="none"

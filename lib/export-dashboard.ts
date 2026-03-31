@@ -3,6 +3,66 @@ import {
   getDashboardSubtitle,
   getDashboardTitle,
 } from "./dashboard-text";
+import {
+  BRAND_GOOGLE_FONTS_HREF,
+  BRAND_THEME,
+} from "./brand-theme";
+
+const EXPORT_THEME_CSS = `
+    :root {
+      --font-headline: '${BRAND_THEME.fonts.display}', system-ui, sans-serif;
+      --font-body: '${BRAND_THEME.fonts.body}', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: ${BRAND_THEME.colors.surface};
+      color: ${BRAND_THEME.colors.onSurface};
+      padding: 2rem;
+      -webkit-font-smoothing: antialiased;
+    }
+    h1, h2, h3, h4, h5, h6 { font-family: var(--font-headline); }
+`;
+
+const EXPORT_LAYOUT_CSS = `
+    .dashboard-header,
+    .header {
+      margin-bottom: 1.5rem;
+    }
+    .dashboard-header h1,
+    .header h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: ${BRAND_THEME.colors.primary};
+      letter-spacing: -0.01em;
+    }
+    .dashboard-header p,
+    .header p {
+      font-size: 0.875rem;
+      color: ${BRAND_THEME.colors.onSurfaceVariant};
+      margin-top: 0.25rem;
+    }
+    .export-badge,
+    .badge {
+      display: inline-block;
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: ${BRAND_THEME.colors.secondaryContainer};
+      color: ${BRAND_THEME.colors.onSecondaryContainer};
+      padding: 0.125rem 0.5rem;
+      border-radius: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      font-size: 0.75rem;
+      color: ${BRAND_THEME.colors.textMuted};
+    }
+    .footer a { color: ${BRAND_THEME.colors.secondary}; }
+`;
 
 /**
  * Convert an SVG element to a canvas element in-place.
@@ -170,64 +230,25 @@ export function exportToHtml(
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(title)} — SPC Dashboard</title>
   <style>
-    :root {
-      --font-headline: 'Manrope', system-ui, sans-serif;
-      --font-body: 'Inter', system-ui, sans-serif;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-body);
-      background: #f7fafc;
-      color: #181c1e;
-      padding: 2rem;
-      -webkit-font-smoothing: antialiased;
-    }
-    h1, h2, h3, h4, h5, h6 { font-family: var(--font-headline); }
-    .dashboard-header {
-      margin-bottom: 1.5rem;
-    }
-    .dashboard-header h1 {
-      font-size: 1.75rem;
-      font-weight: 800;
-      color: #004467;
-      letter-spacing: -0.01em;
-    }
-    .dashboard-header p {
-      font-size: 0.875rem;
-      color: #40484f;
-      margin-top: 0.25rem;
-    }
-    .export-badge {
-      display: inline-block;
-      font-size: 0.625rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      background: #c6e9e9;
-      color: #3c5c5c;
-      padding: 0.125rem 0.5rem;
-      border-radius: 1rem;
-      margin-bottom: 0.75rem;
-    }
+    ${EXPORT_THEME_CSS}
+    ${EXPORT_LAYOUT_CSS}
     .footer {
       margin-top: 2rem;
       padding-top: 1rem;
       font-size: 0.75rem;
-      color: #718096;
     }
-    .footer a { color: #006970; }
     .config-toggle {
       display: inline-block;
       margin-top: 0.75rem;
       font-size: 0.75rem;
-      color: #004467;
+      color: ${BRAND_THEME.colors.primary};
       cursor: pointer;
       text-decoration: underline;
     }
     .config-block {
       display: none;
       margin-top: 0.75rem;
-      background: #f1f4f6;
+      background: ${BRAND_THEME.colors.surfaceLow};
       border-radius: 0.5rem;
       padding: 1rem;
       font-size: 0.7rem;
@@ -245,7 +266,7 @@ export function exportToHtml(
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="${BRAND_GOOGLE_FONTS_HREF}" rel="stylesheet">
 </head>
 <body>
   <div class="dashboard-header">
@@ -299,27 +320,20 @@ export function exportToHtmlLive(config: SDMXDashboardConfig) {
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap-grid.min.css">
   <link rel="stylesheet" href="https://esm.sh/sdmx-dashboard-components@0.4.5/dist/index.css">
   <style>
-    :root { --font-headline: 'Manrope', system-ui, sans-serif; --font-body: 'Inter', system-ui, sans-serif; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--font-body); background: #f7fafc; color: #181c1e; padding: 2rem; -webkit-font-smoothing: antialiased; }
-    h1,h2,h3,h4,h5,h6 { font-family: var(--font-headline); }
-    .header { margin-bottom: 1.5rem; }
-    .header h1 { font-size: 1.75rem; font-weight: 800; color: #004467; letter-spacing: -0.01em; }
-    .header p { font-size: 0.875rem; color: #40484f; margin-top: 0.25rem; }
-    .badge { display: inline-block; font-size: 0.625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; background: #c6e9e9; color: #3c5c5c; padding: 0.125rem 0.5rem; border-radius: 1rem; margin-bottom: 0.75rem; }
-    .loading { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 200px; color: #40484f; font-size: 0.875rem; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: #006970; animation: b 1s ease-in-out infinite; }
+    ${EXPORT_THEME_CSS}
+    ${EXPORT_LAYOUT_CSS}
+    .loading { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 200px; color: ${BRAND_THEME.colors.onSurfaceVariant}; font-size: 0.875rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: ${BRAND_THEME.colors.secondary}; animation: b 1s ease-in-out infinite; }
     .dot:nth-child(2) { animation-delay: .15s; } .dot:nth-child(3) { animation-delay: .3s; }
     @keyframes b { 0%,80%,100% { transform: scale(.6); opacity: .4; } 40% { transform: scale(1); opacity: 1; } }
-    .error { background: #f1f4f6; border-radius: 0.75rem; padding: 1.5rem; margin-top: 1rem; color: #40484f; font-size: 0.875rem; }
-    .error code { display: block; margin-top: 0.75rem; font-size: 0.75rem; background: #e5e9eb; border-radius: 0.5rem; padding: 1rem; overflow-x: auto; white-space: pre; }
-    .footer { margin-top: 2rem; padding-top: 1rem; font-size: 0.75rem; color: #718096; }
-    .footer a { color: #006970; }
+    .error { background: ${BRAND_THEME.colors.surfaceLow}; border-radius: 0.75rem; padding: 1.5rem; margin-top: 1rem; color: ${BRAND_THEME.colors.onSurfaceVariant}; font-size: 0.875rem; }
+    .error code { display: block; margin-top: 0.75rem; font-size: 0.75rem; background: ${BRAND_THEME.colors.surfaceHigh}; border-radius: 0.5rem; padding: 1rem; overflow-x: auto; white-space: pre; }
+    .footer { margin-top: 2rem; padding-top: 1rem; font-size: 0.75rem; }
     @media print { body { padding: .5rem; } .footer { display: none; } }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="${BRAND_GOOGLE_FONTS_HREF}" rel="stylesheet">
   <script type="importmap">
   { "imports": { "react": "${esmReact}", "react/": "${esmReact}/", "react-dom": "${esmReactDom}", "react-dom/": "${esmReactDom}/" } }
   <\/script>

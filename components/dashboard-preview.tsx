@@ -142,19 +142,6 @@ const CONTENT_KEYS = new Set([
   "adaptiveTextSize",
 ]);
 
-const COMPONENT_TYPES = new Set([
-  "line",
-  "bar",
-  "column",
-  "pie",
-  "lollipop",
-  "treemap",
-  "value",
-  "drilldown",
-  "note",
-  "map",
-]);
-
 // getKeyClassName, getStringClassName, formatJsonPreview removed — CodeMirror handles editing
 
 function getKeyTone(key: string): string {
@@ -185,9 +172,9 @@ function getVisualTone(type: SDMXVisualConfig["type"]): string {
     case "treemap":
       return "border-tertiary/30 bg-tertiary-fixed/35";
     case "value":
-      return "border-reef-teal/30 bg-lagoon/15";
+      return "border-secondary/30 bg-accent-light/15";
     case "map":
-      return "border-lagoon/40 bg-lagoon/12";
+      return "border-accent-light/40 bg-accent-light/12";
     case "note":
       return "border-outline-variant bg-surface-high/50";
     case "drilldown":
@@ -201,7 +188,7 @@ function InspectorKey({ name }: { name: string }) {
   return (
     <span
       className={
-        "inline-flex rounded-full px-2 py-0.5 font-[family-name:var(--font-inter)] text-[10px] font-bold uppercase tracking-[0.08em] " +
+        "inline-flex rounded-full px-2 py-0.5 font-[family-name:var(--font-body)] text-[10px] font-bold uppercase tracking-[0.08em] " +
         getKeyTone(name)
       }
     >
@@ -238,7 +225,7 @@ function InspectorPrimitive({
 
   if (typeof value === "number") {
     return (
-      <span className="font-mono text-xs font-semibold text-reef-teal">
+      <span className="font-mono text-xs font-semibold text-secondary">
         {String(value)}
       </span>
     );
@@ -407,7 +394,7 @@ function VisualCard({
               {visual.type}
             </span>
           </div>
-          <h4 className="font-[family-name:var(--font-manrope)] text-base font-semibold text-on-surface">
+          <h4 className="font-[family-name:var(--font-display)] text-base font-semibold text-on-surface">
             {title}
           </h4>
           {subtitle && (
@@ -444,7 +431,7 @@ function RowCard({ row, index }: { row: SDMXDashboardRow; index: number }) {
           <span className="type-label-md text-on-surface-variant">
             Row {index + 1}
           </span>
-          <h3 className="mt-1 font-[family-name:var(--font-manrope)] text-lg font-semibold text-on-surface">
+          <h3 className="mt-1 font-[family-name:var(--font-display)] text-lg font-semibold text-on-surface">
             {row.columns.length} panel{row.columns.length === 1 ? "" : "s"}
           </h3>
         </div>
@@ -475,7 +462,7 @@ function ConfigInspector({ config }: { config: SDMXDashboardConfig }) {
             <span className="type-label-md text-on-surface-variant">
               Dashboard Config
             </span>
-            <h3 className="font-[family-name:var(--font-manrope)] text-lg font-semibold text-on-surface">
+            <h3 className="font-[family-name:var(--font-display)] text-lg font-semibold text-on-surface">
               {getDashboardTitle(config)}
             </h3>
             {getTextConfigValue(config.header?.subtitle) && (
@@ -655,7 +642,7 @@ function JsonEditor({
               type="button"
               onClick={handleApply}
               disabled={!!parseError}
-              className="ocean-gradient rounded-full px-4 py-1 text-xs font-semibold text-on-primary shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95 disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100"
+              className="brand-gradient rounded-full px-4 py-1 text-xs font-semibold text-on-primary shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95 disabled:opacity-40 disabled:shadow-none disabled:hover:scale-100"
             >
               Apply
             </button>
@@ -1116,7 +1103,7 @@ export const DashboardPreview = memo(function DashboardPreview({
         <div className="submerged-overlay max-w-md rounded-[var(--radius-2xl)] bg-surface-low p-12 text-center">
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-[var(--radius-xl)] bg-surface-high">
             <svg
-              className="h-8 w-8 text-soft-mist"
+              className="h-8 w-8 text-accent-muted"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -1175,7 +1162,7 @@ export const DashboardPreview = memo(function DashboardPreview({
           </div>
 
           {title && (
-            <span className="font-[family-name:var(--font-manrope)] text-sm font-semibold tracking-tight text-on-surface">
+            <span className="font-[family-name:var(--font-display)] text-sm font-semibold tracking-tight text-on-surface">
               {title}
             </span>
           )}

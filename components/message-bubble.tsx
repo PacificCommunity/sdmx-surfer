@@ -239,7 +239,7 @@ export function MessageBubble({ message }: { message: UIMessage }) {
     return (
       <div className="flex justify-end">
         <div className="ml-12 max-w-[85%]">
-          <div className="ocean-gradient rounded-[var(--radius-xl)] rounded-tr-none px-4 py-3 text-on-primary shadow-md">
+          <div className="brand-gradient rounded-[var(--radius-xl)] rounded-tr-none px-4 py-3 text-on-primary shadow-md">
             {message.parts.map((part, i) =>
               part.type === "text" ? (
                 <p key={i} className="text-sm leading-relaxed">

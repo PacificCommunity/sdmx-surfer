@@ -161,7 +161,7 @@ export default function AdminPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-surface">
         <div className="ghost-border shadow-ambient rounded-[var(--radius-xl)] bg-surface-card p-10 text-center">
-          <div className="ocean-gradient mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full opacity-60">
+          <div className="brand-gradient mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full opacity-60">
             <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
             </svg>
@@ -172,7 +172,7 @@ export default function AdminPage() {
           </p>
           <Link
             href="/"
-            className="ocean-gradient inline-block rounded-full px-6 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            className="brand-gradient inline-block rounded-full px-6 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
           >
             Go home
           </Link>
@@ -212,7 +212,7 @@ export default function AdminPage() {
         {/* Invite section                                                       */}
         {/* ------------------------------------------------------------------ */}
         <section>
-          <h2 className="font-[family-name:var(--font-manrope)] text-xl font-bold text-on-surface mb-1">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-bold text-on-surface mb-1">
             Pilot Invites
           </h2>
           <p className="type-label-md text-on-surface-variant mb-4">
@@ -234,7 +234,7 @@ export default function AdminPage() {
                 type="button"
                 onClick={() => void handleInvite()}
                 disabled={inviting || !inviteEmail.trim()}
-                className="ocean-gradient rounded-[var(--radius-sm)] px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="brand-gradient rounded-[var(--radius-sm)] px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {inviting ? "Inviting..." : "Invite"}
               </button>
@@ -329,7 +329,7 @@ export default function AdminPage() {
         {/* Users section                                                        */}
         {/* ------------------------------------------------------------------ */}
         <section>
-          <h2 className="font-[family-name:var(--font-manrope)] text-xl font-bold text-on-surface mb-1">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-bold text-on-surface mb-1">
             Users
           </h2>
           <p className="type-label-md text-on-surface-variant mb-4">

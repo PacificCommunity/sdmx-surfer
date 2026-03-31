@@ -205,7 +205,7 @@ export default function DataflowDetailPage() {
           <p className="type-label-md mb-1 text-on-tertiary-fixed-variant">
             {dataflowId}
           </p>
-          <h2 className="font-[family-name:var(--font-manrope)] text-2xl font-extrabold tracking-tight text-on-surface">
+          <h2 className="font-[family-name:var(--font-display)] text-2xl font-extrabold tracking-tight text-on-surface">
             {structure.dataflow.name}
           </h2>
           {structure.dataflow.description && (
@@ -302,7 +302,7 @@ export default function DataflowDetailPage() {
                   "&prompt=" + encodeURIComponent(prompt) +
                   "&dfContext=" + encodeURIComponent(dfContext);
               }}
-              className="ocean-gradient rounded-full px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95"
+              className="brand-gradient rounded-full px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95"
             >
               Explore in Builder
             </button>
@@ -318,25 +318,25 @@ export default function DataflowDetailPage() {
         {/* At a glance — availability stats */}
         {availability && (
           <section className="mb-6">
-            <h3 className="mb-3 font-[family-name:var(--font-manrope)] text-sm font-bold text-on-surface">
+            <h3 className="mb-3 font-[family-name:var(--font-display)] text-sm font-bold text-on-surface">
               At a glance
             </h3>
             <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-[var(--radius-xl)] bg-surface-card p-4 shadow-ambient">
                 <p className="type-label-md text-on-tertiary-fixed-variant">Observations</p>
-                <p className="mt-1 font-[family-name:var(--font-manrope)] text-2xl font-extrabold text-on-surface">
+                <p className="mt-1 font-[family-name:var(--font-display)] text-2xl font-extrabold text-on-surface">
                   {availability.obsCount.toLocaleString()}
                 </p>
               </div>
               <div className="rounded-[var(--radius-xl)] bg-surface-card p-4 shadow-ambient">
                 <p className="type-label-md text-on-tertiary-fixed-variant">Time range</p>
-                <p className="mt-1 font-[family-name:var(--font-manrope)] text-2xl font-extrabold text-on-surface">
+                <p className="mt-1 font-[family-name:var(--font-display)] text-2xl font-extrabold text-on-surface">
                   {availability.timeStart || "?"} - {availability.timeEnd || "?"}
                 </p>
               </div>
               <div className="rounded-[var(--radius-xl)] bg-surface-card p-4 shadow-ambient">
                 <p className="type-label-md text-on-tertiary-fixed-variant">Countries</p>
-                <p className="mt-1 font-[family-name:var(--font-manrope)] text-2xl font-extrabold text-on-surface">
+                <p className="mt-1 font-[family-name:var(--font-display)] text-2xl font-extrabold text-on-surface">
                   {availability.countries.length > 0
                     ? availability.countries.filter((c) => c.obsCount > 0).length
                     : availability.dimensions.find((d) => d.id === "GEO_PICT")?.values.length || "-"}
@@ -344,7 +344,7 @@ export default function DataflowDetailPage() {
               </div>
               <div className="rounded-[var(--radius-xl)] bg-surface-card p-4 shadow-ambient">
                 <p className="type-label-md text-on-tertiary-fixed-variant">Frequency</p>
-                <p className="mt-1 font-[family-name:var(--font-manrope)] text-2xl font-extrabold text-on-surface">
+                <p className="mt-1 font-[family-name:var(--font-display)] text-2xl font-extrabold text-on-surface">
                   {availability.frequencies.length > 0
                     ? availability.frequencies.map((f) =>
                         f === "A" ? "Annual" : f === "Q" ? "Quarterly" : f === "M" ? "Monthly" : f
@@ -406,7 +406,7 @@ export default function DataflowDetailPage() {
 
         {/* Dimensions — expandable codelists */}
         <section className="mb-6">
-          <h3 className="mb-3 font-[family-name:var(--font-manrope)] text-sm font-bold text-on-surface">
+          <h3 className="mb-3 font-[family-name:var(--font-display)] text-sm font-bold text-on-surface">
             Dimensions
           </h3>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -517,7 +517,7 @@ export default function DataflowDetailPage() {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
               </svg>
-              <h3 className="font-[family-name:var(--font-manrope)] text-sm font-bold text-on-surface">
+              <h3 className="font-[family-name:var(--font-display)] text-sm font-bold text-on-surface">
                 Structure Diagram
               </h3>
             </button>
@@ -544,7 +544,7 @@ export default function DataflowDetailPage() {
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
             </svg>
-            <h3 className="font-[family-name:var(--font-manrope)] text-sm font-bold text-on-surface">
+            <h3 className="font-[family-name:var(--font-display)] text-sm font-bold text-on-surface">
               Technical Details
             </h3>
           </button>
@@ -638,7 +638,7 @@ function Header({
             </svg>
           </Link>
           <div>
-            <h1 className="font-[family-name:var(--font-manrope)] text-base font-bold tracking-tight text-primary">
+            <h1 className="font-[family-name:var(--font-display)] text-base font-bold tracking-tight text-primary">
               {name || dataflowId}
             </h1>
             <p className="type-label-md text-on-tertiary-fixed-variant">

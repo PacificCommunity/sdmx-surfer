@@ -109,7 +109,7 @@ function DataflowCard({ df }: { df: Dataflow }) {
       )}
 
       <div className="mb-1.5 flex items-start justify-between gap-2">
-        <h3 className="font-[family-name:var(--font-manrope)] text-sm font-bold leading-snug text-on-surface group-hover:text-primary">
+        <h3 className="font-[family-name:var(--font-display)] text-sm font-bold leading-snug text-on-surface group-hover:text-primary">
           {df.name}
         </h3>
         <svg
@@ -318,7 +318,7 @@ export default function ExplorePage() {
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="ocean-gradient flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] transition-transform hover:scale-105"
+              className="brand-gradient flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] transition-transform hover:scale-105"
               title="Back to home"
             >
               <svg
@@ -336,7 +336,7 @@ export default function ExplorePage() {
               </svg>
             </Link>
             <div>
-              <h1 className="font-[family-name:var(--font-manrope)] text-base font-bold tracking-tight text-primary">
+              <h1 className="font-[family-name:var(--font-display)] text-base font-bold tracking-tight text-primary">
                 Data Catalogue
               </h1>
               <p className="type-label-md text-on-tertiary-fixed-variant">
@@ -511,7 +511,7 @@ export default function ExplorePage() {
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                     </svg>
-                    <h2 className="font-[family-name:var(--font-manrope)] text-sm font-bold text-on-surface">
+                    <h2 className="font-[family-name:var(--font-display)] text-sm font-bold text-on-surface">
                       {group.label}
                     </h2>
                     <span className="rounded-full bg-surface-high px-2 py-0.5 text-[10px] font-medium text-on-surface-variant">

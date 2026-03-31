@@ -1,77 +1,77 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Oceanic Data-Scapes: Full Token Set ── */
+  /* ══════════════════════════════════════════════
+     SPC Pacific Data Hub — Design Tokens
+     Derived from pacificdata.org + stats.pacificdata.org
+     Change values here → every component updates.
+     ══════════════════════════════════════════════ */
 
-  /* Primary */
-  --color-primary: #004467;
-  --color-primary-container: #005c8a;
-  --color-primary-fixed-dim: #90cdff;
+  /* ── Primary (SPC Navy) ── */
+  --color-primary: #031f79;
+  --color-primary-container: #0d3f91;
+  --color-primary-fixed-dim: #a6caed;
   --color-on-primary: #ffffff;
 
-  /* Secondary */
-  --color-secondary: #006970;
-  --color-secondary-container: #8aeff9;
-  --color-secondary-fixed-dim: #6fd6df;
+  /* ── Secondary (Action Blue) ── */
+  --color-secondary: #11a2dc;
+  --color-secondary-container: #e2f2fb;
+  --color-secondary-fixed-dim: #52c9d6;
   --color-on-secondary: #ffffff;
-  --color-on-secondary-container: #006e75;
+  --color-on-secondary-container: #03689a;
 
-  /* Tertiary */
-  --color-tertiary: #244445;
-  --color-tertiary-container: #3c5c5c;
-  --color-tertiary-fixed: #c6e9e9;
-  --color-tertiary-fixed-dim: #abcdcd;
-  --color-on-tertiary-fixed-variant: #2c4c4c;
+  /* ── Tertiary (SPC Orange) ── */
+  --color-tertiary: #e37019;
+  --color-tertiary-container: #f8dcc4;
+  --color-tertiary-fixed: #ffebd4;
+  --color-tertiary-fixed-dim: #ffc72e;
+  --color-on-tertiary-fixed-variant: #8a4500;
 
-  /* Surface hierarchy */
-  --color-surface: #f7fafc;
-  --color-surface-low: #f1f4f6;
+  /* ── Surface hierarchy ── */
+  --color-surface: #f9fafb;
+  --color-surface-low: #f2f3f5;
   --color-surface-card: #ffffff;
-  --color-surface-high: #e5e9eb;
-  --color-surface-tint: #146492;
+  --color-surface-high: #e8eaed;
+  --color-surface-tint: #031f79;
 
-  /* Text / on-surface */
-  --color-on-surface: #181c1e;
-  --color-on-surface-variant: #40484f;
-  --color-text-muted: #718096;
+  /* ── Text / on-surface ── */
+  --color-on-surface: #1a1d2e;
+  --color-on-surface-variant: #4c4c4c;
+  --color-text-muted: #6f6f6f;
 
-  /* Outline */
-  --color-outline: #717880;
-  --color-outline-variant: #c0c7d0;
+  /* ── Outline ── */
+  --color-outline: #c4c4c4;
+  --color-outline-variant: #eeeeee;
 
-  /* Semantic aliases */
-  --color-deep-sea: #004467;
-  --color-reef-teal: #006970;
-  --color-lagoon: #6fd6df;
-  --color-kelp: #244445;
-  --color-soft-mist: #abcdcd;
+  /* ── Semantic aliases (role-based, not color-named) ── */
+  --color-accent: #11a2dc;
+  --color-accent-light: #52c9d6;
+  --color-accent-warm: #e37019;
+  --color-accent-gold: #ffc72e;
+  --color-accent-muted: #668aad;
 
-  /* Chart palette (Highcharts-compatible) */
-  --color-chart-1: #004467;
-  --color-chart-2: #006970;
-  --color-chart-3: #6fd6df;
-  --color-chart-4: #244445;
-  --color-chart-5: #abcdcd;
-  --color-chart-6: #005c8a;
-  --color-chart-7: #90cdff;
+  /* ── Chart palette (Highcharts-compatible, max contrast) ── */
+  --color-chart-1: #031f79;
+  --color-chart-2: #11a2dc;
+  --color-chart-3: #e37019;
+  --color-chart-4: #52c9d6;
+  --color-chart-5: #ffc72e;
+  --color-chart-6: #03689a;
+  --color-chart-7: #668aad;
 
-  /* Spacing */
+  /* ── Radius ── */
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
   --radius-2xl: 2rem;
 
-  /* Shadows */
-  --shadow-ambient: 0 12px 40px rgba(24, 28, 30, 0.06);
+  /* ── Shadows (blue-tinted, from pacificdata.org) ── */
+  --shadow-ambient: 0 2px 50px rgba(0, 5, 160, 0.10);
+  --shadow-lift: 0 2px 25px rgba(0, 18, 181, 0.10);
 }
 
 /* ── Base styles ── */
-
-:root {
-  --font-inter: "Inter";
-  --font-manrope: "Manrope";
-}
 
 html {
   background-color: var(--color-surface);
@@ -79,19 +79,19 @@ html {
 }
 
 body {
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-body, "Inter"), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-family: var(--font-display, "Montserrat"), system-ui, sans-serif;
 }
 
 /* ── Typography scale ── */
 
 .type-display-lg {
-  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-family: var(--font-display, "Montserrat"), system-ui, sans-serif;
   font-size: 3.5rem;
   font-weight: 800;
   line-height: 1.1;
@@ -99,14 +99,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .type-headline-sm {
-  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-family: var(--font-display, "Montserrat"), system-ui, sans-serif;
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 
 .type-label-md {
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-body, "Inter"), system-ui, sans-serif;
   font-size: 0.6875rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -114,7 +114,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .type-body-sm {
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-body, "Inter"), system-ui, sans-serif;
   font-size: 0.75rem;
   line-height: 1.5;
 }
@@ -135,7 +135,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-soft-mist);
+  background: var(--color-accent-muted);
 }
 
 /* ── Utility classes ── */
@@ -146,12 +146,16 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-backdrop-filter: blur(20px);
 }
 
-.ocean-gradient {
+.brand-gradient {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-container) 100%);
 }
 
 .shadow-ambient {
   box-shadow: var(--shadow-ambient);
+}
+
+.shadow-lift {
+  box-shadow: var(--shadow-lift);
 }
 
 .ghost-border {
