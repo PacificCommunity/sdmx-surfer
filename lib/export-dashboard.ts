@@ -1,3 +1,10 @@
+// NOTE: PDF export uses allowTaint:false to avoid a SecurityError from
+// cross-origin images loaded by sdmx-dashboard-components (Highcharts map
+// tiles, flag sprites, etc.). This means those images are silently skipped
+// in the PDF. The proper fix is for the library to either serve assets
+// from the same origin or add crossorigin="anonymous" to <image> elements.
+// Track in: PacificCommunity/sdmx-dashboard-components
+
 import type { SDMXDashboardConfig } from "./types";
 import {
   getDashboardSubtitle,
@@ -165,41 +172,59 @@ export async function exportToPdf(
   element: HTMLElement,
   config: SDMXDashboardConfig,
 ) {
-  const [html2canvas, { jsPDF }] = await Promise.all([
-    import("html2canvas").then((m) => m.default ?? m),
-    import("jspdf"),
-  ]);
+  console.log("[PDF] starting export…");
+
+  let html2canvasFn: (el: HTMLElement, opts: Record<string, unknown>) => Promise<HTMLCanvasElement>;
+  let JsPDF: typeof import("jspdf").jsPDF;
+
+  try {
+    const [h2cMod, jspdfMod] = await Promise.all([
+      import("html2canvas"),
+      import("jspdf"),
+    ]);
+    // html2canvas ships as CJS — .default may or may not exist
+    html2canvasFn = (typeof h2cMod.default === "function" ? h2cMod.default : h2cMod) as typeof html2canvasFn;
+    JsPDF = jspdfMod.jsPDF;
+    console.log("[PDF] libs loaded. html2canvas type:", typeof html2canvasFn, "jsPDF type:", typeof JsPDF);
+  } catch (err) {
+    console.error("[PDF] failed to load libs:", err);
+    throw err;
+  }
 
   const title = getDashboardTitle(config);
 
-  // Convert all SVGs (Highcharts charts) to canvas elements
+  console.log("[PDF] replacing SVGs with canvases…");
   const restoreSvgs = await replaceAllSvgsWithCanvases(element);
 
   try {
-    const canvas = await html2canvas(element, {
+    console.log("[PDF] calling html2canvas…");
+    const canvas = await html2canvasFn(element, {
       scale: 2,
       useCORS: true,
-      allowTaint: true,
+      allowTaint: false,
       backgroundColor: BRAND_THEME.colors.surface,
       logging: false,
     });
+    console.log("[PDF] canvas created:", canvas.width, "x", canvas.height);
+
+    if (canvas.width === 0 || canvas.height === 0) {
+      throw new Error("html2canvas produced a 0×0 canvas — element may be hidden or empty");
+    }
 
     const imgData = canvas.toDataURL("image/png");
-    const imgWidth = canvas.width;
-    const imgHeight = canvas.height;
+    console.log("[PDF] image data length:", imgData.length);
 
-    const pdf = new jsPDF({
-      orientation: imgWidth > imgHeight ? "landscape" : "portrait",
+    const pdf = new JsPDF({
+      orientation: canvas.width > canvas.height ? "landscape" : "portrait",
       unit: "px",
-      format: [imgWidth / 2, imgHeight / 2],
+      format: [canvas.width / 2, canvas.height / 2],
     });
 
-    pdf.addImage(imgData, "PNG", 0, 0, imgWidth / 2, imgHeight / 2);
+    pdf.addImage(imgData, "PNG", 0, 0, canvas.width / 2, canvas.height / 2);
 
-    // Use blob + anchor download instead of pdf.save() —
-    // pdf.save() gets blocked by browsers after multiple awaits
-    // lose the "user gesture" context.
     const blob = pdf.output("blob");
+    console.log("[PDF] blob size:", blob.size);
+
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -207,9 +232,9 @@ export async function exportToPdf(
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    console.log("[PDF] download triggered");
   } finally {
-    // Put the original SVGs back so the live dashboard still works
     restoreSvgs();
   }
 }
