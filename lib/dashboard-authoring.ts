@@ -8,8 +8,9 @@ import {
 } from "./dashboard-schema";
 
 const PACIFIC_EEZ_GEOJSON_URL =
-  "https://www.spc.int/modules/contrib/spc_dot_stat_data/modules/spc_dot_stat_map/maps/eez.json";
-const PACIFIC_EEZ_PROJECTION = "EPSG:3832";
+  "https://geonode.pacificdata.org/geoserver/gwc/service/tms/1.0.0/geonode%3Aglobal_eez_200nm_split@EPSG%3A3857@pbf/{z}/{x}/{-y}.pbf";
+const PACIFIC_EEZ_PROJECTION = "EPSG:3857";
+const PACIFIC_EEZ_JOIN_PROPERTY = "iso_ter1";
 const DEFAULT_VALUE_CONCEPT = "OBS_VALUE";
 
 const authoringTextSchema = z.union([localizedStringSchema, textConfigSchema]);
@@ -288,7 +289,7 @@ function compileChart(intent: ChartIntent): NativeVisualConfig {
 function compileMap(intent: MapIntent): NativeVisualConfig {
   const geoJsonUrl = intent.geoJsonUrl ?? PACIFIC_EEZ_GEOJSON_URL;
   const projection = intent.projection ?? PACIFIC_EEZ_PROJECTION;
-  const joinProperty = intent.joinProperty ?? "id";
+  const joinProperty = intent.joinProperty ?? PACIFIC_EEZ_JOIN_PROPERTY;
   const mapData =
     ensureAllDimensions(intent.dataUrl) +
     ", {" +

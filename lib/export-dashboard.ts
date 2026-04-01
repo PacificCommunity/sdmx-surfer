@@ -467,7 +467,7 @@ export function exportToHtmlLive(config: SDMXDashboardConfig) {
   const esmReact = "https://esm.sh/react@19";
   const esmReactDom = "https://esm.sh/react-dom@19";
   const esmDashboard =
-    "https://esm.sh/sdmx-dashboard-components@0.4.5?deps=react@19,react-dom@19";
+    "https://esm.sh/sdmx-dashboard-components@0.4.6?deps=react@19,react-dom@19";
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -476,7 +476,7 @@ export function exportToHtmlLive(config: SDMXDashboardConfig) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(title)} — SPC Dashboard</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap-grid.min.css">
-  <link rel="stylesheet" href="https://esm.sh/sdmx-dashboard-components@0.4.5/dist/index.css">
+  <link rel="stylesheet" href="https://esm.sh/sdmx-dashboard-components@0.4.6/dist/index.css">
   <style>
     ${EXPORT_THEME_CSS}
     ${EXPORT_LAYOUT_CSS}

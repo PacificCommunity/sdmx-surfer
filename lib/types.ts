@@ -1,5 +1,5 @@
 /**
- * TypeScript types matching sdmx-dashboard-components v0.4.5.
+ * TypeScript types matching sdmx-dashboard-components v0.4.6.
  * NOTE: The library's type definitions use "colums" but the runtime uses "columns".
  */
 
