@@ -9,6 +9,7 @@ interface ChatPanelProps {
   status: ChatStatus;
   sendMessage: (message: { text: string }) => Promise<void>;
   onStop?: () => void;
+  hasDashboard?: boolean;
 }
 
 const SUGGESTIONS = [
@@ -17,7 +18,14 @@ const SUGGESTIONS = [
   "Create a dashboard comparing GDP across Pacific Islands",
 ];
 
-export function ChatPanel({ messages, status, sendMessage, onStop }: ChatPanelProps) {
+const REFINEMENT_SUGGESTIONS = [
+  "Add a map showing this data by country",
+  "Break it down by year as a line chart",
+  "Add another indicator for comparison",
+  "Change the colors and add a title",
+];
+
+export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard }: ChatPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -98,11 +106,37 @@ export function ChatPanel({ messages, status, sendMessage, onStop }: ChatPanelPr
                 </div>
               </div>
             )}
+
+          {/* Refinement nudge — shown after a dashboard is rendered and the AI isn't streaming */}
+          {hasDashboard && !isStreaming && messages.length > 0 &&
+            messages[messages.length - 1].role === "assistant" && (
+              <div className="flex flex-col gap-2 rounded-[var(--radius-xl)] bg-surface-low px-4 py-4">
+                <p className="text-center text-xs font-medium text-on-surface-variant">
+                  Keep going — refine your dashboard
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {REFINEMENT_SUGGESTIONS.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      className="ghost-border rounded-full bg-surface-card px-3 py-1.5 text-xs text-on-surface-variant transition-all hover:bg-surface-high hover:text-on-surface"
+                      onClick={() => setInput(s)}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
         </div>
       </div>
 
-      {/* Input — tonal shift instead of border */}
-      <form onSubmit={handleSubmit} className="shrink-0 bg-surface-low px-4 py-3">
+      {/* Input — tonal shift instead of border; pulses once when dashboard first appears */}
+      <form
+        onSubmit={handleSubmit}
+        className={"shrink-0 rounded-[var(--radius-xl)] bg-surface-low px-4 py-3" + (hasDashboard ? " attention-pulse" : "")}
+        key={hasDashboard ? "has-dashboard" : "no-dashboard"}
+      >
         <textarea
           value={input}
           onChange={(e) => {
@@ -117,7 +151,7 @@ export function ChatPanel({ messages, status, sendMessage, onStop }: ChatPanelPr
               handleSubmit();
             }
           }}
-          placeholder="Describe the dashboard you want..."
+          placeholder={hasDashboard ? "Ask me to change, add, or refine anything..." : "Describe the dashboard you want..."}
           rows={2}
           className="focus-architectural ghost-border w-full resize-none rounded-[var(--radius-xl)] bg-surface-card px-4 py-3 text-sm text-on-surface shadow-ambient placeholder:text-on-surface-variant/50"
           disabled={isStreaming}

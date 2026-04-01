@@ -743,6 +743,7 @@ export default function BuilderPage() {
             status={status}
             sendMessage={sendMessage}
             onStop={stop}
+            hasDashboard={configHistory.current !== null}
           />
         </aside>
 
