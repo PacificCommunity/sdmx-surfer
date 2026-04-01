@@ -1,0 +1,12 @@
+diff --git a/node_modules/sdmx-dashboard-components/dist/sdmx-dashboard-components.js b/node_modules/sdmx-dashboard-components/dist/sdmx-dashboard-components.js
+index a613796..9074e00 100644
+--- a/node_modules/sdmx-dashboard-components/dist/sdmx-dashboard-components.js
++++ b/node_modules/sdmx-dashboard-components/dist/sdmx-dashboard-components.js
+@@ -3021,6 +3021,7 @@ const _c = ({ config: n, language: t, placeholder: e, callback: i, ...s }) => {
+           let Y = {};
+           U ? Y = P.find((V) => V.id === U) : Y = W.find((V) => V.id !== j);
+           const z = W.find((V) => V.id === j);
++          if (!Y || !Y.values || !z) { console.warn("[sdmx-dashboard-components] Missing dimension for chart — skipping series build. xAxisConcept:", j, "legend:", U); return; }
+           Y.values.sort((V, q) => V.id.localeCompare(q.id)).forEach((V) => {
+             const q = D.filter((H) => H[Y.id] === V.name);
+             let $ = c(q, j);
