@@ -28,8 +28,6 @@ const REFINEMENT_SUGGESTIONS = [
 export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard }: ChatPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
-  const [showPulse, setShowPulse] = useState(false);
-  const hadDashboardRef = useRef(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const isStreaming = status === "streaming" || status === "submitted";
 
@@ -39,15 +37,6 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
     }
   }, [messages]);
 
-  // Fire pulse once when the first dashboard appears
-  useEffect(() => {
-    if (hasDashboard && !hadDashboardRef.current) {
-      hadDashboardRef.current = true;
-      setShowPulse(true);
-      const timer = setTimeout(() => setShowPulse(false), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [hasDashboard]);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -143,10 +132,13 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
         </div>
       </div>
 
-      {/* Input — pulses once when the first dashboard appears */}
+      {/* Input area — blue when ready for input, dims to gray while LLM is working */}
       <form
         onSubmit={handleSubmit}
-        className={"shrink-0 bg-surface-low px-4 py-3" + (showPulse ? " attention-pulse" : "")}
+        className={
+          "shrink-0 px-4 py-3 transition-colors duration-500 " +
+          (isStreaming ? "bg-surface-low" : "bg-secondary-container/30")
+        }
       >
         <textarea
           value={input}
@@ -164,7 +156,10 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
           }}
           placeholder={hasDashboard ? "Ask me to change, add, or refine anything..." : "Describe the dashboard you want..."}
           rows={2}
-          className="focus-architectural ghost-border w-full resize-none rounded-[var(--radius-xl)] bg-surface-card px-4 py-3 text-sm text-on-surface shadow-ambient placeholder:text-on-surface-variant/50"
+          className={
+            "focus-architectural ghost-border w-full resize-none rounded-[var(--radius-xl)] px-4 py-3 text-sm text-on-surface shadow-ambient transition-colors duration-500 placeholder:text-on-surface-variant/50 " +
+            (isStreaming ? "bg-surface-high/50" : "bg-surface-card")
+          }
           disabled={isStreaming}
         />
         {submitError && (
