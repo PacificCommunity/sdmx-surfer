@@ -28,6 +28,8 @@ const REFINEMENT_SUGGESTIONS = [
 export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard }: ChatPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
+  const [showPulse, setShowPulse] = useState(false);
+  const hadDashboardRef = useRef(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const isStreaming = status === "streaming" || status === "submitted";
 
@@ -36,6 +38,16 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Fire pulse once when the first dashboard appears
+  useEffect(() => {
+    if (hasDashboard && !hadDashboardRef.current) {
+      hadDashboardRef.current = true;
+      setShowPulse(true);
+      const timer = setTimeout(() => setShowPulse(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [hasDashboard]);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -131,11 +143,10 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
         </div>
       </div>
 
-      {/* Input — tonal shift instead of border; pulses once when dashboard first appears */}
+      {/* Input — pulses once when the first dashboard appears */}
       <form
         onSubmit={handleSubmit}
-        className={"shrink-0 rounded-[var(--radius-xl)] bg-surface-low px-4 py-3" + (hasDashboard ? " attention-pulse" : "")}
-        key={hasDashboard ? "has-dashboard" : "no-dashboard"}
+        className={"shrink-0 bg-surface-low px-4 py-3" + (showPulse ? " attention-pulse" : "")}
       >
         <textarea
           value={input}
