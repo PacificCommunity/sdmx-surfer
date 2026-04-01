@@ -137,7 +137,7 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
         onSubmit={handleSubmit}
         className={
           "shrink-0 px-4 py-3 transition-colors duration-500 " +
-          (isStreaming ? "bg-surface-low" : "bg-secondary-container/30")
+          (isStreaming ? "bg-surface-low" : "bg-tertiary-container")
         }
       >
         <textarea
