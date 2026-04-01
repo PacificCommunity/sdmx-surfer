@@ -120,6 +120,10 @@ export const dashboardConfigSchema = z
       })
       .passthrough()
       .optional(),
+    dataflows: z
+      .record(z.string(), z.string())
+      .optional()
+      .describe("Map of dataflow ID → human-readable name, e.g. { DF_POP: 'Population' }"),
     rows: z.array(
       z
         .object({

@@ -124,11 +124,14 @@ export interface DataSource {
   componentId: string;
   componentTitle: string;
   componentType: string;
+  dataflowId: string;
+  dataflowName: string;
   apiUrl: string;
   explorerUrl: string | null;
 }
 
 export function extractDataSources(config: {
+  dataflows?: Record<string, string>;
   rows: Array<{
     columns: Array<{
       id: string;
@@ -140,6 +143,7 @@ export function extractDataSources(config: {
 }): DataSource[] {
   const sources: DataSource[] = [];
   const seen = new Set<string>();
+  const nameMap = config.dataflows ?? {};
 
   for (const row of config.rows) {
     for (const col of row.columns) {
@@ -152,10 +156,15 @@ export function extractDataSources(config: {
         if (seen.has(url)) continue;
         seen.add(url);
 
+        const parsed = parseApiUrl(url);
+        const dfId = parsed?.dataflowId ?? "";
+
         sources.push({
           componentId: col.id,
           componentTitle: title,
           componentType: col.type,
+          dataflowId: dfId,
+          dataflowName: nameMap[dfId] || dfId,
           apiUrl: url,
           explorerUrl: apiUrlToExplorerUrl(url),
         });

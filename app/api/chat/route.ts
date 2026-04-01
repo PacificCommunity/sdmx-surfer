@@ -17,6 +17,7 @@ import {
   formatKnowledgeSummary,
 } from "@/lib/tier2-knowledge";
 import { createRequestLogger } from "@/lib/logger";
+import { resolveDataflowNamesFromConfig } from "@/lib/dataflow-names";
 
 const chatRequestSchema = z.object({
   messages: z.array(z.unknown()),
@@ -115,6 +116,7 @@ export async function POST(req: Request) {
             config: z.infer<typeof dashboardToolConfigSchema>;
           }) => {
             const compiledConfig = compileDashboardToolConfig(config);
+            compiledConfig.dataflows = resolveDataflowNamesFromConfig(compiledConfig);
             dashboardEmitted = true;
             const result = {
               success: true,

@@ -20,6 +20,8 @@ export interface SDMXDashboardConfig {
   rows: SDMXDashboardRow[];
   languages?: string[];
   colCount?: number;
+  /** Map of dataflow ID → human-readable name, e.g. { DF_POP: "Population" } */
+  dataflows?: Record<string, string>;
   header?: {
     title?: SDMXTextConfig;
     subtitle?: SDMXTextConfig;

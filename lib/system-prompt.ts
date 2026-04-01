@@ -124,6 +124,8 @@ Top-level structure:
 }
 \`\`\`
 
+Note: The app automatically resolves dataflow names from the metadata index. You do not need to include a \`dataflows\` field.
+
 ### Intent Visuals
 
 #### KPI

@@ -11,6 +11,10 @@ import {
   getDashboardTitle,
 } from "./dashboard-text";
 import {
+  extractDataSources,
+  type DataSource,
+} from "./data-explorer-url";
+import {
   BRAND_GOOGLE_FONTS_HREF,
   BRAND_THEME,
 } from "./brand-theme";
@@ -192,6 +196,7 @@ export async function exportToPdf(
   }
 
   const title = getDashboardTitle(config);
+  const sources = extractDataSources(config);
 
   console.log("[PDF] replacing SVGs with canvases…");
   const restoreSvgs = await replaceAllSvgsWithCanvases(element);
@@ -212,15 +217,21 @@ export async function exportToPdf(
     }
 
     const imgData = canvas.toDataURL("image/png");
-    console.log("[PDF] image data length:", imgData.length);
+    const pageW = canvas.width / 2;
+    const pageH = canvas.height / 2;
 
     const pdf = new JsPDF({
-      orientation: canvas.width > canvas.height ? "landscape" : "portrait",
+      orientation: pageW > pageH ? "landscape" : "portrait",
       unit: "px",
-      format: [canvas.width / 2, canvas.height / 2],
+      format: [pageW, pageH],
     });
 
-    pdf.addImage(imgData, "PNG", 0, 0, canvas.width / 2, canvas.height / 2);
+    pdf.addImage(imgData, "PNG", 0, 0, pageW, pageH);
+
+    // ── Native Data Sources table on a second page ──
+    if (sources.length > 0) {
+      renderDataSourcesPage(pdf, sources, pageW);
+    }
 
     const blob = pdf.output("blob");
     console.log("[PDF] blob size:", blob.size);
@@ -237,6 +248,116 @@ export async function exportToPdf(
   } finally {
     restoreSvgs();
   }
+}
+
+/**
+ * Render a "Data Sources" page with native PDF text and clickable links.
+ * Uses jsPDF text/link primitives — no raster, fully selectable and searchable.
+ */
+function renderDataSourcesPage(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  pdf: any,
+  sources: DataSource[],
+  pageW: number,
+) {
+  const margin = 40;
+  const colGap = 12;
+  const lineH = 16;
+  const contentW = pageW - margin * 2;
+  const pageH = 600; // fixed height for the data sources page
+
+  pdf.addPage([pageW, pageH], pageW > pageH ? "landscape" : "portrait");
+
+  let y = margin;
+
+  // Heading
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(14);
+  pdf.setTextColor(BRAND_THEME.colors.primary);
+  pdf.text("Data Sources", margin, y);
+  y += lineH * 1.5;
+
+  // Subtitle
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(8);
+  pdf.setTextColor(BRAND_THEME.colors.textMuted);
+  pdf.text("SDMX data queries used in this dashboard. Links open in the Pacific Data Hub.", margin, y);
+  y += lineH * 1.5;
+
+  // Table column layout
+  const col1X = margin + 4;             // Component
+  const col2X = margin + contentW * 0.22; // Dataflow
+  const col3X = margin + contentW * 0.52; // Type
+  const col4X = margin + contentW * 0.62; // Links
+  const headerY = y;
+
+  pdf.setFillColor(242, 243, 245); // surface-low
+  pdf.rect(margin, headerY - 10, contentW, lineH + 4, "F");
+
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(7);
+  pdf.setTextColor(BRAND_THEME.colors.onSurfaceVariant);
+  pdf.text("COMPONENT", col1X, headerY);
+  pdf.text("DATAFLOW", col2X, headerY);
+  pdf.text("TYPE", col3X, headerY);
+  pdf.text("LINKS", col4X, headerY);
+  y = headerY + lineH;
+
+  // Table rows
+  pdf.setFontSize(8);
+
+  for (const src of sources) {
+    // Check if we need a new page
+    if (y + lineH * 2 > pageH - margin) {
+      pdf.addPage([pageW, pageH], pageW > pageH ? "landscape" : "portrait");
+      y = margin;
+    }
+
+    const rowY = y;
+
+    // Component name
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(BRAND_THEME.colors.onSurface);
+    const nameText = src.componentTitle.length > 25
+      ? src.componentTitle.slice(0, 23) + "…"
+      : src.componentTitle;
+    pdf.text(nameText, col1X, rowY);
+
+    // Dataflow name
+    pdf.setTextColor(BRAND_THEME.colors.onSurface);
+    const dfText = src.dataflowName.length > 35
+      ? src.dataflowName.slice(0, 33) + "…"
+      : src.dataflowName;
+    pdf.text(dfText, col2X, rowY);
+
+    // Type
+    pdf.setTextColor(BRAND_THEME.colors.onSurfaceVariant);
+    pdf.text(src.componentType.toUpperCase(), col3X, rowY);
+
+    // Links
+    pdf.setTextColor(BRAND_THEME.colors.primary);
+    pdf.textWithLink("API", col4X, rowY, { url: src.apiUrl });
+    if (src.explorerUrl) {
+      pdf.setTextColor(BRAND_THEME.colors.secondary);
+      pdf.textWithLink("Data Explorer", col4X + 30, rowY, { url: src.explorerUrl });
+    }
+
+    // Separator line
+    y = rowY + lineH;
+    pdf.setDrawColor(238, 238, 238); // outline-variant
+    pdf.setLineWidth(0.5);
+    pdf.line(margin, y - 4, margin + contentW, y - 4);
+  }
+
+  // Footer
+  y += lineH;
+  pdf.setFont("helvetica", "italic");
+  pdf.setFontSize(7);
+  pdf.setTextColor(BRAND_THEME.colors.textMuted);
+  const footerText = "Exported from SPC Dashboard Builder on " +
+    new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }) +
+    "  ·  Data from stats.pacificdata.org";
+  pdf.text(footerText, margin, y);
 }
 
 /**

@@ -128,6 +128,10 @@ export const dashboardAuthoringSchema = z.object({
   colCount: z.number().optional(),
   header: authoringHeaderFooterSchema,
   footer: authoringHeaderFooterSchema,
+  dataflows: z
+    .record(z.string(), z.string())
+    .optional()
+    .describe("Map of dataflow ID → human-readable name, e.g. { DF_POP: 'Population' }"),
   rows: z.array(
     z.object({
       columns: z.array(authoringVisualSchema).min(1),
@@ -362,6 +366,7 @@ export function compileDashboardToolConfig(
     id: config.id,
     languages: config.languages,
     colCount: config.colCount,
+    dataflows: config.dataflows,
     header: config.header
       ? {
           title: toTextConfig(config.header.title),

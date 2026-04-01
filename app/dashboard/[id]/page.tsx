@@ -220,7 +220,7 @@ export default function DashboardViewPage() {
           )}
         </div>
 
-        {/* Dashboard render */}
+        {/* Dashboard render — ref captures charts only; Data Sources is rendered natively in PDF */}
         <div
           ref={(el) => { dashboardRef.current = el; }}
           className="rounded-[var(--radius-xl)] bg-surface-card p-8 shadow-ambient"
@@ -259,6 +259,7 @@ function DataSourcesPanel({ config }: { config: SDMXDashboardConfig }) {
           <thead>
             <tr className="text-left">
               <th className="pb-2 pr-4 font-semibold text-on-surface-variant">Component</th>
+              <th className="pb-2 pr-4 font-semibold text-on-surface-variant">Dataflow</th>
               <th className="pb-2 pr-4 font-semibold text-on-surface-variant">Type</th>
               <th className="pb-2 font-semibold text-on-surface-variant">Links</th>
             </tr>
@@ -268,6 +269,9 @@ function DataSourcesPanel({ config }: { config: SDMXDashboardConfig }) {
               <tr key={src.componentId + "-" + src.apiUrl} className="transition-colors hover:bg-surface-low">
                 <td className="py-2 pr-4 font-medium text-on-surface">
                   {src.componentTitle}
+                </td>
+                <td className="py-2 pr-4 text-on-surface">
+                  {src.dataflowName}
                 </td>
                 <td className="py-2 pr-4">
                   <span className="rounded-full bg-surface-high px-2 py-0.5 text-[10px] font-semibold uppercase text-on-surface-variant">
