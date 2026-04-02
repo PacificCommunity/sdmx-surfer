@@ -136,11 +136,18 @@ Note: The app automatically resolves dataflow names from the metadata index. You
   "title": "Fiji Population",
   "dataUrl": "https://...built-by-build_data_url...",
   "unit": { "text": "persons", "location": "suffix" },
-  "decimals": 0
+  "decimals": 0,
+  "adaptiveTextSize": true,
+  "colSize": 1
 }
 \`\`\`
 
 The app compiles this to a native \`value\` visual with \`xAxisConcept: "OBS_VALUE"\`.
+
+KPI best practices:
+- ALWAYS set \`adaptiveTextSize: true\` — it scales the number to fit, avoiding oversized text.
+- When placing multiple KPIs in a row, set \`colSize\` accordingly (e.g., 3 KPIs in a 3-column layout → colSize 1 each).
+- ALWAYS set a meaningful \`unit\` — "persons", "USD millions", "%" etc.
 
 #### Chart
 \`\`\`json
@@ -161,6 +168,9 @@ Important chart rules:
 - \`seriesBy\` is the legend / series dimension.
 - The compiler fills \`yAxisConcept: "OBS_VALUE"\` unless you override it.
 - For \`bar\`, \`column\`, \`lollipop\`, and \`treemap\`, you MUST provide \`seriesBy\`. The compiler rejects these charts if it is missing.
+- ALWAYS set \`unit\` with a meaningful text — the library uses it for the y-axis label. Without it the axis shows generic "values". Example: \`"unit": { "text": "USD millions", "location": "suffix" }\`
+- For more control over y-axis text, use \`extraOptions\`:
+  \`"extraOptions": { "yAxis": { "title": { "text": "Trade Value (USD millions)" } } }\`
 
 #### Map
 \`\`\`json
@@ -273,9 +283,20 @@ const SDMX_CONVENTIONS = `## SDMX Conventions for SPC .Stat
   - AGE: Age groups
   - INDICATOR: Specific indicator codes
   - UNIT_MEASURE: Unit of measurement
+  - UNIT_MULT: Unit multiplier (power of 10). Values like 0=units, 3=thousands, 6=millions, 9=billions.
 - Key syntax: dimensions separated by dots (.), multiple values with +
   - Example key: A.FJ+WS.._T means Annual, Fiji+Samoa, all for dim3, Total sex
-- URL query params: startPeriod, endPeriod, lastNObservations, dimensionAtObservation`;
+- URL query params: startPeriod, endPeriod, lastNObservations, dimensionAtObservation
+
+UNIT_MULT — CRITICAL for correct values:
+- Many SPC dataflows store values divided by 10^UNIT_MULT. For example, GDP might be stored as "100" with UNIT_MULT=6, meaning the real value is 100,000,000 (100 million).
+- When you call get_dataflow_structure, check if UNIT_MULT is a dimension. If it is, call get_dimension_codes to see what multiplier values exist.
+- Reflect the multiplier in the \`unit.text\` field of your dashboard config. Examples:
+  - UNIT_MULT=3 → unit.text: "thousands" or "thousands of persons"
+  - UNIT_MULT=6 → unit.text: "USD millions" or "millions"
+  - UNIT_MULT=0 → unit.text: the base unit (e.g., "persons", "%", "USD")
+- When building the data URL key, pin UNIT_MULT to a single value (don't leave it open).
+- If UNIT_MEASURE is also available, combine both for a clear label: e.g., UNIT_MEASURE=USD + UNIT_MULT=6 → "USD millions".`;
 
 const TOOL_INSTRUCTIONS = `## Tool Usage Rules
 

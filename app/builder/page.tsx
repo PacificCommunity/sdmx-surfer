@@ -255,9 +255,11 @@ export default function BuilderPage() {
     const forceNew = params.get("new") === "1";
     const dfContext = params.get("dfContext");
 
-    // Clean URL without reloading
-    if (targetSession || initialPrompt || forceNew || dfContext) {
-      window.history.replaceState({}, "", "/builder");
+    // Clean one-shot params from URL without reloading, but keep ?session=
+    // so page refresh reloads the same session.
+    if (initialPrompt || forceNew || dfContext) {
+      const keepSession = targetSession ? "?session=" + targetSession : "";
+      window.history.replaceState({}, "", "/builder" + keepSession);
     }
 
     if (forceNew) {
@@ -426,6 +428,7 @@ export default function BuilderPage() {
       configJsonRef.current = "";
       setSessionMenu(false);
       setSaveState("idle");
+      window.history.replaceState({}, "", "/builder?session=" + saved.sessionId);
     })();
   }, [clearScheduledSave, doSave]);
 
