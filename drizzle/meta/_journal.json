@@ -8,6 +8,13 @@
       "when": 1774839562679,
       "tag": "0000_slow_bloodstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1775103634998,
+      "tag": "0001_special_lady_bullseye",
+      "breakpoints": true
     }
   ]
 }

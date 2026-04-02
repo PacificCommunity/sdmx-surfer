@@ -1,0 +1,1 @@
+ALTER TABLE "dashboard_sessions" ADD COLUMN "deleted_at" timestamp;

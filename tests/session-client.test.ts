@@ -204,20 +204,21 @@ describe("session client", () => {
   });
 
   describe("deleteSession", () => {
-    it("sends DELETE request", async () => {
+    it("sends DELETE request and returns true on success", async () => {
       mockFetch.mockResolvedValue({ ok: true });
 
-      await deleteSession("sess-to-delete");
+      const result = await deleteSession("sess-to-delete");
 
+      expect(result).toBe(true);
       expect(mockFetch).toHaveBeenCalledWith("/api/sessions/sess-to-delete", {
         method: "DELETE",
       });
     });
 
-    it("silently fails on error", async () => {
+    it("returns false on network error", async () => {
       mockFetch.mockRejectedValue(new Error("offline"));
 
-      await expect(deleteSession("any")).resolves.toBeUndefined();
+      await expect(deleteSession("any")).resolves.toBe(false);
     });
   });
 });

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, dashboardSessions } from "@/lib/db";
 
@@ -39,6 +39,7 @@ export async function GET(
         and(
           eq(dashboardSessions.id, id),
           eq(dashboardSessions.user_id, userId),
+          isNull(dashboardSessions.deleted_at),
         ),
       )
       .limit(1);
@@ -100,6 +101,7 @@ export async function PUT(
         and(
           eq(dashboardSessions.id, id),
           eq(dashboardSessions.user_id, userId),
+          isNull(dashboardSessions.deleted_at),
         ),
       )
       .returning({ id: dashboardSessions.id });
@@ -131,8 +133,10 @@ export async function DELETE(
   const { id } = await params;
 
   try {
+    // Soft-delete: mark as deleted but keep data for analysis
     await db
-      .delete(dashboardSessions)
+      .update(dashboardSessions)
+      .set({ deleted_at: new Date() })
       .where(
         and(
           eq(dashboardSessions.id, id),

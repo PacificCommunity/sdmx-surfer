@@ -86,6 +86,7 @@ export const dashboardSessions = pgTable(
     config_pointer: integer("config_pointer").notNull().default(-1),
     created_at: timestamp("created_at").defaultNow(),
     updated_at: timestamp("updated_at").defaultNow(),
+    deleted_at: timestamp("deleted_at"),
   },
   (table) => [index("sessions_user_updated_idx").on(table.user_id, table.updated_at)],
 );

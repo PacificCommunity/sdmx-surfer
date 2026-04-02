@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, dashboardSessions } from "@/lib/db";
 
@@ -29,13 +29,14 @@ export async function GET() {
   const userId = session.user.userId;
 
   try {
-    // Clean up empty sessions (no messages) older than 1 minute
+    // Hard-delete empty sessions (no messages) older than 1 minute — no data worth keeping
     await db
       .delete(dashboardSessions)
       .where(
         and(
           eq(dashboardSessions.user_id, userId),
           eq(dashboardSessions.title, "Untitled"),
+          isNull(dashboardSessions.deleted_at),
           sql`jsonb_array_length(${dashboardSessions.messages}) = 0`,
           sql`${dashboardSessions.updated_at} < now() - interval '1 minute'`,
         ),
@@ -49,7 +50,12 @@ export async function GET() {
         updatedAt: dashboardSessions.updated_at,
       })
       .from(dashboardSessions)
-      .where(eq(dashboardSessions.user_id, userId))
+      .where(
+        and(
+          eq(dashboardSessions.user_id, userId),
+          isNull(dashboardSessions.deleted_at),
+        ),
+      )
       .orderBy(desc(dashboardSessions.updated_at))
       .limit(20);
 
