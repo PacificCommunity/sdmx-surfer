@@ -97,7 +97,7 @@ async function sendMagicLink(params: {
   const verifyUrl = baseUrl + "/login/verify?ref=" + refId;
   const subject = "Sign in to " + host;
   const body =
-    "<p>Click the link below to sign in to the SPC Dashboard Builder:</p>" +
+    "<p>Click the link below to sign in to SDMX Surfer:</p>" +
     '<p><a href="' + verifyUrl + '">Sign in</a></p>' +
     "<p>This link expires in 15 minutes and can only be used once.</p>" +
     "<p>If you did not request this, you can safely ignore this email.</p>";

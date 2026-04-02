@@ -15,7 +15,7 @@ interface ChatPanelProps {
 const SUGGESTIONS = [
   "What dataflows are available about population?",
   "Show me trade data for Fiji as a bar chart",
-  "Create a dashboard comparing GDP across Pacific Islands",
+  "I want to explore GDP across Pacific Islands",
 ];
 
 const REFINEMENT_SUGGESTIONS = [
@@ -61,10 +61,10 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
       {/* Header — tonal shift instead of border */}
       <div className="shrink-0 bg-surface-low px-5 pb-3 pt-4">
         <h2 className="font-[family-name:var(--font-display)] text-lg font-bold tracking-tight text-primary">
-          Dashboard Builder
+          SDMX Surfer
         </h2>
         <p className="type-label-md mt-0.5 text-on-tertiary-fixed-variant">
-          Describe the data you want to visualize
+          Surf the data — tell me what you want to explore
         </p>
       </div>
 
@@ -77,7 +77,7 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
           {messages.length === 0 ? (
             <div className="submerged-overlay flex flex-col gap-3 rounded-[var(--radius-xl)] bg-surface-low px-5 py-8">
               <p className="text-center text-sm text-on-surface-variant">
-                Ask me to build a dashboard using Pacific data
+                What Pacific data do you want to explore?
               </p>
               {SUGGESTIONS.map((s) => (
                 <button
@@ -113,7 +113,7 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
             messages[messages.length - 1].role === "assistant" && (
               <div className="flex flex-col gap-2 rounded-[var(--radius-xl)] bg-surface-low px-4 py-4">
                 <p className="text-center text-xs font-medium text-on-surface-variant">
-                  Keep going — refine your dashboard
+                  Keep surfing — dig deeper or change direction
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {REFINEMENT_SUGGESTIONS.map((s) => (
@@ -154,7 +154,7 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
               handleSubmit();
             }
           }}
-          placeholder={hasDashboard ? "Ask me to change, add, or refine anything..." : "Describe the dashboard you want..."}
+          placeholder={hasDashboard ? "Keep exploring — refine, compare, or dig deeper..." : "What data do you want to explore?"}
           rows={2}
           className={
             "focus-architectural ghost-border w-full resize-none rounded-[var(--radius-xl)] px-4 py-3 text-sm text-on-surface shadow-ambient transition-colors duration-500 placeholder:text-on-surface-variant/50 " +

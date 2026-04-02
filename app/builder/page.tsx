@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useChat } from "@ai-sdk/react";
+import { SurferLogo } from "@/components/surfer-logo";
 import type { UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
 import { ChatPanel } from "@/components/chat-panel";
@@ -519,23 +520,11 @@ export default function BuilderPage() {
               className="brand-gradient flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] transition-transform hover:scale-105"
               title="Back to home"
             >
-              <svg
-                className="h-5 w-5 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5"
-                />
-              </svg>
+              <SurferLogo className="h-5 w-5 text-white" />
             </Link>
             <div>
               <h1 className="font-[family-name:var(--font-display)] text-base font-bold tracking-tight text-primary">
-                SPC Dashboard Builder
+                SDMX Surfer
               </h1>
               <p className="type-label-md text-on-tertiary-fixed-variant">
                 Pacific Data Hub

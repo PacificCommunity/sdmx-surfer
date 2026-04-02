@@ -115,13 +115,13 @@ export async function POST(req: Request) {
         await resend.emails.send({
           from,
           to: email,
-          subject: "You're invited to SDMX Dashboard Builder",
+          subject: "You're invited to SDMX Surfer",
           html:
             '<div style="font-family: Inter, system-ui, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 16px;">' +
             '<h2 style="color: #004467; margin: 0 0 16px;">You\'ve been invited!</h2>' +
             '<p style="color: #181c1e; line-height: 1.6; margin: 0 0 24px;">' +
-            "You've been invited to the <strong>SPC Conversational Dashboard Builder</strong> pilot. " +
-            "Describe the data dashboards you want in plain language, and an AI agent will build them for you." +
+            "You've been invited to <strong>SDMX Surfer</strong>. " +
+            "Explore Pacific data through conversation — describe what you want to know, and an AI agent will find the data and build visualisations with you." +
             "</p>" +
             '<a href="' + loginUrl + '" style="display: inline-block; background: #004467; color: #fff; ' +
             'padding: 12px 24px; border-radius: 999px; text-decoration: none; font-weight: 600;">Sign in</a>' +

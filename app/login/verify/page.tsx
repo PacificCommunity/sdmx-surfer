@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { SurferLogo } from "@/components/surfer-logo";
 
 /**
  * Intermediate page for magic link sign-in.
@@ -86,7 +87,7 @@ function VerifyContent() {
         Confirm sign in
       </h2>
       <p className="mt-2 text-sm text-on-surface-variant">
-        Click the button below to complete your sign in to the SPC Dashboard Builder.
+        Click the button below to complete your sign in to SDMX Surfer.
       </p>
       {error && (
         <p className="mt-4 rounded-[var(--radius-sm)] bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
@@ -114,22 +115,10 @@ export default function VerifyPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
           <div className="brand-gradient flex h-14 w-14 items-center justify-center rounded-[var(--radius-lg)] shadow-ambient">
-            <svg
-              className="h-8 w-8 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5"
-              />
-            </svg>
+            <SurferLogo className="h-8 w-8 text-white" />
           </div>
           <h1 className="type-headline-sm text-on-surface">
-            SPC Dashboard Builder
+            SDMX Surfer
           </h1>
         </div>
 

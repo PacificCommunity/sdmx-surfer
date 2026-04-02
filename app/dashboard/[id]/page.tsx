@@ -238,7 +238,7 @@ export default function DashboardViewPage() {
           <a href="https://stats.pacificdata.org" className="text-secondary hover:underline">
             Pacific Data Hub
           </a>
-          {" "}&middot; SPC Dashboard Builder
+          {" "}&middot; SDMX Surfer
         </footer>
       </main>
     </div>

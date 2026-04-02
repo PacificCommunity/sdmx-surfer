@@ -13,6 +13,7 @@ import dynamic from "next/dynamic";
 import { json as jsonLang } from "@codemirror/lang-json";
 import { exportToPdf, exportToHtml, exportToHtmlLive, exportToJson } from "@/lib/export-dashboard";
 import { extractDataSources, type DataSource } from "@/lib/data-explorer-url";
+import { SurferLogo } from "@/components/surfer-logo";
 import {
   dashboardConfigSchema,
   formatDashboardConfigError,
@@ -1108,26 +1109,14 @@ export const DashboardPreview = memo(function DashboardPreview({
       <div className="flex h-full items-center justify-center p-12">
         <div className="submerged-overlay max-w-md rounded-[var(--radius-2xl)] bg-surface-low p-12 text-center">
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-[var(--radius-xl)] bg-surface-high">
-            <svg
-              className="h-8 w-8 text-accent-muted"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605"
-              />
-            </svg>
+            <SurferLogo className="h-8 w-8 text-accent-muted" />
           </div>
           <h3 className="type-headline-sm text-on-surface">
-            Dashboard Preview
+            Your exploration appears here
           </h3>
           <p className="mt-3 text-sm leading-relaxed text-on-surface-variant">
-            Describe the data you want to explore in the chat, and your
-            dashboard will appear here.
+            Start surfing in the chat — charts, maps, and data views
+            will build up as you go.
           </p>
         </div>
       </div>

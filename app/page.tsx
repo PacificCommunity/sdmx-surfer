@@ -6,6 +6,7 @@ import {
   deleteSession,
   type SessionSummary,
 } from "@/lib/session";
+import { SurferLogo } from "@/components/surfer-logo";
 
 export default function WelcomePage() {
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
@@ -25,23 +26,11 @@ export default function WelcomePage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="brand-gradient flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)]">
-              <svg
-                className="h-5 w-5 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5"
-                />
-              </svg>
+              <SurferLogo className="h-5 w-5 text-white" />
             </div>
             <div>
               <h1 className="font-[family-name:var(--font-display)] text-base font-bold tracking-tight text-primary">
-                SPC SDMX Navigator
+                SDMX Surfer
               </h1>
               <p className="type-label-md text-on-tertiary-fixed-variant">
                 Pacific Data Hub
@@ -102,15 +91,15 @@ export default function WelcomePage() {
                 Live Intelligence
               </span>
               <h2 className="font-[family-name:var(--font-display)] text-4xl font-extrabold leading-tight tracking-tight lg:text-5xl">
-                The Modern{" "}
+                Surf the{" "}
                 <span className="bg-gradient-to-r from-accent-light to-secondary-fixed-dim bg-clip-text text-transparent">
-                  Navigator
+                  Data
                 </span>
               </h2>
               <p className="mt-4 max-w-lg text-lg leading-relaxed text-white/80">
-                Build SDMX statistical dashboards through conversation.
-                Describe what you want to see, and the AI discovers data,
-                builds charts, and refines them with you.
+                Explore Pacific statistics through conversation.
+                Describe what you want to know, and the AI discovers data,
+                builds visualisations, and digs deeper with you.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <button
@@ -118,7 +107,7 @@ export default function WelcomePage() {
                   onClick={() => { window.location.href = "/builder?new=1"; }}
                   className="rounded-full bg-white px-6 py-3 text-sm font-bold text-primary shadow-xl transition-transform hover:scale-105 active:scale-95"
                 >
-                  Start New Dashboard
+                  Start Exploring
                 </button>
                 {sessions.length > 0 && (
                   <button
@@ -129,7 +118,7 @@ export default function WelcomePage() {
                     }}
                     className="rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-bold backdrop-blur-md transition-transform hover:scale-105 hover:bg-white/20 active:scale-95"
                   >
-                    Open Saved Dashboard
+                    Resume a Session
                   </button>
                 )}
               </div>
@@ -167,7 +156,7 @@ export default function WelcomePage() {
                 Quick Start
               </p>
               <h3 className="font-[family-name:var(--font-display)] text-2xl font-extrabold tracking-tight text-primary">
-                Explore Pacific Data
+                Catch a Wave
               </h3>
             </div>
           </div>
@@ -325,7 +314,7 @@ export default function WelcomePage() {
 
         {/* Footer */}
         <footer className="mt-16 pb-8 text-center text-xs text-on-surface-variant">
-          SPC Dashboard Builder — Pacific Community
+          SDMX Surfer — Pacific Community
           <br />
           Data from{" "}
           <a

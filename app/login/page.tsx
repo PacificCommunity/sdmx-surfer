@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { SurferLogo } from "@/components/surfer-logo";
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -171,26 +172,14 @@ export default function LoginPage() {
         {/* Logo + title */}
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
           <div className="brand-gradient flex h-14 w-14 items-center justify-center rounded-[var(--radius-lg)] shadow-ambient">
-            <svg
-              className="h-8 w-8 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5"
-              />
-            </svg>
+            <SurferLogo className="h-8 w-8 text-white" />
           </div>
           <div>
             <h1 className="type-headline-sm text-on-surface">
-              SPC Dashboard Builder
+              SDMX Surfer
             </h1>
             <p className="mt-1 text-sm text-on-surface-variant">
-              Pacific Community  - Data Intelligence Platform
+              Pacific Community — Surf the data
             </p>
           </div>
         </div>
@@ -206,7 +195,7 @@ export default function LoginPage() {
         </Suspense>
 
         <p className="mt-6 text-center text-xs text-text-muted">
-          Pacific Community - SPC Dashboard Builder
+          Pacific Community — SDMX Surfer
         </p>
       </div>
     </div>

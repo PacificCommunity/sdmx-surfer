@@ -26,34 +26,38 @@ export function generateSessionId(): string {
 // saveSession — PUT to existing session, fall back to POST if 404
 // ---------------------------------------------------------------------------
 
+const knownSessions = new Set<string>();
+
 export async function saveSession(data: SessionData): Promise<void> {
   try {
-    const url = "/api/sessions/" + data.sessionId;
-    const putRes = await fetch(url, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: data.title,
-        messages: data.messages,
-        configHistory: data.configHistory,
-        configPointer: data.configPointer,
-      }),
-    });
+    const payload = {
+      title: data.title,
+      messages: data.messages,
+      configHistory: data.configHistory,
+      configPointer: data.configPointer,
+    };
 
-    if (putRes.status === 404) {
-      // Session does not exist yet — create it
-      await fetch("/api/sessions", {
+    if (!knownSessions.has(data.sessionId)) {
+      // Try creating first — avoids a noisy 404 on PUT for new sessions
+      const postRes = await fetch("/api/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: data.sessionId,
-          title: data.title,
-          messages: data.messages,
-          configHistory: data.configHistory,
-          configPointer: data.configPointer,
-        }),
+        body: JSON.stringify({ id: data.sessionId, ...payload }),
       });
+
+      if (postRes.ok || postRes.status === 201) {
+        knownSessions.add(data.sessionId);
+        return;
+      }
+      // Already exists (409 or similar) — fall through to PUT
     }
+
+    knownSessions.add(data.sessionId);
+    await fetch("/api/sessions/" + data.sessionId, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
   } catch {
     // Network or server error — silently fail (same behaviour as localStorage version)
   }
@@ -69,6 +73,7 @@ export async function loadSession(sessionId?: string): Promise<SessionData | nul
       const res = await fetch("/api/sessions/" + sessionId);
       if (!res.ok) return null;
       const row = await res.json();
+      knownSessions.add(sessionId);
       return rowToSessionData(row);
     }
 

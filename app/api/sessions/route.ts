@@ -108,7 +108,12 @@ export async function POST(req: Request) {
       .returning({ id: dashboardSessions.id });
 
     return NextResponse.json({ id: rows[0].id }, { status: 201 });
-  } catch {
+  } catch (err: unknown) {
+    // Unique constraint violation — session already exists
+    const msg = err instanceof Error ? err.message : "";
+    if (msg.includes("unique") || msg.includes("duplicate")) {
+      return NextResponse.json({ error: "Session already exists" }, { status: 409 });
+    }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

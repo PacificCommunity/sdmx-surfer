@@ -5,9 +5,9 @@ import "./globals.css";
 import { BRAND_GOOGLE_FONTS_HREF } from "@/lib/brand-theme";
 
 export const metadata: Metadata = {
-  title: "SPC Dashboard Builder",
+  title: "SDMX Surfer",
   description:
-    "Build SDMX data dashboards through natural-language conversation",
+    "Surf Pacific data — explore SDMX statistics through conversation",
 };
 
 export default function RootLayout({
