@@ -18,6 +18,7 @@ import {
 } from "@/lib/tier2-knowledge";
 import { createRequestLogger } from "@/lib/logger";
 import { resolveDataflowNamesFromConfig } from "@/lib/dataflow-names";
+import { sanitizeToolInputs } from "@/lib/sanitize-messages";
 
 const chatRequestSchema = z.object({
   messages: z.array(z.unknown()),
@@ -67,26 +68,9 @@ export async function POST(req: Request) {
     });
     const mcpTools = await mcpClient.tools();
 
-    // Sanitize tool call args that may have been stringified during DB round-trip.
-    // The Anthropic API requires tool_use.input to be a dict, but JSON→JSONB→JSON
-    // round-trips can turn nested objects into strings.
-    const sanitizedMessages = (messages as Array<Record<string, unknown>>).map((msg) => {
-      const parts = msg.parts as Array<Record<string, unknown>> | undefined;
-      if (!parts) return msg;
-      const fixedParts = parts.map((part) => {
-        if ((part.type as string)?.startsWith?.("tool-")) {
-          const args = part.args;
-          if (typeof args === "string") {
-            try { return { ...part, args: JSON.parse(args) }; } catch { /* leave as-is */ }
-          }
-          if (args === null || args === undefined) {
-            return { ...part, args: {} };
-          }
-        }
-        return part;
-      });
-      return { ...msg, parts: fixedParts };
-    });
+    const sanitizedMessages = sanitizeToolInputs(
+      messages as Array<Record<string, unknown>>,
+    );
 
     const modelMessages = await convertToModelMessages(
       sanitizedMessages as Parameters<typeof convertToModelMessages>[0],

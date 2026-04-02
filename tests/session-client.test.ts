@@ -40,28 +40,44 @@ describe("session client", () => {
       updatedAt: new Date().toISOString(),
     };
 
-    it("tries PUT first", async () => {
-      mockFetch.mockResolvedValue({ status: 200, ok: true });
+    it("tries POST first for unknown sessions", async () => {
+      mockFetch.mockResolvedValue({ status: 201, ok: true });
 
       await saveSession(testSession);
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
       const [url, opts] = mockFetch.mock.calls[0];
-      expect(url).toBe("/api/sessions/abc123");
-      expect(opts.method).toBe("PUT");
+      expect(url).toBe("/api/sessions");
+      expect(opts.method).toBe("POST");
     });
 
-    it("falls back to POST on 404", async () => {
-      mockFetch
-        .mockResolvedValueOnce({ status: 404, ok: false }) // PUT 404
-        .mockResolvedValueOnce({ status: 201, ok: true }); // POST 201
+    it("uses PUT for subsequent saves of the same session", async () => {
+      // First save — POST creates the session
+      mockFetch.mockResolvedValueOnce({ status: 201, ok: true });
+      await saveSession(testSession);
 
+      // Second save — PUT updates it
+      mockFetch.mockResolvedValueOnce({ status: 200, ok: true });
       await saveSession(testSession);
 
       expect(mockFetch).toHaveBeenCalledTimes(2);
-      expect(mockFetch.mock.calls[0][1].method).toBe("PUT");
-      expect(mockFetch.mock.calls[1][0]).toBe("/api/sessions");
-      expect(mockFetch.mock.calls[1][1].method).toBe("POST");
+      expect(mockFetch.mock.calls[1][0]).toBe("/api/sessions/abc123");
+      expect(mockFetch.mock.calls[1][1].method).toBe("PUT");
+    });
+
+    it("falls back to PUT when POST returns conflict", async () => {
+      // Reset known sessions by using a new session ID
+      const conflictSession = { ...testSession, sessionId: "conflict123" };
+      mockFetch
+        .mockResolvedValueOnce({ status: 409, ok: false }) // POST conflict
+        .mockResolvedValueOnce({ status: 200, ok: true }); // PUT success
+
+      await saveSession(conflictSession);
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(mockFetch.mock.calls[0][1].method).toBe("POST");
+      expect(mockFetch.mock.calls[1][0]).toBe("/api/sessions/conflict123");
+      expect(mockFetch.mock.calls[1][1].method).toBe("PUT");
     });
 
     it("silently fails on network error", async () => {
