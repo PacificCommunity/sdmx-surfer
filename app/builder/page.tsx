@@ -434,16 +434,20 @@ export default function BuilderPage() {
 
   // ── Delete a session ──
   const handleDeleteSession = useCallback((targetId: string) => {
+    if (!window.confirm("Delete this session?")) return;
     clearScheduledSave();
     void (async () => {
       await deleteSession(targetId);
       setSessions(await listSessions());
       // If deleting the current session, start fresh
       if (targetId === sessionIdRef.current) {
-        setSessionId(generateSessionId());
+        const newId = generateSessionId();
+        setSessionId(newId);
         setMessagesRef.current([]);
         configHistoryRef.current.restore([], -1);
         configJsonRef.current = "";
+        setSaveState("idle");
+        window.history.replaceState({}, "", "/builder");
       }
     })();
   }, [clearScheduledSave]);

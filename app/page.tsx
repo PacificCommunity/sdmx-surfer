@@ -295,7 +295,10 @@ export default function WelcomePage() {
                       type="button"
                       onClick={async () => {
                         if (!window.confirm("Delete this session?")) return;
-                        await deleteSession(session.sessionId);
+                        const ok = await deleteSession(session.sessionId);
+                        if (!ok) {
+                          window.alert("Failed to delete session. Check the console for details.");
+                        }
                         setSessions(await listSessions());
                       }}
                       className="rounded-full p-1 text-on-surface-variant transition-colors hover:text-red-500"

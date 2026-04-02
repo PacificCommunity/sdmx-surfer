@@ -36,7 +36,7 @@ export async function GET() {
         and(
           eq(dashboardSessions.user_id, userId),
           eq(dashboardSessions.title, "Untitled"),
-          sql`${dashboardSessions.messages}::text = '[]'`,
+          sql`jsonb_array_length(${dashboardSessions.messages}) = 0`,
           sql`${dashboardSessions.updated_at} < now() - interval '1 minute'`,
         ),
       )

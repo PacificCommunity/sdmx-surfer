@@ -119,11 +119,18 @@ export async function listSessions(): Promise<SessionSummary[]> {
 // deleteSession — DELETE /api/sessions/[id]
 // ---------------------------------------------------------------------------
 
-export async function deleteSession(sessionId: string): Promise<void> {
+export async function deleteSession(sessionId: string): Promise<boolean> {
   try {
-    await fetch("/api/sessions/" + sessionId, { method: "DELETE" });
-  } catch {
-    // Silently fail
+    const res = await fetch("/api/sessions/" + sessionId, { method: "DELETE" });
+    knownSessions.delete(sessionId);
+    if (!res.ok) {
+      console.error("[session] Delete failed:", res.status, sessionId);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("[session] Delete error:", err);
+    return false;
   }
 }
 
