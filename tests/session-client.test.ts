@@ -10,6 +10,8 @@ import {
   loadSession,
   listSessions,
   deleteSession,
+  publishSession,
+  unpublishSession,
   type SessionData,
 } from "@/lib/session";
 
@@ -38,12 +40,13 @@ describe("session client", () => {
       configPointer: -1,
       title: "Test",
       updatedAt: new Date().toISOString(),
+      publishedAt: null,
     };
 
     it("tries POST first for unknown sessions", async () => {
       mockFetch.mockResolvedValue({ status: 201, ok: true });
 
-      await saveSession(testSession);
+      await expect(saveSession(testSession)).resolves.toBe(true);
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
       const [url, opts] = mockFetch.mock.calls[0];
@@ -54,11 +57,11 @@ describe("session client", () => {
     it("uses PUT for subsequent saves of the same session", async () => {
       // First save — POST creates the session
       mockFetch.mockResolvedValueOnce({ status: 201, ok: true });
-      await saveSession(testSession);
+      await expect(saveSession(testSession)).resolves.toBe(true);
 
       // Second save — PUT updates it
       mockFetch.mockResolvedValueOnce({ status: 200, ok: true });
-      await saveSession(testSession);
+      await expect(saveSession(testSession)).resolves.toBe(true);
 
       expect(mockFetch).toHaveBeenCalledTimes(2);
       expect(mockFetch.mock.calls[1][0]).toBe("/api/sessions/abc123");
@@ -72,7 +75,7 @@ describe("session client", () => {
         .mockResolvedValueOnce({ status: 409, ok: false }) // POST conflict
         .mockResolvedValueOnce({ status: 200, ok: true }); // PUT success
 
-      await saveSession(conflictSession);
+      await expect(saveSession(conflictSession)).resolves.toBe(true);
 
       expect(mockFetch).toHaveBeenCalledTimes(2);
       expect(mockFetch.mock.calls[0][1].method).toBe("POST");
@@ -80,11 +83,18 @@ describe("session client", () => {
       expect(mockFetch.mock.calls[1][1].method).toBe("PUT");
     });
 
-    it("silently fails on network error", async () => {
+    it("returns false on network error", async () => {
       mockFetch.mockRejectedValue(new Error("Network error"));
 
-      // Should not throw
-      await expect(saveSession(testSession)).resolves.toBeUndefined();
+      await expect(saveSession(testSession)).resolves.toBe(false);
+    });
+
+    it("returns false when PUT update fails", async () => {
+      mockFetch
+        .mockResolvedValueOnce({ status: 409, ok: false })
+        .mockResolvedValueOnce({ status: 500, ok: false });
+
+      await expect(saveSession({ ...testSession, sessionId: "put-fail" })).resolves.toBe(false);
     });
   });
 
@@ -219,6 +229,50 @@ describe("session client", () => {
       mockFetch.mockRejectedValue(new Error("offline"));
 
       await expect(deleteSession("any")).resolves.toBe(false);
+    });
+  });
+
+  describe("publishSession", () => {
+    it("sends POST to publish endpoint and returns true on success", async () => {
+      mockFetch.mockResolvedValue({ ok: true });
+
+      const result = await publishSession("sess-pub");
+
+      expect(result).toBe(true);
+      expect(mockFetch).toHaveBeenCalledWith("/api/sessions/sess-pub/publish", {
+        method: "POST",
+      });
+    });
+
+    it("returns false on network error", async () => {
+      mockFetch.mockRejectedValue(new Error("offline"));
+
+      await expect(publishSession("any")).resolves.toBe(false);
+    });
+
+    it("returns false on non-OK response", async () => {
+      mockFetch.mockResolvedValue({ ok: false, status: 404 });
+
+      await expect(publishSession("missing")).resolves.toBe(false);
+    });
+  });
+
+  describe("unpublishSession", () => {
+    it("sends DELETE to publish endpoint and returns true on success", async () => {
+      mockFetch.mockResolvedValue({ ok: true });
+
+      const result = await unpublishSession("sess-unpub");
+
+      expect(result).toBe(true);
+      expect(mockFetch).toHaveBeenCalledWith("/api/sessions/sess-unpub/publish", {
+        method: "DELETE",
+      });
+    });
+
+    it("returns false on network error", async () => {
+      mockFetch.mockRejectedValue(new Error("offline"));
+
+      await expect(unpublishSession("any")).resolves.toBe(false);
     });
   });
 });

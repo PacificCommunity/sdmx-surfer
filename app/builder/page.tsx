@@ -16,6 +16,8 @@ import {
   loadSession,
   listSessions,
   deleteSession,
+  publishSession,
+  unpublishSession,
   type SessionData,
   type SessionSummary,
 } from "@/lib/session";
@@ -136,6 +138,7 @@ export default function BuilderPage() {
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [sessionMenu, setSessionMenu] = useState(false);
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
+  const [isPublished, setIsPublished] = useState(false);
   const [availableModels, setAvailableModels] = useState<ModelOption[]>([FREE_TIER]);
   const [selectedModel, setSelectedModel] = useState<ModelOption>(FREE_TIER);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -268,6 +271,7 @@ export default function BuilderPage() {
       setMessages([]);
       configHistory.restore([], -1);
       configJsonRef.current = "";
+      setIsPublished(false);
       setSessionLoaded(true);
 
       // Set dataflow context before sending — it'll be consumed on first send
@@ -293,6 +297,7 @@ export default function BuilderPage() {
           if (saved.configHistory.length > 0) {
             configHistoryRef.current.restore(saved.configHistory, saved.configPointer);
           }
+          setIsPublished(Boolean(saved.publishedAt));
           setSaveState("saved");
         }
         setSessionLoaded(true);
@@ -309,6 +314,7 @@ export default function BuilderPage() {
         if (saved.configHistory.length > 0) {
           configHistoryRef.current.restore(saved.configHistory, saved.configPointer);
         }
+        setIsPublished(Boolean(saved.publishedAt));
         setSaveState("saved");
       } else {
         setSessionId(generateSessionId());
@@ -325,7 +331,7 @@ export default function BuilderPage() {
     }
   }, []);
 
-  const doSave = useCallback(() => {
+  const doSave = useCallback(async () => {
     if (!sessionIdRef.current) return;
     setSaveState("saving");
     const { history, pointer } = configHistoryRef.current.snapshot();
@@ -337,10 +343,11 @@ export default function BuilderPage() {
       configPointer: pointer,
       title: currentConfig ? getDashboardTitle(currentConfig) : "Untitled",
       updatedAt: new Date().toISOString(),
+      publishedAt: null,
     };
-    void saveSession(data).then(() => {
-      setSaveState("saved");
-    });
+    const ok = await saveSession(data);
+    setSaveState(ok ? "saved" : "idle");
+    return ok;
   }, []);
 
   const debouncedSave = useCallback(() => {
@@ -403,18 +410,36 @@ export default function BuilderPage() {
   const handleNewSession = useCallback(() => {
     // Save current session first
     clearScheduledSave();
-    doSave();
+    void doSave();
     setSessionId(generateSessionId());
     setMessagesRef.current([]);
     configHistoryRef.current.restore([], -1);
     configJsonRef.current = "";
+    setIsPublished(false);
     setSaveState("idle");
   }, [clearScheduledSave, doSave]);
+
+  // ── Publish / Unpublish ──
+  const handlePublish = useCallback(async () => {
+    if (!sessionIdRef.current) return;
+    // Save before publishing so the latest config is persisted
+    clearScheduledSave();
+    const saved = await doSave();
+    if (!saved) return;
+    const ok = await publishSession(sessionIdRef.current);
+    if (ok) setIsPublished(true);
+  }, [clearScheduledSave, doSave]);
+
+  const handleUnpublish = useCallback(async () => {
+    if (!sessionIdRef.current) return;
+    const ok = await unpublishSession(sessionIdRef.current);
+    if (ok) setIsPublished(false);
+  }, []);
 
   // ── Switch to an existing session ──
   const handleLoadSession = useCallback((targetId: string) => {
     clearScheduledSave();
-    doSave(); // save current first
+    void doSave(); // save current first
     void (async () => {
       const saved = await loadSession(targetId);
       if (!saved) return;
@@ -426,6 +451,7 @@ export default function BuilderPage() {
         configHistoryRef.current.restore([], -1);
       }
       configJsonRef.current = "";
+      setIsPublished(Boolean(saved.publishedAt));
       setSessionMenu(false);
       setSaveState("idle");
       window.history.replaceState({}, "", "/builder?session=" + saved.sessionId);
@@ -564,7 +590,7 @@ export default function BuilderPage() {
                     return;
                   }
                   clearScheduledSave();
-                  doSave();
+                  void doSave();
                   setSessionId(generateSessionId());
                   setMessagesRef.current([]);
                   configHistoryRef.current.restore([], -1);
@@ -753,6 +779,10 @@ export default function BuilderPage() {
             canUndo={configHistory.canUndo}
             canRedo={configHistory.canRedo}
             presentUrl={sessionId ? "/dashboard/" + sessionId : undefined}
+            isPublished={isPublished}
+            onPublish={handlePublish}
+            onUnpublish={handleUnpublish}
+            publicUrl={isPublished && sessionId ? "/p/" + sessionId : undefined}
           />
         </main>
       </div>

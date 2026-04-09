@@ -261,7 +261,6 @@ function renderDataSourcesPage(
   pageW: number,
 ) {
   const margin = 40;
-  const colGap = 12;
   const lineH = 16;
   const contentW = pageW - margin * 2;
   const pageH = 600; // fixed height for the data sources page

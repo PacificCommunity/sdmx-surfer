@@ -8,6 +8,7 @@ export interface SessionData {
   configPointer: number;
   title: string;
   updatedAt: string;
+  publishedAt: string | null;
 }
 
 export interface SessionSummary {
@@ -28,7 +29,7 @@ export function generateSessionId(): string {
 
 const knownSessions = new Set<string>();
 
-export async function saveSession(data: SessionData): Promise<void> {
+export async function saveSession(data: SessionData): Promise<boolean> {
   try {
     const payload = {
       title: data.title,
@@ -47,19 +48,21 @@ export async function saveSession(data: SessionData): Promise<void> {
 
       if (postRes.ok || postRes.status === 201) {
         knownSessions.add(data.sessionId);
-        return;
+        return true;
       }
       // Already exists (409 or similar) — fall through to PUT
     }
 
     knownSessions.add(data.sessionId);
-    await fetch("/api/sessions/" + data.sessionId, {
+    const putRes = await fetch("/api/sessions/" + data.sessionId, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+    return putRes.ok;
   } catch {
     // Network or server error — silently fail (same behaviour as localStorage version)
+    return false;
   }
 }
 
@@ -138,6 +141,36 @@ export async function deleteSession(sessionId: string): Promise<boolean> {
 // Internal helper — map DB row shape to SessionData
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// publishSession / unpublishSession
+// ---------------------------------------------------------------------------
+
+export async function publishSession(sessionId: string): Promise<boolean> {
+  try {
+    const res = await fetch("/api/sessions/" + sessionId + "/publish", {
+      method: "POST",
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function unpublishSession(sessionId: string): Promise<boolean> {
+  try {
+    const res = await fetch("/api/sessions/" + sessionId + "/publish", {
+      method: "DELETE",
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Internal helper — map DB row shape to SessionData
+// ---------------------------------------------------------------------------
+
 function rowToSessionData(row: Record<string, unknown>): SessionData {
   return {
     sessionId: row.id as string,
@@ -151,5 +184,11 @@ function rowToSessionData(row: Record<string, unknown>): SessionData {
         : typeof row.updated_at === "string"
           ? row.updated_at
           : new Date().toISOString(),
+    publishedAt:
+      row.published_at instanceof Date
+        ? row.published_at.toISOString()
+        : typeof row.published_at === "string"
+          ? row.published_at
+          : null,
   };
 }
