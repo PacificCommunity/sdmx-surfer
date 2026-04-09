@@ -1,16 +1,26 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { and, eq, isNull } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, dashboardSessions } from "@/lib/db";
+import { checkCsrf } from "@/lib/csrf";
+
+const publishSchema = z.object({
+  authorDisplayName: z.string().trim().min(2).max(80),
+  publicTitle: z.string().trim().min(3).max(140),
+  publicDescription: z.string().trim().max(500).optional().default(""),
+});
 
 // ---------------------------------------------------------------------------
 // POST /api/sessions/[id]/publish — publish a session (set published_at)
 // ---------------------------------------------------------------------------
 
 export async function POST(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const csrfError = checkCsrf(req);
+  if (csrfError) return csrfError;
   const session = await auth();
   if (!session?.user?.userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -18,6 +28,23 @@ export async function POST(
 
   const userId = session.user.userId;
   const { id } = await params;
+
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const parsed = publishSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+  }
+
+  const authorDisplayName = parsed.data.authorDisplayName.trim();
+  const publicTitle = parsed.data.publicTitle.trim();
+  const publicDescription = parsed.data.publicDescription.trim();
+  const publishedAt = new Date();
 
   try {
     const rows = await db
@@ -54,7 +81,13 @@ export async function POST(
 
     await db
       .update(dashboardSessions)
-      .set({ published_at: new Date() })
+      .set({
+        published_at: publishedAt,
+        public_title: publicTitle,
+        public_description: publicDescription || null,
+        author_display_name: authorDisplayName,
+        updated_at: new Date(),
+      })
       .where(
         and(
           eq(dashboardSessions.id, id),
@@ -63,7 +96,13 @@ export async function POST(
         ),
       );
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({
+      ok: true,
+      publishedAt: publishedAt.toISOString(),
+      publicTitle,
+      publicDescription: publicDescription || null,
+      authorDisplayName,
+    });
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
@@ -74,9 +113,11 @@ export async function POST(
 // ---------------------------------------------------------------------------
 
 export async function DELETE(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const csrfError = checkCsrf(req);
+  if (csrfError) return csrfError;
   const session = await auth();
   if (!session?.user?.userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -88,7 +129,7 @@ export async function DELETE(
   try {
     const result = await db
       .update(dashboardSessions)
-      .set({ published_at: null })
+      .set({ published_at: null, updated_at: new Date() })
       .where(
         and(
           eq(dashboardSessions.id, id),

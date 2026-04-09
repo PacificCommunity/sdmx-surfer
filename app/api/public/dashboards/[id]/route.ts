@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { and, eq, isNotNull, isNull } from "drizzle-orm";
-import { db, dashboardSessions, authUsers } from "@/lib/db";
+import { db, dashboardSessions } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +10,7 @@ const NO_STORE_HEADERS = {
 
 // ---------------------------------------------------------------------------
 // GET /api/public/dashboards/[id] — load a published dashboard (no auth)
-// Returns only the dashboard config + author info. Never exposes chat messages.
+// Returns only public dashboard metadata + config. Never exposes chat messages.
 // ---------------------------------------------------------------------------
 
 export async function GET(
@@ -24,13 +24,14 @@ export async function GET(
       .select({
         id: dashboardSessions.id,
         title: dashboardSessions.title,
+        public_title: dashboardSessions.public_title,
+        public_description: dashboardSessions.public_description,
+        author_display_name: dashboardSessions.author_display_name,
         config_history: dashboardSessions.config_history,
         config_pointer: dashboardSessions.config_pointer,
         published_at: dashboardSessions.published_at,
-        authorName: authUsers.name,
       })
       .from(dashboardSessions)
-      .leftJoin(authUsers, eq(dashboardSessions.user_id, authUsers.id))
       .where(
         and(
           eq(dashboardSessions.id, id),
@@ -63,9 +64,10 @@ export async function GET(
     return NextResponse.json(
       {
         id: row.id,
-        title: row.title,
+        title: row.public_title || row.title,
+        description: row.public_description || null,
         config,
-        author: row.authorName || null,
+        author: row.author_display_name || null,
         publishedAt: row.published_at?.toISOString() || null,
       },
       { headers: NO_STORE_HEADERS },

@@ -9,12 +9,28 @@ export interface SessionData {
   title: string;
   updatedAt: string;
   publishedAt: string | null;
+  publicTitle: string | null;
+  publicDescription: string | null;
+  authorDisplayName: string | null;
 }
 
 export interface SessionSummary {
   sessionId: string;
   title: string;
   updatedAt: string;
+}
+
+export interface PublishInput {
+  authorDisplayName: string;
+  publicTitle: string;
+  publicDescription?: string;
+}
+
+export interface PublishResult {
+  publishedAt: string | null;
+  publicTitle: string | null;
+  publicDescription: string | null;
+  authorDisplayName: string | null;
 }
 
 export function generateSessionId(): string {
@@ -138,21 +154,29 @@ export async function deleteSession(sessionId: string): Promise<boolean> {
 }
 
 // ---------------------------------------------------------------------------
-// Internal helper — map DB row shape to SessionData
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
 // publishSession / unpublishSession
 // ---------------------------------------------------------------------------
 
-export async function publishSession(sessionId: string): Promise<boolean> {
+export async function publishSession(
+  sessionId: string,
+  input: PublishInput,
+): Promise<PublishResult | null> {
   try {
     const res = await fetch("/api/sessions/" + sessionId + "/publish", {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
     });
-    return res.ok;
+    if (!res.ok) return null;
+    const data = await res.json() as Partial<PublishResult>;
+    return {
+      publishedAt: data.publishedAt ?? null,
+      publicTitle: data.publicTitle ?? null,
+      publicDescription: data.publicDescription ?? null,
+      authorDisplayName: data.authorDisplayName ?? null,
+    };
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -190,5 +214,11 @@ function rowToSessionData(row: Record<string, unknown>): SessionData {
         : typeof row.published_at === "string"
           ? row.published_at
           : null,
+    publicTitle:
+      typeof row.public_title === "string" ? row.public_title : null,
+    publicDescription:
+      typeof row.public_description === "string" ? row.public_description : null,
+    authorDisplayName:
+      typeof row.author_display_name === "string" ? row.author_display_name : null,
   };
 }

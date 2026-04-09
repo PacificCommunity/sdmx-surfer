@@ -15,6 +15,13 @@
       "when": 1775103634998,
       "tag": "0001_special_lady_bullseye",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1775771313983,
+      "tag": "0002_messy_randall",
+      "breakpoints": true
     }
   ]
 }

@@ -29,6 +29,17 @@ interface InviteRecord {
   last_active: string | null;
 }
 
+interface PublishedDashboardRecord {
+  id: string;
+  ownerUserId: string;
+  ownerEmail: string;
+  ownerName: string | null;
+  title: string;
+  description: string | null;
+  author: string | null;
+  publishedAt: string | null;
+}
+
 // ---------------------------------------------------------------------------
 // Admin page
 // ---------------------------------------------------------------------------
@@ -36,6 +47,7 @@ interface InviteRecord {
 export default function AdminPage() {
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [invites, setInvites] = useState<InviteRecord[]>([]);
+  const [publishedDashboards, setPublishedDashboards] = useState<PublishedDashboardRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [accessDenied, setAccessDenied] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -43,6 +55,7 @@ export default function AdminPage() {
   const [inviteError, setInviteError] = useState("");
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [removingEmail, setRemovingEmail] = useState<string | null>(null);
+  const [unpublishingDashboardId, setUnpublishingDashboardId] = useState<string | null>(null);
 
   // ---------------------------------------------------------------------------
   // Data fetching
@@ -67,11 +80,18 @@ export default function AdminPage() {
     setInvites(data.invites);
   }
 
+  async function fetchPublishedDashboards() {
+    const res = await fetch("/api/admin/published-dashboards");
+    if (!res.ok) return;
+    const data = (await res.json()) as { dashboards: PublishedDashboardRecord[] };
+    setPublishedDashboards(data.dashboards);
+  }
+
   useEffect(() => {
     void (async () => {
       const ok = await fetchUsers();
       if (ok) {
-        await fetchInvites();
+        await Promise.all([fetchInvites(), fetchPublishedDashboards()]);
       }
       setLoading(false);
     })();
@@ -130,6 +150,18 @@ export default function AdminPage() {
       await fetchUsers();
     } finally {
       setTogglingId(null);
+    }
+  }
+
+  async function handleUnpublishDashboard(dashboardId: string) {
+    setUnpublishingDashboardId(dashboardId);
+    try {
+      await fetch("/api/admin/published-dashboards/" + dashboardId, {
+        method: "DELETE",
+      });
+      await fetchPublishedDashboards();
+    } finally {
+      setUnpublishingDashboardId(null);
     }
   }
 
@@ -331,6 +363,88 @@ export default function AdminPage() {
         {/* ------------------------------------------------------------------ */}
         {/* Users section                                                        */}
         {/* ------------------------------------------------------------------ */}
+        <section>
+          <h2 className="font-[family-name:var(--font-display)] mb-1 text-xl font-bold text-on-surface">
+            Published Dashboards
+          </h2>
+          <p className="type-label-md mb-4 text-on-surface-variant">
+            Review public dashboards and unpublish them if needed.
+          </p>
+
+          {publishedDashboards.length === 0 ? (
+            <div className="ghost-border rounded-[var(--radius-lg)] bg-surface-card px-6 py-8 text-center">
+              <p className="type-label-md text-on-surface-variant">No public dashboards right now.</p>
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-[var(--radius-xl)] bg-surface-card shadow-ambient">
+              <div className="grid grid-cols-12 gap-3 bg-surface-high/50 px-6 py-3">
+                <div className="type-label-md col-span-4 text-on-surface">Dashboard</div>
+                <div className="type-label-md col-span-2 text-on-surface">Author</div>
+                <div className="type-label-md col-span-2 text-on-surface">Owner</div>
+                <div className="type-label-md col-span-2 text-on-surface">Published</div>
+                <div className="type-label-md col-span-2 text-right text-on-surface">Actions</div>
+              </div>
+
+              {publishedDashboards.map((dashboard) => (
+                <div
+                  key={dashboard.id}
+                  className="grid grid-cols-12 items-center gap-3 border-t border-surface-high/30 px-6 py-4 transition-colors hover:bg-surface-low"
+                >
+                  <div className="col-span-4 min-w-0">
+                    <p className="truncate text-sm font-medium text-on-surface">{dashboard.title}</p>
+                    {dashboard.description && (
+                      <p className="mt-1 truncate text-xs text-on-surface-variant">
+                        {dashboard.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="col-span-2 text-xs text-on-surface-variant">
+                    {dashboard.author || "Anonymous"}
+                  </div>
+
+                  <div className="col-span-2 min-w-0 text-xs text-on-surface-variant">
+                    <p className="truncate">{dashboard.ownerEmail}</p>
+                    {dashboard.ownerName && (
+                      <p className="truncate">{dashboard.ownerName}</p>
+                    )}
+                  </div>
+
+                  <div className="col-span-2 text-xs text-on-surface-variant">
+                    {dashboard.publishedAt
+                      ? new Date(dashboard.publishedAt).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                          timeZone: "UTC",
+                        })
+                      : "-"}
+                  </div>
+
+                  <div className="col-span-2 flex justify-end gap-2">
+                    <Link
+                      href={"/p/" + dashboard.id}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ghost-border rounded-full px-3 py-1 text-xs font-semibold text-primary transition-colors hover:bg-surface-high"
+                    >
+                      Open
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => void handleUnpublishDashboard(dashboard.id)}
+                      disabled={unpublishingDashboardId === dashboard.id}
+                      className="ghost-border rounded-full px-3 py-1 text-xs font-semibold text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {unpublishingDashboardId === dashboard.id ? "..." : "Unpublish"}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
         <section>
           <h2 className="font-[family-name:var(--font-display)] text-xl font-bold text-on-surface mb-1">
             Users

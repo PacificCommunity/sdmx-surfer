@@ -8,6 +8,7 @@ import type { UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
 import { ChatPanel } from "@/components/chat-panel";
 import { DashboardPreview } from "@/components/dashboard-preview";
+import { PublishDialog } from "@/components/publish-dialog";
 import type { SDMXDashboardConfig } from "@/lib/types";
 import { useConfigHistory } from "@/lib/use-config-history";
 import {
@@ -18,6 +19,7 @@ import {
   deleteSession,
   publishSession,
   unpublishSession,
+  type PublishInput,
   type SessionData,
   type SessionSummary,
 } from "@/lib/session";
@@ -139,6 +141,12 @@ export default function BuilderPage() {
   const [sessionMenu, setSessionMenu] = useState(false);
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [isPublished, setIsPublished] = useState(false);
+  const [publishedAt, setPublishedAt] = useState<string | null>(null);
+  const [publicTitle, setPublicTitle] = useState<string | null>(null);
+  const [publicDescription, setPublicDescription] = useState<string | null>(null);
+  const [authorDisplayName, setAuthorDisplayName] = useState<string | null>(null);
+  const [publishDialogOpen, setPublishDialogOpen] = useState(false);
+  const [publishBusy, setPublishBusy] = useState(false);
   const [availableModels, setAvailableModels] = useState<ModelOption[]>([FREE_TIER]);
   const [selectedModel, setSelectedModel] = useState<ModelOption>(FREE_TIER);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -250,19 +258,74 @@ export default function BuilderPage() {
       .catch(() => {});
   }, []);
 
-  // ── Session restore on mount (handles ?session= and ?prompt= query params) ──
+  // ── Session restore on mount (handles ?session=, ?prompt=, ?fork= query params) ──
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const targetSession = params.get("session");
     const initialPrompt = params.get("prompt");
     const forceNew = params.get("new") === "1";
     const dfContext = params.get("dfContext");
+    const forkFrom = params.get("fork");
 
     // Clean one-shot params from URL without reloading, but keep ?session=
     // so page refresh reloads the same session.
-    if (initialPrompt || forceNew || dfContext) {
+    if (initialPrompt || forceNew || dfContext || forkFrom) {
       const keepSession = targetSession ? "?session=" + targetSession : "";
       window.history.replaceState({}, "", "/builder" + keepSession);
+    }
+
+    // Fork from a published dashboard — load its config into a new session
+    if (forkFrom) {
+      void (async () => {
+        const newSessionId = generateSessionId();
+        setSessionId(newSessionId);
+        setMessages([]);
+        configHistoryRef.current.restore([], -1);
+        configJsonRef.current = "";
+        setIsPublished(false);
+        setPublishedAt(null);
+        setPublicTitle(null);
+        setPublicDescription(null);
+        setAuthorDisplayName(null);
+        setPublishDialogOpen(false);
+        setSaveState("idle");
+
+        try {
+          const res = await fetch("/api/public/dashboards/" + forkFrom, {
+            cache: "no-store",
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.config) {
+              const forkedConfig = data.config as SDMXDashboardConfig;
+              configHistoryRef.current.push(forkedConfig);
+              configJsonRef.current = JSON.stringify(forkedConfig);
+
+              // Build context for the AI describing the existing dashboard
+              const { extractDataSources } = await import("@/lib/data-explorer-url");
+              const { getDashboardTitle: getTitle } = await import("@/lib/dashboard-text");
+              const sources = extractDataSources(forkedConfig);
+              const sourcesSummary = sources
+                .map((s) => s.componentTitle + " (" + s.componentType + ", dataflow: " + s.dataflowId + ")")
+                .join("; ");
+              const context =
+                "The user is starting from an existing published dashboard: \"" +
+                getTitle(forkedConfig) + "\". " +
+                "It contains: " + sourcesSummary + ". " +
+                "The full config is already loaded in the preview. " +
+                "Help them explore further — they can refine filters, add new views, compare with other data, or reshape the existing panels.";
+              dataflowContextRef.current = context;
+              autosaveSessionRef.current = newSessionId;
+              window.history.replaceState({}, "", "/builder?session=" + newSessionId);
+            }
+          }
+        } catch {
+          // Fork failed — just start with an empty session
+        }
+
+        setSessionLoaded(true);
+      })();
+      return;
     }
 
     if (forceNew) {
@@ -272,6 +335,11 @@ export default function BuilderPage() {
       configHistory.restore([], -1);
       configJsonRef.current = "";
       setIsPublished(false);
+      setPublishedAt(null);
+      setPublicTitle(null);
+      setPublicDescription(null);
+      setAuthorDisplayName(null);
+      setPublishDialogOpen(false);
       setSessionLoaded(true);
 
       // Set dataflow context before sending — it'll be consumed on first send
@@ -298,6 +366,10 @@ export default function BuilderPage() {
             configHistoryRef.current.restore(saved.configHistory, saved.configPointer);
           }
           setIsPublished(Boolean(saved.publishedAt));
+          setPublishedAt(saved.publishedAt);
+          setPublicTitle(saved.publicTitle);
+          setPublicDescription(saved.publicDescription);
+          setAuthorDisplayName(saved.authorDisplayName);
           setSaveState("saved");
         }
         setSessionLoaded(true);
@@ -315,6 +387,10 @@ export default function BuilderPage() {
           configHistoryRef.current.restore(saved.configHistory, saved.configPointer);
         }
         setIsPublished(Boolean(saved.publishedAt));
+        setPublishedAt(saved.publishedAt);
+        setPublicTitle(saved.publicTitle);
+        setPublicDescription(saved.publicDescription);
+        setAuthorDisplayName(saved.authorDisplayName);
         setSaveState("saved");
       } else {
         setSessionId(generateSessionId());
@@ -343,12 +419,15 @@ export default function BuilderPage() {
       configPointer: pointer,
       title: currentConfig ? getDashboardTitle(currentConfig) : "Untitled",
       updatedAt: new Date().toISOString(),
-      publishedAt: null,
+      publishedAt,
+      publicTitle,
+      publicDescription,
+      authorDisplayName,
     };
     const ok = await saveSession(data);
     setSaveState(ok ? "saved" : "idle");
     return ok;
-  }, []);
+  }, [authorDisplayName, publicDescription, publicTitle, publishedAt]);
 
   const debouncedSave = useCallback(() => {
     clearScheduledSave();
@@ -416,24 +495,51 @@ export default function BuilderPage() {
     configHistoryRef.current.restore([], -1);
     configJsonRef.current = "";
     setIsPublished(false);
+    setPublishedAt(null);
+    setPublicTitle(null);
+    setPublicDescription(null);
+    setAuthorDisplayName(null);
+    setPublishDialogOpen(false);
     setSaveState("idle");
   }, [clearScheduledSave, doSave]);
 
   // ── Publish / Unpublish ──
-  const handlePublish = useCallback(async () => {
+  const openPublishDialog = useCallback(() => {
+    if (!configHistoryRef.current.current) return;
+    setPublishDialogOpen(true);
+  }, []);
+
+  const handlePublish = useCallback(async (input: PublishInput) => {
     if (!sessionIdRef.current) return;
-    // Save before publishing so the latest config is persisted
     clearScheduledSave();
+    setPublishBusy(true);
     const saved = await doSave();
-    if (!saved) return;
-    const ok = await publishSession(sessionIdRef.current);
-    if (ok) setIsPublished(true);
+    if (!saved) {
+      setPublishBusy(false);
+      window.alert("Could not save the session before publishing.");
+      return;
+    }
+    const result = await publishSession(sessionIdRef.current, input);
+    setPublishBusy(false);
+    if (!result) {
+      window.alert("Could not publish this dashboard.");
+      return;
+    }
+    setIsPublished(true);
+    setPublishedAt(result.publishedAt);
+    setPublicTitle(result.publicTitle);
+    setPublicDescription(result.publicDescription);
+    setAuthorDisplayName(result.authorDisplayName);
+    setPublishDialogOpen(false);
   }, [clearScheduledSave, doSave]);
 
   const handleUnpublish = useCallback(async () => {
     if (!sessionIdRef.current) return;
     const ok = await unpublishSession(sessionIdRef.current);
-    if (ok) setIsPublished(false);
+    if (ok) {
+      setIsPublished(false);
+      setPublishedAt(null);
+    }
   }, []);
 
   // ── Switch to an existing session ──
@@ -452,6 +558,11 @@ export default function BuilderPage() {
       }
       configJsonRef.current = "";
       setIsPublished(Boolean(saved.publishedAt));
+      setPublishedAt(saved.publishedAt);
+      setPublicTitle(saved.publicTitle);
+      setPublicDescription(saved.publicDescription);
+      setAuthorDisplayName(saved.authorDisplayName);
+      setPublishDialogOpen(false);
       setSessionMenu(false);
       setSaveState("idle");
       window.history.replaceState({}, "", "/builder?session=" + saved.sessionId);
@@ -472,6 +583,12 @@ export default function BuilderPage() {
         setMessagesRef.current([]);
         configHistoryRef.current.restore([], -1);
         configJsonRef.current = "";
+        setIsPublished(false);
+        setPublishedAt(null);
+        setPublicTitle(null);
+        setPublicDescription(null);
+        setAuthorDisplayName(null);
+        setPublishDialogOpen(false);
         setSaveState("idle");
         window.history.replaceState({}, "", "/builder");
       }
@@ -542,6 +659,10 @@ export default function BuilderPage() {
     errorCountRef.current = 0; // Reset error counter on new config
   }, [configHistory.current]);
 
+  const suggestedPublicTitle =
+    publicTitle ||
+    (configHistory.current ? getDashboardTitle(configHistory.current) : "Untitled dashboard");
+
   return (
     <div className="flex h-screen flex-col bg-surface">
       {/* App bar */}
@@ -595,6 +716,12 @@ export default function BuilderPage() {
                   setMessagesRef.current([]);
                   configHistoryRef.current.restore([], -1);
                   configJsonRef.current = "";
+                  setIsPublished(false);
+                  setPublishedAt(null);
+                  setPublicTitle(null);
+                  setPublicDescription(null);
+                  setAuthorDisplayName(null);
+                  setPublishDialogOpen(false);
                   setSaveState("idle");
                 }
 
@@ -780,12 +907,25 @@ export default function BuilderPage() {
             canRedo={configHistory.canRedo}
             presentUrl={sessionId ? "/dashboard/" + sessionId : undefined}
             isPublished={isPublished}
-            onPublish={handlePublish}
+            onPublish={openPublishDialog}
+            onEditPublishDetails={openPublishDialog}
             onUnpublish={handleUnpublish}
             publicUrl={isPublished && sessionId ? "/p/" + sessionId : undefined}
           />
         </main>
       </div>
+      <PublishDialog
+        open={publishDialogOpen}
+        busy={publishBusy}
+        initialAuthorDisplayName={authorDisplayName}
+        initialPublicTitle={publicTitle}
+        initialPublicDescription={publicDescription}
+        suggestedTitle={suggestedPublicTitle}
+        onClose={() => {
+          if (!publishBusy) setPublishDialogOpen(false);
+        }}
+        onSubmit={handlePublish}
+      />
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { SurferLogo } from "@/components/surfer-logo";
 import { exportToPdf, exportToHtml, exportToHtmlLive, exportToJson } from "@/lib/export-dashboard";
@@ -33,14 +33,33 @@ const SDMXDashboard = dynamic(
 
 export default function PublicDashboardPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
 
   const [config, setConfig] = useState<SDMXDashboardConfig | null>(null);
+  const [title, setTitle] = useState<string | null>(null);
+  const [description, setDescription] = useState<string | null>(null);
   const [author, setAuthor] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [exportMenu, setExportMenu] = useState(false);
   const [exporting, setExporting] = useState(false);
   const dashboardRef = useRef<HTMLDivElement | null>(null);
+
+  const handleExplore = async () => {
+    const forkUrl = "/builder?fork=" + id + "&new=1";
+    try {
+      // Quick auth check — no SessionProvider needed
+      const res = await fetch("/api/auth/session");
+      const data = await res.json();
+      if (data?.user) {
+        router.push(forkUrl);
+        return;
+      }
+    } catch {
+      // If check fails, fall through to login
+    }
+    router.push("/login?callbackUrl=" + encodeURIComponent(forkUrl));
+  };
 
   useEffect(() => {
     void (async () => {
@@ -55,6 +74,8 @@ export default function PublicDashboardPage() {
         const data = await res.json();
         if (data.config) {
           setConfig(data.config as SDMXDashboardConfig);
+          setTitle(typeof data.title === "string" ? data.title : null);
+          setDescription(typeof data.description === "string" ? data.description : null);
           setAuthor(data.author || null);
         } else {
           setNotFound(true);
@@ -101,7 +122,7 @@ export default function PublicDashboardPage() {
     );
   }
 
-  const title = getDashboardTitle(config);
+  const dashboardTitle = title || getDashboardTitle(config);
   const subtitle = getDashboardSubtitle(config);
   const sources = extractDataSources(config);
 
@@ -119,7 +140,7 @@ export default function PublicDashboardPage() {
             </Link>
             <div>
               <h1 className="font-[family-name:var(--font-display)] text-base font-bold tracking-tight text-primary">
-                {title}
+                {dashboardTitle}
               </h1>
               {subtitle && (
                 <p className="type-label-md text-on-tertiary-fixed-variant">
@@ -128,6 +149,18 @@ export default function PublicDashboardPage() {
               )}
             </div>
           </div>
+
+          {/* Explore this data */}
+          <button
+            type="button"
+            onClick={handleExplore}
+            className="ghost-border flex items-center gap-1.5 rounded-full bg-surface-card px-4 py-1.5 text-xs font-semibold text-primary transition-transform hover:scale-105 active:scale-95"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+            </svg>
+            Explore this data
+          </button>
 
           {/* Export dropdown */}
           <div className="relative">
@@ -198,14 +231,24 @@ export default function PublicDashboardPage() {
       {/* Dashboard content */}
       <main className="mx-auto max-w-7xl px-6 py-8">
         <div className="mb-6">
-          <span className="type-label-md rounded-full bg-secondary-container px-2.5 py-0.5 text-on-secondary-container">
+            <span className="type-label-md rounded-full bg-secondary-container px-2.5 py-0.5 text-on-secondary-container">
             Published Dashboard
           </span>
           <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-extrabold tracking-tight text-on-surface">
-            {title}
+            {dashboardTitle}
           </h2>
           {subtitle && (
             <p className="mt-1 text-sm text-on-surface-variant">{subtitle}</p>
+          )}
+          {description && (
+            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-on-surface-variant">
+              {description}
+            </p>
+          )}
+          {author && (
+            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.12em] text-on-tertiary-fixed-variant">
+              By {author}
+            </p>
           )}
         </div>
 
@@ -269,14 +312,28 @@ export default function PublicDashboardPage() {
           </div>
         )}
 
+        {/* Explore CTA */}
+        <div className="mt-8 rounded-[var(--radius-xl)] bg-secondary-container p-8 text-center">
+          <h3 className="font-[family-name:var(--font-display)] text-lg font-bold text-on-secondary-container">
+            Want to dig deeper?
+          </h3>
+          <p className="mt-2 text-sm text-on-secondary-container/80">
+            Start from this dashboard and explore the data further — filter, compare, or add new views.
+          </p>
+          <button
+            type="button"
+            onClick={handleExplore}
+            className="brand-gradient mt-4 inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+            </svg>
+            Explore this data
+          </button>
+        </div>
+
         {/* Footer */}
         <footer className="mt-8 text-center text-xs text-on-surface-variant">
-          {author && (
-            <>
-              <span>By {author}</span>
-              {" "}&middot;{" "}
-            </>
-          )}
           Data from{" "}
           <a href="https://stats.pacificdata.org" className="text-secondary hover:underline">
             Pacific Data Hub

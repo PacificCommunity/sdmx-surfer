@@ -87,9 +87,15 @@ export const dashboardSessions = pgTable(
     created_at: timestamp("created_at").defaultNow(),
     updated_at: timestamp("updated_at").defaultNow(),
     deleted_at: timestamp("deleted_at"),
+    public_title: text("public_title"),
+    public_description: text("public_description"),
+    author_display_name: text("author_display_name"),
     published_at: timestamp("published_at"),
   },
-  (table) => [index("sessions_user_updated_idx").on(table.user_id, table.updated_at)],
+  (table) => [
+    index("sessions_user_updated_idx").on(table.user_id, table.updated_at),
+    index("sessions_published_idx").on(table.published_at),
+  ],
 );
 
 // ---------------------------------------------------------------------------

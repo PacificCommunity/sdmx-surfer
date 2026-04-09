@@ -5,6 +5,13 @@ import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { SurferLogo } from "@/components/surfer-logo";
 
+function getSafeCallbackUrl(rawCallbackUrl: string | null): string {
+  if (!rawCallbackUrl) return "/";
+  if (!rawCallbackUrl.startsWith("/")) return "/";
+  if (rawCallbackUrl.startsWith("//")) return "/";
+  return rawCallbackUrl;
+}
+
 function LoginForm() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -23,7 +30,9 @@ function LoginForm() {
     setError(null);
     setLoading(true);
 
-    const result = await signIn("email", { email, redirect: false, callbackUrl: "/" });
+    // Preserve callbackUrl from query params (e.g. from "Explore this" on published dashboards)
+    const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"));
+    const result = await signIn("email", { email, redirect: false, callbackUrl });
 
     setLoading(false);
 

@@ -41,6 +41,9 @@ describe("session client", () => {
       title: "Test",
       updatedAt: new Date().toISOString(),
       publishedAt: null,
+      publicTitle: null,
+      publicDescription: null,
+      authorDisplayName: null,
     };
 
     it("tries POST first for unknown sessions", async () => {
@@ -103,14 +106,18 @@ describe("session client", () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: () =>
-          Promise.resolve({
-            id: "sess-1",
-            title: "My Dashboard",
-            messages: [{ role: "user", parts: [{ type: "text", text: "hello" }] }],
-            config_history: [],
-            config_pointer: -1,
-            updated_at: "2026-03-25T10:00:00Z",
-          }),
+            Promise.resolve({
+              id: "sess-1",
+              title: "My Dashboard",
+              messages: [{ role: "user", parts: [{ type: "text", text: "hello" }] }],
+              config_history: [],
+              config_pointer: -1,
+              updated_at: "2026-03-25T10:00:00Z",
+              public_title: "Shared title",
+              public_description: "Shared description",
+              author_display_name: "Pacific Data Team",
+              published_at: "2026-04-10T00:00:00Z",
+            }),
       });
 
       const result = await loadSession("sess-1");
@@ -119,6 +126,10 @@ describe("session client", () => {
       expect(result!.sessionId).toBe("sess-1");
       expect(result!.title).toBe("My Dashboard");
       expect(result!.messages).toHaveLength(1);
+      expect(result!.publicTitle).toBe("Shared title");
+      expect(result!.publicDescription).toBe("Shared description");
+      expect(result!.authorDisplayName).toBe("Pacific Data Team");
+      expect(result!.publishedAt).toBe("2026-04-10T00:00:00Z");
     });
 
     it("loads most recent session when no ID given", async () => {
@@ -233,27 +244,57 @@ describe("session client", () => {
   });
 
   describe("publishSession", () => {
-    it("sends POST to publish endpoint and returns true on success", async () => {
-      mockFetch.mockResolvedValue({ ok: true });
+    it("sends POST to publish endpoint and returns metadata on success", async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            publishedAt: "2026-04-10T00:00:00.000Z",
+            publicTitle: "Shared dashboard",
+            publicDescription: "Description",
+            authorDisplayName: "Pacific Data Team",
+          }),
+      });
 
-      const result = await publishSession("sess-pub");
+      const result = await publishSession("sess-pub", {
+        authorDisplayName: "Pacific Data Team",
+        publicTitle: "Shared dashboard",
+        publicDescription: "Description",
+      });
 
-      expect(result).toBe(true);
+      expect(result).toEqual({
+        publishedAt: "2026-04-10T00:00:00.000Z",
+        publicTitle: "Shared dashboard",
+        publicDescription: "Description",
+        authorDisplayName: "Pacific Data Team",
+      });
       expect(mockFetch).toHaveBeenCalledWith("/api/sessions/sess-pub/publish", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          authorDisplayName: "Pacific Data Team",
+          publicTitle: "Shared dashboard",
+          publicDescription: "Description",
+        }),
       });
     });
 
     it("returns false on network error", async () => {
       mockFetch.mockRejectedValue(new Error("offline"));
 
-      await expect(publishSession("any")).resolves.toBe(false);
+      await expect(publishSession("any", {
+        authorDisplayName: "Pacific Data Team",
+        publicTitle: "Shared dashboard",
+      })).resolves.toBeNull();
     });
 
     it("returns false on non-OK response", async () => {
       mockFetch.mockResolvedValue({ ok: false, status: 404 });
 
-      await expect(publishSession("missing")).resolves.toBe(false);
+      await expect(publishSession("missing", {
+        authorDisplayName: "Pacific Data Team",
+        publicTitle: "Shared dashboard",
+      })).resolves.toBeNull();
     });
   });
 
