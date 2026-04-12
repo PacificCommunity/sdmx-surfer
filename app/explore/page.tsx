@@ -345,10 +345,10 @@ export default function ExplorePage() {
             </div>
           </div>
           <Link
-            href="/builder"
+            href="/"
             className="ghost-border rounded-full bg-surface-card px-4 py-1.5 text-xs font-semibold text-primary transition-transform hover:scale-105 active:scale-95"
           >
-            Open Builder
+            Home
           </Link>
         </div>
       </header>

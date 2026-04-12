@@ -1,16 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   listSessions,
   deleteSession,
   type SessionSummary,
 } from "@/lib/session";
+import { signOut } from "next-auth/react";
 import { SurferLogo } from "@/components/surfer-logo";
 
 export default function WelcomePage() {
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
+  const renameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     void (async () => {
@@ -18,6 +22,26 @@ export default function WelcomePage() {
       setLoaded(true);
     })();
   }, []);
+
+  const startRename = (session: SessionSummary) => {
+    setEditingId(session.sessionId);
+    setEditingTitle(session.title);
+    setTimeout(() => renameInputRef.current?.focus(), 0);
+  };
+
+  const commitRename = async () => {
+    if (!editingId) return;
+    const trimmed = editingTitle.trim();
+    if (trimmed && trimmed !== sessions.find((s) => s.sessionId === editingId)?.title) {
+      await fetch("/api/sessions/" + editingId, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: trimmed }),
+      });
+      setSessions(await listSessions());
+    }
+    setEditingId(null);
+  };
 
   return (
     <div className="min-h-screen bg-surface">
@@ -40,27 +64,6 @@ export default function WelcomePage() {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => { window.location.href = "/builder"; }}
-              className="brand-gradient rounded-full px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-transform hover:scale-105 active:scale-95"
-            >
-              Open Builder
-            </button>
-            <button
-              type="button"
-              onClick={() => { window.location.href = "/explore"; }}
-              className="ghost-border rounded-full bg-surface-card px-4 py-2 text-sm font-semibold text-primary transition-transform hover:scale-105 active:scale-95"
-            >
-              Data Catalogue
-            </button>
-            <button
-              type="button"
-              onClick={() => { window.location.href = "/gallery"; }}
-              className="ghost-border rounded-full bg-surface-card px-4 py-2 text-sm font-semibold text-primary transition-transform hover:scale-105 active:scale-95"
-            >
-              Gallery
-            </button>
-            <button
-              type="button"
               onClick={() => { window.location.href = "/settings"; }}
               className="ghost-border rounded-full bg-surface-card p-2 text-on-surface-variant transition-transform hover:scale-105 hover:text-primary active:scale-95"
               title="Settings"
@@ -80,6 +83,16 @@ export default function WelcomePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
               </svg>
             </button>
+            <button
+              type="button"
+              onClick={() => void signOut({ callbackUrl: "/login" })}
+              className="ghost-border rounded-full bg-surface-card p-2 text-on-surface-variant transition-transform hover:scale-105 hover:text-primary active:scale-95"
+              title="Sign out"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+              </svg>
+            </button>
           </div>
         </div>
       </header>
@@ -97,7 +110,7 @@ export default function WelcomePage() {
             <div className="lg:col-span-3">
               <span className="type-label-md mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 backdrop-blur-md">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-accent-light" />
-                Live Intelligence
+                Built in the Pacific
               </span>
               <h2 className="font-[family-name:var(--font-display)] text-4xl font-extrabold leading-tight tracking-tight lg:text-5xl">
                 Surf the{" "}
@@ -138,21 +151,33 @@ export default function WelcomePage() {
               {[
                 { value: "121", label: "Dataflows", color: "bg-accent-light/20" },
                 { value: "22", label: "Pacific Nations", color: "bg-secondary-fixed-dim/20" },
-                { value: "18", label: "SDMX Tools", color: "bg-white/10" },
-                { value: "Live", label: "Data Access", color: "bg-white/10" },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className={"flex flex-col justify-end rounded-[var(--radius-xl)] border border-white/10 p-6 backdrop-blur-xl " + stat.color}
-                >
-                  <span className="font-[family-name:var(--font-display)] text-3xl font-black">
-                    {stat.value}
-                  </span>
-                  <span className="type-label-md mt-1 text-white/60">
-                    {stat.label}
-                  </span>
-                </div>
-              ))}
+                { value: "Catalogue", label: "Data Catalogue", color: "bg-white/10", href: "/explore" },
+                { value: "Gallery", label: "Published", color: "bg-white/10", href: "/gallery" },
+              ].map((stat) => {
+                const cls = "flex flex-col justify-end rounded-[var(--radius-xl)] border border-white/10 p-6 backdrop-blur-xl " + stat.color;
+                if ("href" in stat && stat.href) {
+                  return (
+                    <a key={stat.label} href={stat.href} className={cls + " transition-transform hover:scale-105 hover:border-white/30"}>
+                      <span className="font-[family-name:var(--font-display)] text-3xl font-black">
+                        {stat.value}
+                      </span>
+                      <span className="type-label-md mt-1 text-white/60">
+                        {stat.label}
+                      </span>
+                    </a>
+                  );
+                }
+                return (
+                  <div key={stat.label} className={cls}>
+                    <span className="font-[family-name:var(--font-display)] text-3xl font-black">
+                      {stat.value}
+                    </span>
+                    <span className="type-label-md mt-1 text-white/60">
+                      {stat.label}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -265,16 +290,43 @@ export default function WelcomePage() {
                   key={session.sessionId}
                   className="grid grid-cols-12 items-center gap-4 px-6 py-4 transition-colors hover:bg-surface-low"
                 >
-                  <div className="col-span-6">
-                    <button
-                      type="button"
-                      onClick={() => { window.location.href = "/builder?session=" + session.sessionId; }}
-                      className="text-left"
-                    >
-                      <span className="font-[family-name:var(--font-display)] text-sm font-semibold text-primary hover:underline">
-                        {session.title}
-                      </span>
-                    </button>
+                  <div className="col-span-6 flex items-center gap-2">
+                    {editingId === session.sessionId ? (
+                      <input
+                        ref={renameInputRef}
+                        type="text"
+                        value={editingTitle}
+                        onChange={(e) => setEditingTitle(e.target.value)}
+                        onBlur={() => void commitRename()}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") void commitRename();
+                          if (e.key === "Escape") setEditingId(null);
+                        }}
+                        className="w-full rounded-[var(--radius-md)] border border-primary/30 bg-surface px-2 py-1 font-[family-name:var(--font-display)] text-sm font-semibold text-primary outline-none focus:border-primary"
+                      />
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => { window.location.href = "/builder?session=" + session.sessionId; }}
+                          className="text-left"
+                        >
+                          <span className="font-[family-name:var(--font-display)] text-sm font-semibold text-primary hover:underline">
+                            {session.title}
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => startRename(session)}
+                          className="shrink-0 rounded-full p-1 text-on-surface-variant/40 transition-colors hover:text-primary"
+                          title="Rename"
+                        >
+                          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+                          </svg>
+                        </button>
+                      </>
+                    )}
                   </div>
                   <div className="col-span-3 text-sm text-on-surface-variant">
                     {new Date(session.updatedAt).toLocaleDateString("en-GB", {

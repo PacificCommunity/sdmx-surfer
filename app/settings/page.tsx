@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -215,6 +215,7 @@ function ProviderCard({ config, keyRecord, onSave, onRemove }: ProviderCardProps
 // ---------------------------------------------------------------------------
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [keys, setKeys] = useState<KeyRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -274,15 +275,16 @@ export default function SettingsPage() {
       {/* Glass header */}
       <header className="glass-panel shadow-ambient sticky top-0 z-50 px-6 py-4">
         <div className="mx-auto flex max-w-3xl items-center gap-4">
-          <Link
-            href="/builder"
+          <button
+            type="button"
+            onClick={() => router.back()}
             className="ghost-border flex h-9 w-9 items-center justify-center rounded-full bg-surface-card text-on-surface-variant transition-transform hover:scale-105 hover:text-primary"
-            title="Back to builder"
+            title="Back"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
-          </Link>
+          </button>
           <div>
             <h1 className="type-headline-sm text-on-surface">Settings</h1>
             <p className="type-label-md text-on-surface-variant">API key management</p>
