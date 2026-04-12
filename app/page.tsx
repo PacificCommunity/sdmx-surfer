@@ -151,8 +151,8 @@ export default function WelcomePage() {
               {[
                 { value: "121", label: "Dataflows", color: "bg-accent-light/20" },
                 { value: "22", label: "Pacific Nations", color: "bg-secondary-fixed-dim/20" },
-                { value: "Catalogue", label: "Data Catalogue", color: "bg-white/10", href: "/explore" },
-                { value: "Gallery", label: "Published", color: "bg-white/10", href: "/gallery" },
+                { value: "Catalogue", label: "Pacific Data", color: "bg-white/10", href: "/explore" },
+                { value: "Gallery", label: "Published Explorations", color: "bg-white/10", href: "/gallery" },
               ].map((stat) => {
                 const cls = "flex flex-col justify-end rounded-[var(--radius-xl)] border border-white/10 p-6 backdrop-blur-xl " + stat.color;
                 if ("href" in stat && stat.href) {
