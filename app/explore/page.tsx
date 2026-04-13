@@ -199,7 +199,7 @@ export default function ExplorePage() {
       })
         .then((r) => r.json())
         .then((data) => {
-          if (data.searchType === "semantic" && Array.isArray(data.dataflows) && data.dataflows.length > 0) {
+          if (Array.isArray(data.dataflows) && data.dataflows.length > 0) {
             setSemanticResults(data.dataflows);
           } else {
             setSemanticResults(null);
@@ -257,13 +257,11 @@ export default function ExplorePage() {
       result = dataflows;
 
       if (searchText.trim()) {
-        const q = searchText.toLowerCase();
-        result = result.filter(
-          (df) =>
-            df.id.toLowerCase().includes(q) ||
-            df.name.toLowerCase().includes(q) ||
-            (df.description || "").toLowerCase().includes(q),
-        );
+        const words = searchText.toLowerCase().split(/\s+/).filter(Boolean);
+        result = result.filter((df) => {
+          const text = (df.id + " " + df.name + " " + (df.description || "")).toLowerCase();
+          return words.every((w) => text.includes(w));
+        });
       }
     }
 

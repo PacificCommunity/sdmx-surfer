@@ -33,7 +33,7 @@ export async function GET(req: Request) {
           searchType: "semantic",
         });
       } catch (err) {
-        console.error("[api/explore] Semantic search failed, falling back to keyword:", err instanceof Error ? err.message : err);
+        console.error("[api/explore] Semantic search failed, falling back to keyword:", err instanceof Error ? err.message : err, err instanceof Error ? err.stack : "");
         // Fallback: keyword filter against the index entries
         const index = loadIndex();
         if (index) {
