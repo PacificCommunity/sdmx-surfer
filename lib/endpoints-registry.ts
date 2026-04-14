@@ -100,6 +100,14 @@ export const ENDPOINTS: EndpointInfo[] = [
       buildDotStatUrl("https://data.statsfiji.gov.fj/vis", "ds:FBOS3", p),
   },
   {
+    key: "SBS",
+    name: "Samoa Bureau of Statistics",
+    shortName: "SBS",
+    apiHosts: ["data-sdmx-disseminate.sbs.gov.ws"],
+    buildExplorerUrl: (p) =>
+      buildDotStatUrl("https://data.sbs.gov.ws/vis", "ds:SBS3", p),
+  },
+  {
     key: "OECD",
     name: "OECD",
     shortName: "OECD",
