@@ -677,6 +677,7 @@ function JsonEditor({
                 closeBrackets: true,
                 autocompletion: false,
               }}
+              height="100%"
               style={{ height: "100%", fontSize: "12px" }}
             />
           </div>
