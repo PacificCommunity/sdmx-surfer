@@ -92,6 +92,14 @@ export const ENDPOINTS: EndpointInfo[] = [
       buildDotStatUrl("https://stats.pacificdata.org/vis", "ds:SPC2", p),
   },
   {
+    key: "FBOS",
+    name: "Fiji Bureau of Statistics",
+    shortName: "FBOS",
+    apiHosts: ["data-sdmx-disseminate.statsfiji.gov.fj"],
+    buildExplorerUrl: (p) =>
+      buildDotStatUrl("https://data.statsfiji.gov.fj/vis", "ds:FBOS3", p),
+  },
+  {
     key: "OECD",
     name: "OECD",
     shortName: "OECD",
