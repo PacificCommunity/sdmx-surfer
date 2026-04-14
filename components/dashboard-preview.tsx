@@ -1411,10 +1411,12 @@ export const DashboardPreview = memo(function DashboardPreview({
 
       {/* Tab content */}
       {tab === "json" ? (
-        <JsonEditor
-          config={config}
-          onApply={(edited) => onConfigEdit?.(edited)}
-        />
+        <div className="flex-1 min-h-0">
+          <JsonEditor
+            config={config}
+            onApply={(edited) => onConfigEdit?.(edited)}
+          />
+        </div>
       ) : !hasValidRows ? (
         <div className="flex flex-1 items-center justify-center p-8">
           <div className="max-w-lg rounded-[var(--radius-xl)] bg-surface-low p-8 text-center">
