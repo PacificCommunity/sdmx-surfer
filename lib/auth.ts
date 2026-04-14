@@ -38,6 +38,31 @@ declare module "next-auth/jwt" {
 // ---------------------------------------------------------------------------
 // Resend email sender
 // ---------------------------------------------------------------------------
+function buildMagicLinkBody(verifyUrl: string): { html: string; text: string } {
+  const html =
+    "<p>Hi,</p>" +
+    "<p>You requested access to <strong>SDMX Surfer</strong>, " +
+    "an early-alpha tool built at the Pacific Community (SPC) for exploring " +
+    "SDMX data through conversation.</p>" +
+    '<p><a href="' + verifyUrl + '">Click here to sign in</a></p>' +
+    "<p>This link expires in 15 minutes and can only be used once. " +
+    "If you did not request this, you can safely ignore this email.</p>" +
+    "<p>Happy surfing,<br>Giulio Valentino Dalla Riva<br>Pacific Community (SPC)</p>";
+
+  const text =
+    "Hi,\n\n" +
+    "You requested access to SDMX Surfer, an early-alpha tool built at the " +
+    "Pacific Community (SPC) for exploring SDMX data through conversation.\n\n" +
+    "Sign in: " + verifyUrl + "\n\n" +
+    "This link expires in 15 minutes and can only be used once. " +
+    "If you did not request this, you can safely ignore this email.\n\n" +
+    "Happy surfing,\n" +
+    "Giulio Valentino Dalla Riva\n" +
+    "Pacific Community (SPC)\n";
+
+  return { html, text };
+}
+
 async function sendMagicLink(params: {
   identifier: string;
   url: string;
@@ -81,13 +106,13 @@ async function sendMagicLink(params: {
     // If DB storage fails, fall back to direct URL (less safe but functional)
     console.error("Failed to store magic link ref:", err);
     const verifyUrl = baseUrl + "/login/verify?url=" + encodeURIComponent(url);
+    const { html, text } = buildMagicLinkBody(verifyUrl);
     const { error } = await resend.emails.send({
       from,
       to: identifier,
-      subject: "Sign in to " + host,
-      html: "<p>Click the link below to sign in:</p>" +
-        '<p><a href="' + verifyUrl + '">Sign in</a></p>' +
-        "<p>This link expires in 15 minutes.</p>",
+      subject: "Get ready to surf SDMX data",
+      html,
+      text,
     });
     if (error) throw new Error("Failed to send magic link: " + error.message);
     return;
@@ -95,18 +120,14 @@ async function sendMagicLink(params: {
 
   // The email contains only the ref ID — no auth token or callback URL
   const verifyUrl = baseUrl + "/login/verify?ref=" + refId;
-  const subject = "Sign in to " + host;
-  const body =
-    "<p>Click the link below to sign in to SDMX Surfer:</p>" +
-    '<p><a href="' + verifyUrl + '">Sign in</a></p>' +
-    "<p>This link expires in 15 minutes and can only be used once.</p>" +
-    "<p>If you did not request this, you can safely ignore this email.</p>";
+  const { html, text } = buildMagicLinkBody(verifyUrl);
 
   const { error } = await resend.emails.send({
     from,
     to: identifier,
-    subject,
-    html: body,
+    subject: "Get ready to surf SDMX data",
+    html,
+    text,
   });
 
   if (error) {

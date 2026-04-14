@@ -117,17 +117,30 @@ export async function POST(req: Request) {
           to: email,
           subject: "You're invited to SDMX Surfer",
           html:
-            '<div style="font-family: Inter, system-ui, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 16px;">' +
+            '<div style="font-family: Inter, system-ui, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 16px; color: #181c1e;">' +
             '<h2 style="color: #004467; margin: 0 0 16px;">You\'ve been invited!</h2>' +
-            '<p style="color: #181c1e; line-height: 1.6; margin: 0 0 24px;">' +
-            "You've been invited to <strong>SDMX Surfer</strong>. " +
-            "Explore Pacific data through conversation — describe what you want to know, and an AI agent will find the data and build visualisations with you." +
+            '<p style="line-height: 1.6; margin: 0 0 16px;">Hi,</p>' +
+            '<p style="line-height: 1.6; margin: 0 0 24px;">' +
+            "You've been invited to <strong>SDMX Surfer</strong>, an early-alpha tool built at the " +
+            "<strong>Pacific Community (SPC)</strong> for exploring SDMX data through conversation. " +
+            "Describe what you want to know, and an AI agent will find the data and build visualisations with you." +
             "</p>" +
             '<a href="' + loginUrl + '" style="display: inline-block; background: #004467; color: #fff; ' +
             'padding: 12px 24px; border-radius: 999px; text-decoration: none; font-weight: 600;">Sign in</a>' +
             '<p style="color: #6b7280; font-size: 12px; margin: 24px 0 0;">Sign in with this email address: <strong>' +
             email + "</strong></p>" +
+            '<p style="line-height: 1.6; margin: 24px 0 0;">Happy surfing,<br>Giulio Valentino Dalla Riva<br>Pacific Community (SPC)</p>' +
             "</div>",
+          text:
+            "Hi,\n\n" +
+            "You've been invited to SDMX Surfer, an early-alpha tool built at the Pacific Community (SPC) " +
+            "for exploring SDMX data through conversation. Describe what you want to know, and an AI agent " +
+            "will find the data and build visualisations with you.\n\n" +
+            "Sign in: " + loginUrl + "\n" +
+            "Use this email address to sign in: " + email + "\n\n" +
+            "Happy surfing,\n" +
+            "Giulio Valentino Dalla Riva\n" +
+            "Pacific Community (SPC)\n",
         });
 
         // Mark invite email as sent
