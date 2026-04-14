@@ -272,6 +272,7 @@ export default function PublicDashboardPage() {
                   <tr className="text-left">
                     <th className="pb-2 pr-4 font-semibold text-on-surface-variant">Component</th>
                     <th className="pb-2 pr-4 font-semibold text-on-surface-variant">Dataflow</th>
+                    <th className="pb-2 pr-4 font-semibold text-on-surface-variant">Source</th>
                     <th className="pb-2 pr-4 font-semibold text-on-surface-variant">Type</th>
                     <th className="pb-2 font-semibold text-on-surface-variant">Links</th>
                   </tr>
@@ -281,6 +282,14 @@ export default function PublicDashboardPage() {
                     <tr key={src.componentId + "-" + src.apiUrl} className="transition-colors hover:bg-surface-low">
                       <td className="py-2 pr-4 font-medium text-on-surface">{src.componentTitle}</td>
                       <td className="py-2 pr-4 text-on-surface">{src.dataflowName}</td>
+                      <td className="py-2 pr-4">
+                        <span
+                          className="rounded-full bg-secondary-container px-2 py-0.5 text-[10px] font-semibold uppercase text-on-secondary-container"
+                          title={src.endpointName}
+                        >
+                          {src.endpointShortName}
+                        </span>
+                      </td>
                       <td className="py-2 pr-4">
                         <span className="rounded-full bg-surface-high px-2 py-0.5 text-[10px] font-semibold uppercase text-on-surface-variant">
                           {src.componentType}
@@ -334,11 +343,10 @@ export default function PublicDashboardPage() {
 
         {/* Footer */}
         <footer className="mt-8 text-center text-xs text-on-surface-variant">
-          Data from{" "}
-          <a href="https://stats.pacificdata.org" className="text-secondary hover:underline">
-            Pacific Data Hub
-          </a>
-          {" "}&middot;{" "}
+          {(() => {
+            const uniqueNames = Array.from(new Set(sources.map((s) => s.endpointName)));
+            return uniqueNames.length > 0 ? "Data from " + uniqueNames.join(", ") + " · " : "";
+          })()}
           Built with{" "}
           <Link href="/" className="text-primary hover:underline">SDMX Surfer</Link>
         </footer>

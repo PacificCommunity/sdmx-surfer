@@ -280,14 +280,15 @@ function renderDataSourcesPage(
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(8);
   pdf.setTextColor(BRAND_THEME.colors.textMuted);
-  pdf.text("SDMX data queries used in this dashboard. Links open in the Pacific Data Hub.", margin, y);
+  pdf.text("SDMX data queries used in this dashboard. Links open the originating source's Data Explorer when available.", margin, y);
   y += lineH * 1.5;
 
   // Table column layout
-  const col1X = margin + 4;             // Component
-  const col2X = margin + contentW * 0.22; // Dataflow
-  const col3X = margin + contentW * 0.52; // Type
-  const col4X = margin + contentW * 0.62; // Links
+  const col1X = margin + 4;               // Component
+  const col2X = margin + contentW * 0.20; // Dataflow
+  const col3X = margin + contentW * 0.46; // Source
+  const col4X = margin + contentW * 0.56; // Type
+  const col5X = margin + contentW * 0.66; // Links
   const headerY = y;
 
   pdf.setFillColor(242, 243, 245); // surface-low
@@ -298,8 +299,9 @@ function renderDataSourcesPage(
   pdf.setTextColor(BRAND_THEME.colors.onSurfaceVariant);
   pdf.text("COMPONENT", col1X, headerY);
   pdf.text("DATAFLOW", col2X, headerY);
-  pdf.text("TYPE", col3X, headerY);
-  pdf.text("LINKS", col4X, headerY);
+  pdf.text("SOURCE", col3X, headerY);
+  pdf.text("TYPE", col4X, headerY);
+  pdf.text("LINKS", col5X, headerY);
   y = headerY + lineH;
 
   // Table rows
@@ -324,21 +326,25 @@ function renderDataSourcesPage(
 
     // Dataflow name
     pdf.setTextColor(BRAND_THEME.colors.onSurface);
-    const dfText = src.dataflowName.length > 35
-      ? src.dataflowName.slice(0, 33) + "…"
+    const dfText = src.dataflowName.length > 30
+      ? src.dataflowName.slice(0, 28) + "…"
       : src.dataflowName;
     pdf.text(dfText, col2X, rowY);
 
+    // Source
+    pdf.setTextColor(BRAND_THEME.colors.onSurfaceVariant);
+    pdf.text(src.endpointShortName, col3X, rowY);
+
     // Type
     pdf.setTextColor(BRAND_THEME.colors.onSurfaceVariant);
-    pdf.text(src.componentType.toUpperCase(), col3X, rowY);
+    pdf.text(src.componentType.toUpperCase(), col4X, rowY);
 
     // Links
     pdf.setTextColor(BRAND_THEME.colors.primary);
-    pdf.textWithLink("API", col4X, rowY, { url: src.apiUrl });
+    pdf.textWithLink("API", col5X, rowY, { url: src.apiUrl });
     if (src.explorerUrl) {
       pdf.setTextColor(BRAND_THEME.colors.secondary);
-      pdf.textWithLink("Data Explorer", col4X + 30, rowY, { url: src.explorerUrl });
+      pdf.textWithLink("Data Explorer", col5X + 30, rowY, { url: src.explorerUrl });
     }
 
     // Separator line
@@ -353,9 +359,12 @@ function renderDataSourcesPage(
   pdf.setFont("helvetica", "italic");
   pdf.setFontSize(7);
   pdf.setTextColor(BRAND_THEME.colors.textMuted);
+  const uniqueSourceNames = Array.from(
+    new Set(sources.map((s) => s.endpointName)),
+  );
   const footerText = "Exported from SDMX Surfer on " +
     new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }) +
-    "  ·  Data from stats.pacificdata.org";
+    "  ·  Data from " + uniqueSourceNames.join(", ");
   pdf.text(footerText, margin, y);
 }
 
