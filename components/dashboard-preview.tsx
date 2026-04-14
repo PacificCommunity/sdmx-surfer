@@ -828,6 +828,9 @@ function DataSourcesTable({ config }: { config: SDMXDashboardConfig }) {
                 Dataflow
               </th>
               <th className="px-6 py-2 text-left font-semibold text-on-surface-variant">
+                Source
+              </th>
+              <th className="px-6 py-2 text-left font-semibold text-on-surface-variant">
                 Type
               </th>
               <th className="px-6 py-2 text-left font-semibold text-on-surface-variant">
@@ -869,6 +872,14 @@ function DataSourceRow({ source }: { source: DataSource }) {
       </td>
       <td className="px-6 py-3 text-on-surface">
         {source.dataflowName}
+      </td>
+      <td className="px-6 py-3">
+        <span
+          className="rounded-full bg-secondary-container px-2 py-0.5 text-[10px] font-semibold uppercase text-on-secondary-container"
+          title={source.endpointName}
+        >
+          {source.endpointShortName}
+        </span>
       </td>
       <td className="px-6 py-3">
         <span className="rounded-full bg-surface-high px-2 py-0.5 text-[10px] font-semibold uppercase text-on-surface-variant">
