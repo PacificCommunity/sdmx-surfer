@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { desc, eq, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
-import { db, allowedEmails, authUsers, usageLogs } from "@/lib/db";
+import { db, allowedEmails, authUsers, authVerificationTokens, usageLogs } from "@/lib/db";
 import { checkCsrf } from "@/lib/csrf";
 
 // ---------------------------------------------------------------------------
@@ -48,8 +48,33 @@ export async function GET() {
       .groupBy(usageLogs.user_id);
     const activityMap = new Map(lastActivityRows.map((r) => [r.userId, r.lastActive]));
 
+    // Magic-link request activity per identifier. NextAuth stores `expires`
+    // (= created_at + maxAge), so we surface max(expires) as a proxy for the
+    // most recent request time. Tokens are deleted when the user successfully
+    // signs in, so any remaining rows represent unused / stuck requests.
+    const tokenRows = await db
+      .select({
+        identifier: authVerificationTokens.identifier,
+        pending: sql<number>`count(*) filter (where ${authVerificationTokens.expires} > now())`,
+        total: sql<number>`count(*)`,
+        lastExpires: sql<string>`max(${authVerificationTokens.expires})`,
+      })
+      .from(authVerificationTokens)
+      .groupBy(authVerificationTokens.identifier);
+    const tokenMap = new Map(
+      tokenRows.map((r) => [
+        r.identifier.toLowerCase(),
+        {
+          pending: Number(r.pending),
+          total: Number(r.total),
+          lastExpires: r.lastExpires,
+        },
+      ]),
+    );
+
     const enriched = invites.map((inv) => {
       const user = userMap.get(inv.email);
+      const tokens = tokenMap.get(inv.email);
       return {
         email: inv.email,
         invited_by: inv.invited_by,
@@ -58,6 +83,9 @@ export async function GET() {
         signed_up: !!user,
         signed_up_at: user?.createdAt || null,
         last_active: user ? (activityMap.get(user.id) || null) : null,
+        pending_magic_links: tokens?.pending ?? 0,
+        total_magic_link_requests: tokens?.total ?? 0,
+        last_link_expires_at: tokens?.lastExpires ?? null,
       };
     });
 

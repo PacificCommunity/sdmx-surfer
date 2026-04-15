@@ -27,6 +27,24 @@ interface InviteRecord {
   signed_up: boolean;
   signed_up_at: string | null;
   last_active: string | null;
+  pending_magic_links: number;
+  total_magic_link_requests: number;
+  last_link_expires_at: string | null;
+}
+
+// NextAuth magic links have maxAge 15 min, so requested_at ≈ expires - 15 min.
+function formatRequestedAgo(lastExpiresAt: string | null): string | null {
+  if (!lastExpiresAt) return null;
+  const expiresMs = new Date(lastExpiresAt).getTime();
+  if (Number.isNaN(expiresMs)) return null;
+  const requestedMs = expiresMs - 15 * 60 * 1000;
+  const deltaMin = Math.max(0, Math.round((Date.now() - requestedMs) / 60000));
+  if (deltaMin < 1) return "just now";
+  if (deltaMin < 60) return deltaMin + "m ago";
+  const deltaHr = Math.round(deltaMin / 60);
+  if (deltaHr < 24) return deltaHr + "h ago";
+  const deltaDay = Math.round(deltaHr / 24);
+  return deltaDay + "d ago";
 }
 
 interface PublishedDashboardRecord {
@@ -304,6 +322,28 @@ export default function AdminPage() {
                       <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
                         Active
                       </span>
+                    ) : invite.pending_magic_links > 0 ? (
+                      <div className="flex flex-col gap-0.5">
+                        <span
+                          className="inline-flex w-fit items-center gap-1 rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-semibold text-orange-700 ring-1 ring-inset ring-orange-200"
+                          title={
+                            invite.pending_magic_links +
+                            " unused magic link" +
+                            (invite.pending_magic_links === 1 ? "" : "s") +
+                            " on record (total lifetime: " +
+                            invite.total_magic_link_requests +
+                            ")"
+                          }
+                        >
+                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-orange-500" />
+                          Awaiting link
+                        </span>
+                        {invite.last_link_expires_at && (
+                          <span className="text-[10px] text-on-surface-variant">
+                            requested {formatRequestedAgo(invite.last_link_expires_at)}
+                          </span>
+                        )}
+                      </div>
                     ) : invite.invite_email_sent ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">
                         Invited
