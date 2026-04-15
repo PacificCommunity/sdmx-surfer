@@ -88,9 +88,15 @@ export default function DashboardViewPage() {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => router.push("/")}
+              onClick={() => {
+                if (typeof window !== "undefined" && window.history.length > 1) {
+                  router.back();
+                } else {
+                  router.push("/");
+                }
+              }}
               className="rounded-full p-1.5 text-on-surface-variant transition-colors hover:text-primary"
-              title="Back to home"
+              title="Back"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />

@@ -350,7 +350,7 @@ export default function WelcomePage() {
                       onClick={() => { window.location.href = "/dashboard/" + session.sessionId; }}
                       className="ghost-border rounded-full bg-surface-card px-3 py-1 text-xs font-semibold text-on-surface-variant transition-transform hover:scale-105 active:scale-95"
                     >
-                      View
+                      Present
                     </button>
                     <button
                       type="button"
