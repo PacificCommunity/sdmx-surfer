@@ -302,7 +302,8 @@ function renderDataSourcesPage(
   pdf.text("SOURCE", col3X, headerY);
   pdf.text("TYPE", col4X, headerY);
   pdf.text("LINKS", col5X, headerY);
-  y = headerY + lineH;
+  // Extra gap between the header fill rectangle and the first row's text
+  y = headerY + lineH + 4;
 
   // Table rows
   pdf.setFontSize(8);
@@ -347,11 +348,14 @@ function renderDataSourcesPage(
       pdf.textWithLink("Data Explorer", col5X + 30, rowY, { url: src.explorerUrl });
     }
 
-    // Separator line
+    // Separator line — centered in the gap between rows
+    // (jsPDF text y is the baseline, so the rule must clear the next row's
+    // ascender as well as the current row's descender)
     y = rowY + lineH;
+    const ruleY = rowY + lineH / 2 + 2;
     pdf.setDrawColor(238, 238, 238); // outline-variant
     pdf.setLineWidth(0.5);
-    pdf.line(margin, y - 4, margin + contentW, y - 4);
+    pdf.line(margin, ruleY, margin + contentW, ruleY);
   }
 
   // Footer

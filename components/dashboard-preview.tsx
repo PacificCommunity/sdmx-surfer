@@ -1456,7 +1456,7 @@ export const DashboardPreview = memo(function DashboardPreview({
             <div
               ref={dashboardRootRef}
               className={
-                "relative z-10 min-w-full w-max " +
+                "relative z-10 w-full min-w-[1024px] " +
                 (animateDashboardEnter ? "dashboard-enter" : "")
               }
             >
