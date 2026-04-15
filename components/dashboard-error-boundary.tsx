@@ -16,6 +16,14 @@ export class DashboardErrorBoundary extends Component<
     this.props.onError?.(error.message);
   }
 
+  componentDidUpdate(prevProps: Readonly<{ children: ReactNode }>) {
+    // When the preview receives a new dashboard tree after an AI repair or JSON edit,
+    // clear the previous render error so the new config gets a chance to mount.
+    if (this.state.error && prevProps.children !== this.props.children) {
+      this.setState({ error: null });
+    }
+  }
+
   render() {
     if (this.state.error) {
       const rawMsg = this.state.error.message;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type RefObject } from "react";
+import { useMemo, useState, type RefObject } from "react";
 import {
   exportToPdf,
   exportToHtml,
@@ -8,6 +8,68 @@ import {
   exportToJson,
 } from "@/lib/export-dashboard";
 import type { SDMXDashboardConfig } from "@/lib/types";
+
+export type ExportAction = {
+  key: "pdf" | "html-static" | "html-live" | "json";
+  label: string;
+  sub: string;
+  run: () => void | Promise<void>;
+};
+
+export function useDashboardExport(
+  config: SDMXDashboardConfig,
+  dashboardRef: RefObject<HTMLDivElement | null>,
+) {
+  const [exporting, setExporting] = useState(false);
+
+  const actions = useMemo<ExportAction[]>(
+    () => [
+      {
+        key: "pdf",
+        label: "PDF",
+        sub: "Snapshot image",
+        run: async () => {
+          if (!dashboardRef.current) return;
+          setExporting(true);
+          try {
+            await exportToPdf(dashboardRef.current, config);
+          } catch (err) {
+            console.error("PDF export failed:", err);
+            alert(
+              "PDF export failed: " +
+                (err instanceof Error ? err.message : String(err)),
+            );
+          } finally {
+            setExporting(false);
+          }
+        },
+      },
+      {
+        key: "html-static",
+        label: "HTML (static)",
+        sub: "Works offline",
+        run: () => {
+          if (dashboardRef.current) exportToHtml(dashboardRef.current, config);
+        },
+      },
+      {
+        key: "html-live",
+        label: "HTML (live)",
+        sub: "Interactive, needs HTTP",
+        run: () => exportToHtmlLive(config),
+      },
+      {
+        key: "json",
+        label: "JSON Config",
+        sub: "Raw config file",
+        run: () => exportToJson(config),
+      },
+    ],
+    [config, dashboardRef],
+  );
+
+  return { exporting, actions };
+}
 
 export function DashboardExportMenu({
   config,
@@ -17,51 +79,7 @@ export function DashboardExportMenu({
   dashboardRef: RefObject<HTMLDivElement | null>;
 }) {
   const [open, setOpen] = useState(false);
-  const [exporting, setExporting] = useState(false);
-
-  const items: Array<{ label: string; sub: string; fn: () => void | Promise<void> }> = [
-    {
-      label: "PDF",
-      sub: "Snapshot image",
-      fn: async () => {
-        setOpen(false);
-        if (!dashboardRef.current) return;
-        setExporting(true);
-        try {
-          await exportToPdf(dashboardRef.current, config);
-        } catch (err) {
-          console.error("PDF export failed:", err);
-          alert("PDF export failed: " + (err instanceof Error ? err.message : String(err)));
-        } finally {
-          setExporting(false);
-        }
-      },
-    },
-    {
-      label: "HTML (static)",
-      sub: "Works offline",
-      fn: () => {
-        setOpen(false);
-        if (dashboardRef.current) exportToHtml(dashboardRef.current, config);
-      },
-    },
-    {
-      label: "HTML (live)",
-      sub: "Interactive, needs HTTP",
-      fn: () => {
-        setOpen(false);
-        exportToHtmlLive(config);
-      },
-    },
-    {
-      label: "JSON Config",
-      sub: "Raw config file",
-      fn: () => {
-        setOpen(false);
-        exportToJson(config);
-      },
-    },
-  ];
+  const { exporting, actions } = useDashboardExport(config, dashboardRef);
 
   return (
     <div className="relative">
@@ -90,15 +108,18 @@ export function DashboardExportMenu({
         <>
           <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
           <div className="absolute right-0 z-30 mt-1 w-48 rounded-[var(--radius-lg)] bg-surface-card p-1 shadow-ambient">
-            {items.map((item) => (
+            {actions.map((action) => (
               <button
-                key={item.label}
+                key={action.key}
                 type="button"
-                onClick={item.fn}
+                onClick={() => {
+                  setOpen(false);
+                  void action.run();
+                }}
                 className="flex w-full flex-col rounded-[var(--radius-md)] px-3 py-2 text-left text-xs transition-colors hover:bg-surface-low"
               >
-                <span className="font-medium text-on-surface">{item.label}</span>
-                <span className="text-[10px] text-on-surface-variant">{item.sub}</span>
+                <span className="font-medium text-on-surface">{action.label}</span>
+                <span className="text-[10px] text-on-surface-variant">{action.sub}</span>
               </button>
             ))}
           </div>
