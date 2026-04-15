@@ -896,7 +896,7 @@ export default function BuilderPage() {
           />
         </aside>
 
-        <main className="flex-1 bg-surface">
+        <main className="min-w-0 flex-1 bg-surface">
           <DashboardPreview
             config={configHistory.current}
             onConfigEdit={handleConfigEdit}
