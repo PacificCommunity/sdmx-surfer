@@ -22,6 +22,7 @@ import {
   getDashboardTitle,
   getTextConfigValue,
 } from "@/lib/dashboard-text";
+import { useHighchartsViewportReflow } from "@/lib/use-highcharts-viewport-reflow";
 import type {
   SDMXDashboardConfig,
   SDMXDashboardRow,
@@ -1060,6 +1061,8 @@ export const DashboardPreview = memo(function DashboardPreview({
     ? dashboardNeedsGraphicSignal(config)
     : false;
 
+  useHighchartsViewportReflow(Boolean(config && tab === "preview" && hasValidRows));
+
   useEffect(() => {
     if (!config || tab !== "preview" || !hasValidRows) {
       setShowSkeleton(false);
@@ -1449,19 +1452,21 @@ export const DashboardPreview = memo(function DashboardPreview({
       ) : (
         <div className="relative flex-1 overflow-auto p-6">
           {/* Dashboard renders on top */}
-          <div
-            ref={dashboardRootRef}
-            className={
-              "relative z-10 " +
-              (animateDashboardEnter ? "dashboard-enter" : "")
-            }
-          >
-            <DashboardErrorBoundary
-              onError={reportError}
+          <div className="overflow-x-auto">
+            <div
+              ref={dashboardRootRef}
+              className={
+                "relative z-10 min-w-full w-max " +
+                (animateDashboardEnter ? "dashboard-enter" : "")
+              }
             >
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <SDMXDashboard config={config as any} lang="en" />
-            </DashboardErrorBoundary>
+              <DashboardErrorBoundary
+                onError={reportError}
+              >
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                <SDMXDashboard config={config as any} lang="en" />
+              </DashboardErrorBoundary>
+            </div>
           </div>
           {showSkeleton && (
             <div className="pointer-events-none absolute inset-6 z-20 transition-opacity duration-300">

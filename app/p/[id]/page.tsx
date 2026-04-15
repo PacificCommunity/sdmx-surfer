@@ -8,6 +8,7 @@ import { SurferLogo } from "@/components/surfer-logo";
 import { exportToPdf, exportToHtml, exportToHtmlLive, exportToJson } from "@/lib/export-dashboard";
 import { extractDataSources } from "@/lib/data-explorer-url";
 import { getDashboardSubtitle, getDashboardTitle } from "@/lib/dashboard-text";
+import { useHighchartsViewportReflow } from "@/lib/use-highcharts-viewport-reflow";
 import type { SDMXDashboardConfig } from "@/lib/types";
 
 const SDMXDashboard = dynamic(
@@ -85,6 +86,8 @@ export default function PublicDashboardPage() {
       }
     })();
   }, [id]);
+
+  useHighchartsViewportReflow(Boolean(config));
 
   if (notFound) {
     return (
@@ -252,12 +255,14 @@ export default function PublicDashboardPage() {
           )}
         </div>
 
-        <div
-          ref={(el) => { dashboardRef.current = el; }}
-          className="rounded-[var(--radius-xl)] bg-surface-card p-8 shadow-ambient"
-        >
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          <SDMXDashboard config={config as any} lang="en" />
+        <div className="overflow-x-auto">
+          <div
+            ref={(el) => { dashboardRef.current = el; }}
+            className="min-w-full w-max rounded-[var(--radius-xl)] bg-surface-card p-8 shadow-ambient"
+          >
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            <SDMXDashboard config={config as any} lang="en" />
+          </div>
         </div>
 
         {/* Data sources */}

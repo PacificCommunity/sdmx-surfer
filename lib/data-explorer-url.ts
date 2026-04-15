@@ -51,10 +51,22 @@ function parseApiUrl(url: string): ParsedApiUrl | null {
   }
 }
 
+/**
+ * Map components encode data as "{apiUrl}, {DIM} | {geoJsonUrl}, {projection}, {joinProp}".
+ * Strip the geo suffix to recover the SDMX API URL.
+ */
+function extractSdmxUrl(raw: string): string {
+  const pipeIdx = raw.indexOf(" | ");
+  const beforePipe = pipeIdx >= 0 ? raw.slice(0, pipeIdx) : raw;
+  const braceIdx = beforePipe.indexOf(", {");
+  return (braceIdx >= 0 ? beforePipe.slice(0, braceIdx) : beforePipe).trim();
+}
+
 export function apiUrlToExplorerUrl(apiUrl: string): string | null {
-  const parsed = parseApiUrl(apiUrl);
+  const clean = extractSdmxUrl(apiUrl);
+  const parsed = parseApiUrl(clean);
   if (!parsed) return null;
-  const endpoint = detectEndpoint(apiUrl);
+  const endpoint = detectEndpoint(clean);
   return endpoint.buildExplorerUrl ? endpoint.buildExplorerUrl(parsed) : null;
 }
 
@@ -97,7 +109,8 @@ export function extractDataSources(config: {
       const urls = Array.isArray(col.data) ? col.data : [col.data];
       const title = getLocalizedTextValue(col.title?.text) || col.id;
 
-      for (const url of urls) {
+      for (const rawUrl of urls) {
+        const url = extractSdmxUrl(rawUrl);
         if (seen.has(url)) continue;
         seen.add(url);
 
