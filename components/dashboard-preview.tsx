@@ -1061,7 +1061,10 @@ export const DashboardPreview = memo(function DashboardPreview({
     ? dashboardNeedsGraphicSignal(config)
     : false;
 
-  useHighchartsViewportReflow(Boolean(config && tab === "preview" && hasValidRows));
+  useHighchartsViewportReflow(
+    dashboardRootRef,
+    Boolean(config && tab === "preview" && hasValidRows),
+  );
 
   useEffect(() => {
     if (!config || tab !== "preview" || !hasValidRows) {
@@ -1456,7 +1459,7 @@ export const DashboardPreview = memo(function DashboardPreview({
             <div
               ref={dashboardRootRef}
               className={
-                "relative z-10 w-full min-w-[1024px] " +
+                "relative z-10 block w-full min-w-[1024px] " +
                 (animateDashboardEnter ? "dashboard-enter" : "")
               }
             >

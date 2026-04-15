@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, type RefObject } from "react";
 
 type HighchartsChartLike = {
   reflow?: () => void;
@@ -16,12 +16,16 @@ function loadHighcharts() {
   return highchartsPromise;
 }
 
-export function useHighchartsViewportReflow(enabled: boolean) {
+export function useHighchartsViewportReflow(
+  rootRef: RefObject<HTMLElement | null>,
+  enabled: boolean,
+) {
   useEffect(() => {
     if (!enabled) return;
 
     let raf = 0;
     let cancelled = false;
+    const observers: ResizeObserver[] = [];
 
     const reflow = () => {
       cancelAnimationFrame(raf);
@@ -42,6 +46,18 @@ export function useHighchartsViewportReflow(enabled: boolean) {
       });
     };
 
+    const root = rootRef.current;
+    if (root && typeof ResizeObserver !== "undefined") {
+      const targets = [root, root.parentElement].filter(
+        (target): target is HTMLElement => Boolean(target),
+      );
+      targets.forEach((target) => {
+        const observer = new ResizeObserver(reflow);
+        observer.observe(target);
+        observers.push(observer);
+      });
+    }
+
     window.addEventListener("resize", reflow);
     window.visualViewport?.addEventListener("resize", reflow);
 
@@ -51,8 +67,9 @@ export function useHighchartsViewportReflow(enabled: boolean) {
     return () => {
       cancelled = true;
       cancelAnimationFrame(raf);
+      observers.forEach((observer) => observer.disconnect());
       window.removeEventListener("resize", reflow);
       window.visualViewport?.removeEventListener("resize", reflow);
     };
-  }, [enabled]);
+  }, [enabled, rootRef]);
 }

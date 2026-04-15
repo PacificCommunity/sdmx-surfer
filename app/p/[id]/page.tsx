@@ -87,7 +87,7 @@ export default function PublicDashboardPage() {
     })();
   }, [id]);
 
-  useHighchartsViewportReflow(Boolean(config));
+  useHighchartsViewportReflow(dashboardRef, Boolean(config));
 
   if (notFound) {
     return (
@@ -258,7 +258,7 @@ export default function PublicDashboardPage() {
         <div className="overflow-x-auto">
           <div
             ref={(el) => { dashboardRef.current = el; }}
-            className="w-full min-w-[1024px] rounded-[var(--radius-xl)] bg-surface-card p-8 shadow-ambient"
+            className="block w-full min-w-[1024px] rounded-[var(--radius-xl)] bg-surface-card p-8 shadow-ambient"
           >
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             <SDMXDashboard config={config as any} lang="en" />
