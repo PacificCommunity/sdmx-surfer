@@ -73,6 +73,7 @@ export default function AdminPage() {
   const [inviteError, setInviteError] = useState("");
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [removingEmail, setRemovingEmail] = useState<string | null>(null);
+  const [clearingLinksEmail, setClearingLinksEmail] = useState<string | null>(null);
   const [unpublishingDashboardId, setUnpublishingDashboardId] = useState<string | null>(null);
 
   // ---------------------------------------------------------------------------
@@ -141,6 +142,19 @@ export default function AdminPage() {
       setInviteError("Network error");
     } finally {
       setInviting(false);
+    }
+  }
+
+  async function handleClearMagicLinks(email: string) {
+    setClearingLinksEmail(email);
+    try {
+      await fetch(
+        "/api/admin/invites/" + encodeURIComponent(email) + "/magic-links",
+        { method: "DELETE" },
+      );
+      await fetchInvites();
+    } finally {
+      setClearingLinksEmail(null);
     }
   }
 
@@ -322,27 +336,43 @@ export default function AdminPage() {
                       <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
                         Active
                       </span>
-                    ) : invite.pending_magic_links > 0 ? (
+                    ) : invite.total_magic_link_requests > 0 ? (
                       <div className="flex flex-col gap-0.5">
                         <span
                           className="inline-flex w-fit items-center gap-1 rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-semibold text-orange-700 ring-1 ring-inset ring-orange-200"
                           title={
-                            invite.pending_magic_links +
-                            " unused magic link" +
-                            (invite.pending_magic_links === 1 ? "" : "s") +
-                            " on record (total lifetime: " +
                             invite.total_magic_link_requests +
-                            ")"
+                            " magic-link request" +
+                            (invite.total_magic_link_requests === 1 ? "" : "s") +
+                            " on record (" +
+                            invite.pending_magic_links +
+                            " unexpired)"
                           }
                         >
-                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-orange-500" />
+                          {invite.pending_magic_links > 0 && (
+                            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-orange-500" />
+                          )}
                           Awaiting link
+                          {invite.total_magic_link_requests > 1 && (
+                            <span className="rounded-full bg-orange-100 px-1 text-[9px] tabular-nums">
+                              ×{invite.total_magic_link_requests}
+                            </span>
+                          )}
                         </span>
                         {invite.last_link_expires_at && (
                           <span className="text-[10px] text-on-surface-variant">
-                            requested {formatRequestedAgo(invite.last_link_expires_at)}
+                            last asked {formatRequestedAgo(invite.last_link_expires_at)}
                           </span>
                         )}
+                        <button
+                          type="button"
+                          onClick={() => void handleClearMagicLinks(invite.email)}
+                          disabled={clearingLinksEmail === invite.email}
+                          className="w-fit text-[10px] font-semibold text-primary transition-colors hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+                          title="Delete unused verification tokens so the user can request a fresh link"
+                        >
+                          {clearingLinksEmail === invite.email ? "clearing…" : "clear requests"}
+                        </button>
                       </div>
                     ) : invite.invite_email_sent ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-inset ring-amber-200">
