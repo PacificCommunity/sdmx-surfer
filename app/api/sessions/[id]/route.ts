@@ -3,6 +3,7 @@ import { z } from "zod";
 import { and, eq, isNull } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, dashboardSessions } from "@/lib/db";
+import { checkCsrf } from "@/lib/csrf";
 
 // ---------------------------------------------------------------------------
 // Input validation schema for PUT
@@ -62,6 +63,9 @@ export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const csrfError = checkCsrf(req);
+  if (csrfError) return csrfError;
+
   const session = await auth();
   if (!session?.user?.userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -121,9 +125,12 @@ export async function PUT(
 // ---------------------------------------------------------------------------
 
 export async function DELETE(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const csrfError = checkCsrf(req);
+  if (csrfError) return csrfError;
+
   const session = await auth();
   if (!session?.user?.userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

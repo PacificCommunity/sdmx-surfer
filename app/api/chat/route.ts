@@ -3,6 +3,7 @@ import { createMCPClient } from "@ai-sdk/mcp";
 import { mcpTransportConfig } from "@/lib/mcp-client";
 import { getModelForUser } from "@/lib/model-router";
 import { auth } from "@/lib/auth";
+import { checkCsrf } from "@/lib/csrf";
 import { z } from "zod";
 import {
   getConfigTitle,
@@ -42,6 +43,9 @@ const NUDGE_MESSAGE =
 export const maxDuration = 300;
 
 export async function POST(req: Request) {
+  const csrfError = checkCsrf(req);
+  if (csrfError) return csrfError;
+
   const session = await auth();
   if (!session?.user?.userId) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
