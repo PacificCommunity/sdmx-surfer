@@ -79,7 +79,11 @@ dashboarder/
 │   │   ├── page.tsx                # SDMX data catalogue with semantic search
 │   │   └── [id]/page.tsx           # Dataflow detail + dimension explorer
 │   ├── dashboard/
-│   │   └── [id]/page.tsx           # Standalone dashboard view (shareable)
+│   │   └── [id]/page.tsx           # Private presentation view for an authenticated session
+│   ├── p/
+│   │   └── [id]/page.tsx           # Public presentation view for a published dashboard
+│   ├── gallery/
+│   │   └── page.tsx                # Public gallery of published dashboards
 │   ├── admin/
 │   │   └── page.tsx                # Admin: invite management + user usage (admin only)
 │   ├── settings/
@@ -87,7 +91,7 @@ dashboarder/
 │   └── api/
 │       ├── auth/[...nextauth]/     # NextAuth magic-link handler
 │       ├── chat/route.ts           # Agent loop: streamText + MCP + tools
-│       ├── sessions/               # Session CRUD (GET list, POST create, GET/PATCH/DELETE by id)
+│       ├── sessions/               # Session CRUD (GET list, POST create, GET/PUT/DELETE by id, publish sub-route)
 │       ├── explore/                # Dataflow catalogue + semantic search API
 │       ├── admin/
 │       │   ├── users/              # User list + role management (admin only)
@@ -111,7 +115,7 @@ dashboarder/
 │   ├── session.ts                  # Session persistence helpers (DB-backed)
 │   ├── use-config-history.ts       # Undo/redo hook
 │   ├── tier2-knowledge.ts          # Session knowledge extraction for context
-│   ├── logger.ts                   # Server-side JSONL request logging
+│   ├── logger.ts                   # Database-backed request logging
 │   ├── mcp-client.ts               # MCP transport config (HTTP + auth token)
 │   ├── csrf.ts                     # CSRF token helpers
 │   └── db/
@@ -128,11 +132,12 @@ dashboarder/
 │   └── dashboard-authoring.test.ts # Vitest: authoring schema compiler
 ├── patches/
 │   └── sdmx-dashboard-components+0.4.5.patch
-├── proxy.ts                        # NextAuth middleware (protects all routes except /login)
-├── logs/                           # Server-side chat logs (gitignored)
+├── proxy.ts                        # NextAuth middleware (public exceptions include /login, /gallery, /p/*, /api/public/*)
+├── logs/                           # Legacy local chat logs from the earlier JSONL logger (gitignored)
 ├── docs/
 │   ├── architecture.mmd            # Mermaid source for architecture diagram
-│   └── technical-reference.md      # Detailed technical documentation
+│   ├── current-architecture.md     # Implemented route/access/publication model
+│   └── technical-reference.md      # Detailed technical internals
 ├── stitch_assets/                  # UI mockups and design system spec
 ├── CLAUDE.md                       # Instructions for Claude Code
 ├── .env.example                    # Environment template
@@ -334,8 +339,8 @@ flowchart TB
 - Prevents redundant MCP discovery calls, saving tokens and steps
 
 ### Request logging
-- Every chat request logged to `logs/chat-YYYY-MM-DD.jsonl`
-- Usage also written to `usage_logs` table in Postgres (session ID, user, tokens, model, duration)
+- Every chat request is written to the `usage_logs` table in Postgres (session ID, user, tokens, model, duration)
+- The `logs/` directory is legacy from the earlier JSONL logger and is no longer the active logging backend
 
 ## Environment Variables
 
@@ -496,7 +501,7 @@ Ensure `DATABASE_URL` is set and the Postgres instance is reachable. For Vercel 
 
 ## Technical Reference
 
-See [`docs/technical-reference.md`](docs/technical-reference.md) for detailed architecture documentation, module descriptions, and design decisions.
+See [`docs/current-architecture.md`](docs/current-architecture.md) for the implemented route/access/publication model, and [`docs/technical-reference.md`](docs/technical-reference.md) for lower-level technical internals and module descriptions.
 
 ## License
 

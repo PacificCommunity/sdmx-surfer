@@ -946,6 +946,9 @@ const LOAD_COMPLETE_SELECTOR = [
   "canvas",
 ].join(", ");
 
+const PREVIEW_DASHBOARD_SCROLL_CLASS = "max-w-full overflow-x-auto";
+const PREVIEW_DASHBOARD_CONTENT_CLASS = "relative z-10 block w-full min-w-[1024px] ";
+
 function dashboardNeedsGraphicSignal(config: SDMXDashboardConfig): boolean {
   return config.rows.some((row) =>
     row.columns.some((column) => column.type !== "note" && column.type !== "value"),
@@ -1455,11 +1458,11 @@ export const DashboardPreview = memo(function DashboardPreview({
       ) : (
         <div className="relative flex-1 min-w-0 overflow-auto p-6">
           {/* Dashboard renders on top */}
-          <div className="max-w-full overflow-x-auto">
+          <div className={PREVIEW_DASHBOARD_SCROLL_CLASS}>
             <div
               ref={dashboardRootRef}
               className={
-                "relative z-10 block w-full min-w-[1024px] " +
+                PREVIEW_DASHBOARD_CONTENT_CLASS +
                 (animateDashboardEnter ? "dashboard-enter" : "")
               }
             >

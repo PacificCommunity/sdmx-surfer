@@ -32,6 +32,10 @@ const SDMXDashboard = dynamic(
   { ssr: false },
 );
 
+const DASHBOARD_CARD_SCROLL_CLASS =
+  "max-w-full overflow-x-auto rounded-[var(--radius-xl)] bg-surface-card p-8 shadow-ambient";
+const DASHBOARD_CARD_CONTENT_CLASS = "block w-full min-w-[1024px]";
+
 export default function PublicDashboardPage() {
   const params = useParams();
   const router = useRouter();
@@ -255,10 +259,10 @@ export default function PublicDashboardPage() {
           )}
         </div>
 
-        <div className="max-w-full overflow-x-auto rounded-[var(--radius-xl)] bg-surface-card p-8 shadow-ambient">
+        <div className={DASHBOARD_CARD_SCROLL_CLASS}>
           <div
             ref={(el) => { dashboardRef.current = el; }}
-            className="block w-full min-w-[1024px]"
+            className={DASHBOARD_CARD_CONTENT_CLASS}
           >
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             <SDMXDashboard config={config as any} lang="en" />

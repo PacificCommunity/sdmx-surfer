@@ -1,7 +1,9 @@
 # Technical Reference — SPC Conversational Dashboard Builder
 
-**Version:** 0.2.0 (Pilot Deployment)
-**Last updated:** March 2026
+**Version:** 0.2.1 (Pilot Deployment)
+**Last updated:** April 2026
+
+> Current-state note: for the implemented route model, access rights, publication model, and public/private data boundaries, read `docs/current-architecture.md` first. This file covers lower-level technical internals (module-by-module reference, schemas, patches, deployment) and should be read alongside the current-architecture doc, not instead of it.
 
 ---
 
@@ -37,7 +39,7 @@ The SPC Conversational Dashboard Builder is a web application that lets users cr
 The system connects three existing components:
 
 - **sdmx-mcp-gateway** — a Python MCP (Model Context Protocol) server providing 18+ tools for progressive SDMX data discovery on SPC's .Stat platform
-- **sdmx-dashboard-components** — an npm library (v0.4.5) that renders dashboards from JSON configs using Highcharts, OpenLayers, and React
+- **sdmx-dashboard-components** — an npm library (currently `^0.4.6` in this repo) that renders dashboards from JSON configs using Highcharts, OpenLayers, and React
 - **AI SDK v6** — Vercel's TypeScript framework for building AI applications, providing the streaming chat interface and tool orchestration
 
 The **new piece** built in this repository is the agent loop + chat UI + live preview that connects these three, plus a full pilot deployment stack: authentication, database persistence, multi-model support, and an admin interface.
@@ -59,7 +61,7 @@ The AI agent produces **JSON configs, not code**. The preferred output is the si
 | LLM (default) | Gemini 3 Flash (free tier) | gemini-3-flash-preview |
 | LLM (BYOK) | Anthropic, OpenAI, Google | user-configurable |
 | MCP | HTTP transport to gateway | configurable via `MCP_GATEWAY_URL` |
-| Dashboard | sdmx-dashboard-components | 0.4.5 |
+| Dashboard | sdmx-dashboard-components | ^0.4.6 |
 | Charts | Highcharts | 11.4.8 |
 | Auth | NextAuth v4 with Resend magic links | 4.24.13 |
 | Database | Vercel Postgres (Neon) + Drizzle ORM | 0.10.0 / 0.45.1 |
@@ -178,7 +180,7 @@ The largest client component (~800+ lines). Manages:
 
 ### `lib/types.ts` — TypeScript Types
 
-Interfaces matching `sdmx-dashboard-components` v0.4.5:
+Interfaces matching the `sdmx-dashboard-components` contract currently used by this app (`^0.4.6` dependency, with a local compatibility patch):
 - `SDMXTextConfig` — text with optional styling
 - `SDMXDashboardConfig` — root config
 - `SDMXDashboardRow` — container for columns (note: uses `columns`, not `colums` from the library's buggy type defs)
@@ -188,13 +190,13 @@ Interfaces matching `sdmx-dashboard-components` v0.4.5:
 ### `lib/session.ts` — Session Client
 
 Database-backed session management (replaced the old localStorage implementation). All operations call the `/api/sessions` REST API routes:
-- `saveSession()` — PUT to update existing session, POST to create if 404
+- `saveSession()` — POST to create if the session is not yet known locally, otherwise PUT to update
 - `loadSession(id?)` — GET by id, or GET list and return the most recent
 - `listSessions()` — GET `/api/sessions`, returns `SessionSummary[]`
 - `deleteSession(id)` — DELETE `/api/sessions/[id]`
 - Session ID: 16-char hex from `crypto.getRandomValues`
 
-The `SessionData` interface is unchanged; the storage backend switched from `localStorage` to PostgreSQL.
+The `SessionData` interface now includes publication metadata (`publishedAt`, `publicTitle`, `publicDescription`, `authorDisplayName`) in addition to the session editing state. The storage backend switched from `localStorage` to PostgreSQL.
 
 ### `lib/model-router.ts` — Model Resolution
 
@@ -276,7 +278,74 @@ Four export modes:
 
 ### `proxy.ts` — Auth Middleware
 
-Next.js middleware (`withAuth`) protecting all routes except `/api/auth/**`, `/_next/**`, `/favicon.ico`, `/models/**`, and `/login`. Unauthenticated requests are redirected to `/login`.
+Next.js middleware (`withAuth`) protecting all routes except the public surfaces and static assets. Unauthenticated requests to protected routes are redirected to `/login`.
+
+Matcher exclusions:
+
+- `/api/auth/**` — NextAuth endpoints
+- `/api/public/**` — public dashboard read API
+- `/_next/static`, `/_next/image`, `/favicon.ico`, `/models/**` — static assets and the ONNX model bundle
+- `/login` — sign-in page
+- `/gallery` — public listing of published dashboards
+- `/p/**` — public presentation view for published dashboards
+
+All other routes (including `/`, `/builder`, `/dashboard/[id]`, `/explore`, `/settings`, `/admin`, and the authenticated API routes under `/api/sessions`, `/api/chat`, `/api/admin`) require a signed-in session. See `docs/current-architecture.md` section 3 for the full access-rights model.
+
+### `app/dashboard/[id]/page.tsx` — Private Presentation View
+
+Authenticated, owner-scoped presentation of a single session's current dashboard. Loads the session via `loadSession(id)` from the owner-scoped session API, renders via `SDMXDashboard`, and exposes the full export dropdown (PDF / HTML static / HTML live / JSON). The header has an "Edit via Chat" button that routes back to `/builder?session={id}`. Not a public sharing surface — the equivalent public view is `/p/[id]`.
+
+### `app/p/[id]/page.tsx` — Public Presentation View
+
+Public, unauthenticated presentation view for a published dashboard. Reads from `/api/public/dashboards/[id]`, which only returns sessions where `published_at IS NOT NULL AND deleted_at IS NULL`, projected down to the public fields (id, public_title, public_description, author_display_name, published_at, current config). No chat, no edit controls, no session internals. Includes an "Explore this data" entry point that seeds a new builder session (fork flow — see current-architecture.md section 4.4).
+
+### `app/gallery/page.tsx` — Public Gallery
+
+Public listing of all published dashboards. Backed by `GET /api/public/dashboards`, returns only the public summary fields. Excludes soft-deleted and unpublished sessions at the API layer.
+
+### `app/api/sessions/[id]/publish/route.ts` — Publish / Unpublish
+
+Owner-only mutating endpoint that toggles a session between private and public. Sets `published_at`, `public_title`, `public_description`, and `author_display_name` on publish; clears `published_at` on unpublish. CSRF-checked.
+
+### `app/api/public/dashboards/route.ts` and `app/api/public/dashboards/[id]/route.ts` — Public Read API
+
+Unauthenticated read-only endpoints serving the gallery and the public presentation view. Both filter on `published_at IS NOT NULL AND deleted_at IS NULL` and return only the public projection (never messages, config_history, or owner email).
+
+### `app/api/admin/invites/route.ts`, `app/api/admin/users/route.ts`, `app/api/admin/published-dashboards/route.ts` — Admin API
+
+Admin-only (require `session.user.role === "admin"`) endpoints backing `/admin`: invite allowlist management, user list with usage stats, and moderation view over published dashboards (including the ability to unpublish on behalf of a user).
+
+### `lib/endpoints-registry.ts` — SDMX Endpoint Registry
+
+Single source of truth mapping each supported SDMX endpoint (SPC, OECD, UNICEF, IMF, ECB, ESTAT, ILO, ABS, BIS, FBOS, SBS) to a display name, API host(s), and an optional Data Explorer deep-link builder. Exports `detectEndpoint(apiUrl)` used by the data-source table and PDF export to resolve which endpoint served each component's data. Endpoints without a Data Explorer (UNICEF, IMF, ECB) are API-only.
+
+### `lib/data-explorer-url.ts` — Data Source Extraction
+
+Walks a dashboard config and produces a flat `DataSource[]` list with per-component metadata: component id and title, dataflow name, endpoint key / name / short name, API URL, and an optional Data Explorer URL. Handles the compound data string used by map components (`{apiUrl}, {GEO_PICT} | {geoJsonUrl}, ...`) via `extractSdmxUrl()`, so the map's GeoJSON reference is never mistaken for an SDMX URL.
+
+### `lib/dashboard-text.ts` — Dashboard Text Helpers
+
+Shared helpers that extract the current title and subtitle from either an authoring or native dashboard config, used by the private view, public view, and builder header to keep header text consistent across surfaces.
+
+### `lib/use-highcharts-viewport-reflow.ts` — Highcharts Reflow Hook
+
+Custom React hook that observes the layout-driving container via `ResizeObserver` (the parent scroll shell when present, otherwise the root itself), plus `window.resize` and `window.visualViewport.resize`, and calls `chart.reflow()` on every live Highcharts instance after a debounced measure change. Used by all three rendering surfaces (`/builder` preview, `/dashboard/[id]`, `/p/[id]`) so charts track window resize and browser zoom.
+
+### `lib/brand-theme.ts` — Design Tokens
+
+Oceanic Data-Scapes color palette and typography exports consumed by PDF export, HTML export, and other non-Tailwind render paths that need the brand tokens at runtime.
+
+### `lib/dataflow-names.ts` — Dataflow Name Cache
+
+Cached lookup for human-readable dataflow names, used by the data-source extraction and export paths.
+
+### `lib/embeddings.ts` — Semantic Search Embeddings
+
+Client-side ONNX inference wrapper around `granite-embedding-small-r2` used by `/explore` for semantic dataflow search. See Section 19 (Deployment) for the build-time index.
+
+### `lib/sanitize-messages.ts` — Message Sanitization
+
+Strips message fields that must not be echoed into system prompts or logs (e.g. raw tool-output payloads beyond configured size limits).
 
 ### `app/explore/page.tsx` and `app/explore/[id]/page.tsx` — Data Catalogue
 
@@ -393,7 +462,7 @@ This grows with the conversation. The large context windows of supported models 
 
 ## 6. Dashboard Config Schema
 
-The `update_dashboard` tool accepts either the **authoring schema** (preferred, see Section 7) or the **native config** format conforming to `sdmx-dashboard-components` v0.4.5:
+The `update_dashboard` tool accepts either the **authoring schema** (preferred, see Section 7) or the **native config** format conforming to the `sdmx-dashboard-components` contract used by this app (`^0.4.6` dependency):
 
 ```typescript
 {
@@ -666,16 +735,30 @@ Sessions are persisted in PostgreSQL via the `dashboard_sessions` table. The `li
 ### `dashboard_sessions` table
 
 ```sql
-id            TEXT PRIMARY KEY   -- UUID
-user_id       TEXT NOT NULL      -- FK to auth_users.id
-title         TEXT DEFAULT 'Untitled'
-messages      JSONB DEFAULT []   -- UIMessage[] serialized
-config_history JSONB DEFAULT []  -- SDMXDashboardConfig[] undo stack
-config_pointer INTEGER DEFAULT -1
-created_at    TIMESTAMP
-updated_at    TIMESTAMP
+id                   TEXT PRIMARY KEY   -- random hex id
+user_id              TEXT NOT NULL      -- FK to auth_users.id
+title                TEXT DEFAULT 'Untitled'
+messages             JSONB DEFAULT []   -- UIMessage[] serialized
+config_history       JSONB DEFAULT []   -- SDMXDashboardConfig[] undo stack
+config_pointer       INTEGER DEFAULT -1
+created_at           TIMESTAMP
+updated_at           TIMESTAMP
+deleted_at           TIMESTAMP          -- soft-delete marker (NULL = live)
+published_at         TIMESTAMP          -- publication marker (NULL = private)
+public_title         TEXT               -- public-facing title (publish-only)
+public_description   TEXT               -- public description (publish-only)
+author_display_name  TEXT               -- public author attribution
 INDEX sessions_user_updated_idx ON (user_id, updated_at DESC)
 ```
+
+The `deleted_at` and `published_at` fields encode the two main session state transitions:
+
+- `deleted_at IS NULL` — live session
+- `published_at IS NOT NULL AND deleted_at IS NULL` — publicly visible
+- both public and private routes must exclude rows with `deleted_at IS NOT NULL`
+- public APIs additionally require `published_at IS NOT NULL`
+
+Publication is a state on the session, not a separate table. The public projection of a session returns only `id`, `public_title`, `public_description`, `author_display_name`, `published_at`, and the current dashboard config — never `messages`, `config_history`, or owner email. See `docs/current-architecture.md` sections 5–6 for the public/private boundary and the owner/admin/public authorization model.
 
 ### API routes
 
@@ -683,15 +766,19 @@ INDEX sessions_user_updated_idx ON (user_id, updated_at DESC)
 |--------|------|-------------|
 | GET | `/api/sessions` | List user's sessions (summary: id, title, updatedAt) |
 | POST | `/api/sessions` | Create a new session |
-| GET | `/api/sessions/[id]` | Get full session data |
+| GET | `/api/sessions/[id]` | Get full session data (owner-scoped) |
 | PUT | `/api/sessions/[id]` | Update session (messages, config, title) |
-| DELETE | `/api/sessions/[id]` | Delete session |
+| DELETE | `/api/sessions/[id]` | Soft-delete session (sets `deleted_at`) |
+| POST | `/api/sessions/[id]/publish` | Publish a session and set public metadata (owner-only) |
+| DELETE | `/api/sessions/[id]/publish` | Unpublish a session (owner-only) |
+| GET | `/api/public/dashboards` | Public list of published dashboards (gallery backing) |
+| GET | `/api/public/dashboards/[id]` | Public read of one published dashboard |
 
-All routes require authentication and scope queries to the authenticated user's `userId`. Cross-user access returns 403.
+All `/api/sessions/*` routes require authentication and scope queries to the authenticated user's `userId`. Cross-user access is filtered out at query time and returns 404 rather than exposing the existence of another user's session. The `/api/public/dashboards*` routes are unauthenticated and only return the public projection of sessions where `published_at IS NOT NULL AND deleted_at IS NULL`.
 
 ### Client behavior
 
-- `saveSession()` tries PUT first; falls back to POST if the session doesn't exist yet (404)
+- `saveSession()` tries POST first for sessions not yet known client-side; if the session already exists it falls through to PUT
 - Network or server errors are silently swallowed — the same graceful-degradation approach as the former localStorage version
 - Save is debounced at 1.5 seconds after the last change
 
@@ -747,8 +834,20 @@ The `/admin` page aggregates usage data per user (request count, total tokens, s
 4. Run `html2canvas` on the container element
 5. Create `jsPDF` document sized to the canvas
 6. Restore original SVG elements
+7. If the config references SDMX data sources, append a **Data Sources page** rendered natively with jsPDF (not via html2canvas)
 
 The SVG-to-canvas step is necessary because `html2canvas` cannot rasterize SVG directly.
+
+#### Data Sources page
+
+The appended page is generated via `extractDataSources(config)` (in `lib/data-explorer-url.ts`) and rendered with jsPDF text/line primitives. It contains:
+
+- a heading and subtitle
+- a five-column table: **Component**, **Dataflow**, **Source**, **Type**, **Links**
+- per-row clickable **API** and **Data Explorer** URLs (where the endpoint registry supports a Data Explorer deep link)
+- a footer crediting the distinct endpoint names contributing data to the dashboard
+
+The endpoint registry that powers the Source column and Data Explorer link generation lives in `lib/endpoints-registry.ts`.
 
 ### Static HTML Export
 
@@ -803,7 +902,7 @@ reportError(msg):
 
 ### Library patch
 
-`sdmx-dashboard-components` has a null dereference bug when `getActiveDimensions()` returns fewer dimensions than expected (e.g., single-dimension queries). The patch (`patches/sdmx-dashboard-components+0.4.5.patch`) adds a null-guard that logs a warning and skips series construction instead of crashing.
+`sdmx-dashboard-components` has a null dereference bug when `getActiveDimensions()` returns fewer dimensions than expected (e.g., single-dimension queries). The local patch file remains named `patches/sdmx-dashboard-components+0.4.5.patch`, but the dependency currently resolves from `^0.4.6` in this repo. The patch adds a null-guard that logs a warning and skips series construction instead of crashing.
 
 ---
 
@@ -850,9 +949,10 @@ Based on the **Oceanic Data-Scapes** spec (`stitch_assets/stitch/oceanic_logic/D
 
 ## 17. Library Patches and Workarounds
 
-### sdmx-dashboard-components v0.4.5
+### sdmx-dashboard-components compatibility patch
 
-**Patch:** `patches/sdmx-dashboard-components+0.4.5.patch`
+**Dependency:** `sdmx-dashboard-components@^0.4.6`  
+**Patch file:** `patches/sdmx-dashboard-components+0.4.5.patch`
 **Issue:** Null dereference when `getActiveDimensions()` returns fewer dimensions than expected for bar/column/lollipop/treemap charts.
 **Fix:** Added null-guard before `Y.values.sort(...)` — skips series construction with a console warning instead of crashing.
 
@@ -918,9 +1018,11 @@ user_api_keys         — BYOK keys (encrypted_key, provider, model_preference, 
 
 - **SPC SSO integration** — currently using magic links; SPC OAuth 2.0 / SAML SSO would allow single sign-on with SPC credentials
 - **Rate limiting** — per-user token budgets and request throttling (currently no per-user limits)
-- **Public dashboard gallery** — sharing URLs and institutional curation
+- **Institutional curation** — the public gallery exists; editorial review / featured-dashboard workflow does not
 - **Per-user MCP state** — the MCP gateway already supports per-session state; wiring this to user auth context is a future step
 - **Query whitelisting** — restricting which SDMX dataflows each user can access
+
+Public dashboards and the public gallery itself are no longer Phase 3 items — they are implemented and documented in `docs/current-architecture.md` (publication flow and gallery model).
 
 ---
 
@@ -978,6 +1080,6 @@ The explore page uses a local ONNX embedding model (`granite-embedding-small-r2`
 4. **PDF export may miss some styles** — `html2canvas` doesn't capture all CSS properties (e.g., backdrop-filter). Complex dashboards may look slightly different in PDF.
 5. **Live HTML export requires HTTP server** — ES module imports don't work from `file://` protocol.
 6. **Prompt caching only for Anthropic** — Gemini and OpenAI users pay full input token cost on every request turn, making long conversations proportionally more expensive.
-7. **No shared/public dashboards** — sessions are private to each user. Sharing requires copying the JSON config manually. Sharing URLs are planned for Phase 3.
+7. **No institutional curation of public dashboards** — sessions can be published to `/p/[id]` and appear in `/gallery`, but there is no editorial review, featured-status workflow, or moderation queue. Admins can inspect and unpublish via `/admin` but cannot promote/demote dashboards within the gallery.
 8. **ENCRYPTION_SECRET rotation requires migration** — rotating the master encryption secret invalidates all stored BYOK keys. There is no automated migration path yet.
 9. **No undo/redo persistence across page loads** — the undo stack is in memory (React state); it is not serialized to the database session. Reloading the page clears the undo history (the latest config is preserved).

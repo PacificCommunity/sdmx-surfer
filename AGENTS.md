@@ -1,13 +1,14 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This repository is a Next.js 16 + React 19 TypeScript app for an SDMX dashboard builder prototype. App routes live in `app/`, including the main pages and the chat API route at `app/api/chat/route.ts`. Reusable UI lives in `components/`, and shared types, prompt text, and example data live in `lib/`. Static assets belong in `public/`. Architecture and design references live in `dashboard-architecture.md`, `CLAUDE.md`, and `stitch_assets/`; treat those as supporting documentation, not runtime code.
+This repository is a Next.js 16 + React 19 TypeScript app for the SDMX Surfer conversational dashboard builder (pilot deployment). App routes live in `app/`, including the main pages (`/`, `/builder`, `/dashboard/[id]`, `/p/[id]`, `/gallery`, `/explore`, `/settings`, `/admin`, `/login`) and the chat API route at `app/api/chat/route.ts`. Reusable UI lives in `components/`, and shared types, prompt text, and example data live in `lib/`. Static assets belong in `public/`. Architecture and design references live in `docs/current-architecture.md` (implemented behavior — source of truth for route/access/publication semantics), `docs/technical-reference.md` (lower-level technical internals), `dashboard-architecture.md` (broader target-state scoping), `CLAUDE.md`, and `stitch_assets/`; treat those as supporting documentation, not runtime code.
 
 ## Build, Test, and Development Commands
 - `npm run dev`: start the local Next.js dev server with Turbopack.
 - `npm run build`: create a production build and catch type/app-router issues.
 - `npm run start`: serve the production build locally.
 - `npm run lint`: run the Next.js ESLint checks; this is the main automated gate today.
+- `npm test`: run the committed Vitest suite.
 
 Use `.env.local` for local configuration such as `MCP_GATEWAY_URL`.
 
@@ -15,7 +16,7 @@ Use `.env.local` for local configuration such as `MCP_GATEWAY_URL`.
 Use TypeScript with `strict` mode and prefer the `@/` path alias for internal imports. Match the existing style: 2-space indentation, double quotes, semicolons, and small functional React components. Use PascalCase for component files and exports (`ChatPanel`), camelCase for helpers and variables (`getSystemPrompt`), and Next.js route conventions like `page.tsx`, `layout.tsx`, and `route.ts`. Keep Tailwind utility usage aligned with the design tokens defined in `app/globals.css`.
 
 ## Testing Guidelines
-There is no committed automated test suite yet. Until one is added, run `npm run lint`, then manually verify the affected flow in `npm run dev`. For UI work, check both the landing page and `/builder`; for API work, exercise `app/api/chat/route.ts` against a working MCP gateway. If you add tests, prefer `*.test.ts` or `*.test.tsx` next to the code they cover.
+Run `npm run lint` and `npm test` for normal changes, then manually verify the affected flow in `npm run dev` when UI or routing is involved. For UI work, check the relevant route directly, especially `/`, `/builder`, `/dashboard/[id]`, `/p/[id]`, and `/gallery` when publication or presentation behavior is touched. For API work, exercise `app/api/chat/route.ts` and the relevant session/public/admin endpoints against a working MCP gateway and authenticated session context. Prefer `*.test.ts` or `*.test.tsx` next to the code they cover.
 
 ## Commit & Pull Request Guidelines
 Git history is not available in this workspace snapshot, so no local commit convention can be inferred. Use short imperative commit subjects, for example `Add dashboard preview loading state`. PRs should include a concise summary, linked issue or task, manual verification steps, and screenshots for visible UI changes. Call out any changes to prompts, schema shape, or environment variables explicitly.

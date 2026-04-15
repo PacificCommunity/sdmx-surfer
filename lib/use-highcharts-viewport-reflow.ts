@@ -7,6 +7,8 @@ type HighchartsChartLike = {
   renderTo?: Element | null;
 };
 
+const REFLOW_DEBOUNCE_MS = 120;
+
 let highchartsPromise: Promise<typeof import("highcharts")> | null = null;
 
 function loadHighcharts() {
@@ -30,6 +32,7 @@ export function useHighchartsViewportReflow(
     let lastMeasuredHeight = -1;
 
     const root = rootRef.current;
+    // The parent scroll shell is the width that actually changes with layout.
     const observedElement = root?.parentElement ?? root;
 
     const runReflow = () => {
@@ -69,7 +72,7 @@ export function useHighchartsViewportReflow(
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
-      timeoutId = setTimeout(runReflow, 120);
+      timeoutId = setTimeout(runReflow, REFLOW_DEBOUNCE_MS);
     };
 
     let observer: ResizeObserver | null = null;
@@ -81,7 +84,6 @@ export function useHighchartsViewportReflow(
     window.addEventListener("resize", scheduleReflow);
     window.visualViewport?.addEventListener("resize", scheduleReflow);
 
-    // Handle the initial viewport state too, not just later changes.
     scheduleReflow();
 
     return () => {

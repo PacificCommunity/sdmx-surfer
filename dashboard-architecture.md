@@ -1,5 +1,7 @@
 # SCOPING & ARCHITECTURE DOCUMENT
 
+> Current-state note: this document is the broader scoping/target-state architecture. For the implemented application behavior, route semantics, access rights, and publication model, read `docs/current-architecture.md`.
+
 ## Conversational Dashboard Builder
 
 **Pacific Community (SPC) — Statistics for Development Division**
