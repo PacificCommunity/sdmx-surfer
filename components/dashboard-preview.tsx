@@ -1455,7 +1455,7 @@ export const DashboardPreview = memo(function DashboardPreview({
       ) : (
         <div className="relative flex-1 overflow-auto p-6">
           {/* Dashboard renders on top */}
-          <div className="overflow-x-auto">
+          <div className="max-w-full overflow-x-auto">
             <div
               ref={dashboardRootRef}
               className={

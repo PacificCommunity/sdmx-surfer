@@ -23,11 +23,16 @@ export function useHighchartsViewportReflow(
   useEffect(() => {
     if (!enabled) return;
 
-    let raf = 0;
     let cancelled = false;
-    const observers: ResizeObserver[] = [];
+    let raf = 0;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let lastMeasuredWidth = -1;
+    let lastMeasuredHeight = -1;
 
-    const reflow = () => {
+    const root = rootRef.current;
+    const observedElement = root?.parentElement ?? root;
+
+    const runReflow = () => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
         void loadHighcharts().then((hc) => {
@@ -46,30 +51,48 @@ export function useHighchartsViewportReflow(
       });
     };
 
-    const root = rootRef.current;
-    if (root && typeof ResizeObserver !== "undefined") {
-      const targets = [root, root.parentElement].filter(
-        (target): target is HTMLElement => Boolean(target),
-      );
-      targets.forEach((target) => {
-        const observer = new ResizeObserver(reflow);
-        observer.observe(target);
-        observers.push(observer);
-      });
+    const scheduleReflow = () => {
+      if (!observedElement) return;
+
+      const nextWidth = observedElement.clientWidth;
+      const nextHeight = observedElement.clientHeight;
+      const widthChanged = nextWidth !== lastMeasuredWidth;
+      const heightChanged = nextHeight !== lastMeasuredHeight;
+
+      if (!widthChanged && !heightChanged) {
+        return;
+      }
+
+      lastMeasuredWidth = nextWidth;
+      lastMeasuredHeight = nextHeight;
+
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      timeoutId = setTimeout(runReflow, 120);
+    };
+
+    let observer: ResizeObserver | null = null;
+    if (observedElement && typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(scheduleReflow);
+      observer.observe(observedElement);
     }
 
-    window.addEventListener("resize", reflow);
-    window.visualViewport?.addEventListener("resize", reflow);
+    window.addEventListener("resize", scheduleReflow);
+    window.visualViewport?.addEventListener("resize", scheduleReflow);
 
     // Handle the initial viewport state too, not just later changes.
-    reflow();
+    scheduleReflow();
 
     return () => {
       cancelled = true;
       cancelAnimationFrame(raf);
-      observers.forEach((observer) => observer.disconnect());
-      window.removeEventListener("resize", reflow);
-      window.visualViewport?.removeEventListener("resize", reflow);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      observer?.disconnect();
+      window.removeEventListener("resize", scheduleReflow);
+      window.visualViewport?.removeEventListener("resize", scheduleReflow);
     };
   }, [enabled, rootRef]);
 }
