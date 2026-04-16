@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { SortableHeader } from "./SortableHeader";
+import {
+  dateValue,
+  useSortableTable,
+  type SortableColumn,
+} from "./useSortableTable";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -40,6 +46,65 @@ interface PasswordReveal {
   email: string;
   passphrase: string;
 }
+
+// ---------------------------------------------------------------------------
+// Sortable table configuration
+// ---------------------------------------------------------------------------
+
+// Rank invites by stage in the sign-up funnel so "Status" sort puts active
+// users at one end and never-invited stubs at the other.
+function inviteStatusRank(i: InviteRecord): number {
+  if (i.signed_up) return 4;
+  if (i.total_magic_link_requests > 0) return 3;
+  if (i.invite_email_sent) return 2;
+  return 1;
+}
+
+type InviteSortKey = "email" | "status" | "invited" | "signed_up" | "last_active";
+
+const INVITE_COLUMNS: SortableColumn<InviteRecord, InviteSortKey>[] = [
+  { key: "email", getValue: (i) => i.email, defaultDir: "asc" },
+  { key: "status", getValue: inviteStatusRank, defaultDir: "desc" },
+  { key: "invited", getValue: (i) => dateValue(i.created_at), defaultDir: "desc" },
+  { key: "signed_up", getValue: (i) => dateValue(i.signed_up_at), defaultDir: "desc" },
+  { key: "last_active", getValue: (i) => dateValue(i.last_active ?? i.last_login_at), defaultDir: "desc" },
+];
+
+const inviteSearchText = (i: InviteRecord): string => i.email;
+
+type UserSortKey = "email" | "role" | "sessions" | "tokens" | "joined" | "last_active";
+
+const USER_COLUMNS: SortableColumn<UserRecord, UserSortKey>[] = [
+  { key: "email", getValue: (u) => u.email, defaultDir: "asc" },
+  { key: "role", getValue: (u) => (u.role === "admin" ? 1 : 0), defaultDir: "desc" },
+  { key: "sessions", getValue: (u) => u.sessionCount, defaultDir: "desc" },
+  { key: "tokens", getValue: (u) => u.totalTokens, defaultDir: "desc" },
+  { key: "joined", getValue: (u) => dateValue(u.joinedAt ?? u.createdAt), defaultDir: "desc" },
+  { key: "last_active", getValue: (u) => dateValue(u.lastActive), defaultDir: "desc" },
+];
+
+const userSearchText = (u: UserRecord): string =>
+  u.email + " " + (u.name ?? "");
+
+type DashboardSortKey = "title" | "author" | "owner" | "published";
+
+const DASHBOARD_COLUMNS: SortableColumn<PublishedDashboardRecord, DashboardSortKey>[] = [
+  { key: "title", getValue: (d) => d.title, defaultDir: "asc" },
+  { key: "author", getValue: (d) => d.author, defaultDir: "asc" },
+  { key: "owner", getValue: (d) => d.ownerEmail, defaultDir: "asc" },
+  { key: "published", getValue: (d) => dateValue(d.publishedAt), defaultDir: "desc" },
+];
+
+const dashboardSearchText = (d: PublishedDashboardRecord): string =>
+  d.title +
+  " " +
+  (d.description ?? "") +
+  " " +
+  (d.author ?? "") +
+  " " +
+  d.ownerEmail +
+  " " +
+  (d.ownerName ?? "");
 
 // NextAuth magic links have maxAge 15 min, so requested_at ≈ expires - 15 min.
 function formatRequestedAgo(lastExpiresAt: string | null): string | null {
@@ -87,6 +152,31 @@ export default function AdminPage() {
   const [passwordReveal, setPasswordReveal] = useState<PasswordReveal | null>(null);
   const [passwordCopied, setPasswordCopied] = useState(false);
   const [unpublishingDashboardId, setUnpublishingDashboardId] = useState<string | null>(null);
+
+  // ---------------------------------------------------------------------------
+  // Sortable / searchable tables
+  // ---------------------------------------------------------------------------
+
+  const invitesTable = useSortableTable<InviteRecord, InviteSortKey>({
+    rows: invites,
+    columns: INVITE_COLUMNS,
+    initialSort: { key: "invited", dir: "desc" },
+    searchText: inviteSearchText,
+  });
+
+  const usersTable = useSortableTable<UserRecord, UserSortKey>({
+    rows: users,
+    columns: USER_COLUMNS,
+    initialSort: { key: "last_active", dir: "desc" },
+    searchText: userSearchText,
+  });
+
+  const dashboardsTable = useSortableTable<PublishedDashboardRecord, DashboardSortKey>({
+    rows: publishedDashboards,
+    columns: DASHBOARD_COLUMNS,
+    initialSort: { key: "published", dir: "desc" },
+    searchText: dashboardSearchText,
+  });
 
   // ---------------------------------------------------------------------------
   // Data fetching
@@ -442,16 +532,38 @@ export default function AdminPage() {
               <p className="type-label-md text-on-surface-variant">No invites yet.</p>
             </div>
           ) : (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3 px-1">
+                <input
+                  type="search"
+                  value={invitesTable.query}
+                  onChange={(e) => invitesTable.setQuery(e.target.value)}
+                  placeholder="Search invites by email..."
+                  className="focus-architectural ghost-border w-64 rounded-[var(--radius-sm)] bg-surface-low px-3 py-1.5 text-xs text-on-surface placeholder:text-text-muted hover:bg-surface-high"
+                />
+                <span className="type-label-md text-on-surface-variant">
+                  {invitesTable.query.trim()
+                    ? invitesTable.matchedCount + " of " + invitesTable.totalCount
+                    : invitesTable.totalCount + " total"}
+                </span>
+              </div>
+              {invitesTable.displayRows.length === 0 ? (
+                <div className="ghost-border rounded-[var(--radius-lg)] bg-surface-card px-6 py-8 text-center">
+                  <p className="type-label-md text-on-surface-variant">
+                    No invites match &ldquo;{invitesTable.query}&rdquo;.
+                  </p>
+                </div>
+              ) : (
             <div className="overflow-hidden rounded-[var(--radius-xl)] bg-surface-card shadow-ambient">
               <div className="grid grid-cols-12 gap-3 bg-surface-high/50 px-6 py-3">
-                <div className="type-label-md col-span-3 text-on-surface">Email</div>
-                <div className="type-label-md col-span-2 text-on-surface">Status</div>
-                <div className="type-label-md col-span-2 text-on-surface">Invited</div>
-                <div className="type-label-md col-span-2 text-on-surface">Signed up</div>
-                <div className="type-label-md col-span-2 text-on-surface">Last active</div>
+                <SortableHeader label="Email" className="col-span-3" {...invitesTable.getSortProps("email")} />
+                <SortableHeader label="Status" className="col-span-2" {...invitesTable.getSortProps("status")} />
+                <SortableHeader label="Invited" className="col-span-2" {...invitesTable.getSortProps("invited")} />
+                <SortableHeader label="Signed up" className="col-span-2" {...invitesTable.getSortProps("signed_up")} />
+                <SortableHeader label="Last active" className="col-span-2" {...invitesTable.getSortProps("last_active")} />
                 <div className="type-label-md col-span-1 text-right text-on-surface"></div>
               </div>
-              {invites.map((invite) => (
+              {invitesTable.displayRows.map((invite) => (
                 <div
                   key={invite.email}
                   className="grid grid-cols-12 items-center gap-3 border-t border-surface-high/30 px-6 py-3 transition-colors hover:bg-surface-low"
@@ -613,11 +725,13 @@ export default function AdminPage() {
                 </div>
               ))}
             </div>
+              )}
+            </div>
           )}
         </section>
 
         {/* ------------------------------------------------------------------ */}
-        {/* Users section                                                        */}
+        {/* Published dashboards section                                        */}
         {/* ------------------------------------------------------------------ */}
         <section>
           <h2 className="font-[family-name:var(--font-display)] mb-1 text-xl font-bold text-on-surface">
@@ -632,16 +746,38 @@ export default function AdminPage() {
               <p className="type-label-md text-on-surface-variant">No public dashboards right now.</p>
             </div>
           ) : (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3 px-1">
+                <input
+                  type="search"
+                  value={dashboardsTable.query}
+                  onChange={(e) => dashboardsTable.setQuery(e.target.value)}
+                  placeholder="Search title, author, owner..."
+                  className="focus-architectural ghost-border w-64 rounded-[var(--radius-sm)] bg-surface-low px-3 py-1.5 text-xs text-on-surface placeholder:text-text-muted hover:bg-surface-high"
+                />
+                <span className="type-label-md text-on-surface-variant">
+                  {dashboardsTable.query.trim()
+                    ? dashboardsTable.matchedCount + " of " + dashboardsTable.totalCount
+                    : dashboardsTable.totalCount + " total"}
+                </span>
+              </div>
+              {dashboardsTable.displayRows.length === 0 ? (
+                <div className="ghost-border rounded-[var(--radius-lg)] bg-surface-card px-6 py-8 text-center">
+                  <p className="type-label-md text-on-surface-variant">
+                    No dashboards match &ldquo;{dashboardsTable.query}&rdquo;.
+                  </p>
+                </div>
+              ) : (
             <div className="overflow-hidden rounded-[var(--radius-xl)] bg-surface-card shadow-ambient">
               <div className="grid grid-cols-12 gap-3 bg-surface-high/50 px-6 py-3">
-                <div className="type-label-md col-span-4 text-on-surface">Dashboard</div>
-                <div className="type-label-md col-span-2 text-on-surface">Author</div>
-                <div className="type-label-md col-span-2 text-on-surface">Owner</div>
-                <div className="type-label-md col-span-2 text-on-surface">Published</div>
+                <SortableHeader label="Dashboard" className="col-span-4" {...dashboardsTable.getSortProps("title")} />
+                <SortableHeader label="Author" className="col-span-2" {...dashboardsTable.getSortProps("author")} />
+                <SortableHeader label="Owner" className="col-span-2" {...dashboardsTable.getSortProps("owner")} />
+                <SortableHeader label="Published" className="col-span-2" {...dashboardsTable.getSortProps("published")} />
                 <div className="type-label-md col-span-2 text-right text-on-surface">Actions</div>
               </div>
 
-              {publishedDashboards.map((dashboard) => (
+              {dashboardsTable.displayRows.map((dashboard) => (
                 <div
                   key={dashboard.id}
                   className="grid grid-cols-12 items-center gap-3 border-t border-surface-high/30 px-6 py-4 transition-colors hover:bg-surface-low"
@@ -697,6 +833,8 @@ export default function AdminPage() {
                 </div>
               ))}
             </div>
+              )}
+            </div>
           )}
         </section>
 
@@ -713,19 +851,44 @@ export default function AdminPage() {
               <p className="type-label-md text-on-surface-variant">No users registered yet.</p>
             </div>
           ) : (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3 px-1">
+                <input
+                  type="search"
+                  value={usersTable.query}
+                  onChange={(e) => usersTable.setQuery(e.target.value)}
+                  placeholder="Search users by email or name..."
+                  className="focus-architectural ghost-border w-64 rounded-[var(--radius-sm)] bg-surface-low px-3 py-1.5 text-xs text-on-surface placeholder:text-text-muted hover:bg-surface-high"
+                />
+                <span className="type-label-md text-on-surface-variant">
+                  {usersTable.query.trim()
+                    ? usersTable.matchedCount + " of " + usersTable.totalCount
+                    : usersTable.totalCount + " total"}
+                </span>
+              </div>
+              {usersTable.displayRows.length === 0 ? (
+                <div className="ghost-border rounded-[var(--radius-lg)] bg-surface-card px-6 py-8 text-center">
+                  <p className="type-label-md text-on-surface-variant">
+                    No users match &ldquo;{usersTable.query}&rdquo;.
+                  </p>
+                </div>
+              ) : (
             <div className="overflow-hidden rounded-[var(--radius-xl)] bg-surface-card shadow-ambient">
               {/* Table header */}
               <div className="grid grid-cols-12 gap-3 bg-surface-high/50 px-6 py-3">
-                <div className="type-label-md col-span-3 text-on-surface">Email</div>
-                <div className="type-label-md col-span-1 text-on-surface">Role</div>
-                <div className="type-label-md col-span-2 text-on-surface">Usage</div>
-                <div className="type-label-md col-span-2 text-on-surface">Joined</div>
-                <div className="type-label-md col-span-2 text-on-surface">Last active</div>
+                <SortableHeader label="Email" className="col-span-3" {...usersTable.getSortProps("email")} />
+                <SortableHeader label="Role" className="col-span-1" {...usersTable.getSortProps("role")} />
+                <div className="col-span-2 flex items-center gap-3">
+                  <SortableHeader label="sessions" size="sm" {...usersTable.getSortProps("sessions")} />
+                  <SortableHeader label="tokens" size="sm" {...usersTable.getSortProps("tokens")} />
+                </div>
+                <SortableHeader label="Joined" className="col-span-2" {...usersTable.getSortProps("joined")} />
+                <SortableHeader label="Last active" className="col-span-2" {...usersTable.getSortProps("last_active")} />
                 <div className="type-label-md col-span-2 text-right text-on-surface">Actions</div>
               </div>
 
               {/* Rows */}
-              {users.map((user) => (
+              {usersTable.displayRows.map((user) => (
                 <div
                   key={user.id}
                   className="grid grid-cols-12 items-center gap-3 border-t border-surface-high/30 px-6 py-4 transition-colors hover:bg-surface-low"
@@ -807,6 +970,8 @@ export default function AdminPage() {
                   </div>
                 </div>
               ))}
+            </div>
+              )}
             </div>
           )}
         </section>
