@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { SurferLogo } from "@/components/surfer-logo";
 
@@ -12,9 +12,14 @@ function getSafeCallbackUrl(rawCallbackUrl: string | null): string {
   return rawCallbackUrl;
 }
 
+type Mode = "magic" | "password";
+
 function LoginForm() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const [mode, setMode] = useState<Mode>("magic");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
@@ -52,6 +57,31 @@ function LoginForm() {
     }
 
     setSent(true);
+  }
+
+  async function handlePasswordSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"));
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+      callbackUrl,
+    });
+
+    setLoading(false);
+
+    if (!result || result.error) {
+      // Generic message — never reveal whether email, password, or lockout failed.
+      setError("Invalid email or password.");
+      return;
+    }
+
+    router.push(callbackUrl);
+    router.refresh();
   }
 
   return (
@@ -95,8 +125,8 @@ function LoginForm() {
             Use a different email
           </button>
         </div>
-      ) : (
-        /* Form state */
+      ) : mode === "magic" ? (
+        /* Magic link form */
         <form onSubmit={handleSubmit} noValidate>
           <h2 className="type-headline-sm mb-1 text-on-surface">Sign in</h2>
           <p className="mb-6 text-sm text-on-surface-variant">
@@ -164,10 +194,99 @@ function LoginForm() {
             )}
           </button>
 
+          <button
+            type="button"
+            onClick={() => {
+              setMode("password");
+              setError(null);
+            }}
+            className="mt-4 w-full text-center text-xs text-on-surface-variant transition-colors hover:text-primary hover:underline"
+          >
+            Sign in with a password instead
+          </button>
+
           <p className="mt-4 text-center text-xs text-text-muted">
             Invite-only access. Contact your SPC administrator to request
             access.
           </p>
+        </form>
+      ) : (
+        /* Password form */
+        <form onSubmit={handlePasswordSubmit} noValidate>
+          <h2 className="type-headline-sm mb-1 text-on-surface">Sign in</h2>
+          <p className="mb-6 text-sm text-on-surface-variant">
+            Use the passphrase your administrator shared with you.
+          </p>
+
+          <div className="mb-4">
+            <label
+              htmlFor="pw-email"
+              className="type-label-md mb-2 block text-on-surface-variant"
+            >
+              Email address
+            </label>
+            <input
+              id="pw-email"
+              type="email"
+              autoComplete="username"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className={
+                "focus-architectural w-full rounded-[var(--radius-md)] border border-outline-variant bg-surface-low px-4 py-3 text-sm text-on-surface placeholder:text-text-muted transition-colors" +
+                (error ? " border-red-400" : "")
+              }
+            />
+          </div>
+
+          <div className="mb-4">
+            <label
+              htmlFor="pw-password"
+              className="type-label-md mb-2 block text-on-surface-variant"
+            >
+              Passphrase
+            </label>
+            <input
+              id="pw-password"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="cheerful-indigo-otter42!"
+              className={
+                "focus-architectural w-full rounded-[var(--radius-md)] border border-outline-variant bg-surface-low px-4 py-3 font-mono text-sm text-on-surface placeholder:text-text-muted transition-colors" +
+                (error ? " border-red-400" : "")
+              }
+            />
+          </div>
+
+          {error && (
+            <p className="mb-4 rounded-[var(--radius-sm)] bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading || email.trim() === "" || password === ""}
+            className="brand-gradient w-full rounded-full py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {loading ? "Signing in..." : "Sign in"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setMode("magic");
+              setError(null);
+              setPassword("");
+            }}
+            className="mt-4 w-full text-center text-xs text-on-surface-variant transition-colors hover:text-primary hover:underline"
+          >
+            ← Use a magic link instead
+          </button>
         </form>
       )}
     </div>

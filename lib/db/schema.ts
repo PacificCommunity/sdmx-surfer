@@ -23,7 +23,34 @@ export const authUsers = pgTable("auth_users", {
   image: text("image"),
   role: text("role").notNull().default("user"),
   created_at: timestamp("created_at").defaultNow(),
+  // Password credentials (optional — users can also sign in via magic link)
+  password_hash: text("password_hash"),
+  failed_attempts: integer("failed_attempts").notNull().default(0),
+  locked_until: timestamp("locked_until"),
 });
+
+// ---------------------------------------------------------------------------
+// auth_events  (append-only audit log for auth-relevant actions)
+// ---------------------------------------------------------------------------
+export const authEvents = pgTable(
+  "auth_events",
+  {
+    id: serial("id").primaryKey(),
+    // user_id may be null for failed attempts against non-existent users
+    user_id: text("user_id").references(() => authUsers.id),
+    // email is always captured so we can trace activity by identifier
+    email: text("email").notNull(),
+    // event_type: password_set | password_cleared | login_success |
+    // login_failure | account_locked | password_self_change
+    event_type: text("event_type").notNull(),
+    // Who performed the action (admin for set/clear, user for self-change / login)
+    actor_user_id: text("actor_user_id").references(() => authUsers.id),
+    ip: text("ip"),
+    metadata: jsonb("metadata"),
+    created_at: timestamp("created_at").defaultNow(),
+  },
+  (table) => [index("auth_events_email_created_idx").on(table.email, table.created_at)],
+);
 
 // ---------------------------------------------------------------------------
 // auth_accounts  (NextAuth OAuth accounts — future use)

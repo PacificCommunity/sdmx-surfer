@@ -2,7 +2,14 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { desc, eq, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
-import { db, allowedEmails, authUsers, authVerificationTokens, usageLogs } from "@/lib/db";
+import {
+  db,
+  allowedEmails,
+  authUsers,
+  authVerificationTokens,
+  usageLogs,
+  authEvents,
+} from "@/lib/db";
 import { checkCsrf } from "@/lib/csrf";
 
 // ---------------------------------------------------------------------------
@@ -34,7 +41,14 @@ export async function GET() {
 
     // Look up which invited emails have registered (have an auth_users record)
     const allUsers = await db
-      .select({ email: authUsers.email, id: authUsers.id, createdAt: authUsers.created_at })
+      .select({
+        email: authUsers.email,
+        id: authUsers.id,
+        createdAt: authUsers.created_at,
+        emailVerified: authUsers.emailVerified,
+        passwordHash: authUsers.password_hash,
+        lockedUntil: authUsers.locked_until,
+      })
       .from(authUsers);
     const userMap = new Map(allUsers.map((u) => [u.email, u]));
 
@@ -47,6 +61,21 @@ export async function GET() {
       .from(usageLogs)
       .groupBy(usageLogs.user_id);
     const activityMap = new Map(lastActivityRows.map((r) => [r.userId, r.lastActive]));
+
+    // First successful login per email. This prevents admin-provisioned
+    // password-only accounts from being shown as "signed up" before the user
+    // has actually completed a login.
+    const authSuccessRows = await db
+      .select({
+        email: authEvents.email,
+        firstSuccessAt: sql<string>`min(${authEvents.created_at})`,
+      })
+      .from(authEvents)
+      .where(eq(authEvents.event_type, "login_success"))
+      .groupBy(authEvents.email);
+    const successMap = new Map(
+      authSuccessRows.map((r) => [r.email.toLowerCase(), r.firstSuccessAt]),
+    );
 
     // Magic-link request activity per identifier. NextAuth stores `expires`
     // (= created_at + maxAge), so we surface max(expires) as a proxy for the
@@ -75,17 +104,27 @@ export async function GET() {
     const enriched = invites.map((inv) => {
       const user = userMap.get(inv.email);
       const tokens = tokenMap.get(inv.email);
+      const lastActive = user ? (activityMap.get(user.id) || null) : null;
+      const firstSuccessAt = successMap.get(inv.email) || null;
+      const signedUpAt =
+        user?.emailVerified ||
+        firstSuccessAt ||
+        (lastActive && user?.createdAt ? user.createdAt : null);
+      const nowMs = Date.now();
       return {
         email: inv.email,
         invited_by: inv.invited_by,
         created_at: inv.created_at,
         invite_email_sent: inv.invite_email_sent ?? false,
-        signed_up: !!user,
-        signed_up_at: user?.createdAt || null,
-        last_active: user ? (activityMap.get(user.id) || null) : null,
+        signed_up: !!signedUpAt,
+        signed_up_at: signedUpAt,
+        last_active: lastActive,
         pending_magic_links: tokens?.pending ?? 0,
         total_magic_link_requests: tokens?.total ?? 0,
         last_link_expires_at: tokens?.lastExpires ?? null,
+        has_password: !!user?.passwordHash,
+        locked:
+          !!user?.lockedUntil && new Date(user.lockedUntil).getTime() > nowMs,
       };
     });
 

@@ -12,9 +12,23 @@
 import NextAuth, { type NextAuthOptions, type DefaultSession } from "next-auth";
 import { getServerSession } from "next-auth/next";
 import EmailProvider from "next-auth/providers/email";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
-import { db, authUsers, authAccounts, authVerificationTokens, allowedEmails } from "./db/index";
+import {
+  db,
+  authUsers,
+  authAccounts,
+  authVerificationTokens,
+  authEvents,
+  allowedEmails,
+} from "./db/index";
+import {
+  verifyPassword,
+  isLocked,
+  recordLoginSuccess,
+  recordLoginFailure,
+} from "./password";
 
 // ---------------------------------------------------------------------------
 // Module augmentation: extend Session / JWT types with role + userId
@@ -33,6 +47,29 @@ declare module "next-auth/jwt" {
     userId?: string;
     role?: string;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+type MaybeHeaders = Record<string, string | string[] | undefined> | undefined;
+
+function extractIp(
+  req: { headers?: MaybeHeaders } | undefined,
+): string | null {
+  const headers = req?.headers;
+  if (!headers) return null;
+  const raw =
+    headers["x-forwarded-for"] ??
+    headers["x-real-ip"] ??
+    headers["X-Forwarded-For"];
+  if (!raw) return null;
+  const str = Array.isArray(raw) ? raw[0] : raw;
+  if (!str) return null;
+  // x-forwarded-for may contain a comma-separated chain; take the first entry
+  const first = str.split(",")[0]?.trim();
+  return first || null;
 }
 
 // ---------------------------------------------------------------------------
@@ -162,6 +199,102 @@ export const authOptions: NextAuthOptions = {
       from: process.env.EMAIL_FROM ?? "noreply@example.com",
       maxAge: 15 * 60, // 15 minutes
       sendVerificationRequest: sendMagicLink,
+    }),
+
+    // Admin-provisioned password sign-in. Users do not self-register here;
+    // passwords are set by an admin via the admin panel or CLI, and the user
+    // signs in with their email + that password. Allowlist is enforced in
+    // the signIn callback (same gate as magic-link).
+    CredentialsProvider({
+      id: "credentials",
+      name: "Password",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials, req) {
+        // Generic failure — never signals which part mismatched, to avoid
+        // account enumeration and password-oracle attacks.
+        const fail = async (
+          reason: string,
+          email: string | null,
+          userId: string | null,
+        ): Promise<null> => {
+          try {
+            await db.insert(authEvents).values({
+              user_id: userId,
+              email: email ?? "",
+              event_type: "login_failure",
+              ip: extractIp(req),
+              metadata: { reason },
+            });
+          } catch {
+            // audit logging must never block the auth path
+          }
+          return null;
+        };
+
+        const email = credentials?.email?.toLowerCase().trim();
+        const password = credentials?.password;
+        if (!email || !password) return fail("missing_fields", null, null);
+
+        // Same allowlist gate as magic-link sign-in
+        const allow = await db
+          .select({ email: allowedEmails.email })
+          .from(allowedEmails)
+          .where(eq(allowedEmails.email, email))
+          .limit(1);
+        if (allow.length === 0) return fail("not_allowlisted", email, null);
+
+        const rows = await db
+          .select()
+          .from(authUsers)
+          .where(eq(authUsers.email, email))
+          .limit(1);
+        const user = rows[0];
+        if (!user) return fail("no_user", email, null);
+        if (!user.password_hash) return fail("no_password_set", email, user.id);
+
+        if (isLocked(user.locked_until)) {
+          return fail("locked", email, user.id);
+        }
+
+        const ok = await verifyPassword(user.password_hash, password);
+        if (!ok) {
+          const { locked } = await recordLoginFailure(user.id);
+          if (locked) {
+            try {
+              await db.insert(authEvents).values({
+                user_id: user.id,
+                email,
+                event_type: "account_locked",
+                ip: extractIp(req),
+              });
+            } catch {
+              // ignore audit failures
+            }
+          }
+          return fail("bad_password", email, user.id);
+        }
+
+        await recordLoginSuccess(user.id);
+        try {
+          await db.insert(authEvents).values({
+            user_id: user.id,
+            email,
+            event_type: "login_success",
+            ip: extractIp(req),
+          });
+        } catch {
+          // ignore audit failures
+        }
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name ?? undefined,
+        };
+      },
     }),
   ],
 

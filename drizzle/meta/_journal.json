@@ -22,6 +22,13 @@
       "when": 1775771313983,
       "tag": "0002_messy_randall",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1776298331042,
+      "tag": "0003_lowly_hercules",
+      "breakpoints": true
     }
   ]
 }

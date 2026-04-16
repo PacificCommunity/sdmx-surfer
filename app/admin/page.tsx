@@ -30,6 +30,13 @@ interface InviteRecord {
   pending_magic_links: number;
   total_magic_link_requests: number;
   last_link_expires_at: string | null;
+  has_password: boolean;
+  locked: boolean;
+}
+
+interface PasswordReveal {
+  email: string;
+  passphrase: string;
 }
 
 // NextAuth magic links have maxAge 15 min, so requested_at ≈ expires - 15 min.
@@ -74,6 +81,9 @@ export default function AdminPage() {
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [removingEmail, setRemovingEmail] = useState<string | null>(null);
   const [clearingLinksEmail, setClearingLinksEmail] = useState<string | null>(null);
+  const [passwordBusyEmail, setPasswordBusyEmail] = useState<string | null>(null);
+  const [passwordReveal, setPasswordReveal] = useState<PasswordReveal | null>(null);
+  const [passwordCopied, setPasswordCopied] = useState(false);
   const [unpublishingDashboardId, setUnpublishingDashboardId] = useState<string | null>(null);
 
   // ---------------------------------------------------------------------------
@@ -142,6 +152,69 @@ export default function AdminPage() {
       setInviteError("Network error");
     } finally {
       setInviting(false);
+    }
+  }
+
+  async function handleSetPassword(email: string, verb: "set" | "reset") {
+    if (
+      verb === "reset" &&
+      !confirm(
+        "Generate a new password for " +
+          email +
+          "? The previous password will stop working immediately.",
+      )
+    ) {
+      return;
+    }
+    setPasswordBusyEmail(email);
+    try {
+      const res = await fetch(
+        "/api/admin/invites/" + encodeURIComponent(email) + "/password",
+        { method: "POST" },
+      );
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        alert(data.error ?? "Failed to set password");
+        return;
+      }
+      const data = (await res.json()) as PasswordReveal;
+      setPasswordReveal(data);
+      setPasswordCopied(false);
+      await fetchInvites();
+    } finally {
+      setPasswordBusyEmail(null);
+    }
+  }
+
+  async function handleRevokePassword(email: string) {
+    if (
+      !confirm(
+        "Revoke password sign-in for " +
+          email +
+          "? They can still use the magic link if they can receive the email.",
+      )
+    ) {
+      return;
+    }
+    setPasswordBusyEmail(email);
+    try {
+      await fetch(
+        "/api/admin/invites/" + encodeURIComponent(email) + "/password",
+        { method: "DELETE" },
+      );
+      await fetchInvites();
+    } finally {
+      setPasswordBusyEmail(null);
+    }
+  }
+
+  async function handleCopyPassword() {
+    if (!passwordReveal) return;
+    try {
+      await navigator.clipboard.writeText(passwordReveal.passphrase);
+      setPasswordCopied(true);
+    } catch {
+      // Clipboard may be blocked; the user can still copy manually from the modal.
     }
   }
 
@@ -251,6 +324,59 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-surface">
+      {passwordReveal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="password-reveal-title"
+        >
+          <div className="w-full max-w-md rounded-[var(--radius-xl)] bg-surface-card p-6 shadow-ambient">
+            <h3
+              id="password-reveal-title"
+              className="font-[family-name:var(--font-display)] text-lg font-bold text-on-surface"
+            >
+              Password generated
+            </h3>
+            <p className="mt-1 text-xs text-on-surface-variant">
+              For <span className="font-medium text-on-surface">{passwordReveal.email}</span>.
+              This is the only time you&apos;ll see it — copy it now and share it with the user
+              over a trusted channel (Teams, work email, in person).
+            </p>
+            <div className="mt-4 flex items-center gap-2 rounded-[var(--radius-md)] bg-surface-low p-3">
+              <code className="flex-1 select-all break-all font-mono text-sm text-on-surface">
+                {passwordReveal.passphrase}
+              </code>
+              <button
+                type="button"
+                onClick={() => void handleCopyPassword()}
+                className="shrink-0 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+              >
+                {passwordCopied ? "Copied" : "Copy"}
+              </button>
+            </div>
+            <p className="mt-4 text-[11px] leading-relaxed text-on-surface-variant">
+              Tell the user to sign in at <span className="font-mono">/login</span> using{" "}
+              <span className="font-medium text-on-surface">Sign in with a password</span>.
+              Their email is the username. If they lose this password, click{" "}
+              <span className="font-semibold">reset</span> to generate a new one.
+            </p>
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setPasswordReveal(null);
+                  setPasswordCopied(false);
+                }}
+                className="brand-gradient rounded-full px-5 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Glass header */}
       <header className="glass-panel shadow-ambient sticky top-0 z-50 px-6 py-4">
         <div className="mx-auto flex max-w-5xl items-center gap-4">
@@ -394,15 +520,65 @@ export default function AdminPage() {
                         })
                       : "-"}
                   </div>
-                  <div className="col-span-2 text-xs text-on-surface-variant">
-                    {invite.signed_up_at
-                      ? new Date(invite.signed_up_at).toLocaleDateString("en-GB", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                          timeZone: "UTC",
-                        })
-                      : "-"}
+                  <div className="col-span-2 flex flex-col gap-1 text-xs text-on-surface-variant">
+                    <span>
+                      {invite.signed_up_at
+                        ? new Date(invite.signed_up_at).toLocaleDateString("en-GB", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                            timeZone: "UTC",
+                          })
+                        : "-"}
+                    </span>
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                      {invite.has_password ? (
+                        <>
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-on-surface">
+                            <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                            </svg>
+                            password set
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => void handleSetPassword(invite.email, "reset")}
+                            disabled={passwordBusyEmail === invite.email}
+                            className="text-[10px] font-semibold text-primary transition-colors hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+                            title="Generate a new password (the old one stops working immediately)"
+                          >
+                            {passwordBusyEmail === invite.email ? "…" : "reset"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void handleRevokePassword(invite.email)}
+                            disabled={passwordBusyEmail === invite.email}
+                            className="text-[10px] font-semibold text-red-500 transition-colors hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+                            title="Disable password sign-in for this user"
+                          >
+                            revoke
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => void handleSetPassword(invite.email, "set")}
+                          disabled={passwordBusyEmail === invite.email}
+                          className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary transition-colors hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+                          title="Generate a memorable passphrase for this user"
+                        >
+                          {passwordBusyEmail === invite.email ? "generating…" : "set password"}
+                        </button>
+                      )}
+                      {invite.locked && (
+                        <span
+                          className="inline-flex items-center gap-1 rounded-full bg-red-50 px-1.5 py-0.5 text-[9px] font-semibold text-red-700 ring-1 ring-inset ring-red-200"
+                          title="Too many failed password attempts; will auto-unlock in 15 minutes or on admin reset"
+                        >
+                          locked
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="col-span-2 text-xs text-on-surface-variant">
                     {invite.last_active
