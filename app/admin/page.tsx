@@ -13,6 +13,7 @@ interface UserRecord {
   name: string | null;
   role: string;
   createdAt: string | null;
+  joinedAt: string | null;
   requestCount: number;
   totalTokens: number;
   sessionCount: number;
@@ -27,6 +28,7 @@ interface InviteRecord {
   signed_up: boolean;
   signed_up_at: string | null;
   last_active: string | null;
+  last_login_at: string | null;
   pending_magic_links: number;
   total_magic_link_requests: number;
   last_link_expires_at: string | null;
@@ -516,7 +518,6 @@ export default function AdminPage() {
                           day: "numeric",
                           month: "short",
                           year: "numeric",
-                          timeZone: "UTC",
                         })
                       : "-"}
                   </div>
@@ -527,8 +528,7 @@ export default function AdminPage() {
                             day: "numeric",
                             month: "short",
                             year: "numeric",
-                            timeZone: "UTC",
-                          })
+                            })
                         : "-"}
                     </span>
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
@@ -580,15 +580,25 @@ export default function AdminPage() {
                       )}
                     </div>
                   </div>
-                  <div className="col-span-2 text-xs text-on-surface-variant">
-                    {invite.last_active
-                      ? new Date(invite.last_active).toLocaleDateString("en-GB", {
+                  <div className="col-span-2 flex flex-col gap-0.5 text-xs text-on-surface-variant">
+                    <span>
+                      {invite.last_active
+                        ? new Date(invite.last_active).toLocaleDateString("en-GB", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                            })
+                        : "-"}
+                    </span>
+                    {invite.last_login_at && (
+                      <span className="text-[10px]" title="Most recent sign-in">
+                        login{" "}
+                        {new Date(invite.last_login_at).toLocaleDateString("en-GB", {
                           day: "numeric",
                           month: "short",
-                          year: "numeric",
-                          timeZone: "UTC",
-                        })
-                      : "-"}
+                        })}
+                      </span>
+                    )}
                   </div>
                   <div className="col-span-1 flex justify-end">
                     <button
@@ -662,7 +672,6 @@ export default function AdminPage() {
                           day: "numeric",
                           month: "short",
                           year: "numeric",
-                          timeZone: "UTC",
                         })
                       : "-"}
                   </div>
@@ -747,14 +756,29 @@ export default function AdminPage() {
                   </div>
 
                   <div className="col-span-2 text-xs text-on-surface-variant">
-                    {user.createdAt
-                      ? new Date(user.createdAt).toLocaleDateString("en-GB", {
+                    {user.joinedAt
+                      ? new Date(user.joinedAt).toLocaleDateString("en-GB", {
                           day: "numeric",
                           month: "short",
                           year: "numeric",
-                          timeZone: "UTC",
                         })
-                      : "-"}
+                      : user.createdAt
+                        ? (
+                          <span
+                            title={
+                              "Account provisioned " +
+                              new Date(user.createdAt).toLocaleDateString("en-GB", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              }) +
+                              " but no completed sign-in recorded yet"
+                            }
+                          >
+                            -
+                          </span>
+                        )
+                        : "-"}
                   </div>
 
                   <div className="col-span-2 text-xs text-on-surface-variant">
@@ -763,7 +787,6 @@ export default function AdminPage() {
                           day: "numeric",
                           month: "short",
                           year: "numeric",
-                          timeZone: "UTC",
                         })
                       : "-"}
                   </div>

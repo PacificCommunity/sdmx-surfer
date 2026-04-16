@@ -56,11 +56,17 @@ export async function GET() {
     const lastActivityRows = await db
       .select({
         userId: usageLogs.user_id,
+        firstActive: sql<string>`min(${usageLogs.created_at})`,
         lastActive: sql<string>`max(${usageLogs.created_at})`,
       })
       .from(usageLogs)
       .groupBy(usageLogs.user_id);
-    const activityMap = new Map(lastActivityRows.map((r) => [r.userId, r.lastActive]));
+    const activityMap = new Map(
+      lastActivityRows.map((r) => [
+        r.userId,
+        { first: r.firstActive, last: r.lastActive },
+      ]),
+    );
 
     // First successful login per email. This prevents admin-provisioned
     // password-only accounts from being shown as "signed up" before the user
@@ -69,12 +75,16 @@ export async function GET() {
       .select({
         email: authEvents.email,
         firstSuccessAt: sql<string>`min(${authEvents.created_at})`,
+        lastLoginAt: sql<string>`max(${authEvents.created_at})`,
       })
       .from(authEvents)
       .where(eq(authEvents.event_type, "login_success"))
       .groupBy(authEvents.email);
     const successMap = new Map(
-      authSuccessRows.map((r) => [r.email.toLowerCase(), r.firstSuccessAt]),
+      authSuccessRows.map((r) => [
+        r.email.toLowerCase(),
+        { first: r.firstSuccessAt, last: r.lastLoginAt },
+      ]),
     );
 
     // Magic-link request activity per identifier. NextAuth stores `expires`
@@ -104,11 +114,15 @@ export async function GET() {
     const enriched = invites.map((inv) => {
       const user = userMap.get(inv.email);
       const tokens = tokenMap.get(inv.email);
-      const lastActive = user ? (activityMap.get(user.id) || null) : null;
-      const firstSuccessAt = successMap.get(inv.email) || null;
+      const activity = user ? (activityMap.get(user.id) || null) : null;
+      const firstActiveAt = activity?.first || null;
+      const lastActive = activity?.last || null;
+      const loginInfo = successMap.get(inv.email);
+      const firstSuccessAt = loginInfo?.first || null;
       const signedUpAt =
         user?.emailVerified ||
         firstSuccessAt ||
+        firstActiveAt ||
         (lastActive && user?.createdAt ? user.createdAt : null);
       const nowMs = Date.now();
       return {
@@ -119,6 +133,7 @@ export async function GET() {
         signed_up: !!signedUpAt,
         signed_up_at: signedUpAt,
         last_active: lastActive,
+        last_login_at: loginInfo?.last || null,
         pending_magic_links: tokens?.pending ?? 0,
         total_magic_link_requests: tokens?.total ?? 0,
         last_link_expires_at: tokens?.lastExpires ?? null,
