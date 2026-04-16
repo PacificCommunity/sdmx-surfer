@@ -1,0 +1,1 @@
+ALTER TABLE "usage_logs" ADD COLUMN "cost_usd" numeric(12, 6);

@@ -8,6 +8,7 @@ import {
   boolean,
   index,
   primaryKey,
+  numeric,
 } from "drizzle-orm/pg-core";
 
 // ---------------------------------------------------------------------------
@@ -148,6 +149,14 @@ export const usageLogs = pgTable(
     step_count: integer("step_count"),
     model: text("model"),
     provider: text("provider"),
+    // Which credential path served the request:
+    //   "platform-direct"   — platform API key, direct provider SDK
+    //   "platform-gateway"  — platform traffic routed through Vercel AI Gateway
+    //   "byok"              — user's own API key
+    key_source: text("key_source"),
+    // Authoritative per-request USD cost from the AI Gateway. Null for
+    // direct-SDK paths (where cost must be estimated from a pricing table).
+    cost_usd: numeric("cost_usd", { precision: 12, scale: 6 }),
     created_at: timestamp("created_at").defaultNow(),
   },
   (table) => [index("logs_user_created_idx").on(table.user_id, table.created_at)],

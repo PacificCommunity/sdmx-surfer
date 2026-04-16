@@ -102,7 +102,7 @@ export async function POST(req: Request) {
     let currentStep = 0;
 
     const modelConfig = await getModelForUser(userId, modelOverride);
-    logger.setModelInfo(modelConfig.modelId, modelConfig.providerId);
+    logger.setModelInfo(modelConfig.modelId, modelConfig.providerId, modelConfig.keySource);
 
     const result = streamText({
       model: modelConfig.model,
@@ -178,8 +178,14 @@ export async function POST(req: Request) {
           }
         }
       },
-      onFinish: async ({ text, usage }) => {
+      onFinish: async ({ text, usage, providerMetadata }) => {
         logger.setAiResponse(text);
+        const gatewayCost = (providerMetadata as { gateway?: { cost?: string } } | undefined)
+          ?.gateway?.cost;
+        if (gatewayCost) {
+          const parsed = parseFloat(gatewayCost);
+          logger.setCostUsd(Number.isFinite(parsed) ? parsed : null);
+        }
         await logger.flush(
           usage
             ? { input: usage.inputTokens ?? 0, output: usage.outputTokens ?? 0 }

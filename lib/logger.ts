@@ -1,4 +1,5 @@
 import { db, usageLogs } from "@/lib/db";
+import type { KeySource } from "@/lib/model-router";
 
 export interface ChatLogEntry {
   timestamp: string;
@@ -20,6 +21,7 @@ export interface ChatLogEntry {
   stepCount: number;
   model?: string;
   provider?: string;
+  keySource?: KeySource;
 }
 
 /** Truncate a value to a short preview string for logging */
@@ -49,6 +51,8 @@ export function createRequestLogger(userId: string, sessionId: string) {
   let stepCount = 0;
   let model: string | undefined;
   let provider: string | undefined;
+  let keySource: KeySource | undefined;
+  let costUsd: number | null = null;
 
   return {
     requestId,
@@ -57,9 +61,14 @@ export function createRequestLogger(userId: string, sessionId: string) {
       userMessage = msg;
     },
 
-    setModelInfo(m: string, p: string) {
+    setModelInfo(m: string, p: string, ks?: KeySource) {
       model = m;
       provider = p;
+      keySource = ks;
+    },
+
+    setCostUsd(cost: number | null) {
+      costUsd = cost;
     },
 
     recordToolCall(
@@ -111,6 +120,8 @@ export function createRequestLogger(userId: string, sessionId: string) {
           step_count: stepCount,
           model: model ?? null,
           provider: provider ?? null,
+          key_source: keySource ?? null,
+          cost_usd: costUsd === null ? null : costUsd.toString(),
         });
       } catch (err) {
         // Never let logging failures affect the request
