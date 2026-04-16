@@ -237,6 +237,13 @@ export default function BuilderPage() {
             { id: "gemini-3-flash-preview", label: "Gemini 3 Flash" },
             { id: "gemini-3.1-pro-preview", label: "Gemini 3.1 Pro" },
           ],
+          mistral: [
+            { id: "mistral-large-latest", label: "Mistral Large" },
+            { id: "mistral-medium-latest", label: "Mistral Medium" },
+            { id: "mistral-small-latest", label: "Mistral Small" },
+            { id: "codestral-latest", label: "Codestral" },
+            { id: "ministral-8b-latest", label: "Ministral 8B" },
+          ],
         };
         // For each provider the user has a key for, add all models
         const providers = new Set<string>(

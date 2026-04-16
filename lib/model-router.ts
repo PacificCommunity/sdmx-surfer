@@ -2,6 +2,7 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createMistral } from "@ai-sdk/mistral";
 import { type LanguageModel } from "ai";
 import { type ProviderOptions } from "@ai-sdk/provider-utils";
 import { db, userApiKeys } from "@/lib/db";
@@ -19,6 +20,7 @@ const DEFAULT_MODELS: Record<string, string> = {
   anthropic: "claude-sonnet-4-6",
   openai: "gpt-4.1-mini",
   google: "gemini-3-flash-preview",
+  mistral: "mistral-large-latest",
 };
 
 export async function getModelForUser(
@@ -108,6 +110,15 @@ export async function getModelForUser(
         providerId,
       };
     }
+
+    if (providerId === "mistral") {
+      const provider = createMistral({ apiKey });
+      return {
+        model: provider(modelId),
+        modelId,
+        providerId,
+      };
+    }
   }
 
   // No BYOK key found — use platform Anthropic key (Sonnet 4.6)
@@ -166,6 +177,11 @@ async function tryByokProvider(
 
     if (providerId === "google") {
       const provider = createGoogleGenerativeAI({ apiKey });
+      return { model: provider(modelId), modelId, providerId };
+    }
+
+    if (providerId === "mistral") {
+      const provider = createMistral({ apiKey });
       return { model: provider(modelId), modelId, providerId };
     }
   } catch {

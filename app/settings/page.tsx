@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 // Types
 // ---------------------------------------------------------------------------
 
-type Provider = "anthropic" | "openai" | "google";
+type Provider = "anthropic" | "openai" | "google" | "mistral";
 
 interface KeyRecord {
   provider: Provider;
@@ -48,6 +48,19 @@ const PROVIDERS: ProviderConfig[] = [
     badge: "Gemini",
     models: ["gemini-2.5-flash", "gemini-3-flash-preview", "gemini-3.1-pro-preview"],
     placeholder: "AIza...",
+  },
+  {
+    id: "mistral",
+    name: "Mistral",
+    badge: "Mistral",
+    models: [
+      "mistral-large-latest",
+      "mistral-medium-latest",
+      "mistral-small-latest",
+      "codestral-latest",
+      "ministral-8b-latest",
+    ],
+    placeholder: "sk-...",
   },
 ];
 
