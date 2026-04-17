@@ -286,6 +286,9 @@ const SDMX_CONVENTIONS = `## SDMX Conventions for SPC .Stat
   - UNIT_MULT: Unit multiplier (power of 10). Values like 0=units, 3=thousands, 6=millions, 9=billions.
 - Key syntax: dimensions separated by dots (.), multiple values with +
   - Example key: A.FJ+WS.._T means Annual, Fiji+Samoa, all for dim3, Total sex
+  - "All values" of a dimension is written as an EMPTY slot (nothing between the dots), NEVER as '*'. Asterisks are not valid SDMX REST syntax and will be rejected by the server.
+    - Correct:   A.FJ..POP._T      (dim3 = all values)
+    - Wrong:     A.FJ.*.POP._T     (asterisk is invalid)
 - URL query params: startPeriod, endPeriod, lastNObservations, dimensionAtObservation
 
 UNIT_MULT — CRITICAL for correct values:
