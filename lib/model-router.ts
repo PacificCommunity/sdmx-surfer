@@ -9,6 +9,7 @@ import { type ProviderOptions } from "@ai-sdk/provider-utils";
 import { db, userApiKeys } from "@/lib/db";
 import { eq, and, desc } from "drizzle-orm";
 import { decryptApiKey } from "@/lib/encryption";
+import { findPlatformModel } from "@/lib/platform-models";
 
 export type KeySource = "platform-direct" | "platform-gateway" | "byok";
 
@@ -35,20 +36,34 @@ export function toGatewaySlug(providerId: string, modelId: string): string {
   return providerId + "/" + normalized;
 }
 
+// Platform-key path for any provider in PLATFORM_MODELS, routed through the
+// gateway. Per-provider providerOptions land here:
+//   - Anthropic: ephemeral cache_control (saves cost on our ~10-15K system prompt)
+//   - Mistral:   parallelToolCalls:false — Mistral's default eager parallel
+//     tool-calling breaks sequential ReAct loops (calls every tool in one
+//     step with fabricated args). Forcing one-call-per-step restores the
+//     standard agent loop. Verified via scripts/smoke-gateway.ts.
+function platformViaGateway(providerId: string, modelId: string): ModelConfig {
+  let providerOptions: ProviderOptions | undefined;
+  if (providerId === "anthropic") {
+    providerOptions = { anthropic: { cacheControl: { type: "ephemeral" } } };
+  } else if (providerId === "mistral") {
+    providerOptions = { mistral: { parallelToolCalls: false } };
+  }
+  return {
+    model: gateway(toGatewaySlug(providerId, modelId)),
+    modelId,
+    providerId,
+    keySource: "platform-gateway",
+    providerOptions,
+  };
+}
+
 // Platform-key path: either route through the Vercel AI Gateway (flag on) or
 // call the Anthropic SDK directly (flag off — unchanged pre-migration path).
+// Anthropic only — the other three platform providers are gateway-only.
 function platformAnthropic(modelId: string): ModelConfig {
-  if (useGateway()) {
-    return {
-      model: gateway(toGatewaySlug("anthropic", modelId)),
-      modelId,
-      providerId: "anthropic",
-      keySource: "platform-gateway",
-      providerOptions: {
-        anthropic: { cacheControl: { type: "ephemeral" } },
-      },
-    };
-  }
+  if (useGateway()) return platformViaGateway("anthropic", modelId);
   return {
     model: anthropic(modelId),
     modelId,
@@ -77,8 +92,14 @@ export async function getModelForUser(
     const byokConfig = await tryByokProvider(userId, override.provider, override.model);
     if (byokConfig) return byokConfig;
 
-    // If they chose the free-tier anthropic, use platform path
-    // (either gateway or direct SDK — see platformAnthropic()).
+    // Platform via gateway — any provider in the PLATFORM_MODELS catalog
+    // resolves here when USE_AI_GATEWAY is on. One Vercel key pays for all.
+    if (useGateway() && findPlatformModel(override.provider, override.model)) {
+      return platformViaGateway(override.provider, override.model);
+    }
+
+    // Anthropic has a legacy direct-SDK platform path (pre-gateway) that
+    // still works when the flag is off — keep it for rollback safety.
     if (override.provider === "anthropic" && process.env.ANTHROPIC_API_KEY) {
       return platformAnthropic(override.model);
     }

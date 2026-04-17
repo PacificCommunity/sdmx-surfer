@@ -128,10 +128,12 @@ interface ModelOption {
   label: string;
 }
 
-const FREE_TIER: ModelOption = {
+// Fallback used until /api/settings/keys resolves on mount. Always safe:
+// anthropic/claude-sonnet-4-6 has a direct-SDK path even with the gateway off.
+const FALLBACK_OPTION: ModelOption = {
   provider: "anthropic",
   model: "claude-sonnet-4-6",
-  label: "Sonnet 4.6 (free)",
+  label: "Sonnet 4.6",
 };
 
 export default function BuilderPage() {
@@ -147,8 +149,8 @@ export default function BuilderPage() {
   const [authorDisplayName, setAuthorDisplayName] = useState<string | null>(null);
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
   const [publishBusy, setPublishBusy] = useState(false);
-  const [availableModels, setAvailableModels] = useState<ModelOption[]>([FREE_TIER]);
-  const [selectedModel, setSelectedModel] = useState<ModelOption>(FREE_TIER);
+  const [availableModels, setAvailableModels] = useState<ModelOption[]>([FALLBACK_OPTION]);
+  const [selectedModel, setSelectedModel] = useState<ModelOption>(FALLBACK_OPTION);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autosaveSessionRef = useRef<string | null>(null);
   const pendingPreviewErrorRef = useRef<string | null>(null);
@@ -220,46 +222,61 @@ export default function BuilderPage() {
     fetch("/api/settings/keys")
       .then((r) => r.json())
       .then((data) => {
-        const models: ModelOption[] = [FREE_TIER];
-        const PROVIDER_MODELS: Record<string, Array<{ id: string; label: string }>> = {
+        const models: ModelOption[] = [];
+
+        // Platform-tier models available to everyone. Server filters the
+        // catalog by what's actually reachable in the current env.
+        const platform = (data.platformModels ?? []) as Array<{
+          providerId: string;
+          modelId: string;
+          label: string;
+        }>;
+        for (const m of platform) {
+          models.push({
+            provider: m.providerId,
+            model: m.modelId,
+            label: m.label,
+          });
+        }
+        if (models.length === 0) models.push(FALLBACK_OPTION);
+
+        // BYOK models layered on top — per-provider model lists remain
+        // available when the user has added their own key.
+        const BYOK_MODELS: Record<string, Array<{ id: string; label: string }>> = {
           anthropic: [
-            { id: "claude-haiku-4-5", label: "Claude Haiku 4.5" },
-            { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6" },
-            { id: "claude-opus-4-6", label: "Claude Opus 4.6" },
+            { id: "claude-haiku-4-5", label: "Claude Haiku 4.5 (BYOK)" },
+            { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6 (BYOK)" },
+            { id: "claude-opus-4-6", label: "Claude Opus 4.6 (BYOK)" },
           ],
           openai: [
-            { id: "gpt-4.1-nano", label: "GPT-4.1 Nano" },
-            { id: "gpt-4.1-mini", label: "GPT-4.1 Mini" },
-            { id: "gpt-5.4", label: "GPT-5.4" },
+            { id: "gpt-4.1-nano", label: "GPT-4.1 Nano (BYOK)" },
+            { id: "gpt-4.1-mini", label: "GPT-4.1 Mini (BYOK)" },
+            { id: "gpt-5.4", label: "GPT-5.4 (BYOK)" },
           ],
           google: [
-            { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-            { id: "gemini-3-flash-preview", label: "Gemini 3 Flash" },
-            { id: "gemini-3.1-pro-preview", label: "Gemini 3.1 Pro" },
+            { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash (BYOK)" },
+            { id: "gemini-3-flash-preview", label: "Gemini 3 Flash (BYOK)" },
+            { id: "gemini-3.1-pro-preview", label: "Gemini 3.1 Pro (BYOK)" },
           ],
           mistral: [
-            { id: "mistral-large-latest", label: "Mistral Large" },
-            { id: "mistral-medium-latest", label: "Mistral Medium" },
-            { id: "mistral-small-latest", label: "Mistral Small" },
-            { id: "codestral-latest", label: "Codestral" },
-            { id: "ministral-8b-latest", label: "Ministral 8B" },
+            { id: "mistral-large-latest", label: "Mistral Large (BYOK)" },
+            { id: "mistral-medium-latest", label: "Mistral Medium (BYOK)" },
+            { id: "mistral-small-latest", label: "Mistral Small (BYOK)" },
+            { id: "codestral-latest", label: "Codestral (BYOK)" },
+            { id: "ministral-8b-latest", label: "Ministral 8B (BYOK)" },
           ],
         };
-        // For each provider the user has a key for, add all models
         const providers = new Set<string>(
           (data.keys || []).map((k: { provider: string }) => k.provider),
         );
         for (const provider of providers) {
-          const providerModels = PROVIDER_MODELS[provider];
+          const providerModels = BYOK_MODELS[provider];
           if (!providerModels) continue;
           for (const m of providerModels) {
-            models.push({
-              provider,
-              model: m.id,
-              label: m.label,
-            });
+            models.push({ provider, model: m.id, label: m.label });
           }
         }
+
         setAvailableModels(models);
       })
       .catch(() => {});

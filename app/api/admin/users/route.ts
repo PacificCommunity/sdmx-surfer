@@ -7,6 +7,18 @@ import { db, authUsers, usageLogs, dashboardSessions, authEvents } from "@/lib/d
 // GET /api/admin/users — list all users enriched with usage stats
 // ---------------------------------------------------------------------------
 
+export interface CostBreakdownRow {
+  model: string | null;
+  provider: string | null;
+  keySource: string | null;
+  requestCount: number;
+  inputTokens: number;
+  outputTokens: number;
+  // null when no authoritative cost is available for this bucket (direct SDK
+  // or BYOK). Rendered as a dash in the UI — never estimated.
+  costUsd: number | null;
+}
+
 export async function GET() {
   const session = await auth();
   if (!session?.user?.userId) {
@@ -36,11 +48,34 @@ export async function GET() {
         requestCount: count(usageLogs.id),
         totalInputTokens: sum(usageLogs.input_tokens),
         totalOutputTokens: sum(usageLogs.output_tokens),
+        totalCostUsd: sum(usageLogs.cost_usd),
         firstActive: sql<string>`min(${usageLogs.created_at})`,
         lastActive: sql<string>`max(${usageLogs.created_at})`,
       })
       .from(usageLogs)
       .groupBy(usageLogs.user_id);
+
+    // Per-(user, model, provider, key_source) buckets — drives the drill-down.
+    // cost_usd sums to null when every row in the bucket has a null cost
+    // (direct-SDK or BYOK paths), which is exactly what we want to surface.
+    const breakdownRows = await db
+      .select({
+        userId: usageLogs.user_id,
+        model: usageLogs.model,
+        provider: usageLogs.provider,
+        keySource: usageLogs.key_source,
+        requestCount: count(usageLogs.id),
+        inputTokens: sum(usageLogs.input_tokens),
+        outputTokens: sum(usageLogs.output_tokens),
+        costUsd: sum(usageLogs.cost_usd),
+      })
+      .from(usageLogs)
+      .groupBy(
+        usageLogs.user_id,
+        usageLogs.model,
+        usageLogs.provider,
+        usageLogs.key_source,
+      );
 
     // Count sessions per user
     const sessionRows = await db
@@ -71,6 +106,20 @@ export async function GET() {
         .filter((r) => r.userId)
         .map((r) => [r.userId as string, r.firstLoginAt]),
     );
+    const breakdownMap = new Map<string, CostBreakdownRow[]>();
+    for (const r of breakdownRows) {
+      const list = breakdownMap.get(r.userId) ?? [];
+      list.push({
+        model: r.model,
+        provider: r.provider,
+        keySource: r.keySource,
+        requestCount: Number(r.requestCount ?? 0),
+        inputTokens: Number(r.inputTokens ?? 0),
+        outputTokens: Number(r.outputTokens ?? 0),
+        costUsd: r.costUsd === null ? null : Number(r.costUsd),
+      });
+      breakdownMap.set(r.userId, list);
+    }
 
     const enriched = users.map((u) => {
       const usage = usageMap.get(u.id);
@@ -88,8 +137,13 @@ export async function GET() {
         joinedAt: joinedAt || firstActiveAt || u.createdAt || null,
         requestCount: Number(usage?.requestCount ?? 0),
         totalTokens: inputTokens + outputTokens,
+        totalCostUsd:
+          usage?.totalCostUsd === null || usage?.totalCostUsd === undefined
+            ? null
+            : Number(usage.totalCostUsd),
         sessionCount: Number(sess?.sessionCount ?? 0),
         lastActive: usage?.lastActive || null,
+        breakdown: breakdownMap.get(u.id) ?? [],
       };
     });
 

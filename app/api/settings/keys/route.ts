@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { db, userApiKeys } from "@/lib/db";
 import { checkCsrf } from "@/lib/csrf";
 import { encryptApiKey } from "@/lib/encryption";
+import { PLATFORM_MODELS } from "@/lib/platform-models";
 
 // ---------------------------------------------------------------------------
 // Input validation schemas
@@ -72,7 +73,18 @@ export async function GET() {
       updatedAt: row.updatedAt,
     }));
 
-    return NextResponse.json({ keys });
+    // Platform models available to everyone (no BYOK needed). Gateway-routed
+    // options require both the flag and the key; Anthropic also has a legacy
+    // direct-SDK path when only ANTHROPIC_API_KEY is set.
+    const gatewayEnabled =
+      process.env.USE_AI_GATEWAY === "1" && !!process.env.AI_GATEWAY_API_KEY;
+    const anthropicDirectAvailable = !!process.env.ANTHROPIC_API_KEY;
+    const platformModels = PLATFORM_MODELS.filter((m) => {
+      if (gatewayEnabled) return true;
+      return m.providerId === "anthropic" && anthropicDirectAvailable;
+    });
+
+    return NextResponse.json({ keys, platformModels });
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
