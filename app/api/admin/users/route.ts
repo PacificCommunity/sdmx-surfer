@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
-import { count, sum, sql } from "drizzle-orm";
+import { count, sum, sql, gte } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, authUsers, usageLogs, dashboardSessions, authEvents } from "@/lib/db";
+
+// Aggregate only usage since the gateway rollout — earlier rows have no
+// cost_usd populated (pre-cost-tracking), so including them would make the
+// per-user totals lopsided (huge Claude history with null cost counted as
+// free). Raw usage_logs is untouched; point SQL at the table directly for
+// full-history audits.
+const USAGE_EPOCH = new Date("2026-04-16T00:00:00Z");
 
 // ---------------------------------------------------------------------------
 // GET /api/admin/users — list all users enriched with usage stats
@@ -53,6 +60,7 @@ export async function GET() {
         lastActive: sql<string>`max(${usageLogs.created_at})`,
       })
       .from(usageLogs)
+      .where(gte(usageLogs.created_at, USAGE_EPOCH))
       .groupBy(usageLogs.user_id);
 
     // Per-(user, model, provider, key_source) buckets — drives the drill-down.
@@ -70,6 +78,7 @@ export async function GET() {
         costUsd: sum(usageLogs.cost_usd),
       })
       .from(usageLogs)
+      .where(gte(usageLogs.created_at, USAGE_EPOCH))
       .groupBy(
         usageLogs.user_id,
         usageLogs.model,
