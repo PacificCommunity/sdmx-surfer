@@ -2,13 +2,7 @@ import { NextResponse } from "next/server";
 import { count, sum, sql, gte } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, authUsers, usageLogs, dashboardSessions, authEvents } from "@/lib/db";
-
-// Aggregate only usage since the gateway rollout — earlier rows have no
-// cost_usd populated (pre-cost-tracking), so including them would make the
-// per-user totals lopsided (huge Claude history with null cost counted as
-// free). Raw usage_logs is untouched; point SQL at the table directly for
-// full-history audits.
-const USAGE_EPOCH = new Date("2026-04-16T00:00:00Z");
+import { USAGE_EPOCH } from "@/lib/admin-epoch";
 
 // ---------------------------------------------------------------------------
 // GET /api/admin/users — list all users enriched with usage stats
