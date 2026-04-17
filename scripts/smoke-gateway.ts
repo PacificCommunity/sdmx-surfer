@@ -28,6 +28,7 @@ import { generateText, streamText, tool, stepCountIs } from "ai";
 import { z } from "zod";
 import { gateway } from "@ai-sdk/gateway";
 import { anthropic } from "@ai-sdk/anthropic";
+import { type ProviderOptions } from "@ai-sdk/provider-utils";
 import { toGatewaySlug } from "@/lib/model-router";
 import { PLATFORM_MODELS } from "@/lib/platform-models";
 
@@ -185,7 +186,7 @@ async function runMultiStepToolChain() {
   // Mirror the per-provider providerOptions the server-side router sets in
   // lib/model-router.ts:platformViaGateway(). Without these, the smoke is
   // testing raw gateway defaults — not what production code actually sends.
-  const providerOptionsFor = (providerId: string): Record<string, unknown> | undefined => {
+  const providerOptionsFor = (providerId: string): ProviderOptions | undefined => {
     if (providerId === "anthropic") {
       return { anthropic: { cacheControl: { type: "ephemeral" } } };
     }
