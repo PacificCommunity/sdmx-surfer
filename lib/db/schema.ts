@@ -159,7 +159,14 @@ export const usageLogs = pgTable(
     cost_usd: numeric("cost_usd", { precision: 12, scale: 6 }),
     created_at: timestamp("created_at").defaultNow(),
   },
-  (table) => [index("logs_user_created_idx").on(table.user_id, table.created_at)],
+  (table) => [
+    index("logs_user_created_idx").on(table.user_id, table.created_at),
+    // Supports the epoch-scoped aggregations in /api/admin/overview and
+    // /api/admin/users (WHERE created_at >= USAGE_EPOCH). The compound index
+    // above is leading on user_id, so Postgres can't use it for epoch-only
+    // scans — this one covers that query shape.
+    index("logs_created_at_idx").on(table.created_at),
+  ],
 );
 
 // ---------------------------------------------------------------------------

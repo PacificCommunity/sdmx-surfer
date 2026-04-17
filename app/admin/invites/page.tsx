@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SortableHeader } from "../SortableHeader";
 import {
   dateValue,
@@ -64,6 +64,63 @@ export default function InvitesPage() {
   const [passwordBusyEmail, setPasswordBusyEmail] = useState<string | null>(null);
   const [passwordReveal, setPasswordReveal] = useState<PasswordReveal | null>(null);
   const [passwordCopied, setPasswordCopied] = useState(false);
+  const passwordCopyBtnRef = useRef<HTMLButtonElement>(null);
+  const passwordDoneBtnRef = useRef<HTMLButtonElement>(null);
+  const passwordModalRef = useRef<HTMLDivElement>(null);
+  const passwordRestoreFocusRef = useRef<HTMLElement | null>(null);
+
+  // Focus management + Esc handler for the password-reveal modal. Captures
+  // the element that opened it (row button) so we can restore focus on
+  // close; autofocuses the Copy button on open; handles Esc; and loops Tab
+  // within the modal.
+  useEffect(() => {
+    if (!passwordReveal) return;
+
+    passwordRestoreFocusRef.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    // Slight delay so the element is mounted before we focus it.
+    const t = setTimeout(() => passwordCopyBtnRef.current?.focus(), 0);
+
+    const closeModal = () => {
+      setPasswordReveal(null);
+      setPasswordCopied(false);
+    };
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeModal();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      // Minimal focus trap — cycle between Copy and Done, the only two
+      // focusable controls. Keeps focus out of the page behind the modal.
+      const copy = passwordCopyBtnRef.current;
+      const done = passwordDoneBtnRef.current;
+      if (!copy || !done) return;
+      const active = document.activeElement;
+      if (e.shiftKey) {
+        if (active === copy || !passwordModalRef.current?.contains(active)) {
+          e.preventDefault();
+          done.focus();
+        }
+      } else {
+        if (active === done || !passwordModalRef.current?.contains(active)) {
+          e.preventDefault();
+          copy.focus();
+        }
+      }
+    };
+    window.addEventListener("keydown", onKey);
+
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("keydown", onKey);
+      // Restore focus to whatever opened the modal (the row button).
+      passwordRestoreFocusRef.current?.focus();
+      passwordRestoreFocusRef.current = null;
+    };
+  }, [passwordReveal]);
 
   const invitesTable = useSortableTable<InviteRecord, InviteSortKey>({
     rows: invites,
@@ -216,6 +273,7 @@ export default function InvitesPage() {
     <section>
       {passwordReveal && (
         <div
+          ref={passwordModalRef}
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
@@ -241,9 +299,10 @@ export default function InvitesPage() {
                 {passwordReveal.passphrase}
               </code>
               <button
+                ref={passwordCopyBtnRef}
                 type="button"
                 onClick={() => void handleCopyPassword()}
-                className="shrink-0 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+                className="shrink-0 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               >
                 {passwordCopied ? "Copied" : "Copy"}
               </button>
@@ -259,12 +318,13 @@ export default function InvitesPage() {
             </p>
             <div className="mt-5 flex justify-end">
               <button
+                ref={passwordDoneBtnRef}
                 type="button"
                 onClick={() => {
                   setPasswordReveal(null);
                   setPasswordCopied(false);
                 }}
-                className="brand-gradient rounded-full px-5 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+                className="brand-gradient rounded-full px-5 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               >
                 Done
               </button>

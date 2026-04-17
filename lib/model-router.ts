@@ -36,26 +36,35 @@ export function toGatewaySlug(providerId: string, modelId: string): string {
   return providerId + "/" + normalized;
 }
 
-// Platform-key path for any provider in PLATFORM_MODELS, routed through the
-// gateway. Per-provider providerOptions land here:
+// Single source of truth for provider-specific options. Every Mistral and
+// Anthropic construction site in this file must route through this helper so
+// that, e.g., Mistral's parallelToolCalls:false fix applies to BYOK paths too,
+// not just the platform-gateway path.
+//
 //   - Anthropic: ephemeral cache_control (saves cost on our ~10-15K system prompt)
 //   - Mistral:   parallelToolCalls:false — Mistral's default eager parallel
 //     tool-calling breaks sequential ReAct loops (calls every tool in one
 //     step with fabricated args). Forcing one-call-per-step restores the
 //     standard agent loop. Verified via scripts/smoke-gateway.ts.
-function platformViaGateway(providerId: string, modelId: string): ModelConfig {
-  let providerOptions: ProviderOptions | undefined;
+function providerOptionsFor(providerId: string): ProviderOptions | undefined {
   if (providerId === "anthropic") {
-    providerOptions = { anthropic: { cacheControl: { type: "ephemeral" } } };
-  } else if (providerId === "mistral") {
-    providerOptions = { mistral: { parallelToolCalls: false } };
+    return { anthropic: { cacheControl: { type: "ephemeral" } } };
   }
+  if (providerId === "mistral") {
+    return { mistral: { parallelToolCalls: false } };
+  }
+  return undefined;
+}
+
+// Platform-key path for any provider in PLATFORM_MODELS, routed through the
+// gateway.
+function platformViaGateway(providerId: string, modelId: string): ModelConfig {
   return {
     model: gateway(toGatewaySlug(providerId, modelId)),
     modelId,
     providerId,
     keySource: "platform-gateway",
-    providerOptions,
+    providerOptions: providerOptionsFor(providerId),
   };
 }
 
@@ -69,9 +78,7 @@ function platformAnthropic(modelId: string): ModelConfig {
     modelId,
     providerId: "anthropic",
     keySource: "platform-direct",
-    providerOptions: {
-      anthropic: { cacheControl: { type: "ephemeral" } },
-    },
+    providerOptions: providerOptionsFor("anthropic"),
   };
 }
 
@@ -143,9 +150,7 @@ export async function getModelForUser(
         modelId,
         providerId,
         keySource: "byok",
-        providerOptions: {
-          anthropic: { cacheControl: { type: "ephemeral" } },
-        },
+        providerOptions: providerOptionsFor(providerId),
       };
     }
 
@@ -156,6 +161,7 @@ export async function getModelForUser(
         modelId,
         providerId,
         keySource: "byok",
+        providerOptions: providerOptionsFor(providerId),
       };
     }
 
@@ -166,6 +172,7 @@ export async function getModelForUser(
         modelId,
         providerId,
         keySource: "byok",
+        providerOptions: providerOptionsFor(providerId),
       };
     }
 
@@ -176,6 +183,7 @@ export async function getModelForUser(
         modelId,
         providerId,
         keySource: "byok",
+        providerOptions: providerOptionsFor(providerId),
       };
     }
   }
@@ -216,25 +224,41 @@ async function tryByokProvider(
         modelId,
         providerId,
         keySource: "byok",
-        providerOptions: {
-          anthropic: { cacheControl: { type: "ephemeral" } },
-        },
+        providerOptions: providerOptionsFor(providerId),
       };
     }
 
     if (providerId === "openai") {
       const provider = createOpenAI({ apiKey });
-      return { model: provider(modelId), modelId, providerId, keySource: "byok" };
+      return {
+        model: provider(modelId),
+        modelId,
+        providerId,
+        keySource: "byok",
+        providerOptions: providerOptionsFor(providerId),
+      };
     }
 
     if (providerId === "google") {
       const provider = createGoogleGenerativeAI({ apiKey });
-      return { model: provider(modelId), modelId, providerId, keySource: "byok" };
+      return {
+        model: provider(modelId),
+        modelId,
+        providerId,
+        keySource: "byok",
+        providerOptions: providerOptionsFor(providerId),
+      };
     }
 
     if (providerId === "mistral") {
       const provider = createMistral({ apiKey });
-      return { model: provider(modelId), modelId, providerId, keySource: "byok" };
+      return {
+        model: provider(modelId),
+        modelId,
+        providerId,
+        keySource: "byok",
+        providerOptions: providerOptionsFor(providerId),
+      };
     }
   } catch {
     // Decryption or DB error — skip

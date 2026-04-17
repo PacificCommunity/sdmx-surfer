@@ -227,11 +227,22 @@ export default function UsersPage() {
                     <div
                       className={
                         "grid grid-cols-12 items-center gap-3 border-t border-surface-high/30 px-6 py-4 transition-colors " +
-                        (hasBreakdown ? "cursor-pointer hover:bg-surface-low " : "") +
+                        (hasBreakdown ? "cursor-pointer hover:bg-surface-low focus:bg-surface-low focus:outline-none " : "") +
                         (expanded ? "bg-surface-low" : "")
                       }
                       onClick={toggle}
+                      onKeyDown={
+                        hasBreakdown
+                          ? (e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                toggle();
+                              }
+                            }
+                          : undefined
+                      }
                       role={hasBreakdown ? "button" : undefined}
+                      tabIndex={hasBreakdown ? 0 : undefined}
                       aria-expanded={hasBreakdown ? expanded : undefined}
                     >
                       <div className="col-span-3 flex min-w-0 items-start gap-2">
