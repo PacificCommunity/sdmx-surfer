@@ -29,6 +29,7 @@ import {
   recordLoginSuccess,
   recordLoginFailure,
 } from "./password";
+import { isCredentialAttemptThrottled } from "./auth-throttle";
 
 // ---------------------------------------------------------------------------
 // Module augmentation: extend Session / JWT types with role + userId
@@ -237,6 +238,10 @@ export const authOptions: NextAuthOptions = {
         const email = credentials?.email?.toLowerCase().trim();
         const password = credentials?.password;
         if (!email || !password) return fail("missing_fields", null, null);
+
+        if (await isCredentialAttemptThrottled(email)) {
+          return fail("rate_limited", email, null);
+        }
 
         // Same allowlist gate as magic-link sign-in
         const allow = await db

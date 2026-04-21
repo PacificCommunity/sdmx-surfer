@@ -3,6 +3,7 @@ import "bootstrap/dist/css/bootstrap-grid.min.css";
 import "sdmx-dashboard-components/dist/index.css";
 import "./globals.css";
 import { BRAND_GOOGLE_FONTS_HREF } from "@/lib/brand-theme";
+import { SdmxProxyBoot } from "./sdmx-proxy-boot";
 
 export const metadata: Metadata = {
   title: "SDMX Surfer",
@@ -23,6 +24,7 @@ export default function RootLayout({
         <link href={BRAND_GOOGLE_FONTS_HREF} rel="stylesheet" />
       </head>
       <body className="min-h-screen bg-surface">
+        <SdmxProxyBoot />
         {children}
       </body>
     </html>

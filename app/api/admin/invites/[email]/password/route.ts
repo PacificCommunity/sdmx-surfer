@@ -18,7 +18,7 @@ import { hashPassword } from "@/lib/password";
  */
 
 async function guard(req: Request) {
-  const csrfError = checkCsrf(req);
+  const csrfError = checkCsrf(req, { strict: true });
   if (csrfError) return { response: csrfError };
   const session = await auth();
   if (!session?.user?.userId) {

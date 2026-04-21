@@ -24,7 +24,7 @@ const changeSchema = z.object({
  * Generic error messages on failure to avoid revealing state.
  */
 export async function PUT(req: Request) {
-  const csrfError = checkCsrf(req);
+  const csrfError = checkCsrf(req, { strict: true });
   if (csrfError) return csrfError;
 
   const session = await auth();

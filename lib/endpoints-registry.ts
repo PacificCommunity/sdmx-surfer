@@ -171,6 +171,13 @@ export const ENDPOINTS: EndpointInfo[] = [
       ),
   },
   {
+    key: "STATSNZ",
+    name: "Stats NZ — Aotearoa Data Explorer",
+    shortName: "Stats NZ",
+    apiHosts: ["api.data.stats.govt.nz"],
+    // Data Explorer deep-link URL pattern TBC — API-only for now.
+  },
+  {
     key: "BIS",
     name: "Bank for International Settlements",
     shortName: "BIS",

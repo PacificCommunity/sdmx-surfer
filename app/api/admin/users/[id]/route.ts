@@ -21,7 +21,7 @@ export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const csrfError = checkCsrf(req);
+  const csrfError = checkCsrf(req, { strict: true });
   if (csrfError) return csrfError;
   const session = await auth();
   if (!session?.user?.userId) {
@@ -56,8 +56,18 @@ export async function PATCH(
   }
 
   try {
+    const [targetUser] = await db
+      .select({ id: authUsers.id, role: authUsers.role })
+      .from(authUsers)
+      .where(eq(authUsers.id, id))
+      .limit(1);
+
+    if (!targetUser) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
     // Prevent removing the last admin
-    if (role === "user") {
+    if (role === "user" && targetUser.role === "admin") {
       const [result] = await db
         .select({ adminCount: count() })
         .from(authUsers)

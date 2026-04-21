@@ -11,6 +11,7 @@ import {
   authEvents,
 } from "@/lib/db";
 import { checkCsrf } from "@/lib/csrf";
+import { deriveJoinedAt, hasSignedUp } from "@/lib/admin-query";
 
 // ---------------------------------------------------------------------------
 // Input validation
@@ -119,18 +120,26 @@ export async function GET() {
       const lastActive = activity?.last || null;
       const loginInfo = successMap.get(inv.email);
       const firstSuccessAt = loginInfo?.first || null;
-      const signedUpAt =
-        user?.emailVerified ||
-        firstSuccessAt ||
-        firstActiveAt ||
-        (lastActive && user?.createdAt ? user.createdAt : null);
+      const signedUpAt = deriveJoinedAt({
+        emailVerified: user?.emailVerified,
+        firstLoginAt: firstSuccessAt,
+        firstActiveAt,
+        lastActiveAt: lastActive,
+        createdAt: user?.createdAt,
+      });
       const nowMs = Date.now();
       return {
         email: inv.email,
         invited_by: inv.invited_by,
         created_at: inv.created_at,
         invite_email_sent: inv.invite_email_sent ?? false,
-        signed_up: !!signedUpAt,
+        signed_up: hasSignedUp({
+          emailVerified: user?.emailVerified,
+          firstLoginAt: firstSuccessAt,
+          firstActiveAt,
+          lastActiveAt: lastActive,
+          createdAt: user?.createdAt,
+        }),
         signed_up_at: signedUpAt,
         last_active: lastActive,
         last_login_at: loginInfo?.last || null,

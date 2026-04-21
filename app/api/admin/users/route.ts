@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { count, sum, sql, gte } from "drizzle-orm";
+import { count, sum, sql, gte, isNull } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, authUsers, usageLogs, dashboardSessions, authEvents } from "@/lib/db";
 import { USAGE_EPOCH } from "@/lib/admin-epoch";
+import { deriveJoinedAt } from "@/lib/admin-query";
 
 // ---------------------------------------------------------------------------
 // GET /api/admin/users — list all users enriched with usage stats
@@ -87,6 +88,7 @@ export async function GET() {
         sessionCount: count(dashboardSessions.id),
       })
       .from(dashboardSessions)
+      .where(isNull(dashboardSessions.deleted_at))
       .groupBy(dashboardSessions.user_id);
 
     // First successful login per user. This is a better semantic match for
@@ -127,7 +129,6 @@ export async function GET() {
     const enriched = users.map((u) => {
       const usage = usageMap.get(u.id);
       const sess = sessionMap.get(u.id);
-      const joinedAt = u.emailVerified || loginMap.get(u.id) || null;
       const inputTokens = Number(usage?.totalInputTokens ?? 0);
       const outputTokens = Number(usage?.totalOutputTokens ?? 0);
       const firstActiveAt = usage?.firstActive || null;
@@ -137,7 +138,13 @@ export async function GET() {
         name: u.name,
         role: u.role,
         createdAt: u.createdAt,
-        joinedAt: joinedAt || firstActiveAt || u.createdAt || null,
+        joinedAt: deriveJoinedAt({
+          emailVerified: u.emailVerified,
+          firstLoginAt: loginMap.get(u.id) || null,
+          firstActiveAt,
+          lastActiveAt: usage?.lastActive || null,
+          createdAt: u.createdAt,
+        }),
         requestCount: Number(usage?.requestCount ?? 0),
         totalTokens: inputTokens + outputTokens,
         totalCostUsd:
