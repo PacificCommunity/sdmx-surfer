@@ -58,6 +58,7 @@ export async function GET(
           },
           structure: entry.structure,
         },
+        endpoint: entry.endpoint ?? "SPC",
         categories: entry.categories || [],
         availability: entry.availability || null,
         diagram,

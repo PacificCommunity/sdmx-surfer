@@ -26,6 +26,13 @@ import { createMCPClient } from "@ai-sdk/mcp";
 
 const MCP_URL = process.env.MCP_GATEWAY_URL || "http://localhost:8000/mcp";
 const INDEX_PATH = join(process.cwd(), "models", "dataflow-index.json");
+
+// This script currently builds an SPC-only catalogue. The MCP endpoint and the
+// REST base are hardcoded to SPC below; the index stamps each entry with
+// `endpoint: INDEX_ENDPOINT` so multi-endpoint consumers can tell which
+// provider an entry belongs to, and so a future multi-endpoint build can
+// concatenate per-endpoint runs without ambiguity.
+const INDEX_ENDPOINT = "SPC";
 const STAT_BASE = "https://stats-nsi-stable.pacificdata.org/rest";
 
 // ── Category fetching from .Stat SDMX REST API ──
@@ -322,6 +329,7 @@ async function main() {
     const result = (await call("list_dataflows", {
       limit: 50,
       offset,
+      endpoint: INDEX_ENDPOINT,
     })) as { dataflows: Dataflow[]; pagination: { has_more: boolean } };
 
     allDataflows.push(...result.dataflows);
@@ -378,6 +386,7 @@ async function main() {
     try {
       const s = (await call("get_dataflow_structure", {
         dataflow_id: df.id,
+        endpoint: INDEX_ENDPOINT,
       })) as StructureResponse;
       structures.set(df.id, s);
     } catch {
@@ -461,6 +470,7 @@ async function main() {
         measure: struct.measure,
       } : null,
       availability: availabilityMap.get(df.id) || null,
+      endpoint: INDEX_ENDPOINT,
     };
   });
   console.log("  Built " + String(entries.length) + " descriptions\n");

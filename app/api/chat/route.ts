@@ -60,8 +60,18 @@ function quarantine(content: string, source: string): string {
   );
 }
 
+// Step budget sizing:
+//   - Single-panel discovery is 4-6 steps (list → structure → build → probe →
+//     recover-if-empty → update). Multi-panel dashboards add one recover-step
+//     per empty probe, which is the new recovery path per the 2026-04-22 MCP
+//     update (suggest_nonempty_queries replaces hand-rolled relaxations).
+//   - Cross-provider work used to cost 15-20 steps because every provider
+//     switch tore down an HTTP client; with per-call `endpoint=` it's ~8 steps.
+//   - NUDGE_AT fires the "emit a draft now" override before the hard cap, so
+//     the user never sees a silent budget exhaustion. Sizing it at 20/25 keeps
+//     ~5 steps of grace for the recovery path + final update.
 const STEP_LIMIT = 25;
-const NUDGE_AT = 18;
+const NUDGE_AT = 20;
 
 const NUDGE_MESSAGE =
   "URGENT: You are running low on tool-call budget. " +

@@ -27,6 +27,7 @@ export async function GET(req: Request) {
             name: r.name,
             description: r.description,
             score: r.score,
+            endpoint: r.endpoint,
             categories: catMap.get(r.id) || [],
           })),
           total: results.length,
@@ -45,6 +46,7 @@ export async function GET(req: Request) {
           return Response.json({
             dataflows: filtered.map((e) => ({
               id: e.id, name: e.name, description: e.description,
+              endpoint: e.endpoint ?? "SPC",
               categories: e.categories || [],
             })),
             total: filtered.length,
@@ -73,6 +75,7 @@ export async function GET(req: Request) {
           id: e.id,
           name: e.name,
           description: e.description,
+          endpoint: e.endpoint ?? "SPC",
           categories: e.categories || [],
         })),
         total: index.entries.length,

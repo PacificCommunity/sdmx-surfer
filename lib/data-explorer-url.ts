@@ -13,7 +13,10 @@ import {
  *   {host}/{rest-prefix}/data/[AGENCY,]DF_ID[,VERSION]/KEY?params
  */
 
-function parseApiUrl(url: string): ParsedApiUrl | null {
+function parseApiUrl(
+  url: string,
+  fallbackAgency: string = "SPC",
+): ParsedApiUrl | null {
   try {
     const u = new URL(url);
 
@@ -24,7 +27,12 @@ function parseApiUrl(url: string): ParsedApiUrl | null {
     const flowPart = pathParts[dataIdx + 1];
     const key = pathParts[dataIdx + 2] || "";
 
-    let agency = "SPC";
+    // Bare-flow URLs (the gateway's current default for most providers) carry
+    // no agency; only the comma form (AGENCY,FLOW,VERSION) does. For the bare
+    // case the caller supplies fallbackAgency from the detected endpoint so
+    // downstream DE link builders (ABS, ILO, STATSNZ, BIS, …) don't default
+    // to "SPC" and produce broken links.
+    let agency = fallbackAgency;
     let dataflowId = flowPart;
     let version = "1.0";
 
@@ -64,9 +72,9 @@ function extractSdmxUrl(raw: string): string {
 
 export function apiUrlToExplorerUrl(apiUrl: string): string | null {
   const clean = extractSdmxUrl(apiUrl);
-  const parsed = parseApiUrl(clean);
-  if (!parsed) return null;
   const endpoint = detectEndpoint(clean);
+  const parsed = parseApiUrl(clean, endpoint.agency);
+  if (!parsed) return null;
   return endpoint.buildExplorerUrl ? endpoint.buildExplorerUrl(parsed) : null;
 }
 
@@ -114,9 +122,9 @@ export function extractDataSources(config: {
         if (seen.has(url)) continue;
         seen.add(url);
 
-        const parsed = parseApiUrl(url);
-        const dfId = parsed?.dataflowId ?? "";
         const endpoint = detectEndpoint(url);
+        const parsed = parseApiUrl(url, endpoint.agency);
+        const dfId = parsed?.dataflowId ?? "";
 
         sources.push({
           componentId: col.id,

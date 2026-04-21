@@ -37,7 +37,9 @@ The **new deliverable** is the AI agent loop: a server-side process that connect
 
 ## SDMX MCP Tools Available
 
-This project has an active MCP connection to sdmx-mcp-gateway. The progressive discovery workflow is: `list_dataflows` → `get_dataflow_structure` → `get_dimension_codes` → `check_time_availability` / `get_data_availability` → `build_data_url`. Additional tools: `get_codelist`, `validate_query`, `compare_structures`, `find_code_usage_across_dataflows`, `switch_endpoint`.
+This project has an active MCP connection to sdmx-mcp-gateway. The progressive discovery workflow is: `list_dataflows` → `get_dataflow_structure` → `get_dimension_codes` → `check_time_availability` / `get_data_availability` → `build_data_url` → `probe_data_url` → `suggest_nonempty_queries` (only if the probe is empty) → `update_dashboard`. Additional tools: `get_codelist`, `validate_query`, `compare_structures`, `find_code_usage_across_dataflows`, `switch_endpoint`.
+
+Most endpoint-scoped tools (`list_dataflows`, `get_dataflow_structure`, `get_codelist`, `get_dimension_codes`, `get_code_usage`, `check_time_availability`, `find_code_usage_across_dataflows`, `get_data_availability`, `validate_query`, `build_key`, `build_data_url`, `probe_data_url`, `suggest_nonempty_queries`, `get_structure_diagram`, `compare_structures`, plus `compare_dataflow_dimensions` via `endpoint_a`/`endpoint_b`) accept an optional `endpoint=<KEY>` argument. Prefer per-call `endpoint=` over `switch_endpoint` when the caller already knows which provider it wants; `switch_endpoint` is now a pointer flip for the session default and is only needed when the session focus should change for subsequent untargeted calls. Probe statuses are exactly `nonempty`, `empty`, `error`; empty-recovery delegates to `suggest_nonempty_queries` rather than guessing relaxations.
 
 ## Design System Quick Reference
 

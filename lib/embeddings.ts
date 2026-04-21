@@ -105,6 +105,10 @@ export interface DataflowIndexEntry {
   categories: DataflowCategory[];
   structure: DataflowStructure | null;
   availability: AvailabilityInfo | null;
+  // MCP endpoint this entry was fetched from. Optional for backward
+  // compatibility with pre-endpoint-tagging index builds, which are all SPC.
+  // Consumers that care should default missing values to "SPC".
+  endpoint?: string;
 }
 
 export interface DataflowIndex {
@@ -147,6 +151,7 @@ export interface SearchResult {
   name: string;
   description: string;
   score: number;
+  endpoint: string;
 }
 
 /**
@@ -168,6 +173,7 @@ export async function semanticSearch(
     name: entry.name,
     description: entry.description,
     score: cosineSimilarity(queryEmbedding, entry.embedding),
+    endpoint: entry.endpoint ?? "SPC",
   }));
 
   scored.sort((a, b) => b.score - a.score);

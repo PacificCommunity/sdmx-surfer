@@ -175,7 +175,7 @@ flowchart TB
   subgraph Server["Next.js Server — /api/chat"]
     ST["streamText()\nModel Router"]
     UD["update_dashboard\ncustom tool"]
-    PS["prepareStep\nnudge at step 18"]
+    PS["prepareStep\nnudge at step 20"]
     Cache["Prompt Cache\nTier 1 + Tier 2"]
   end
 
@@ -247,8 +247,8 @@ flowchart TB
 4. `useChat` POSTs to `/api/chat` with the session ID header; the route verifies the session via NextAuth
 5. The model router selects a model: BYOK key first, then platform Gemini 3 Flash, then env fallback
 6. `streamText` calls the model with MCP tools + `update_dashboard` custom tool
-7. The model does progressive discovery via MCP (`list_dataflows` → `get_dataflow_structure` → `get_dimension_codes` → `probe_data_url` → `build_data_url`)
-8. `probe_data_url` validates a candidate query before the model emits a dashboard, reducing bad-URL errors
+7. The model does progressive discovery via MCP (`list_dataflows` → `get_dataflow_structure` → `get_dimension_codes` → `build_data_url` → `probe_data_url` → `suggest_nonempty_queries` if empty)
+8. `probe_data_url` validates a built URL before the model emits a dashboard, and `suggest_nonempty_queries` recovers empty probes without the model guessing relaxations
 9. The model calls `update_dashboard` with an authoring schema config; the server compiles it to native config
 10. Tool output flows back to the client via the SSE stream
 11. Client extracts config from tool output in message parts

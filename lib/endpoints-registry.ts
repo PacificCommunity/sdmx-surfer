@@ -23,6 +23,16 @@ export interface EndpointInfo {
   name: string;
   shortName: string;
   apiHosts: string[];
+  // Canonical SDMX agency id for this provider. Used as the fallback agency
+  // when a data URL is in bare-flow form (/data/FLOW/KEY) rather than the
+  // comma form (/data/AGENCY,FLOW,VERSION/KEY). The gateway's build_data_url
+  // currently emits bare-flow for most providers, so without this fallback
+  // every non-SPC Data Explorer link would be built with agency=SPC.
+  //
+  // OECD dataflows use variable subagencies (OECD.SDD.NAD, OECD.CFE, …); the
+  // plain "OECD" default here only produces correct DE links when the URL
+  // itself carries the agency.
+  agency?: string;
   buildExplorerUrl?: (parsed: ParsedApiUrl) => string | null;
 }
 
@@ -34,6 +44,9 @@ function buildDotStatUrl(
   baseUrl: string,
   datasourceId: string,
   p: ParsedApiUrl,
+  // Deployments differ on the id of the time dimension: most use TIME_PERIOD
+  // (SDMX convention); Stats NZ's Aotearoa Data Explorer uses plain TIME.
+  timeDimensionId: string = "TIME_PERIOD",
 ): string {
   const params = new URLSearchParams();
   params.set("df[ds]", datasourceId);
@@ -48,7 +61,7 @@ function buildDotStatUrl(
     params.set("lom", "LASTNOBSERVATIONS");
     params.set("lo", p.lastNObservations);
   }
-  params.set("to[TIME_PERIOD]", "false");
+  params.set("to[" + timeDimensionId + "]", "false");
   return baseUrl + "?" + params.toString();
 }
 
@@ -88,6 +101,7 @@ export const ENDPOINTS: EndpointInfo[] = [
     name: "Pacific Data Hub",
     shortName: "SPC",
     apiHosts: ["stats-sdmx-disseminate.pacificdata.org"],
+    agency: "SPC",
     buildExplorerUrl: (p) =>
       buildDotStatUrl("https://stats.pacificdata.org/vis", "ds:SPC2", p),
   },
@@ -96,6 +110,7 @@ export const ENDPOINTS: EndpointInfo[] = [
     name: "Fiji Bureau of Statistics",
     shortName: "FBOS",
     apiHosts: ["data-sdmx-disseminate.statsfiji.gov.fj"],
+    agency: "FBOS",
     buildExplorerUrl: (p) =>
       buildDotStatUrl("https://data.statsfiji.gov.fj/vis", "ds:FBOS3", p),
   },
@@ -104,6 +119,7 @@ export const ENDPOINTS: EndpointInfo[] = [
     name: "Samoa Bureau of Statistics",
     shortName: "SBS",
     apiHosts: ["data-sdmx-disseminate.sbs.gov.ws"],
+    agency: "SBS",
     buildExplorerUrl: (p) =>
       buildDotStatUrl("https://data.sbs.gov.ws/vis", "ds:SBS3", p),
   },
@@ -112,6 +128,10 @@ export const ENDPOINTS: EndpointInfo[] = [
     name: "OECD",
     shortName: "OECD",
     apiHosts: ["sdmx.oecd.org"],
+    // OECD uses subagencies (OECD.SDD.NAD, OECD.CFE, …) per dataflow, so the
+    // "OECD" default only produces a correct DE link when the URL is in comma
+    // form and carries the specific subagency.
+    agency: "OECD",
     buildExplorerUrl: (p) =>
       buildDotStatUrl(
         "https://data-explorer.oecd.org/vis",
@@ -124,6 +144,7 @@ export const ENDPOINTS: EndpointInfo[] = [
     name: "Eurostat",
     shortName: "Eurostat",
     apiHosts: ["ec.europa.eu"],
+    agency: "ESTAT",
     buildExplorerUrl: (p) =>
       "https://ec.europa.eu/eurostat/databrowser/view/" +
       encodeURIComponent(p.dataflowId) +
@@ -134,24 +155,30 @@ export const ENDPOINTS: EndpointInfo[] = [
     name: "UNICEF",
     shortName: "UNICEF",
     apiHosts: ["sdmx.data.unicef.org"],
+    agency: "UNICEF",
   },
   {
     key: "IMF",
     name: "International Monetary Fund",
     shortName: "IMF",
     apiHosts: ["api.imf.org", "dataservices.imf.org"],
+    // Most IMF flows register under "IMF.STA"; other divisions (RES, FAD, …)
+    // exist. Only used as a fallback when the URL is bare-flow.
+    agency: "IMF.STA",
   },
   {
     key: "ECB",
     name: "European Central Bank",
     shortName: "ECB",
     apiHosts: ["data-api.ecb.europa.eu"],
+    agency: "ECB",
   },
   {
     key: "ILO",
     name: "International Labour Organization",
     shortName: "ILO",
     apiHosts: ["sdmx.ilo.org"],
+    agency: "ILO",
     buildExplorerUrl: (p) =>
       buildDotStatUrl("https://data.ilo.org/vis", "ds-ilostat-prod", p),
   },
@@ -160,6 +187,7 @@ export const ENDPOINTS: EndpointInfo[] = [
     name: "Australian Bureau of Statistics",
     shortName: "ABS",
     apiHosts: ["data.api.abs.gov.au"],
+    agency: "ABS",
     // ABS's DE has many `df[ds]` values (LABOUR_TOPICS, ECONOMY_TOPICS, …),
     // but all map to the same backend — it's a UI scope label, not a routing key.
     // `ABS_ABS_TOPICS` is the generic "all topics" catalog and loads any dataflow.
@@ -172,16 +200,24 @@ export const ENDPOINTS: EndpointInfo[] = [
   },
   {
     key: "STATSNZ",
-    name: "Stats NZ — Aotearoa Data Explorer",
-    shortName: "Stats NZ",
+    name: "StatsNZ — Aotearoa Data Explorer",
+    shortName: "StatsNZ",
     apiHosts: ["api.data.stats.govt.nz"],
-    // Data Explorer deep-link URL pattern TBC — API-only for now.
+    agency: "STATSNZ",
+    buildExplorerUrl: (p) =>
+      buildDotStatUrl(
+        "https://explore.data.stats.govt.nz/vis",
+        "ds-nsiws-disseminate",
+        p,
+        "TIME",
+      ),
   },
   {
     key: "BIS",
     name: "Bank for International Settlements",
     shortName: "BIS",
     apiHosts: ["stats.bis.org"],
+    agency: "BIS",
     // BIS Data Portal deep links require the dataflow's topic segment in the path:
     //   https://data.bis.org/topics/{TOPIC}/{AGENCY},{FLOW},{VERSION}/{KEY}
     // Mapping scraped from https://data.bis.org/topics — unknown flows fall back to API-only.

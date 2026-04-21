@@ -103,7 +103,7 @@ The core server-side module. Handles POST requests from the chat client.
 
 - **Per-request MCP client:** Each request creates a fresh `MCPClient` instance via `createMCPClient`. The client is closed in `onFinish` (or on error). This is safe for multi-user because there is no shared module-level singleton.
 - **`update_dashboard` tool:** Custom tool intercepted by the agent loop (not forwarded to MCP). Accepts either a simplified authoring config or a native config. The authoring config is compiled to native via `compileDashboardToolConfig()` before being returned in the tool output for the client to extract.
-- **Step budget:** `stopWhen: stepCountIs(25)` limits total steps. `prepareStep` at step 18+ injects an urgent system message telling the AI to emit a draft dashboard immediately.
+- **Step budget:** `stopWhen: stepCountIs(25)` limits total steps. `prepareStep` at step 20+ injects an urgent system message telling the AI to emit a draft dashboard immediately. The nudge sits closer to the ceiling (5 steps of grace) because the post-2026-04-22 MCP workflow adds an explicit recovery step (`suggest_nonempty_queries`) per empty probe, so multi-panel dashboards need room for recoveries before the draft is forced.
 - **Prompt caching:** `providerOptions.anthropic.cacheControl` marks the system prompt for Anthropic's native ephemeral caching (~90% cost reduction on the cached prefix for subsequent messages in the same session). Only active when the resolved model is an Anthropic model.
 
 **Zod schemas consumed here:**
@@ -173,7 +173,7 @@ The largest client component (~800+ lines). Manages:
 2. **Conversation strategy** — propose first, build incrementally, ask when ambiguous, offer next steps, pacing rule (max 5-6 tool calls between user interactions)
 3. **Config schema documentation** — JSON structure with critical rules; documents the authoring schema (intent visuals) as the preferred output format
 4. **Probe workflow** — agent must call `probe_data_url` before emitting a dashboard; probe shape drives viz type guidance (e.g., single-observation → KPI, time-series → line chart, cross-section → bar/column)
-5. **Progressive discovery workflow** — list → structure → codes → probe → build URL
+5. **Progressive discovery workflow** — list → structure → codes → build URL → probe → recover-if-empty (suggest_nonempty_queries) → update
 6. **SDMX conventions** — base URL, common dimensions, key syntax
 7. **Example configs** — three working dashboards (few-shot)
 8. **Tool instructions** — always use `update_dashboard`, handle errors
@@ -411,8 +411,8 @@ update_dashboard({ config: { id: "pop", rows: [...] } })
 ### Step budget management
 
 - **Total limit:** 25 steps (`stepCountIs(25)`)
-- **Nudge threshold:** Step 18 — if no `update_dashboard` has been called, the system prompt is augmented with an urgent message telling the AI to emit a draft immediately
-- **Rationale:** Complex requests (multi-dataflow dashboards) can consume 15-20 discovery steps. The nudge ensures the user always sees something, even if incomplete.
+- **Nudge threshold:** Step 20 — if no `update_dashboard` has been called, the system prompt is augmented with an urgent message telling the AI to emit a draft immediately
+- **Rationale:** Cross-provider work used to cost 15-20 steps because every switch tore down an HTTP client; with the post-2026-04-22 per-call `endpoint=` MCP contract it's ~8 steps. The main per-panel cost today is the explicit probe + recover-on-empty (`suggest_nonempty_queries`) contract, so the nudge sits 5 steps below the hard cap to leave room for recovery steps on multi-panel dashboards before a draft is forced.
 
 ### Streaming response
 
