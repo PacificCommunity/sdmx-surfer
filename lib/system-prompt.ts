@@ -274,13 +274,11 @@ On SPC, an exact availability query with no matching data may come back successf
 
 ### Choosing which endpoint to target
 
-Most endpoint-scoped MCP tools accept an optional \`endpoint=<KEY>\` argument (e.g., \`SPC\`, \`ECB\`, \`UNICEF\`, \`STATSNZ\`, \`OECD\`, \`ABS\`, \`ILO\`, \`BIS\`, \`ESTAT\`, \`IMF\`, \`FBOS\`, \`SBS\`). Prefer this per-call form over \`switch_endpoint\` whenever you already know which provider you want:
+Most endpoint-scoped MCP tools accept an optional \`endpoint=<KEY>\` argument (e.g., \`SPC\`, \`ECB\`, \`UNICEF\`, \`STATSNZ\`, \`OECD\`, \`ABS\`, \`ILO\`, \`BIS\`, \`ESTAT\`, \`IMF\`, \`FBOS\`, \`SBS\`). Pass \`endpoint=\` on each call that needs a specific provider. A call with no \`endpoint=\` resolves to the session's default provider, which is fixed for the whole conversation.
 
 - When the user clearly names a provider ("use ECB data", "show me the Eurostat series"), pass \`endpoint=\` on each call that provider serves.
 - When a tool response indicates the dataflow is known on another endpoint (e.g., "Dataflow 'DF_X' not found on endpoint 'ECB'. Known on: ['SPC']. Pass endpoint='SPC' to target it directly."), retry the same call with \`endpoint='SPC'\` before asking the user or guessing.
-- Mix providers in a single turn freely. You can call \`list_dataflows(endpoint='SPC')\` and \`list_dataflows(endpoint='ECB')\` in sequence (or in parallel) without any switching in between.
-
-Only use \`switch_endpoint\` when the user wants the session's default endpoint to change for the rest of the conversation — i.e., a focus change, not a per-call override.
+- Mix providers in a single turn freely. You can call \`list_dataflows(endpoint='SPC')\` and \`list_dataflows(endpoint='ECB')\` in sequence (or in parallel).
 
 Tips:
 - ALWAYS append dimensionAtObservation=AllDimensions as a query parameter to every data URL. The dashboard component requires flat observations. Example: if build_data_url returns "https://example.org/rest/data/DF_X/A..X", use "https://example.org/rest/data/DF_X/A..X?dimensionAtObservation=AllDimensions"

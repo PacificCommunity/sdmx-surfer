@@ -4,18 +4,40 @@
 **Upstream branch:** `feat/endpoint-per-call-param` (merged to `main`)
 **Scope:** behavioural change in `sdmx-mcp-gateway` that the dashboarder's agent loop and prompts should adapt to.
 
+## Dashboarder adoption status
+
+**Last reviewed:** 2026-04-22
+
+### Done
+
+- **System prompt and docs** updated to teach the new 7-step workflow (discover → `build_data_url` → `probe_data_url` → `suggest_nonempty_queries` if empty → `update_dashboard`), the `nonempty` / `empty` / `error` probe-status contract, the per-call `endpoint=` pattern including retry on mismatch hints, and the SPC sentinel-time-range nuance for empty queries. Files: `lib/system-prompt.ts`, `CLAUDE.md`, `README.md`, `docs/technical-reference.md`.
+- **Step budget retuned** from `NUDGE_AT=18` to `NUDGE_AT=20` in `app/api/chat/route.ts`, leaving 5 steps of grace below the hard cap for empty-recovery calls before a draft is forced. Doc references updated in `docs/technical-reference.md`, `README.md`, `docs/architecture.mmd`.
+- **Data-sources table fixed for non-SPC endpoints.** Data Explorer links for ABS, ILO, FBOS, SBS, StatsNZ, BIS were silently building with `df[ag]=SPC` because the gateway emits bare-flow URLs and our parser defaulted agency to SPC. Each endpoint in `lib/endpoints-registry.ts` now carries a canonical `agency`; `parseApiUrl` in `lib/data-explorer-url.ts` uses the detected endpoint's agency as the fallback when the URL is bare-flow. Covered by `tests/data-explorer-url.test.ts` (30 cases using real gateway URL shapes).
+- **Dataflow index endpoint stamping** (additive plumbing): `scripts/build-index.ts` passes `endpoint="SPC"` explicitly on MCP calls and stamps each entry; `DataflowIndexEntry.endpoint` is populated and surfaced via `/api/explore*`. No agent-side consumer reads the field yet.
+- **`switch_endpoint` purge** (follow-up after gateway removal of both `switch_endpoint` and `switch_endpoint_interactive`): removed every reference from `lib/system-prompt.ts` and `CLAUDE.md`. Both now tell the model (and Claude Code) that per-call `endpoint=` is the only way to target a specific provider and that the session default is set once at gateway startup via `SDMX_ENDPOINT` and is immutable at runtime. No code paths in the dashboarder were calling the removed tools.
+
+### Open
+
+- **Gateway-side URL format.** `build_data_url` emits bare-flow (`/data/<FLOW>/<KEY>`) for every probed provider except OECD (which emits comma form). The dashboarder fallback table handles this today, but self-describing comma-form URLs would remove the fallback's load-bearing role and cover future format changes — especially OECD, where the real agency is a subagency (`OECD.SDD.NAD`, `OECD.CFE`, …) that only a comma-form URL carries. Low-priority upstream request.
+- **Error-handling auto-retry on mismatch hints** (action item 2 below): handled at prompt level only. A server-side parser in the chat route that catches `Pass endpoint='X' to target it directly` hints and retries before the model spends a step is a possible follow-up.
+- **Step-count measurement** (action item 5 below): the `NUDGE_AT` retune is reasoned, not measured. Worth a real cross-provider probe once there is traffic.
+- **STATSNZ ops-readiness** (dashboarder-specific note below): the MCP gateway logs a warning and returns 401 when `SDMX_STATSNZ_KEY` is unset. Nothing on the dashboarder surfaces this in health / readiness.
+- **Non-SPC dataflow name resolution.** `resolveDataflowNamesFromConfig` reads the SPC-only index and falls back to raw IDs for non-SPC flows. Accepted gap until the catalogue goes multi-endpoint. Once that happens, the already-stamped `endpoint` field on index entries becomes load-bearing.
+
 ## TL;DR
 
-Every endpoint-scoped MCP tool now accepts an optional `endpoint=<key>` argument. Agents no longer need to call `switch_endpoint` before a per-call provider switch. `switch_endpoint` still exists, but is now a pointer flip (cheap, non-destructive) and is only needed when the agent wants the session's default endpoint to change for subsequent untargeted calls.
+Every endpoint-scoped MCP tool now accepts an optional `endpoint=<key>` argument.
 
-**Fully backward compatible.** Every existing agent that calls tools without `endpoint=` continues to work unchanged.
+**Update 2026-04-22 (follow-up):** `switch_endpoint` and `switch_endpoint_interactive` have now been **removed** from the gateway. The stateless per-call pattern is the only supported way to target a provider. The session default endpoint is set once at server startup from `SDMX_ENDPOINT` (env var) and is immutable at runtime. If you want a different provider for a specific call, pass `endpoint=<KEY>`; if you want to change the session default, restart the server with a different `SDMX_ENDPOINT`.
+
+**Backward compatibility:** Every existing agent that calls tools without `endpoint=` continues to work unchanged (tools still fall back to the session default). Agents that were calling `switch_endpoint` must migrate to `endpoint=` per-call — the dashboarder already did this in the initial round of adoption, so no action is needed here.
 
 ## What changed upstream
 
 1. **16 endpoint-scoped tools gained an optional `endpoint: str | None = None` kwarg:**
    `list_dataflows`, `get_dataflow_structure`, `get_codelist`, `get_dimension_codes`, `get_code_usage`, `check_time_availability`, `find_code_usage_across_dataflows`, `get_data_availability`, `validate_query`, `build_key`, `build_data_url`, `probe_data_url`, `suggest_nonempty_queries`, `get_structure_diagram`, `compare_structures`, `compare_dataflow_dimensions` (the last already had `endpoint_a` / `endpoint_b`; still supported).
 
-2. **`switch_endpoint` is a pointer flip.** Previously it tore down the session's HTTP client and rebuilt it. Now it just rewrites `SessionState.default_endpoint_key` and keeps the pooled client for the old endpoint warm. Switching back is free.
+2. **`switch_endpoint` removed (follow-up).** Initially rewritten as a cheap pointer flip. Later removed entirely once per-call `endpoint=` was confirmed to be the only pattern in use. Session defaults are now set once at server startup from the `SDMX_ENDPOINT` env var and are immutable thereafter. `switch_endpoint_interactive` (elicitation) is also gone.
 
 3. **Per-session client pool.** Each MCP session owns a dict of `SDMXProgressiveClient` keyed by endpoint. Repeated calls into the same endpoint reuse the same HTTP client (and therefore the same connection pool + version cache).
 
@@ -25,17 +47,17 @@ Every endpoint-scoped MCP tool now accepts an optional `endpoint=<key>` argument
 
    The gateway remembers which dataflow IDs have been seen on which endpoints per session and uses that to sharpen the hint when possible. For genuinely unknown dataflows it falls back to a generic list of registered endpoints.
 
-5. **`switch_endpoint` result hint** now includes an informational line reminding agents they can pass `endpoint=` per call.
+5. **`list_available_endpoints` note** points at the per-call pattern and explicitly states the session default is set at startup and not mutable at runtime.
 
 ## What the agent loop should change
 
 ### Prompt / system message updates
 
-The current implicit pattern in most agent prompts is: *"To query a different provider, call `switch_endpoint` first, then your tool."* That's now the slow path. Replace with:
+Any agent prompt that still mentions `switch_endpoint` is referring to a removed tool and should be purged. Replace with:
 
-> **Preferred pattern for multi-provider work:** Pass `endpoint=<KEY>` directly on each tool call that needs a specific provider. The session's default endpoint stays put unless you explicitly call `switch_endpoint`. You can gather data from two different providers in the same conversation turn without any switching: call `list_dataflows(endpoint='SPC')` and `list_dataflows(endpoint='ECB')` in sequence (or in parallel if your agent runtime supports it) and each resolves to the right provider.
+> **Only pattern for multi-provider work:** Pass `endpoint=<KEY>` directly on each tool call that needs a specific provider. The session's default endpoint is set at server startup and does not change during the session. You can gather data from two different providers in the same conversation turn by calling `list_dataflows(endpoint='SPC')` and `list_dataflows(endpoint='ECB')` in sequence (or in parallel if your agent runtime supports it) and each resolves to the right provider.
 >
-> **When to use `switch_endpoint`:** when the user has settled on a provider for the rest of the conversation and you want subsequent untargeted calls to default to it. Think of it as changing the focus of the session, not as a prerequisite to each call.
+> There is no longer a `switch_endpoint` tool. If you need a specific provider to be the default for a whole conversation, set `SDMX_ENDPOINT` at server startup.
 
 ### Handling mismatch hints in tool errors
 
@@ -72,13 +94,13 @@ The STATSNZ integration (added in the same branch) requires a per-call subscript
 
 ## Backward-compatibility matrix
 
-| Behaviour | Before | After |
-|---|---|---|
-| `tool_name(...)` (no `endpoint=`) | Uses session default | Unchanged |
-| `switch_endpoint('X')` then `tool_name(...)` | Targets X | Targets X (unchanged) |
-| `tool_name(..., endpoint='X')` | N/A (error: unexpected kwarg) | Targets X for this call only |
-| `compare_dataflow_dimensions(..., endpoint_a='X', endpoint_b='Y')` | Creates + tears down temp clients | Uses pool (no tear-down) |
-| Switch, call, switch back, call | 4 HTTP client builds | 2 HTTP client builds; pool reuse |
+| Behaviour | Original | After first round | After removal (2026-04-22) |
+|---|---|---|---|
+| `tool_name(...)` (no `endpoint=`) | Uses session default | Unchanged | Unchanged (session default is startup-time immutable) |
+| `switch_endpoint('X')` then `tool_name(...)` | Targets X | Still works (pointer flip) | **Tool no longer exists** |
+| `tool_name(..., endpoint='X')` | Error: unexpected kwarg | Targets X for this call only | Unchanged |
+| `compare_dataflow_dimensions(..., endpoint_a='X', endpoint_b='Y')` | Creates + tears down temp clients | Uses pool (no tear-down) | Unchanged |
+| Session default set at runtime | Yes, via `switch_endpoint` | Yes, via `switch_endpoint` | No. Set via `SDMX_ENDPOINT` env at startup only |
 
 ## Reference
 
