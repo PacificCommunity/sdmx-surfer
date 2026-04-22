@@ -14,7 +14,7 @@ interface ChatPanelProps {
 
 const SUGGESTIONS = [
   "What dataflows are available about population?",
-  "Show me trade data for Fiji as a bar chart",
+  "Compare trade across Pacific Island countries as a bar chart",
   "I want to explore GDP across Pacific Islands",
 ];
 

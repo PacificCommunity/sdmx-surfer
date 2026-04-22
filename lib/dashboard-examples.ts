@@ -40,7 +40,7 @@ export const EXAMPLE_TRADE_LINE: DashboardAuthoringConfig = {
   colCount: 1,
   header: {
     title: "Trade Trends",
-    subtitle: "Fiji, Samoa, Tonga — Imports & Exports (USD)",
+    subtitle: "Imports & Exports over time, multi-country comparison (USD)",
   },
   rows: [
     {
@@ -77,7 +77,7 @@ export const EXAMPLE_KPI_AND_MAP: DashboardAuthoringConfig = {
           kind: "kpi",
           id: "pop_value",
           colSize: 1,
-          title: "Fiji Population",
+          title: "Latest Population",
           dataUrl:
             "https://stats-sdmx-disseminate.pacificdata.org/rest/data/DF_POP_PROJ/A.FJ.MIDYEARPOPEST._T._T?lastNObservations=1",
           unit: { text: "persons", location: "suffix" },

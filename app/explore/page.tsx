@@ -22,30 +22,33 @@ interface CountryResult {
   dataflow_version: string;
 }
 
-// Common Pacific country codes for the country filter
+// All 22 Pacific Island countries and territories that SPC serves, listed
+// alphabetically by display name so the dropdown doesn't imply any
+// prominence ordering. Keep the full enumeration here; it mirrors the
+// GEO_PICT codelist members used by SPC .Stat.
 const COUNTRIES = [
+  { code: "AS", name: "American Samoa" },
+  { code: "CK", name: "Cook Islands" },
   { code: "FJ", name: "Fiji" },
-  { code: "PG", name: "Papua New Guinea" },
-  { code: "WS", name: "Samoa" },
-  { code: "SB", name: "Solomon Islands" },
-  { code: "TO", name: "Tonga" },
-  { code: "VU", name: "Vanuatu" },
+  { code: "PF", name: "French Polynesia" },
+  { code: "GU", name: "Guam" },
   { code: "KI", name: "Kiribati" },
   { code: "MH", name: "Marshall Islands" },
   { code: "FM", name: "Micronesia" },
   { code: "NR", name: "Nauru" },
-  { code: "PW", name: "Palau" },
-  { code: "TV", name: "Tuvalu" },
-  { code: "CK", name: "Cook Islands" },
-  { code: "NU", name: "Niue" },
-  { code: "TK", name: "Tokelau" },
   { code: "NC", name: "New Caledonia" },
-  { code: "PF", name: "French Polynesia" },
-  { code: "GU", name: "Guam" },
-  { code: "AS", name: "American Samoa" },
+  { code: "NU", name: "Niue" },
   { code: "MP", name: "Northern Mariana Islands" },
-  { code: "WF", name: "Wallis and Futuna" },
+  { code: "PW", name: "Palau" },
+  { code: "PG", name: "Papua New Guinea" },
   { code: "PN", name: "Pitcairn Islands" },
+  { code: "WS", name: "Samoa" },
+  { code: "SB", name: "Solomon Islands" },
+  { code: "TK", name: "Tokelau" },
+  { code: "TO", name: "Tonga" },
+  { code: "TV", name: "Tuvalu" },
+  { code: "VU", name: "Vanuatu" },
+  { code: "WF", name: "Wallis and Futuna" },
 ];
 
 // Color palette for topic categories (CAS_COM_TOPIC)
