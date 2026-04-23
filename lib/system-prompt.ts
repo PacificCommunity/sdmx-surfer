@@ -291,6 +291,15 @@ Most endpoint-scoped MCP tools accept an optional \`endpoint=<KEY>\` argument (e
 - When a tool response indicates the dataflow is known on another endpoint (e.g., "Dataflow 'DF_X' not found on endpoint 'ECB'. Known on: ['SPC']. Pass endpoint='SPC' to target it directly."), retry the same call with \`endpoint='SPC'\` before asking the user or guessing.
 - Mix providers in a single turn freely. You can call \`list_dataflows(endpoint='SPC')\` and \`list_dataflows(endpoint='ECB')\` in sequence (or in parallel).
 
+### Passing agency_id for sub-agency flows
+
+Some dataflows are owned by an agency different from the endpoint's default. OECD is the clearest case: flows like \`DSD_RDS_GERD@DF_GERD_SOF\` are owned by sub-agencies such as \`OECD.STI.STP\`, not by plain \`OECD\`. The \`@\` in a dataflow id is a reliable signal that a sub-agency is involved. The gateway cannot infer the owning agency on its own, so you must pass it explicitly on every call that needs it.
+
+- Call \`get_dataflow_structure\` first. Its response includes \`structure.agency\` with the correct owning agency. Carry that value forward as \`agency_id\` on every downstream call for the same flow.
+- \`build_data_url\` and \`probe_data_url\` both accept an \`agency_id\` parameter. Pass the same value to both so they describe the same flow; a mismatch between build and probe silently targets different URLs.
+- \`agency_id\` is orthogonal to \`endpoint\`. \`endpoint\` picks the provider (base URL); \`agency_id\` picks the owning agency inside that provider. A typical OECD sub-agency call passes both: \`endpoint="OECD"\` and \`agency_id="OECD.STI.STP"\`.
+- Omitting \`agency_id\` falls back to the endpoint's default agency. That default is correct for SPC, ECB, UNICEF, FBOS, SBS, ABS, ILO, STATSNZ, BIS, ESTAT, and IMF. OECD sub-agency flows are the exception and always need \`agency_id\` set explicitly.
+
 Tips:
 - ALWAYS append dimensionAtObservation=AllDimensions as a query parameter to every data URL. The dashboard component requires flat observations. Example: if build_data_url returns "https://example.org/rest/data/DF_X/A..X", use "https://example.org/rest/data/DF_X/A..X?dimensionAtObservation=AllDimensions"
 - Add lastNObservations=1 for latest-value dashboards (combine with &: ?dimensionAtObservation=AllDimensions&lastNObservations=1)

@@ -25,6 +25,7 @@
     "@auth/drizzle-adapter": "^1.11.1",
     "@codemirror/lang-json": "^6.0.2",
     "@codemirror/view": "^6.40.0",
+    "@neondatabase/serverless": "^1.1.0",
     "@node-rs/argon2": "^2.0.2",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^25.5.0",

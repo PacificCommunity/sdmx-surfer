@@ -5,6 +5,8 @@ import { auth } from "@/lib/auth";
 import { db, dashboardSessions } from "@/lib/db";
 import { checkCsrf } from "@/lib/csrf";
 
+export const maxDuration = 25;
+
 // ---------------------------------------------------------------------------
 // Input validation schemas
 // ---------------------------------------------------------------------------

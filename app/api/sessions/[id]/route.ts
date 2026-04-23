@@ -5,6 +5,11 @@ import { auth } from "@/lib/auth";
 import { db, dashboardSessions } from "@/lib/db";
 import { checkCsrf } from "@/lib/csrf";
 
+// A session read/write is a single indexed query; anything over a few seconds
+// means the DB is misbehaving. Cap the function so the client sees a quick
+// 504 and can retry, instead of waiting out the plan's 300s default.
+export const maxDuration = 25;
+
 // ---------------------------------------------------------------------------
 // Input validation schema for PUT
 // ---------------------------------------------------------------------------

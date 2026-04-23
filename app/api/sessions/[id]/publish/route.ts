@@ -5,6 +5,8 @@ import { auth } from "@/lib/auth";
 import { db, dashboardSessions } from "@/lib/db";
 import { checkCsrf } from "@/lib/csrf";
 
+export const maxDuration = 25;
+
 const publishSchema = z.object({
   authorDisplayName: z.string().trim().min(2).max(80),
   publicTitle: z.string().trim().min(3).max(140),

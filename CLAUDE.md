@@ -41,6 +41,8 @@ This project has an active MCP connection to sdmx-mcp-gateway. The progressive d
 
 Most endpoint-scoped tools (`list_dataflows`, `get_dataflow_structure`, `get_codelist`, `get_dimension_codes`, `get_code_usage`, `check_time_availability`, `find_code_usage_across_dataflows`, `get_data_availability`, `validate_query`, `build_key`, `build_data_url`, `probe_data_url`, `suggest_nonempty_queries`, `get_structure_diagram`, `compare_structures`, plus `compare_dataflow_dimensions` via `endpoint_a`/`endpoint_b`) accept an optional `endpoint=<KEY>` argument. Per-call `endpoint=` is the only way to target a specific provider (the old `switch_endpoint` / `switch_endpoint_interactive` tools were removed upstream on 2026-04-22). The session's default endpoint is set once at gateway startup via the `SDMX_ENDPOINT` env var and is immutable at runtime. Probe statuses are exactly `nonempty`, `empty`, `error`; empty-recovery delegates to `suggest_nonempty_queries` rather than guessing relaxations.
 
+Most of those tools also accept an optional `agency_id=<ID>` argument for flows owned by an agency different from the endpoint's default. OECD sub-agency flows are the main case: a dataflow id containing `@` (e.g., `DSD_RDS_GERD@DF_GERD_SOF`) is owned by a sub-agency like `OECD.STI.STP` and needs `agency_id` passed explicitly on `build_data_url`, `probe_data_url`, and any other downstream call. `get_dataflow_structure` returns the correct owning agency in `structure.agency`; carry that value forward. Omitting `agency_id` falls back to the endpoint's default agency, which is correct for every provider except OECD sub-agency flows.
+
 ## Design System Quick Reference
 
 "Oceanic Data-Scapes" / "The Modern Navigator" theme:

@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { KEYED_HOST_NAMES } from "@/lib/keyed-hosts";
+import { PROXIED_HOST_NAMES } from "@/lib/proxied-hosts";
 
-// Client-side fetch wrapper: rewrites fetches to keyed SDMX hosts so they go
-// through /api/sdmx-proxy, where the subscription key is injected server-side.
+// Client-side fetch wrapper: rewrites fetches to SDMX hosts that either need
+// a subscription key or block CORS so they go through /api/sdmx-proxy, where
+// keys are injected server-side and same-origin responses bypass CORS.
 // Mounted once in app/layout.tsx so the builder, /p/[id], gallery, and any
 // future routes all get the wrapper.
 //
@@ -45,7 +46,7 @@ export function SdmxProxyBoot() {
       if (urlStr) {
         try {
           const host = new URL(urlStr, window.location.origin).host;
-          if (KEYED_HOST_NAMES.has(host)) {
+          if (PROXIED_HOST_NAMES.has(host)) {
             return original(
               "/api/sdmx-proxy?url=" + encodeURIComponent(urlStr),
               carriedInit,

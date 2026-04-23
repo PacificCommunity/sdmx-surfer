@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { KEYED_HOSTS } from "@/lib/keyed-hosts";
+import { PROXIED_HOSTS } from "@/lib/proxied-hosts";
 
 // ---------------------------------------------------------------------------
-// GET /api/sdmx-proxy?url=… — proxy SDMX fetches for hosts that require a
-// subscription key. The key is read from env on every request and injected as
-// the configured header; it never crosses the network to the browser.
+// GET /api/sdmx-proxy?url=… — forward SDMX fetches for hosts that either need
+// a subscription key or block CORS. Key-bearing hosts have the key injected
+// server-side; CORS-blocked hosts are simply relayed so the browser sees a
+// same-origin response.
 // ---------------------------------------------------------------------------
 //
 // Defenses (since published dashboards at /p/[id] and the gallery are served
 // unauthenticated, this route is necessarily public):
-//   - Host allowlist — only hosts in lib/keyed-hosts.ts are forwarded.
-//   - Path allowlist per host — narrows what the shared key can query.
+//   - Host allowlist — only hosts in lib/proxied-hosts.ts are forwarded.
+//   - Path allowlist per host — narrows what the proxy will relay so it can't
+//     become an open forwarder for unrelated URLs on the same domain.
 //   - https required on the target URL.
 //   - Loose Origin/Referer check — blocks requests with no browser context.
 //   - Cache-Control gated on status: long cache for 2xx, brief for 4xx, no
@@ -82,7 +84,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "https required" }, { status: 400 });
   }
 
-  const config = KEYED_HOSTS[parsed.host];
+  const config = PROXIED_HOSTS[parsed.host];
   if (!config) {
     return NextResponse.json({ error: "host not allowed" }, { status: 403 });
   }
@@ -91,29 +93,32 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "path not allowed" }, { status: 403 });
   }
 
-  const key = process.env[config.envVar];
-  if (!key) {
-    return NextResponse.json(
-      { error: "server misconfigured" },
-      { status: 500 },
-    );
+  const outgoingHeaders: Record<string, string> = {
+    Accept:
+      req.headers.get("accept") ??
+      "application/vnd.sdmx.data+json;version=1.0.0",
+    "Accept-Language": req.headers.get("accept-language") ?? "en",
+  };
+
+  if (config.key) {
+    const keyValue = process.env[config.key.envVar];
+    if (!keyValue) {
+      return NextResponse.json(
+        { error: "server misconfigured" },
+        { status: 500 },
+      );
+    }
+    outgoingHeaders[config.key.header] = keyValue;
   }
 
   let upstream: Response;
   try {
-    upstream = await fetch(parsed.toString(), {
-      headers: {
-        [config.header]: key,
-        Accept:
-          req.headers.get("accept") ??
-          "application/vnd.sdmx.data+json;version=1.0.0",
-        "Accept-Language": req.headers.get("accept-language") ?? "en",
-      },
-    });
+    upstream = await fetch(parsed.toString(), { headers: outgoingHeaders });
   } catch (err) {
     logProxy({
       host: parsed.host,
       path: parsed.pathname,
+      reason: config.reason,
       status: 502,
       ms: Date.now() - started,
       error: err instanceof Error ? err.message : String(err),
@@ -127,6 +132,7 @@ export async function GET(req: NextRequest) {
   logProxy({
     host: parsed.host,
     path: parsed.pathname,
+    reason: config.reason,
     status: upstream.status,
     ms: Date.now() - started,
   });
