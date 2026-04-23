@@ -293,12 +293,14 @@ Most endpoint-scoped MCP tools accept an optional \`endpoint=<KEY>\` argument (e
 
 ### Passing agency_id for sub-agency flows
 
-Some dataflows are owned by an agency different from the endpoint's default. OECD is the clearest case: flows like \`DSD_RDS_GERD@DF_GERD_SOF\` are owned by sub-agencies such as \`OECD.STI.STP\`, not by plain \`OECD\`. The \`@\` in a dataflow id is a reliable signal that a sub-agency is involved. The gateway cannot infer the owning agency on its own, so you must pass it explicitly on every call that needs it.
+Some dataflows are owned by an agency different from the endpoint's default. OECD is the clearest case: flows like \`DSD_RDS_GERD@DF_GERD_SOF\` are owned by sub-agencies such as \`OECD.STI.STP\`, not by plain \`OECD\`. The \`@\` in a dataflow id is a reliable signal that a sub-agency is involved.
 
-- Call \`get_dataflow_structure\` first. Its response includes \`structure.agency\` with the correct owning agency. Carry that value forward as \`agency_id\` on every downstream call for the same flow.
+- \`list_dataflows\` summaries include an \`agency\` field per entry. That is the canonical source: when you pick a flow from a \`list_dataflows\` result, carry its \`agency\` forward as \`agency_id\` on every downstream call for that flow (\`get_dataflow_structure\`, \`build_data_url\`, \`probe_data_url\`, etc.).
+- If you arrive at a flow without going through \`list_dataflows\`, call \`get_dataflow_structure\`: its response's \`structure.agency\` holds the correct owning agency.
 - \`build_data_url\` and \`probe_data_url\` both accept an \`agency_id\` parameter. Pass the same value to both so they describe the same flow; a mismatch between build and probe silently targets different URLs.
 - \`agency_id\` is orthogonal to \`endpoint\`. \`endpoint\` picks the provider (base URL); \`agency_id\` picks the owning agency inside that provider. A typical OECD sub-agency call passes both: \`endpoint="OECD"\` and \`agency_id="OECD.STI.STP"\`.
-- Omitting \`agency_id\` falls back to the endpoint's default agency. That default is correct for SPC, ECB, UNICEF, FBOS, SBS, ABS, ILO, STATSNZ, BIS, ESTAT, and IMF. OECD sub-agency flows are the exception and always need \`agency_id\` set explicitly.
+- If you omit \`agency_id\` on an OECD \`@\`-flow, the gateway auto-retries once with the \`agency="all"\` wildcard and recovers the sub-agency from the response. That makes initial discovery tolerant, but it costs an extra round-trip; pass \`agency_id\` explicitly when you already know it.
+- For non-OECD providers (SPC, ECB, UNICEF, FBOS, SBS, ABS, ILO, STATSNZ, BIS, ESTAT, IMF), omitting \`agency_id\` resolves to the endpoint's default agency, which is correct.
 
 Tips:
 - ALWAYS append dimensionAtObservation=AllDimensions as a query parameter to every data URL. The dashboard component requires flat observations. Example: if build_data_url returns "https://example.org/rest/data/DF_X/A..X", use "https://example.org/rest/data/DF_X/A..X?dimensionAtObservation=AllDimensions"
