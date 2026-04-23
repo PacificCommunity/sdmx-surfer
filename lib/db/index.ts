@@ -1,5 +1,5 @@
 import { neon } from "@neondatabase/serverless";
-import { drizzle, type NeonHttpDatabase } from "drizzle-orm/neon-http";
+import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "./schema";
 
 // Neon HTTP driver: every query is a stateless HTTPS request to Neon's SQL
@@ -15,32 +15,26 @@ import * as schema from "./schema";
 // (WebSocket-pooled) for just those paths rather than regressing the whole
 // module back to the TCP pool.
 //
-// The db handle is built lazily on first use so modules can be imported in
-// test environments without a DB URL. Attempting an actual query without a
-// configured URL throws with a clear message.
+// Initialization is eager. A Proxy-based lazy wrapper was attempted first to
+// let the module import cleanly in test environments, but `@auth/drizzle-adapter`
+// calls drizzle's `is(db, PgDatabase)` at module load to pick a dialect, and
+// `is()` walks `Object.getPrototypeOf(db).constructor` — a Proxy target of
+// `{}` yields `Object`, so the adapter rejects the db with "Unsupported
+// database type (object)". Constructing drizzle eagerly preserves the
+// prototype chain; the `neon()` client is itself lazy (no network until a
+// query actually runs), so construction with a placeholder URL at build time
+// is harmless.
 
-type Schema = typeof schema;
-let cached: NeonHttpDatabase<Schema> | null = null;
+const databaseUrl =
+  process.env.POSTGRES_URL_NON_POOLING ??
+  process.env.POSTGRES_URL ??
+  process.env.DATABASE_URL ??
+  // Placeholder so module load succeeds during `next build` page-data
+  // collection and in test environments. Any real query without a real URL
+  // will fail at fetch time with a clear network error.
+  "postgresql://placeholder:placeholder@placeholder.invalid/placeholder";
 
-function resolveDb(): NeonHttpDatabase<Schema> {
-  if (cached) return cached;
-  const url =
-    process.env.POSTGRES_URL_NON_POOLING ??
-    process.env.POSTGRES_URL ??
-    process.env.DATABASE_URL;
-  if (!url) {
-    throw new Error(
-      "Database URL not configured: set POSTGRES_URL (or POSTGRES_URL_NON_POOLING) via the Vercel/Neon integration, or DATABASE_URL locally.",
-    );
-  }
-  cached = drizzle(neon(url), { schema });
-  return cached;
-}
-
-export const db = new Proxy({} as NeonHttpDatabase<Schema>, {
-  get(_target, prop, receiver) {
-    return Reflect.get(resolveDb(), prop, receiver);
-  },
-}) as NeonHttpDatabase<Schema>;
+const client = neon(databaseUrl);
+export const db = drizzle(client, { schema });
 
 export * from "./schema";
