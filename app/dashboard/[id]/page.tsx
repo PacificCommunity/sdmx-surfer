@@ -8,6 +8,7 @@ import { useHighchartsViewportReflow } from "@/lib/use-highcharts-viewport-reflo
 import { SDMXDashboardDynamic } from "@/components/sdmx-dashboard-dynamic";
 import { DataSourcesPanel, DashboardSourceFooter } from "@/components/data-sources-panel";
 import { DashboardExportMenu } from "@/components/dashboard-export-menu";
+import { AppFooter } from "@/components/app-footer";
 import type { SDMXDashboardConfig } from "@/lib/types";
 
 const DASHBOARD_CARD_SCROLL_CLASS =
@@ -157,6 +158,7 @@ export default function DashboardViewPage() {
         <DataSourcesPanel config={config} />
 
         <DashboardSourceFooter config={config} />
+        <AppFooter className="mt-4 pb-8" />
       </main>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { SurferLogo } from "@/components/surfer-logo";
+import { AppFooter } from "@/components/app-footer";
 
 interface PublishedDashboardSummary {
   id: string;
@@ -138,6 +139,7 @@ export default function GalleryPage() {
             ))}
           </div>
         )}
+        <AppFooter />
       </main>
     </div>
   );

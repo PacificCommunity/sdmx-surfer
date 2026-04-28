@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
+import { AppFooter } from "@/components/app-footer";
 
 interface Category {
   scheme: string;
@@ -563,6 +564,7 @@ export default function ExplorePage() {
             )}
           </div>
         )}
+        <AppFooter />
       </main>
     </div>
   );

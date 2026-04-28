@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { SurferLogo } from "@/components/surfer-logo";
+import { AppFooter } from "@/components/app-footer";
 
 function getSafeCallbackUrl(rawCallbackUrl: string | null): string {
   if (!rawCallbackUrl) return "/";
@@ -322,9 +323,7 @@ export default function LoginPage() {
           <LoginForm />
         </Suspense>
 
-        <p className="mt-6 text-center text-xs text-text-muted">
-          Pacific Community — SDMX Surfer
-        </p>
+        <AppFooter className="mt-6" />
       </div>
     </div>
   );

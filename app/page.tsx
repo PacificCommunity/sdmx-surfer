@@ -8,6 +8,7 @@ import {
 } from "@/lib/session";
 import { signOut } from "next-auth/react";
 import { SurferLogo } from "@/components/surfer-logo";
+import { AppFooter } from "@/components/app-footer";
 
 export default function WelcomePage() {
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
@@ -376,18 +377,7 @@ export default function WelcomePage() {
           </section>
         )}
 
-        {/* Footer */}
-        <footer className="mt-16 pb-8 text-center text-xs text-on-surface-variant">
-          SDMX Surfer — Pacific Community
-          <br />
-          Data from{" "}
-          <a
-            href="https://stats.pacificdata.org"
-            className="text-secondary hover:underline"
-          >
-            Pacific Data Hub
-          </a>
-        </footer>
+        <AppFooter />
       </main>
     </div>
   );

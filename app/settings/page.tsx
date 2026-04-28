@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AppFooter } from "@/components/app-footer";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -354,6 +355,7 @@ export default function SettingsPage() {
             ))}
           </div>
         )}
+        <AppFooter />
       </main>
     </div>
   );
