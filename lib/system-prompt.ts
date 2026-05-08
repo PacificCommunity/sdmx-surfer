@@ -176,7 +176,7 @@ Important chart rules:
 - \`xAxis\` is the dimension shown on the axis.
 - \`seriesBy\` is the legend / series dimension.
 - The compiler fills \`yAxisConcept: "OBS_VALUE"\` unless you override it.
-- For \`bar\`, \`column\`, \`lollipop\`, and \`treemap\`, you MUST provide \`seriesBy\`. The compiler rejects these charts if it is missing.
+- For \`bar\`, \`column\`, \`lollipop\`, and \`treemap\`, you MUST provide \`seriesBy\` AND it must be a different dimension from \`xAxis\`. Both must actually vary in the data — check that the probe shows \`distinct_count > 1\` for both. If only one dimension varies (e.g. you used \`lastNObservations=1\` and only \`ITEM\` varies), the library throws "Chart type=bar with xAxis=... needs at least one other varying dimension". Fix by widening the query so a second dim varies (drop \`lastNObservations\`, broaden the filter), or switch to \`line\` or \`pie\` which work with a single varying dim.
 - ALWAYS set \`unit\` with a meaningful text — the library uses it for the y-axis label. Without it the axis shows generic "values". Example: \`"unit": { "text": "USD millions", "location": "suffix" }\`
 - For more control over y-axis text, use \`extraOptions\`:
   \`"extraOptions": { "yAxis": { "title": { "text": "Trade Value (USD millions)" } } }\`
@@ -266,7 +266,7 @@ The probe_data_url response tells you the exact shape of the data. Use it to pic
 |---|---|
 | observation_count = 1 | \`kpi\` — single value card |
 | observation_count > 1, has_time_dimension = true, time_period_count > 3 | \`chart\` with chartType \`line\` (xAxis = TIME_PERIOD) |
-| observation_count > 1, geo_dimension_id present, no time variation | \`chart\` with chartType \`bar\` (xAxis = geo dimension) or \`map\` |
+| observation_count > 1, geo_dimension_id present, no time variation | \`chart\` with chartType \`bar\` (xAxis = geo dimension, seriesBy = a second varying dim) or \`map\`. If only the geo dim varies, use \`map\` or \`pie\`; \`bar\` needs ≥2 varying dims. |
 | observation_count > 1, geo_dimension_id present, time_period_count > 1 | \`chart\` with chartType \`line\`, or \`map\` for latest snapshot |
 | observation_count = 0 | Empty result. Call suggest_nonempty_queries — do NOT emit this panel. |
 
@@ -351,6 +351,7 @@ const TOOL_INSTRUCTIONS = `## Tool Usage Rules
 - If a data URL returns no data, try broadening the query (fewer dimension filters, wider time range).
 - If you are building a map, do NOT handcraft the native map string. Use the map intent visual and let the compiler build the native syntax.
 - If the dashboard preview reports an error, it will include the component names and their data URLs. Use this to identify WHICH component failed. Do NOT blindly rebuild the entire dashboard — fix only the broken component(s).
+- The preview fetches data as **SDMX-JSON 2.0** via \`Accept: application/vnd.sdmx.data+json;version=2.0.0\`. It does NOT use CSV. Render errors are never caused by CSV-shape issues (attribute columns, BASE_PER, escaping). Do not add \`&detail=dataonly\` to URLs as a render fix — it is a no-op for the JSON parser and just adds noise. Read the actual error message; the library reports the precise cause (e.g. "Chart type=bar... needs at least one other varying dimension", "xAxisConcept X not found in dataflow", or a parser error pointing at a specific field).
 - When fixing errors, try at most 2 attempts per component. If a data URL consistently fails, tell the user the data may not be available and suggest alternatives.
 
 DATA AVAILABILITY CAVEAT: The check_time_availability and get_data_availability tools report the theoretical range and dimension values, but this does NOT guarantee data exists for every combination. Data can be sparse — e.g., a dataflow might report "1990-2020" for Fiji but have actual observations only for 2000, 2005, 2010. If a chart renders empty despite the availability check, the data simply doesn't exist for that specific combination. Don't retry the same query — try a different indicator, broader time range, or fewer country filters.
