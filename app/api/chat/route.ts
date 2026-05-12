@@ -226,17 +226,33 @@ export async function POST(req: Request) {
           );
         }
       },
-      onFinish: async ({ text, usage, providerMetadata }) => {
+      onFinish: async ({ text, totalUsage, steps }) => {
         logger.setAiResponse(text);
-        const gatewayCost = (providerMetadata as { gateway?: { cost?: string } } | undefined)
-          ?.gateway?.cost;
-        if (gatewayCost) {
-          const parsed = parseFloat(gatewayCost);
-          logger.setCostUsd(Number.isFinite(parsed) ? parsed : null);
+        // AI SDK v6: `onFinish` extends the FINAL step's `StepResult`. The
+        // `usage` and `providerMetadata` on the event refer to that final step
+        // only — not the whole turn. For multi-step agent runs (every SDMX
+        // Surfer turn is 8-20 steps) summing per-step costs from `steps[]` is
+        // the only way to get the real total. Use `totalUsage` for tokens.
+        let totalCost = 0;
+        let anyCost = false;
+        for (const step of steps) {
+          const c = (
+            step.providerMetadata as { gateway?: { cost?: string } } | undefined
+          )?.gateway?.cost;
+          if (c == null) continue;
+          const parsed = parseFloat(c);
+          if (Number.isFinite(parsed)) {
+            totalCost += parsed;
+            anyCost = true;
+          }
         }
+        logger.setCostUsd(anyCost ? totalCost : null);
         await logger.flush(
-          usage
-            ? { input: usage.inputTokens ?? 0, output: usage.outputTokens ?? 0 }
+          totalUsage
+            ? {
+                input: totalUsage.inputTokens ?? 0,
+                output: totalUsage.outputTokens ?? 0,
+              }
             : undefined,
         );
         if (mcpClient) await mcpClient.close().catch(() => {});

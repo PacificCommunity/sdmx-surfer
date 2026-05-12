@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { count, sum, sql, gte, isNull } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, authUsers, usageLogs, dashboardSessions, authEvents } from "@/lib/db";
-import { USAGE_EPOCH } from "@/lib/admin-epoch";
+import { USAGE_EPOCH, COST_TRUSTED_FROM } from "@/lib/admin-epoch";
 import { deriveJoinedAt } from "@/lib/admin-query";
 
 // ---------------------------------------------------------------------------
@@ -43,19 +43,32 @@ export async function GET() {
       })
       .from(authUsers);
 
-    // Aggregate usage logs per user: request count, total tokens, last active
-    const usageRows = await db
+    // Per-user activity (request count, first/last active) — full window since
+    // USAGE_EPOCH. Tokens and cost are NOT aggregated here because pre-cutoff
+    // rows are systematically undercounted (AI SDK v6 final-step-only bug,
+    // see admin-epoch.ts).
+    const activityRows = await db
       .select({
         userId: usageLogs.user_id,
         requestCount: count(usageLogs.id),
-        totalInputTokens: sum(usageLogs.input_tokens),
-        totalOutputTokens: sum(usageLogs.output_tokens),
-        totalCostUsd: sum(usageLogs.cost_usd),
         firstActive: sql<string>`min(${usageLogs.created_at})`,
         lastActive: sql<string>`max(${usageLogs.created_at})`,
       })
       .from(usageLogs)
       .where(gte(usageLogs.created_at, USAGE_EPOCH))
+      .groupBy(usageLogs.user_id);
+
+    // Per-user spend (tokens + cost) — only since COST_TRUSTED_FROM where the
+    // chat-route aggregates every step properly.
+    const spendRows = await db
+      .select({
+        userId: usageLogs.user_id,
+        totalInputTokens: sum(usageLogs.input_tokens),
+        totalOutputTokens: sum(usageLogs.output_tokens),
+        totalCostUsd: sum(usageLogs.cost_usd),
+      })
+      .from(usageLogs)
+      .where(gte(usageLogs.created_at, COST_TRUSTED_FROM))
       .groupBy(usageLogs.user_id);
 
     // Per-(user, model, provider, key_source) buckets — drives the drill-down.
@@ -73,7 +86,7 @@ export async function GET() {
         costUsd: sum(usageLogs.cost_usd),
       })
       .from(usageLogs)
-      .where(gte(usageLogs.created_at, USAGE_EPOCH))
+      .where(gte(usageLogs.created_at, COST_TRUSTED_FROM))
       .groupBy(
         usageLogs.user_id,
         usageLogs.model,
@@ -104,7 +117,8 @@ export async function GET() {
       .groupBy(authEvents.user_id);
 
     // Build lookup maps
-    const usageMap = new Map(usageRows.map((r) => [r.userId, r]));
+    const activityMap = new Map(activityRows.map((r) => [r.userId, r]));
+    const spendMap = new Map(spendRows.map((r) => [r.userId, r]));
     const sessionMap = new Map(sessionRows.map((r) => [r.userId, r]));
     const loginMap = new Map(
       loginRows
@@ -127,11 +141,12 @@ export async function GET() {
     }
 
     const enriched = users.map((u) => {
-      const usage = usageMap.get(u.id);
+      const activity = activityMap.get(u.id);
+      const spend = spendMap.get(u.id);
       const sess = sessionMap.get(u.id);
-      const inputTokens = Number(usage?.totalInputTokens ?? 0);
-      const outputTokens = Number(usage?.totalOutputTokens ?? 0);
-      const firstActiveAt = usage?.firstActive || null;
+      const inputTokens = Number(spend?.totalInputTokens ?? 0);
+      const outputTokens = Number(spend?.totalOutputTokens ?? 0);
+      const firstActiveAt = activity?.firstActive || null;
       return {
         id: u.id,
         email: u.email,
@@ -142,17 +157,17 @@ export async function GET() {
           emailVerified: u.emailVerified,
           firstLoginAt: loginMap.get(u.id) || null,
           firstActiveAt,
-          lastActiveAt: usage?.lastActive || null,
+          lastActiveAt: activity?.lastActive || null,
           createdAt: u.createdAt,
         }),
-        requestCount: Number(usage?.requestCount ?? 0),
+        requestCount: Number(activity?.requestCount ?? 0),
         totalTokens: inputTokens + outputTokens,
         totalCostUsd:
-          usage?.totalCostUsd === null || usage?.totalCostUsd === undefined
+          spend?.totalCostUsd === null || spend?.totalCostUsd === undefined
             ? null
-            : Number(usage.totalCostUsd),
+            : Number(spend.totalCostUsd),
         sessionCount: Number(sess?.sessionCount ?? 0),
-        lastActive: usage?.lastActive || null,
+        lastActive: activity?.lastActive || null,
         breakdown: breakdownMap.get(u.id) ?? [],
       };
     });

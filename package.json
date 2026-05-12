@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "postinstall": "node scripts/apply-patches.mjs",
+    "postinstall": "node -e \"const fs=require('fs');if(fs.existsSync('scripts/apply-patches.mjs')){require('child_process').execFileSync('node',['scripts/apply-patches.mjs'],{stdio:'inherit'})}else{const S=[['node_modules/sdmx-json-parser/dist/parser.js','SBS-v1-to-v2 normalisation'],['node_modules/sdmx-dashboard-components/dist/sdmx-dashboard-components.js','varies in this query. Fix: switch chart type']];for(const[f,s]of S){let c;try{c=fs.readFileSync(f,'utf8')}catch(e){console.error('[postinstall] missing '+f);process.exit(1)}if(!c.includes(s)){console.error('[postinstall] FATAL: scripts/apply-patches.mjs missing AND patches absent from cached '+f+' — force-redeploy to refresh the build cache');process.exit(1)}}console.log('[postinstall] script missing but cached node_modules has patches applied — skipping')}\"",
     "dev": "next dev --turbopack",
     "build": "next build --webpack",
     "start": "next start",

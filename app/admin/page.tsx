@@ -31,6 +31,7 @@ interface RecentActivityRow {
 
 interface OverviewResponse {
   epoch: string;
+  costTrustedFrom: string;
   totals: {
     users: number;
     sessions: number;
@@ -106,13 +107,16 @@ export default function AdminOverviewPage() {
     );
   }
 
-  const { totals, invites, spendByModel, recentActivity, epoch } = data;
-  const epochDate = new Date(epoch);
-  const epochLabel = epochDate.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  const { totals, invites, spendByModel, recentActivity, epoch, costTrustedFrom } = data;
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  const epochLabel = formatDate(epoch);
+  const costLabel = formatDate(costTrustedFrom);
+  const costScopeDiffers = epoch !== costTrustedFrom;
 
   // Largest bucket first — helps spot "who's eating the bill".
   const sortedSpend = [...spendByModel].sort(
@@ -128,7 +132,9 @@ export default function AdminOverviewPage() {
             Activity since {epochLabel}
           </h2>
           <span className="type-label-md text-on-surface-variant">
-            Usage analytics epoch — earlier rows excluded
+            {costScopeDiffers
+              ? "Tokens / spend reset on " + costLabel + " after cost-accounting fix"
+              : "Usage analytics epoch — earlier rows excluded"}
           </span>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -146,6 +152,7 @@ export default function AdminOverviewPage() {
             label="Tokens"
             value={totals.tokens.toLocaleString()}
             hint={
+              (costScopeDiffers ? "since " + costLabel + " · " : "") +
               totals.inputTokens.toLocaleString() +
               " in / " +
               totals.outputTokens.toLocaleString() +
@@ -155,7 +162,11 @@ export default function AdminOverviewPage() {
           <StatsTile
             label="Spend"
             value={formatUsd(totals.costUsd)}
-            hint="gateway-tracked only"
+            hint={
+              costScopeDiffers
+                ? "since " + costLabel + " · gateway-tracked only"
+                : "gateway-tracked only"
+            }
           />
         </div>
       </div>
@@ -168,7 +179,7 @@ export default function AdminOverviewPage() {
         {sortedSpend.length === 0 ? (
           <div className="ghost-border rounded-[var(--radius-lg)] bg-surface-card px-6 py-8 text-center">
             <p className="type-label-md text-on-surface-variant">
-              No usage recorded since {epochLabel}.
+              No usage recorded since {costLabel}.
             </p>
           </div>
         ) : (

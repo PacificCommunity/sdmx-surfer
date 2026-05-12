@@ -47,7 +47,10 @@ const PATCHES = [
   {
     name: "sdmx-dashboard-components: throw actionable error when bar/column chart has no series dim",
     file: "node_modules/sdmx-dashboard-components/dist/sdmx-dashboard-components.js",
-    sentinel: 'Chart type=" + m + " with xAxis=',
+    // Sentinel picked from the throw's message body; no double quotes so the
+    // inline fallback in package.json's postinstall can check it without
+    // shell-escape gymnastics.
+    sentinel: "varies in this query. Fix: switch chart type",
     reason:
       "Library silently produced a blank panel when the bar/column branch couldn't find a series dimension distinct from xAxis. Replace with a thrown error the agent can read and self-correct from.",
     before:

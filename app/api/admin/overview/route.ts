@@ -20,7 +20,7 @@ import {
   allowedEmails,
   authEvents,
 } from "@/lib/db";
-import { USAGE_EPOCH } from "@/lib/admin-epoch";
+import { USAGE_EPOCH, COST_TRUSTED_FROM } from "@/lib/admin-epoch";
 import { hasSignedUp } from "@/lib/admin-query";
 
 // ---------------------------------------------------------------------------
@@ -149,16 +149,24 @@ export async function GET() {
       }) ? 1 : 0);
     }, 0);
 
-    // Usage totals since epoch
+    // Usage totals — requestCount uses USAGE_EPOCH (full window). Tokens and
+    // cost use COST_TRUSTED_FROM because pre-cutoff sums are systematically
+    // undercounted by the AI SDK v6 final-step-only bug (see admin-epoch.ts).
     const [usageTotals] = await db
       .select({
         requestCount: count(usageLogs.id),
+      })
+      .from(usageLogs)
+      .where(gte(usageLogs.created_at, USAGE_EPOCH));
+
+    const [usageSpend] = await db
+      .select({
         totalInputTokens: sum(usageLogs.input_tokens),
         totalOutputTokens: sum(usageLogs.output_tokens),
         totalCostUsd: sum(usageLogs.cost_usd),
       })
       .from(usageLogs)
-      .where(gte(usageLogs.created_at, USAGE_EPOCH));
+      .where(gte(usageLogs.created_at, COST_TRUSTED_FROM));
 
     // Spend by (model, provider, key_source) — fuels the "Spend by model" table
     const spendByModelRows = await db
@@ -172,7 +180,7 @@ export async function GET() {
         costUsd: sum(usageLogs.cost_usd),
       })
       .from(usageLogs)
-      .where(gte(usageLogs.created_at, USAGE_EPOCH))
+      .where(gte(usageLogs.created_at, COST_TRUSTED_FROM))
       .groupBy(usageLogs.model, usageLogs.provider, usageLogs.key_source);
 
     const spendByModel: SpendByModelRow[] = spendByModelRows.map((r) => ({
@@ -220,11 +228,12 @@ export async function GET() {
       createdAt: r.createdAt,
     }));
 
-    const totalInputTokens = Number(usageTotals?.totalInputTokens ?? 0);
-    const totalOutputTokens = Number(usageTotals?.totalOutputTokens ?? 0);
+    const totalInputTokens = Number(usageSpend?.totalInputTokens ?? 0);
+    const totalOutputTokens = Number(usageSpend?.totalOutputTokens ?? 0);
 
     return NextResponse.json({
       epoch: USAGE_EPOCH.toISOString(),
+      costTrustedFrom: COST_TRUSTED_FROM.toISOString(),
       totals: {
         users: Number(usersRow?.c ?? 0),
         sessions: Number(sessionsRow?.c ?? 0),
@@ -234,10 +243,10 @@ export async function GET() {
         outputTokens: totalOutputTokens,
         tokens: totalInputTokens + totalOutputTokens,
         costUsd:
-          usageTotals?.totalCostUsd === null ||
-          usageTotals?.totalCostUsd === undefined
+          usageSpend?.totalCostUsd === null ||
+          usageSpend?.totalCostUsd === undefined
             ? 0
-            : Number(usageTotals.totalCostUsd),
+            : Number(usageSpend.totalCostUsd),
       },
       invites: {
         total: Number(inviteTotal?.c ?? 0),
