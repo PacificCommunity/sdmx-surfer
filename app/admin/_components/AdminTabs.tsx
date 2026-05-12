@@ -8,6 +8,7 @@ const TABS: Array<{ href: string; label: string }> = [
   { href: "/admin/users", label: "Users" },
   { href: "/admin/invites", label: "Invites" },
   { href: "/admin/dashboards", label: "Dashboards" },
+  { href: "/admin/activity", label: "Activity" },
 ];
 
 export function AdminTabs() {

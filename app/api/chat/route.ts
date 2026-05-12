@@ -210,18 +210,20 @@ export async function POST(req: Request) {
 
         return {};
       },
-      onStepFinish: ({ toolCalls }) => {
-        if (!toolCalls) return;
-        for (const tc of toolCalls) {
-          if (tc.toolName !== "update_dashboard") {
-            const tcAny = tc as Record<string, unknown>;
-            logger.recordToolCall(
-              tc.toolName,
-              (tcAny.args ?? tcAny.input ?? {}) as Record<string, unknown>,
-              (tcAny.result ?? tcAny.output) as unknown,
-              currentStep,
-            );
-          }
+      onStepFinish: ({ dynamicToolCalls }) => {
+        // AI SDK v6 splits tool calls into static (defined inline, e.g.
+        // update_dashboard) and dynamic (MCP). update_dashboard logs itself
+        // in its execute(); here we just record the dynamic ones — every
+        // MCP SDMX call we want to surface in admin analytics.
+        if (!dynamicToolCalls) return;
+        for (const tc of dynamicToolCalls) {
+          const tcAny = tc as Record<string, unknown>;
+          logger.recordToolCall(
+            String(tcAny.toolName ?? ""),
+            (tcAny.input ?? tcAny.args ?? {}) as Record<string, unknown>,
+            (tcAny.result ?? tcAny.output) as unknown,
+            currentStep,
+          );
         }
       },
       onFinish: async ({ text, usage, providerMetadata }) => {
