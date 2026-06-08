@@ -48,7 +48,7 @@ function logFailure(item: DashboardItem, err: Error) {
 
 export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
   return (
-    <div className="space-y-10">
+    <div className="space-y-10" data-snapshot-pdf-target>
       {config.items.map((item) => (
         <section
           key={item.id}

@@ -7,6 +7,7 @@ import {
 import { buildSnapshotConfig } from "@/lib/country-snapshots/config-builder";
 import { SnapshotPageShell } from "@/components/country-snapshots/snapshot-page-shell";
 import { DashboardRenderer } from "@/components/country-snapshots/dashboard-renderer";
+import { ExportButton } from "@/components/country-snapshots/export-button";
 
 export async function generateStaticParams() {
   const cat = getSnapshotCatalogue();
@@ -39,6 +40,9 @@ export default async function Page({
     <SnapshotPageShell
       title={`${country.name} — ${theme.title}`}
       subtitle={`Snapshot of ${config.items.length} indicators`}
+      actions={
+        <ExportButton filenameStem={`${country.name}_${theme.title}`} />
+      }
     >
       <DashboardRenderer config={config} />
     </SnapshotPageShell>

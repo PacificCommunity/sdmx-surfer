@@ -9,6 +9,7 @@ import { buildSnapshotConfig } from "@/lib/country-snapshots/config-builder";
 import { SnapshotPageShell } from "@/components/country-snapshots/snapshot-page-shell";
 import { DashboardRenderer } from "@/components/country-snapshots/dashboard-renderer";
 import { ComparePicker } from "@/components/country-snapshots/compare-picker";
+import { ExportButton } from "@/components/country-snapshots/export-button";
 
 const MAX_COMPARE = 5;
 const MIN_COMPARE = 2;
@@ -47,6 +48,11 @@ export default async function ComparePage({
     <SnapshotPageShell
       title={`${safeCountries.map((c) => c.name).join(" vs ")} — ${theme.title}`}
       subtitle={`Compare across ${codes.length} countries — ${config.items.length} indicators`}
+      actions={
+        <ExportButton
+          filenameStem={`${safeCountries.map((c) => c.name).join("_vs_")}_${theme.title}`}
+        />
+      }
     >
       <ComparePicker theme={theme} countries={cat.countries} selected={codes} />
       <DashboardRenderer config={config} />
