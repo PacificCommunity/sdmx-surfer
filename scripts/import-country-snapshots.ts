@@ -189,12 +189,15 @@ export async function importExcel(
     if (API && API !== "-") {
       const { url, fixed } = normaliseUrl(API);
       if (fixed) urlFixups.push(`${ID}: ${API} -> ${url}`);
-      apiUrlTemplate = url.includes("[TAG_GEO]")
-        ? url
-        : url
-            .replace(/\/A\.\./, "/A.[TAG_GEO].")
-            .replace(/\/A\./, "/A.[TAG_GEO].");
-      if (!apiUrlTemplate.includes("[TAG_GEO]")) {
+      if (url.includes("[TAG_GEO]")) {
+        apiUrlTemplate = url;
+      } else if (/\/A\.\./.test(url)) {
+        // Empty geo dimension (A..) — substitute [TAG_GEO].
+        apiUrlTemplate = url.replace(/\/A\.\./, "/A.[TAG_GEO].");
+      } else if (/\/A\./.test(url)) {
+        // Time-only first dim then geo — insert [TAG_GEO] after A.
+        apiUrlTemplate = url.replace(/\/A\./, "/A.[TAG_GEO].");
+      } else {
         skippedRows.push(
           `INDICATORS ${ID}: could not parameterise URL with [TAG_GEO]; kept as-is`,
         );

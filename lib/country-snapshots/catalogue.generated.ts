@@ -316,7 +316,7 @@ export const catalogue: Catalogue = {
       "mfatName": "Age dependency ratio, young (% of working-age population)",
       "rendering": "TABLE",
       "dataflow": "DF_POP_AGE",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_AGE,/A.[TAG_GEO].[TAG_GEO].POPYOUTH._T?dimensionAtObservation=AllDimensions",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_AGE,/A.[TAG_GEO].POPYOUTH._T?dimensionAtObservation=AllDimensions",
       "visUrl": "https://stats.pacificdata.org/vis?tm=population&pg=0&hc[Topic]=Population&snb=42&df[ds]=ds%3ASPC2&df[id]=DF_POP_AGE&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..POPYOUTH._T&ly[rw]=GEO_PICT&to[TIME_PERIOD]=false",
       "notes": "New 2024"
     },
@@ -514,7 +514,7 @@ export const catalogue: Catalogue = {
       "mfatName": "Immunisation coverage by vaccine (three main types - DPT, HepB3, Measles)",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_HEA",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A.[TAG_GEO].[TAG_GEO].NMDI0103._T._T._T..?dimensionAtObservation=AllDimensions",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A.[TAG_GEO].NMDI0103._T._T._T..?dimensionAtObservation=AllDimensions",
       "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators%2C0%7CNational%20Minimum%20Development%20Indicators%23NMDI%23&pg=0&fc=Development%20indicators&bp=true&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_HEA&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0103._T._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
       "notes": "New 2024"
     },
@@ -525,7 +525,7 @@ export const catalogue: Catalogue = {
       "mfatName": "Immunisation coverage by vaccine (three main types - DPT, HepB3, Measles)",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_HEA",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A.[TAG_GEO].[TAG_GEO].NMDI0145._T._T._T..?dimensionAtObservation=AllDimensions",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A.[TAG_GEO].NMDI0145._T._T._T..?dimensionAtObservation=AllDimensions",
       "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators%2C0%7CNational%20Minimum%20Development%20Indicators%23NMDI%23&pg=0&fc=Development%20indicators&bp=true&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_HEA&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0145._T._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
       "notes": "New 2024"
     },
@@ -536,7 +536,7 @@ export const catalogue: Catalogue = {
       "mfatName": "Immunisation coverage by vaccine (three main types - DPT, HepB3, Measles)",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_HEA",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A.[TAG_GEO].[TAG_GEO].NMDI0146._T._T._T..?dimensionAtObservation=AllDimensions",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A.[TAG_GEO].NMDI0146._T._T._T..?dimensionAtObservation=AllDimensions",
       "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators%2C0%7CNational%20Minimum%20Development%20Indicators%23NMDI%23&pg=0&fc=Development%20indicators&bp=true&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_HEA&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0146._T._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
       "notes": "New 2024"
     },
@@ -691,7 +691,7 @@ export const catalogue: Catalogue = {
       "mfatName": "Survival rate to the last grade of lower secondary general education (%) (Transition rate)",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_EDU",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].[TAG_GEO].NMDI0431._T._T._T..?dimensionAtObservation=AllDimensions",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0431._T._T._T..?dimensionAtObservation=AllDimensions",
       "visUrl": "https://stats.pacificdata.org/vis?tm=transition%20rate&pg=0&snb=2&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0431._T._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
       "notes": "New 2024"
     },
@@ -721,7 +721,7 @@ export const catalogue: Catalogue = {
       "mfatName": "Literacy rate of youth (%ages 15-24) - by sex and rural/urban",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_EDU",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].[TAG_GEO].NMDI0019.F._T._T..?dimensionAtObservation=AllDimensions",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0019.F._T._T..?dimensionAtObservation=AllDimensions",
       "visUrl": "https://stats.pacificdata.org/vis?tm=literacy%20rate&pg=0&snb=5&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0019.F._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
       "notes": "New 2024"
     },
@@ -732,7 +732,7 @@ export const catalogue: Catalogue = {
       "mfatName": "Literacy rate of youth (%ages 15-24) - by sex and rural/urban",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_EDU",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].[TAG_GEO].NMDI0019.M._T._T..?dimensionAtObservation=AllDimensions",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0019.M._T._T..?dimensionAtObservation=AllDimensions",
       "visUrl": "https://stats.pacificdata.org/vis?tm=literacy%20rate&pg=0&snb=5&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0019.M._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false&lb=nm",
       "notes": "New 2024"
     },
@@ -743,7 +743,7 @@ export const catalogue: Catalogue = {
       "mfatName": "Literacy rate of youth (%ages 15-24) - by sex and rural/urban",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_EDU",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].[TAG_GEO].NMDI0019._T._T.U._T.?dimensionAtObservation=AllDimensions",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0019._T._T.U._T.?dimensionAtObservation=AllDimensions",
       "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators%2C0%7CNational%20Minimum%20Development%20Indicators%23NMDI%23&pg=0&fc=Development%20indicators&bp=true&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0019._T._T.U._T.&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
       "notes": "New 2024"
     },
@@ -754,7 +754,7 @@ export const catalogue: Catalogue = {
       "mfatName": "Literacy rate of youth (%ages 15-24) - by sex and rural/urban",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_EDU",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].[TAG_GEO].NMDI0019._T._T.R._T.?dimensionAtObservation=AllDimensions",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0019._T._T.R._T.?dimensionAtObservation=AllDimensions",
       "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators%2C0%7CNational%20Minimum%20Development%20Indicators%23NMDI%23&pg=0&fc=Development%20indicators&bp=true&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0019._T._T.R._T.&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
       "notes": "New 2024"
     },
@@ -765,7 +765,7 @@ export const catalogue: Catalogue = {
       "mfatName": "Literacy rate of adults (%ages 25-64) - by sex and rural/urban",
       "rendering": "CHART",
       "dataflow": "DF_UIS",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_UIS,/A.[TAG_GEO].[TAG_GEO].LR_AG25T64?dimensionAtObservation=AllDimensions",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_UIS,/A.[TAG_GEO].LR_AG25T64?dimensionAtObservation=AllDimensions",
       "visUrl": "https://stats.pacificdata.org/vis?tm=literacy%20rate&pg=0&snb=5&df[ds]=ds%3ASPC2&df[id]=DF_UIS&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..LR_AG25T64&ly[rw]=INDICATOR&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
       "notes": "New 2024"
     },
@@ -776,7 +776,7 @@ export const catalogue: Catalogue = {
       "mfatName": "Literacy rate of adults (%ages 25-64) - by sex and rural/urban",
       "rendering": "CHART",
       "dataflow": "DF_UIS",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_UIS,/A.[TAG_GEO].[TAG_GEO].LR_AG25T64_F?dimensionAtObservation=AllDimensions",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_UIS,/A.[TAG_GEO].LR_AG25T64_F?dimensionAtObservation=AllDimensions",
       "visUrl": "https://stats.pacificdata.org/vis?tm=literacy%20rate&pg=0&snb=5&df[ds]=ds%3ASPC2&df[id]=DF_UIS&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..LR_AG25T64_F&ly[rw]=INDICATOR&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
       "notes": "New 2024"
     },
@@ -787,7 +787,7 @@ export const catalogue: Catalogue = {
       "mfatName": "Literacy rate of adults (%ages 25-64) - by sex and rural/urban",
       "rendering": "CHART",
       "dataflow": "DF_UIS",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_UIS,/A.[TAG_GEO].[TAG_GEO].LR_AG25T64_M?dimensionAtObservation=AllDimensions",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_UIS,/A.[TAG_GEO].LR_AG25T64_M?dimensionAtObservation=AllDimensions",
       "visUrl": "https://stats.pacificdata.org/vis?tm=literacy%20rate&pg=0&snb=5&df[ds]=ds%3ASPC2&df[id]=DF_UIS&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..LR_AG25T64_M&ly[rw]=INDICATOR&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
       "notes": "New 2024"
     },

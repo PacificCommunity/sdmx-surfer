@@ -41,3 +41,50 @@ describe("catalogue helpers", () => {
     expect(ids).toEqual(["II.1", "II.2"]);
   });
 });
+
+// The mock above replaces the generated catalogue module. To exercise the
+// REAL catalogue, import its data via a side-channel that bypasses the mock.
+// Using vi.importActual gives us a clean reference even though the module is mocked.
+describe("real catalogue invariants", async () => {
+  const real = (
+    await vi.importActual<
+      typeof import("../../lib/country-snapshots/catalogue.generated")
+    >("../../lib/country-snapshots/catalogue.generated")
+  ).catalogue;
+
+  it("every indicator's themeId resolves to a known theme", () => {
+    const themeIds = new Set(real.themes.map((t) => t.id));
+    const orphans = real.indicators.filter((i) => !themeIds.has(i.themeId));
+    expect(orphans).toEqual([]);
+  });
+
+  it("every indicator with a dataflow has an apiUrlTemplate", () => {
+    const broken = real.indicators.filter((i) => i.dataflow && !i.apiUrlTemplate);
+    expect(broken.map((i) => i.id)).toEqual([]);
+  });
+
+  it("every apiUrlTemplate contains exactly one [TAG_GEO]", () => {
+    const malformed = real.indicators.filter((i) => {
+      if (!i.apiUrlTemplate) return false;
+      const matches = i.apiUrlTemplate.match(/\[TAG_GEO\]/g) ?? [];
+      return matches.length !== 1;
+    });
+    expect(malformed.map((i) => i.id)).toEqual([]);
+  });
+
+  it("theme slugs are unique", () => {
+    const slugs = real.themes.map((t) => t.slug);
+    expect(new Set(slugs).size).toBe(slugs.length);
+  });
+
+  it("country codes are unique", () => {
+    const codes = real.countries.map((c) => c.code);
+    expect(new Set(codes).size).toBe(codes.length);
+  });
+
+  it("has the expected order of magnitude (sanity)", () => {
+    expect(real.countries.length).toBeGreaterThan(15);
+    expect(real.themes.length).toBeGreaterThanOrEqual(10);
+    expect(real.indicators.length).toBeGreaterThan(100);
+  });
+});
