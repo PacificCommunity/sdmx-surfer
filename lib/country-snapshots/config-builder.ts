@@ -1,7 +1,9 @@
 import type { Catalogue, Country, Indicator, Theme } from "./catalogue";
+import { chartTypeFor, chartTypeForCompare } from "./chart-types";
 
 export type DashboardItem = {
-  type: "chart" | "table" | "text";
+  type: "chart" | "text";  // "chart" iff renderable with library; "text" otherwise
+  chartType?: "line" | "bar";  // resolved from per-(indicator × country) cache
   id: string;          // catalogue indicator id (e.g. "II.4"), also used as a stable in-page anchor
   title: string;
   dataUrl?: string;    // template URL with country code(s) substituted
@@ -32,18 +34,29 @@ export function buildSnapshotConfig(args: {
     .sort((a, b) => a.id.localeCompare(b.id, "en", { numeric: true }));
 
   const items: DashboardItem[] = indicators.map((i) => {
-    const type: DashboardItem["type"] =
-      i.rendering === "CHART"
-        ? "chart"
-        : i.rendering === "TABLE"
-          ? "table"
-          : "text";
+    const dataUrl = i.apiUrlTemplate
+      ? resolveUrl(i.apiUrlTemplate, codes)
+      : undefined;
+
+    let chartType: "line" | "bar" | undefined;
+    if (dataUrl) {
+      const decision =
+        codes.length === 1
+          ? chartTypeFor(i.id, codes[0])
+          : chartTypeForCompare(i.id, codes);
+      // "empty" or "error" from the cache → treat as text (no useful chart).
+      if (decision === "line" || decision === "bar") chartType = decision;
+    }
+
+    const type: DashboardItem["type"] = chartType ? "chart" : "text";
+
     return {
       type,
+      chartType,
       id: i.id,
       title: i.title,
       rendering: i.rendering,
-      dataUrl: i.apiUrlTemplate ? resolveUrl(i.apiUrlTemplate, codes) : undefined,
+      dataUrl,
       source: i.dataflow ? { dataflow: i.dataflow, visUrl: i.visUrl } : undefined,
       notes: i.notes,
     };

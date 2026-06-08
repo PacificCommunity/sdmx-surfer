@@ -8,6 +8,7 @@ const ALLOWED_PATHS = [
   "lib/country-snapshots",
   "components/country-snapshots",
   "scripts/import-country-snapshots.ts",
+  "scripts/augment-country-snapshot-types.ts",
   "tests/country-snapshots",
 ];
 

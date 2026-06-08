@@ -56,10 +56,42 @@ function slugify(s: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+/**
+ * Two normalisations applied to every URL:
+ *
+ *   1. Drop the dataflow version pin: `SPC,DF_X,3.0/` → `SPC,DF_X,/` (per the
+ *      2026 spreadsheet update notes from C. Idler).
+ *   2. Migrate legacy hosts to the canonical SPC endpoint
+ *      `stats-sdmx-disseminate.pacificdata.org`. The 2025 spreadsheet uses
+ *      `stats-nsi-stable.pacificdata.org` for many indicators; both hosts
+ *      currently resolve to the same backend, but the MCP gateway and the
+ *      rest of Surfer use the disseminate one, so we standardise on it.
+ *
+ * SDG dataflow (DF_SDG_*) URLs are NOT migrated here. The 2026 SDG
+ * restructure changed both the dimension layout (11 → 15 positions) and
+ * the codelists (e.g. AGE Y00T04 → Y0T4); a mechanical translation can't
+ * reliably preserve the original query intent. Those indicators are
+ * dropped at import time pending a refreshed indicator list.
+ */
 function normaliseUrl(raw: string): { url: string; fixed: boolean } {
-  // Replace SPC,DF_X,N.M/ with SPC,DF_X,/ per the 2026 update.
-  const fixed = raw.replace(/(SPC,[^,]+,)\d+(?:\.\d+)?\//g, "$1/");
-  return { url: fixed, fixed: fixed !== raw };
+  let out = raw.replace(/(SPC,[^,]+,)\d+(?:\.\d+)?\//g, "$1/");
+  out = out.replace(
+    /stats-nsi-stable\.pacificdata\.org/g,
+    "stats-sdmx-disseminate.pacificdata.org",
+  );
+  return { url: out, fixed: out !== raw };
+}
+
+/**
+ * SDG dataflows (DF_SDG_01..17) use a restructured DSD as of 2026: the
+ * dimension layout changed (15 positions instead of 11) and several
+ * codelists were renamed. The 2025 spreadsheet's URL templates are not
+ * mechanically migrate-able with reasonable confidence. Drop these
+ * indicators until a fresh list lands.
+ */
+function isStaleSdgIndicator(dataflow: string | undefined): boolean {
+  if (!dataflow) return false;
+  return /^DF_SDG_\d+$/.test(dataflow);
 }
 
 export async function importExcel(
@@ -181,6 +213,14 @@ export async function importExcel(
     if (!RENDERING_VALUES.includes(RENDERING)) {
       skippedRows.push(
         `INDICATORS row ${rowNumber} (${ID}): unknown rendering "${RENDERING}"`,
+      );
+      return;
+    }
+
+    const dataflowCandidate = DF && DF !== "-" ? DF : undefined;
+    if (isStaleSdgIndicator(dataflowCandidate)) {
+      skippedRows.push(
+        `INDICATORS ${ID}: SDG dataflow ${dataflowCandidate} dropped pending refreshed indicator list`,
       );
       return;
     }

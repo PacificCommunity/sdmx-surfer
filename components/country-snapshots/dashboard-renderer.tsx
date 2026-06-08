@@ -67,9 +67,11 @@ export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
             <p className="mb-2 text-xs italic text-neutral-500">{item.notes}</p>
           ) : null}
 
-          {item.type === "text" || !item.dataUrl ? (
+          {item.type === "text" || !item.dataUrl || !item.chartType ? (
             <p className="rounded-md bg-[#f7fafc] p-4 text-sm italic text-neutral-500">
-              No data source for this indicator yet.
+              {item.dataUrl
+                ? "No usable data available yet for this indicator."
+                : "No data source for this indicator yet."}
             </p>
           ) : (
             <ErrorBoundary
@@ -79,7 +81,7 @@ export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
               <SnapshotChart
                 config={{
                   id: item.id,
-                  type: "line",
+                  type: item.chartType,
                   xAxisConcept: "TIME_PERIOD",
                   data: item.dataUrl,
                   title: { text: "" },

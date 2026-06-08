@@ -1,4 +1,23 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+// Stub the chart-types cache so tests aren't dependent on the real probed data.
+// II.1 in TO/WS/VU has plenty of points (line); II.2 has 2 points (bar);
+// II.10 is a text indicator with no data source.
+vi.mock("../../lib/country-snapshots/chart-types.generated", () => ({
+  chartTypes: {
+    "II.1": {
+      TO: { type: "line", timePoints: 10, detectedAt: "2026-06-08", locked: true },
+      WS: { type: "line", timePoints: 10, detectedAt: "2026-06-08", locked: true },
+      VU: { type: "line", timePoints: 10, detectedAt: "2026-06-08", locked: true },
+    },
+    "II.2": {
+      TO: { type: "bar", timePoints: 2, detectedAt: "2026-06-08", locked: false },
+      WS: { type: "bar", timePoints: 2, detectedAt: "2026-06-08", locked: false },
+      VU: { type: "bar", timePoints: 2, detectedAt: "2026-06-08", locked: false },
+    },
+  },
+}));
+
 import { buildSnapshotConfig } from "../../lib/country-snapshots/config-builder";
 import type { Catalogue } from "../../lib/country-snapshots/catalogue";
 
@@ -91,15 +110,39 @@ describe("buildSnapshotConfig", () => {
     expect(lifeItem?.source?.visUrl).toBe("https://stats.x/vis");
   });
 
-  it("maps rendering to type: CHART→chart, TABLE→table, TEXT→text", () => {
+  it("emits type=chart for indicators with usable data, type=text otherwise", () => {
     const cfg = buildSnapshotConfig({
       country: fixture.countries[0],
       theme: fixture.themes[0],
       catalogue: fixture,
     });
     const types = Object.fromEntries(cfg.items.map((i) => [i.id, i.type]));
-    expect(types["II.1"]).toBe("chart");
-    expect(types["II.2"]).toBe("table");
-    expect(types["II.10"]).toBe("text");
+    expect(types["II.1"]).toBe("chart"); // line in cache
+    expect(types["II.2"]).toBe("chart"); // bar in cache
+    expect(types["II.10"]).toBe("text"); // no data source
+  });
+
+  it("picks chartType from the per-(indicator × country) cache", () => {
+    const cfg = buildSnapshotConfig({
+      country: fixture.countries[0],
+      theme: fixture.themes[0],
+      catalogue: fixture,
+    });
+    const chartTypes = Object.fromEntries(
+      cfg.items.map((i) => [i.id, i.chartType]),
+    );
+    expect(chartTypes["II.1"]).toBe("line");
+    expect(chartTypes["II.2"]).toBe("bar");
+    expect(chartTypes["II.10"]).toBeUndefined();
+  });
+
+  it("collapses compare-mode chartType to line when any country has line", () => {
+    const cfg = buildSnapshotConfig({
+      country: [fixture.countries[0], fixture.countries[1]],
+      theme: fixture.themes[0],
+      catalogue: fixture,
+    });
+    const lifeItem = cfg.items.find((i) => i.id === "II.1");
+    expect(lifeItem?.chartType).toBe("line");
   });
 });
