@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "build-index": "npx tsx scripts/build-index.ts",
     "set-password": "npx tsx scripts/set-password.ts",
+    "import:country-snapshots": "npx tsx scripts/import-country-snapshots.ts --in data/country-snapshots/country_snapshots_2025.xlsx --out lib/country-snapshots/catalogue.generated.ts --report data/country-snapshots/import-report.md",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -70,6 +71,7 @@
     "@vitejs/plugin-react": "^6.0.1",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9.39.4",
+    "exceljs": "^4.4.0",
     "tsx": "^4.21.0",
     "vitest": "^4.1.1"
   }
