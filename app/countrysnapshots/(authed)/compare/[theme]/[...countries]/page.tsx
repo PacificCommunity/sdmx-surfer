@@ -10,6 +10,7 @@ import { SnapshotPageShell } from "@/components/country-snapshots/snapshot-page-
 import { DashboardRenderer } from "@/components/country-snapshots/dashboard-renderer";
 import { ComparePicker } from "@/components/country-snapshots/compare-picker";
 import { ExportButton } from "@/components/country-snapshots/export-button";
+import { ChatOverlay } from "@/components/country-snapshots/chat-overlay";
 
 const MAX_COMPARE = 5;
 const MIN_COMPARE = 2;
@@ -56,6 +57,13 @@ export default async function ComparePage({
     >
       <ComparePicker theme={theme} countries={cat.countries} selected={codes} />
       <DashboardRenderer config={config} />
+      <ChatOverlay
+        snapshotContext={{
+          countryCodes: safeCountries.map((c) => c.code),
+          themeSlug: theme.slug,
+          indicatorIds: config.items.map((i) => i.id),
+        }}
+      />
     </SnapshotPageShell>
   );
 }

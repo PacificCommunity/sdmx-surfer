@@ -8,6 +8,7 @@ import { buildSnapshotConfig } from "@/lib/country-snapshots/config-builder";
 import { SnapshotPageShell } from "@/components/country-snapshots/snapshot-page-shell";
 import { DashboardRenderer } from "@/components/country-snapshots/dashboard-renderer";
 import { ExportButton } from "@/components/country-snapshots/export-button";
+import { ChatOverlay } from "@/components/country-snapshots/chat-overlay";
 
 export async function generateStaticParams() {
   const cat = getSnapshotCatalogue();
@@ -45,6 +46,13 @@ export default async function Page({
       }
     >
       <DashboardRenderer config={config} />
+      <ChatOverlay
+        snapshotContext={{
+          countryCodes: [country.code],
+          themeSlug: theme.slug,
+          indicatorIds: config.items.map((i) => i.id),
+        }}
+      />
     </SnapshotPageShell>
   );
 }
