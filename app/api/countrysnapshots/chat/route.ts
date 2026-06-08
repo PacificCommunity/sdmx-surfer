@@ -24,8 +24,10 @@ const STEP_LIMIT = 12;
 const MAX_MESSAGES = 200;
 const MAX_INDICATOR_IDS = 100;
 
+// countryCodes / themeSlug / indicatorIds all relax to empty for the
+// entry-page catalogue-wide mode. Page-scoped chats fill them in.
 const snapshotContextSchema = z.object({
-  countryCodes: z.array(z.string()).min(1).max(5),
+  countryCodes: z.array(z.string()).max(5),
   themeSlug: z.string(),
   indicatorIds: z.array(z.string()).max(MAX_INDICATOR_IDS),
 });

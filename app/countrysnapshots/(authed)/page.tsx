@@ -1,6 +1,7 @@
 import { getSnapshotCatalogue } from "@/lib/country-snapshots/catalogue";
 import { SnapshotPageShell } from "@/components/country-snapshots/snapshot-page-shell";
 import { EntryPageMatrix } from "@/components/country-snapshots/entry-page-matrix";
+import { ChatStarter } from "@/components/country-snapshots/chat-starter";
 
 export default function CountrySnapshotsEntry() {
   const cat = getSnapshotCatalogue();
@@ -11,9 +12,10 @@ export default function CountrySnapshotsEntry() {
       subtitle={`Curated indicators across ${cat.countries.length} Pacific Island Countries and Territories.`}
     >
       <p className="text-sm text-neutral-700">
-        Pick a country and theme to browse, or compare countries side by side.
-        An AI assistant will be added shortly to help you explore further.
+        Pick a country and theme to browse, compare countries side by side, or
+        ask the assistant to point you somewhere.
       </p>
+      <ChatStarter />
       <EntryPageMatrix countries={cat.countries} themes={cat.themes} />
     </SnapshotPageShell>
   );

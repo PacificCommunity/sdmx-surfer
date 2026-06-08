@@ -36,20 +36,35 @@ export function buildSnapshotSystemPrompt(args: {
 
   parts.push("");
   parts.push("# Current Snapshot Context");
+
+  const isIndex =
+    args.ctx.themeSlug === "index" || args.ctx.countryCodes.length === 0;
+  if (isIndex) {
+    parts.push(
+      "The user is on the Country Snapshots entry page, not a specific " +
+        "country/theme view. Help them navigate the catalogue: suggest " +
+        "country/theme combinations to inspect, summarise what's available " +
+        "across PICTs, and point them at canonical pages they should open " +
+        "next. When you suggest a page, use the shape " +
+        "`/countrysnapshots/<COUNTRY_CODE>/<theme-slug>` " +
+        "or `/countrysnapshots/compare/<theme-slug>/<CODE>/<CODE>`.",
+    );
+  } else {
+    parts.push(
+      `Country/countries on this page: ${args.ctx.countryCodes.join(", ")}`,
+    );
+    parts.push(`Theme slug: ${args.ctx.themeSlug}`);
+    parts.push(
+      `Indicators visible: ${args.ctx.indicatorIds.join(", ") || "(none)"}`,
+    );
+  }
   parts.push(
-    `Country/countries on this page: ${args.ctx.countryCodes.join(", ") || "(none)"}`,
-  );
-  parts.push(`Theme slug: ${args.ctx.themeSlug}`);
-  parts.push(
-    `Indicators visible: ${args.ctx.indicatorIds.join(", ") || "(none)"}`,
-  );
-  parts.push(
-    "You are operating as a read-only assistant for this snapshot page. " +
-      "You can call MCP discovery tools to investigate the data shown. " +
-      "Do NOT call update_dashboard — the snapshot config is fixed. " +
+    "You are operating as a read-only assistant. " +
+      "You can call MCP discovery tools to investigate the data. " +
+      "Do NOT call update_dashboard — snapshots are fixed. " +
       "If the user wants to add indicators, change the time range, or " +
-      "otherwise customise the view, tell them to use the 'Explore in " +
-      "Surfer' button which forks this snapshot into an editable session.",
+      "otherwise customise a view, tell them to use the 'Explore in " +
+      "Surfer' button on a snapshot page to fork into an editable session.",
   );
 
   return parts.join("\n");
