@@ -1,14 +1,20 @@
-import { notFound } from "next/navigation";
-import { countrySnapshotsEnabled } from "@/lib/country-snapshots/feature-flag";
+import { getSnapshotCatalogue } from "@/lib/country-snapshots/catalogue";
+import { SnapshotPageShell } from "@/components/country-snapshots/snapshot-page-shell";
+import { EntryPageMatrix } from "@/components/country-snapshots/entry-page-matrix";
 
-export default function CountrySnapshotsPlaceholder() {
-  if (!countrySnapshotsEnabled) notFound();
+export default function CountrySnapshotsEntry() {
+  const cat = getSnapshotCatalogue();
+
   return (
-    <main className="p-8">
-      <h1 className="text-2xl font-semibold">Country Snapshots</h1>
-      <p className="mt-2 text-sm text-neutral-600">
-        Coming soon. The login screen will live at /countrysnapshots/login.
+    <SnapshotPageShell
+      title="Country Snapshots"
+      subtitle={`Curated indicators across ${cat.countries.length} Pacific Island Countries and Territories.`}
+    >
+      <p className="text-sm text-neutral-700">
+        Pick a country and theme to browse, or compare countries side by side.
+        An AI assistant will be added shortly to help you explore further.
       </p>
-    </main>
+      <EntryPageMatrix countries={cat.countries} themes={cat.themes} />
+    </SnapshotPageShell>
   );
 }
