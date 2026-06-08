@@ -67,7 +67,8 @@ export async function importExcel(
   sourceName: string,
 ): Promise<ImportResult> {
   const wb = new ExcelJS.Workbook();
-  await wb.xlsx.load(buffer);
+  // exceljs typings predate Node's generic Buffer<ArrayBufferLike>; runtime accepts it.
+  await wb.xlsx.load(buffer as unknown as ArrayBuffer);
   const reportsSheet = wb.getWorksheet("REPORTS");
   const indicatorsSheet = wb.getWorksheet("INDICATORS");
   if (!reportsSheet || !indicatorsSheet) {
@@ -133,7 +134,12 @@ export async function importExcel(
     const ID = cellToString(cells[4]);
     const EN = cellToString(cells[5]);
     const MFAT_NAME = cellToString(cells[6]);
-    const RENDERING = cellToString(cells[7]).toUpperCase() as Rendering;
+    const renderingRaw = cellToString(cells[7]).toUpperCase();
+    // Spreadsheet uses "-" for indicators without a defined rendering;
+    // treat these as TEXT (static fact placeholders) so they still appear in the catalogue.
+    const RENDERING = (renderingRaw === "-" || renderingRaw === ""
+      ? "TEXT"
+      : renderingRaw) as Rendering;
     const DE = cellToString(cells[8]);
     const API = cellToString(cells[9]);
     const COMMENT1 = cellToString(cells[10]);
