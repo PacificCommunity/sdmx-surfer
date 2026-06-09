@@ -81,14 +81,25 @@ export function ChatStarter() {
 
   const busy = status === "submitted" || status === "streaming";
 
-  // Stable dashboard prop: re-rendering SDMXDashboardDynamic with a new
-  // object reference tears down and remounts every chart, even when the
-  // content hasn't actually changed. The agent often emits update_dashboard
-  // multiple times during one turn while iterating; we deep-compare by
-  // serialised JSON and only update the reference when the content differs.
+  // Dashboard prop discipline:
+  //   1. The agent often emits update_dashboard 2-3 times during one
+  //      streaming turn while it iterates — first with 2 panels, then 4,
+  //      then 6. Each emission has different content, so deep-equality
+  //      doesn't help.
+  //   2. Updating the prop mid-stream tears down and remounts every chart
+  //      panel that wasn't in the previous emission — observed as the
+  //      bottom panel flickering as the dashboard grows.
+  //   3. So we freeze the rendered dashboard while busy, and only swap to
+  //      the latest emission once the agent has settled (status !== busy).
+  //   4. Within a single completed turn, deep-compare so identical
+  //      content reuses the existing reference.
   const lastSerialisedRef = useRef<string | null>(null);
   const lastDashboardRef = useRef<SDMXDashboardConfig | null>(null);
   const dashboard = useMemo(() => {
+    if (busy) {
+      // Hold the previous reference steady until streaming completes.
+      return lastDashboardRef.current;
+    }
     const next = extractLatestDashboard(messages);
     if (next === null) {
       lastSerialisedRef.current = null;
@@ -102,7 +113,7 @@ export function ChatStarter() {
     lastSerialisedRef.current = serialised;
     lastDashboardRef.current = next;
     return next;
-  }, [messages]);
+  }, [messages, busy]);
 
   // Scroll the dashboard into view the first time it appears. Only re-fires
   // on the boolean transition; running on every config tweak would steal the
