@@ -2,8 +2,8 @@ import type { Catalogue, Country, Indicator, Theme } from "./catalogue";
 import { chartTypeFor, chartTypeForCompare } from "./chart-types";
 
 export type DashboardItem = {
-  type: "chart" | "text";  // "chart" iff renderable with library; "text" otherwise
-  chartType?: "line" | "bar";  // resolved from per-(indicator × country) cache
+  type: "chart" | "value" | "text";  // "chart"/"value" for library; "text" for placeholders
+  chartType?: "line" | "bar" | "lollipop";  // when type === "chart"
   id: string;          // catalogue indicator id (e.g. "II.4"), also used as a stable in-page anchor
   title: string;
   dataUrl?: string;    // template URL with country code(s) substituted
@@ -38,17 +38,54 @@ export function buildSnapshotConfig(args: {
       ? resolveUrl(i.apiUrlTemplate, codes)
       : undefined;
 
+    // Map the curator's rendering intent to a library visual.
+    //   TEXT  → text placeholder (no data fetch)
+    //   TABLE → "value" (single-country KPI) or "bar" (compare, lets bars
+    //           group across countries on the GEO axis)
+    //   CHART → "line" by default; "bar" only in compare mode
+    //   MAP   → fall back to "value"/"line" for v1 (no geojson plumbing yet)
+    let type: DashboardItem["type"] = "text";
     let chartType: "line" | "bar" | undefined;
+
     if (dataUrl) {
-      const decision =
+      const cacheDecision =
         codes.length === 1
           ? chartTypeFor(i.id, codes[0])
           : chartTypeForCompare(i.id, codes);
-      // "empty" or "error" from the cache → treat as text (no useful chart).
-      if (decision === "line" || decision === "bar") chartType = decision;
-    }
+      const hasData = cacheDecision === "line" || cacheDecision === "bar";
 
-    const type: DashboardItem["type"] = chartType ? "chart" : "text";
+      if (!hasData) {
+        type = "text";
+      } else if (i.rendering === "TABLE" || i.rendering === "MAP") {
+        // Single-country: KPI card. Compare: bar across countries (GEO is
+        // the varying dimension so the library accepts bar there).
+        if (codes.length === 1) {
+          type = "value";
+        } else {
+          type = "chart";
+          chartType = "bar";
+        }
+      } else if (i.rendering === "CHART") {
+        // Single-country: with ≥3 time points a line reads as a proper
+        // trend. With 1-2 points a line over-implies continuity, so we
+        // fall back to a KPI value — until the consolidation pass lets
+        // us emit one chart with multiple series (M/F/Total etc.) where
+        // lollipop becomes a valid stratified visual.
+        if (codes.length === 1 && cacheDecision === "bar") {
+          type = "value";
+        } else if (codes.length === 1) {
+          type = "chart";
+          chartType = "line";
+        } else {
+          type = "chart";
+          chartType = cacheDecision === "bar" ? "bar" : "line";
+        }
+      } else {
+        // rendering === "TEXT" but the indicator unexpectedly has a data
+        // URL — still surface it as a value rather than dropping.
+        type = "value";
+      }
+    }
 
     return {
       type,

@@ -15,6 +15,12 @@ vi.mock("../../lib/country-snapshots/chart-types.generated", () => ({
       WS: { type: "bar", timePoints: 2, detectedAt: "2026-06-08", locked: false },
       VU: { type: "bar", timePoints: 2, detectedAt: "2026-06-08", locked: false },
     },
+    "II.3": {
+      // CHART rendering with sparse data — should render as value, not line
+      TO: { type: "bar", timePoints: 1, detectedAt: "2026-06-08", locked: false },
+      WS: { type: "bar", timePoints: 1, detectedAt: "2026-06-08", locked: false },
+      VU: { type: "bar", timePoints: 1, detectedAt: "2026-06-08", locked: false },
+    },
   },
 }));
 
@@ -53,6 +59,14 @@ const fixture: Catalogue = {
       rendering: "TABLE",
       dataflow: "DF_SMK",
       apiUrlTemplate: "https://x/SPC,DF_SMK,/A.[TAG_GEO].SMK",
+    },
+    {
+      id: "II.3",
+      themeId: "II",
+      title: "Recent census coverage",
+      rendering: "CHART",
+      dataflow: "DF_CENSUS",
+      apiUrlTemplate: "https://x/SPC,DF_CENSUS,/A.[TAG_GEO].CENSUS",
     },
   ],
 };
@@ -96,7 +110,7 @@ describe("buildSnapshotConfig", () => {
       theme: fixture.themes[0],
       catalogue: fixture,
     });
-    expect(cfg.items.map((i) => i.id)).toEqual(["II.1", "II.2", "II.10"]);
+    expect(cfg.items.map((i) => i.id)).toEqual(["II.1", "II.2", "II.3", "II.10"]);
   });
 
   it("attaches source metadata for indicators with a dataflow", () => {
@@ -110,30 +124,52 @@ describe("buildSnapshotConfig", () => {
     expect(lifeItem?.source?.visUrl).toBe("https://stats.x/vis");
   });
 
-  it("emits type=chart for indicators with usable data, type=text otherwise", () => {
+  it("honours rendering on single-country: CHART→chart, TABLE→value, TEXT→text", () => {
     const cfg = buildSnapshotConfig({
       country: fixture.countries[0],
       theme: fixture.themes[0],
       catalogue: fixture,
     });
     const types = Object.fromEntries(cfg.items.map((i) => [i.id, i.type]));
-    expect(types["II.1"]).toBe("chart"); // line in cache
-    expect(types["II.2"]).toBe("chart"); // bar in cache
-    expect(types["II.10"]).toBe("text"); // no data source
+    expect(types["II.1"]).toBe("chart"); // rendering=CHART, has data
+    expect(types["II.2"]).toBe("value"); // rendering=TABLE, has data → KPI card
+    expect(types["II.10"]).toBe("text"); // rendering=TEXT, no data source
   });
 
-  it("picks chartType from the per-(indicator × country) cache", () => {
+  it("CHART indicators with ≥3 points get chartType=line on single-country pages", () => {
     const cfg = buildSnapshotConfig({
       country: fixture.countries[0],
       theme: fixture.themes[0],
       catalogue: fixture,
     });
-    const chartTypes = Object.fromEntries(
-      cfg.items.map((i) => [i.id, i.chartType]),
-    );
-    expect(chartTypes["II.1"]).toBe("line");
-    expect(chartTypes["II.2"]).toBe("bar");
-    expect(chartTypes["II.10"]).toBeUndefined();
+    const lifeItem = cfg.items.find((i) => i.id === "II.1");
+    expect(lifeItem?.type).toBe("chart");
+    expect(lifeItem?.chartType).toBe("line");
+  });
+
+  it("CHART indicators with sparse data fall back to value on single-country pages", () => {
+    const cfg = buildSnapshotConfig({
+      country: fixture.countries[0],
+      theme: fixture.themes[0],
+      catalogue: fixture,
+    });
+    const sparseChart = cfg.items.find((i) => i.id === "II.3");
+    // Lollipop would be the ideal viz but it needs a second varying
+    // dimension; until consolidation produces multi-series queries we
+    // settle for the KPI value.
+    expect(sparseChart?.type).toBe("value");
+    expect(sparseChart?.chartType).toBeUndefined();
+  });
+
+  it("TABLE indicators become bar on compare pages (GEO provides the varying dim)", () => {
+    const cfg = buildSnapshotConfig({
+      country: [fixture.countries[0], fixture.countries[1]],
+      theme: fixture.themes[0],
+      catalogue: fixture,
+    });
+    const sparseItem = cfg.items.find((i) => i.id === "II.2");
+    expect(sparseItem?.type).toBe("chart");
+    expect(sparseItem?.chartType).toBe("bar");
   });
 
   it("collapses compare-mode chartType to line when any country has line", () => {

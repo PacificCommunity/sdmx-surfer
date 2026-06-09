@@ -5,7 +5,7 @@ import type {
   SnapshotConfig,
   DashboardItem,
 } from "@/lib/country-snapshots/config-builder";
-import { SnapshotChart } from "./snapshot-chart";
+import { SnapshotChart, SnapshotValue } from "./snapshot-chart";
 import { SourceCitation } from "./source-citation";
 
 function ItemErrorFallback({ item }: { item: DashboardItem }) {
@@ -67,13 +67,29 @@ export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
             <p className="mb-2 text-xs italic text-neutral-500">{item.notes}</p>
           ) : null}
 
-          {item.type === "text" || !item.dataUrl || !item.chartType ? (
+          {item.type === "text" || !item.dataUrl ? (
             <p className="rounded-md bg-[#f7fafc] p-4 text-sm italic text-neutral-500">
               {item.dataUrl
                 ? "No usable data available yet for this indicator."
                 : "No data source for this indicator yet."}
             </p>
-          ) : (
+          ) : item.type === "value" ? (
+            <ErrorBoundary
+              fallback={<ItemErrorFallback item={item} />}
+              onError={(err) => logFailure(item, err as Error)}
+            >
+              <SnapshotValue
+                config={{
+                  id: item.id,
+                  type: "value",
+                  xAxisConcept: "OBS_VALUE",
+                  data: item.dataUrl,
+                  title: { text: "" },
+                }}
+                language="en"
+              />
+            </ErrorBoundary>
+          ) : item.chartType ? (
             <ErrorBoundary
               fallback={<ItemErrorFallback item={item} />}
               onError={(err) => logFailure(item, err as Error)}
@@ -85,11 +101,21 @@ export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
                   xAxisConcept: "TIME_PERIOD",
                   data: item.dataUrl,
                   title: { text: "" },
+                  // Compare mode: tell the library that REF_AREA is the
+                  // series dimension (countries become coloured series/bars).
+                  ...(config.countries.length > 1
+                    ? {
+                        legend: {
+                          concept: "REF_AREA",
+                          location: "bottom" as const,
+                        },
+                      }
+                    : {}),
                 }}
                 language="en"
               />
             </ErrorBoundary>
-          )}
+          ) : null}
 
           {item.source ? (
             <SourceCitation

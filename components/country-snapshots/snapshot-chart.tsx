@@ -3,9 +3,23 @@
 import dynamic from "next/dynamic";
 
 /**
- * Dynamic wrapper for SDMXChart so Highcharts (browser-only) doesn't run during SSR.
- * Mirrors the pattern used by components/sdmx-dashboard-dynamic.tsx.
+ * Dynamic wrappers for the library components so Highcharts (browser-only)
+ * doesn't run during SSR. Mirrors the pattern used by
+ * components/sdmx-dashboard-dynamic.tsx.
  */
+
+export const SnapshotValue = dynamic(
+  () =>
+    import("sdmx-dashboard-components").then((mod) => mod.SDMXValue),
+  { ssr: false, loading: () => <ValueSkeleton /> },
+);
+
+function ValueSkeleton() {
+  return (
+    <div className="h-24 w-full animate-pulse rounded-md bg-[#f1f4f6]" />
+  );
+}
+
 export const SnapshotChart = dynamic(
   () =>
     Promise.all([
