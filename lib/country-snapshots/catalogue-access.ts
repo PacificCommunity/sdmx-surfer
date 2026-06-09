@@ -23,30 +23,65 @@ export function renderCatalogueForPrompt(
   const lines: string[] = [];
   lines.push("# Country Snapshot Catalogue");
   lines.push(
-    "You have prior knowledge of the following curated indicators, themes, " +
-      "and dataflows. Use these directly to answer questions about Country " +
-      "Snapshots without re-discovering dataflows.",
+    "Below is the COMPLETE curated catalogue of indicators MFAT cares " +
+      "about across 22 PICTs. For each indicator you get the dataflow, " +
+      "a URL template (with [TAG_GEO] standing in for the country code), " +
+      "and a seriesConcept when the indicator combines multiple series " +
+      "into one chart (e.g. M+F+_T for SEX).",
+  );
+  lines.push("");
+  lines.push("# How to use this catalogue");
+  lines.push(
+    "1. For requests about MFAT-style snapshots, BUILD the dashboard " +
+      "from this catalogue. Substitute [TAG_GEO] with the user's country " +
+      "code(s) — for multiple countries join with '+' (e.g. TO+WS+VU). " +
+      "Do NOT re-discover the SERIES codes or dimensions — they are " +
+      "already encoded in the URL template.",
+  );
+  lines.push(
+    "2. Only fall back to broader MCP discovery (list_dataflows, " +
+      "get_dataflow_structure, ...) when the user's question genuinely " +
+      "asks for data not in this catalogue.",
+  );
+  lines.push(
+    "3. For consolidated indicators (those with seriesConcept), set " +
+      "legend.concept=<that concept> on the chart visual so the library " +
+      "groups the M/F/Total (or urban/rural, etc.) series properly.",
+  );
+  lines.push(
+    "4. When emitting a dashboard, use kpi visuals for single-value " +
+      "indicators with sparse data, line charts for time series, and " +
+      "bar charts for cross-country comparisons. Avoid responding with " +
+      "handmade markdown tables of figures — emit a dashboard or link " +
+      "to the canonical snapshot page.",
   );
   lines.push("");
   for (const t of cat.themes) {
-    lines.push(`## ${t.title} (id=${t.id}, slug=${t.slug})`);
+    lines.push(`## ${t.title} (themeId=${t.id}, themeSlug=${t.slug})`);
     const inds = cat.indicators
       .filter((i) => i.themeId === t.id)
       .sort((a, b) => a.id.localeCompare(b.id, "en", { numeric: true }));
     if (inds.length === 0) {
-      lines.push("_No indicators in this theme yet._");
+      lines.push("_No indicators in this theme._");
       lines.push("");
       continue;
     }
     for (const i of inds) {
-      const src = i.dataflow
-        ? ` [dataflow=${i.dataflow}]`
-        : " [no data source]";
-      lines.push(`- ${i.id} ${i.title}${src}`);
+      lines.push(`- **${i.id}** ${i.title}`);
+      if (i.apiUrlTemplate) {
+        lines.push(`    url: ${i.apiUrlTemplate}`);
+      } else {
+        lines.push(`    url: (no data source)`);
+      }
+      if (i.dataflow) lines.push(`    dataflow: ${i.dataflow}`);
+      if (i.seriesConcept) {
+        lines.push(`    seriesConcept: ${i.seriesConcept}`);
+      }
     }
     lines.push("");
   }
-  lines.push("Countries (code: name, region, mfat=1|0):");
+  lines.push("# Countries");
+  lines.push("(code: name, region, mfat-priority)");
   for (const c of cat.countries) {
     lines.push(
       `- ${c.code}: ${c.name}, ${c.region}, mfat=${c.mfatRelevant ? 1 : 0}`,

@@ -49,16 +49,19 @@ describe("renderCatalogueForPrompt", () => {
 
   it("includes every indicator id and title", () => {
     const text = renderCatalogueForPrompt();
-    expect(text).toContain("I.5 Mid-year population estimate");
-    expect(text).toContain("II.1 Life expectancy at birth");
-    expect(text).toContain("II.99 Constitutional form");
+    expect(text).toContain("I.5");
+    expect(text).toContain("Mid-year population estimate");
+    expect(text).toContain("II.1");
+    expect(text).toContain("Life expectancy at birth");
+    expect(text).toContain("II.99");
+    expect(text).toContain("Constitutional form");
   });
 
-  it("marks indicators with dataflows and without", () => {
+  it("marks indicators with their dataflow + url or 'no data source'", () => {
     const text = renderCatalogueForPrompt();
-    expect(text).toContain("[dataflow=DF_POP_PROJ]");
-    expect(text).toContain("[dataflow=DF_VITAL]");
-    expect(text).toContain("[no data source]");
+    expect(text).toContain("dataflow: DF_POP_PROJ");
+    expect(text).toContain("dataflow: DF_VITAL");
+    expect(text).toContain("(no data source)");
   });
 
   it("lists every country with region and mfat flag", () => {
