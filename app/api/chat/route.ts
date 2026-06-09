@@ -135,14 +135,35 @@ export async function POST(req: Request) {
     const quarantinedDataflowContext = dataflowContext
       ? quarantine(dataflowContext, "dataflow-context")
       : "";
-    const systemPrompt = [
-      systemPromptBase,
+
+    // System prompt is split into two system MESSAGES so the stable base
+    // (~6.4K tokens, identical across every turn and step) can carry an
+    // Anthropic cache breakpoint. Cache prefix order is tools → system →
+    // messages, so the breakpoint also caches the MCP tool definitions
+    // ahead of it. The volatile block (tier-2 knowledge, dataflow context,
+    // preview repair) changes per turn and stays uncached after it.
+    // NOTE: cache_control only works on MESSAGE-level providerOptions —
+    // a call-level anthropic.cacheControl is silently ignored by the
+    // provider (that bug lived in model-router for months).
+    const volatileSystem = [
       tier2Summary,
       quarantinedDataflowContext,
       previewRepairPrompt,
     ]
       .filter(Boolean)
       .join("\n\n");
+    const systemMessages = [
+      {
+        role: "system" as const,
+        content: systemPromptBase,
+        providerOptions: {
+          anthropic: { cacheControl: { type: "ephemeral" as const } },
+        },
+      },
+      ...(volatileSystem
+        ? [{ role: "system" as const, content: volatileSystem }]
+        : []),
+    ];
 
     let dashboardEmitted = false;
     let currentStep = 0;
@@ -152,8 +173,7 @@ export async function POST(req: Request) {
 
     const result = streamText({
       model: modelConfig.model,
-      system: systemPrompt,
-      messages: modelMessages,
+      messages: [...systemMessages, ...modelMessages],
       providerOptions: modelConfig.providerOptions || {},
       tools: {
         ...mcpTools,
@@ -195,19 +215,18 @@ export async function POST(req: Request) {
         currentStep = stepNumber;
 
         if (stepNumber >= NUDGE_AT && !dashboardEmitted) {
-          // Combine Tier 2 knowledge + nudge
-          const nudgedPrompt = tier2Summary
-            ? systemPromptBase + "\n\n" + tier2Summary + "\n\n" + NUDGE_MESSAGE
-            : systemPromptBase + "\n\n" + NUDGE_MESSAGE;
-          return { system: nudgedPrompt };
+          // The base prompt + tier-2 already live in the leading system
+          // MESSAGES; returning `system` here adds the nudge as a separate
+          // leading system block for this step only. The provider merges
+          // consecutive system blocks, so the model sees nudge + base +
+          // volatile. Cache note: the new leading block changes the prefix,
+          // so nudge steps pay full prefill — acceptable for an emergency
+          // path that fires at most a handful of times per conversation.
+          return { system: NUDGE_MESSAGE };
         }
 
-        // Inject Tier 2 on every step (knowledge might grow via in-flight tool calls,
-        // but for now the initial extraction covers the conversation history)
-        if (tier2Summary) {
-          return { system: systemPrompt };
-        }
-
+        // Base + volatile system messages are part of `messages`; nothing
+        // to override on ordinary steps.
         return {};
       },
       onStepFinish: ({ dynamicToolCalls }) => {
@@ -247,6 +266,32 @@ export async function POST(req: Request) {
           }
         }
         logger.setCostUsd(anyCost ? totalCost : null);
+        // Cache observability: read ≫ write on warm turns means the
+        // system-message cache breakpoint is working (see systemMessages).
+        const cacheDetails = (
+          totalUsage as
+            | {
+                inputTokenDetails?: {
+                  cacheReadTokens?: number;
+                  cacheWriteTokens?: number;
+                  noCacheTokens?: number;
+                };
+              }
+            | undefined
+        )?.inputTokenDetails;
+        if (cacheDetails?.cacheReadTokens || cacheDetails?.cacheWriteTokens) {
+          console.info(
+            "[api/chat] prompt cache: read=" +
+              (cacheDetails.cacheReadTokens ?? 0) +
+              " write=" +
+              (cacheDetails.cacheWriteTokens ?? 0) +
+              " uncached=" +
+              (cacheDetails.noCacheTokens ?? 0) +
+              " across " +
+              steps.length +
+              " steps",
+          );
+        }
         await logger.flush(
           totalUsage
             ? {

@@ -188,39 +188,42 @@ export async function POST(req: Request) {
       onFinish: async ({ steps, totalUsage }) => {
         let totalCost = 0;
         let anyCost = false;
-        let cacheRead = 0;
-        let cacheWrite = 0;
         for (const step of steps) {
-          const meta = step.providerMetadata as
+          const c = (
+            step.providerMetadata as { gateway?: { cost?: string } } | undefined
+          )?.gateway?.cost;
+          if (c == null) continue;
+          const parsed = parseFloat(c);
+          if (Number.isFinite(parsed)) {
+            totalCost += parsed;
+            anyCost = true;
+          }
+        }
+        // Cache observability. The AI SDK standardises cache accounting on
+        // totalUsage (inputTokenDetails.cacheReadTokens / cacheWriteTokens);
+        // the provider-metadata field names differ per provider and per
+        // gateway hop, so don't read them. read ≫ write on warm turns
+        // means the system-prompt cache breakpoint is working.
+        const details = (
+          totalUsage as
             | {
-                gateway?: { cost?: string };
-                anthropic?: {
-                  cacheReadInputTokens?: number;
-                  cacheCreationInputTokens?: number;
+                inputTokenDetails?: {
+                  cacheReadTokens?: number;
+                  cacheWriteTokens?: number;
+                  noCacheTokens?: number;
                 };
               }
-            | undefined;
-          const c = meta?.gateway?.cost;
-          if (c != null) {
-            const parsed = parseFloat(c);
-            if (Number.isFinite(parsed)) {
-              totalCost += parsed;
-              anyCost = true;
-            }
-          }
-          cacheRead += meta?.anthropic?.cacheReadInputTokens ?? 0;
-          cacheWrite += meta?.anthropic?.cacheCreationInputTokens ?? 0;
-        }
-        // Temporary observability while we confirm the cache breakpoint
-        // lands through the gateway: read ≫ write after the first step
-        // means the prefix cache is working.
-        if (cacheRead || cacheWrite) {
+            | undefined
+        )?.inputTokenDetails;
+        if (details?.cacheReadTokens || details?.cacheWriteTokens) {
           console.info(
             "[country-snapshots/chat] prompt cache: read=" +
-              cacheRead +
+              (details.cacheReadTokens ?? 0) +
               " write=" +
-              cacheWrite +
-              " tokens across " +
+              (details.cacheWriteTokens ?? 0) +
+              " uncached=" +
+              (details.noCacheTokens ?? 0) +
+              " across " +
               steps.length +
               " steps",
           );
