@@ -80,10 +80,29 @@ export function ChatStarter() {
   });
 
   const busy = status === "submitted" || status === "streaming";
-  const dashboard = useMemo(
-    () => extractLatestDashboard(messages),
-    [messages],
-  );
+
+  // Stable dashboard prop: re-rendering SDMXDashboardDynamic with a new
+  // object reference tears down and remounts every chart, even when the
+  // content hasn't actually changed. The agent often emits update_dashboard
+  // multiple times during one turn while iterating; we deep-compare by
+  // serialised JSON and only update the reference when the content differs.
+  const lastSerialisedRef = useRef<string | null>(null);
+  const lastDashboardRef = useRef<SDMXDashboardConfig | null>(null);
+  const dashboard = useMemo(() => {
+    const next = extractLatestDashboard(messages);
+    if (next === null) {
+      lastSerialisedRef.current = null;
+      lastDashboardRef.current = null;
+      return null;
+    }
+    const serialised = JSON.stringify(next);
+    if (serialised === lastSerialisedRef.current) {
+      return lastDashboardRef.current;
+    }
+    lastSerialisedRef.current = serialised;
+    lastDashboardRef.current = next;
+    return next;
+  }, [messages]);
 
   // Scroll the dashboard into view the first time it appears. Only re-fires
   // on the boolean transition; running on every config tweak would steal the
