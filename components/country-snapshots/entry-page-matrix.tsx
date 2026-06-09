@@ -15,8 +15,30 @@ export function EntryPageMatrix({
 
   return (
     <section className="mt-8">
+      <div className="mb-3 rounded-md bg-white p-3 shadow-sm">
+        <div className="mb-2 flex items-baseline justify-between gap-2">
+          <h2 className="text-sm font-semibold text-[#181c1e]">
+            Regional summaries
+          </h2>
+          <span className="text-xs text-neutral-500">
+            one chart per indicator across MFAT-priority countries
+          </span>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {themes.map((t) => (
+            <Link
+              key={t.id}
+              href={`/countrysnapshots/regional/${t.slug}`}
+              className="rounded-full bg-[#004467] px-3 py-1 text-xs text-white hover:bg-[#003355]"
+            >
+              {t.title}
+            </Link>
+          ))}
+        </div>
+      </div>
+
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Browse</h2>
+        <h2 className="text-lg font-semibold">Browse by country or theme</h2>
         <button
           type="button"
           onClick={() =>
