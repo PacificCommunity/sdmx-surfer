@@ -8,6 +8,7 @@ import type {
 } from "@/lib/country-snapshots/config-builder";
 import { SnapshotChart } from "./snapshot-chart";
 import { SourceCitation } from "./source-citation";
+import { geoConceptForDataflow } from "@/lib/country-snapshots/dataflow-dimensions";
 
 /**
  * Can we render this indicator as one chart across all selected countries?
@@ -152,10 +153,10 @@ export function RegionalRenderer({ config }: { config: SnapshotConfig }) {
                   xAxisConcept: "TIME_PERIOD",
                   data: item.dataUrl,
                   title: { text: "" },
-                  // SPC convention: GEO_PICT is the country dimension. SDG
-                  // flows use REF_AREA but those are dropped in v1.
+                  // Resolve the country dimension per dataflow (SPC uses
+                  // GEO_PICT, SDG uses REF_AREA, etc.).
                   legend: {
-                    concept: "GEO_PICT",
+                    concept: geoConceptForDataflow(item.source?.dataflow),
                     location: "bottom" as const,
                   },
                 }}

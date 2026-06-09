@@ -8,6 +8,7 @@ import type {
 import { SnapshotChart, SnapshotValue } from "./snapshot-chart";
 import { SnapshotTable } from "./snapshot-table";
 import { SourceCitation } from "./source-citation";
+import { geoConceptForDataflow } from "@/lib/country-snapshots/dataflow-dimensions";
 
 function ItemErrorFallback({ item }: { item: DashboardItem }) {
   return (
@@ -114,14 +115,17 @@ export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
                   data: item.dataUrl,
                   title: { text: "" },
                   // Series dimension precedence:
-                  //   compare mode → countries vary, GEO_PICT is the series
+                  //   compare mode → countries vary, geo dim is the series
                   //   single-country consolidated → seriesConcept (e.g. SEX)
-                  // GEO_PICT is the SPC convention; SDG flows use REF_AREA
-                  // but those are dropped in v1.
+                  // The geo dim varies by dataflow (GEO_PICT for SPC,
+                  // REF_AREA for SDG-family, etc.); resolve from
+                  // dataflow-dimensions.json.
                   ...(config.countries.length > 1
                     ? {
                         legend: {
-                          concept: "GEO_PICT",
+                          concept: geoConceptForDataflow(
+                            item.source?.dataflow,
+                          ),
                           location: "bottom" as const,
                         },
                       }
