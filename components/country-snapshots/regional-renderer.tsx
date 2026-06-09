@@ -152,8 +152,10 @@ export function RegionalRenderer({ config }: { config: SnapshotConfig }) {
                   xAxisConcept: "TIME_PERIOD",
                   data: item.dataUrl,
                   title: { text: "" },
+                  // SPC convention: GEO_PICT is the country dimension. SDG
+                  // flows use REF_AREA but those are dropped in v1.
                   legend: {
-                    concept: "REF_AREA",
+                    concept: "GEO_PICT",
                     location: "bottom" as const,
                   },
                 }}

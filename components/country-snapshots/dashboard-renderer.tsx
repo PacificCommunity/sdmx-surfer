@@ -114,12 +114,14 @@ export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
                   data: item.dataUrl,
                   title: { text: "" },
                   // Series dimension precedence:
-                  //   compare mode → countries vary, REF_AREA is the series
+                  //   compare mode → countries vary, GEO_PICT is the series
                   //   single-country consolidated → seriesConcept (e.g. SEX)
+                  // GEO_PICT is the SPC convention; SDG flows use REF_AREA
+                  // but those are dropped in v1.
                   ...(config.countries.length > 1
                     ? {
                         legend: {
-                          concept: "REF_AREA",
+                          concept: "GEO_PICT",
                           location: "bottom" as const,
                         },
                       }
