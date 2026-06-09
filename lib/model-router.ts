@@ -41,15 +41,19 @@ export function toGatewaySlug(providerId: string, modelId: string): string {
 // that, e.g., Mistral's parallelToolCalls:false fix applies to BYOK paths too,
 // not just the platform-gateway path.
 //
-//   - Anthropic: ephemeral cache_control (saves cost on our ~10-15K system prompt)
-//   - Mistral:   parallelToolCalls:false — Mistral's default eager parallel
+//   - Mistral: parallelToolCalls:false — Mistral's default eager parallel
 //     tool-calling breaks sequential ReAct loops (calls every tool in one
 //     step with fabricated args). Forcing one-call-per-step restores the
 //     standard agent loop. Verified via scripts/smoke-gateway.ts.
+//
+// NOTE on Anthropic prompt caching: a call-level
+// `anthropic.cacheControl` used to live here. It was a silent no-op —
+// @ai-sdk/anthropic only reads cacheControl from MESSAGE-level (or
+// tool-level) providerOptions, never from the streamText call options.
+// Cache breakpoints are now set where they work: on the system message in
+// the chat routes (see app/api/countrysnapshots/chat/route.ts). Do not
+// re-add cacheControl here expecting it to do something.
 function providerOptionsFor(providerId: string): ProviderOptions | undefined {
-  if (providerId === "anthropic") {
-    return { anthropic: { cacheControl: { type: "ephemeral" } } };
-  }
   if (providerId === "mistral") {
     return { mistral: { parallelToolCalls: false } };
   }

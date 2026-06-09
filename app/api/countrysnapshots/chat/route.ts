@@ -9,7 +9,7 @@ import { createRequestLogger } from "@/lib/logger";
 import { db, dashboardSessions } from "@/lib/db";
 import { requireSnapshotSession } from "@/lib/country-snapshots/auth";
 import {
-  buildSnapshotSystemPrompt,
+  buildSnapshotSystemPromptParts,
   type SnapshotContext,
 } from "@/lib/country-snapshots/system-prompt";
 import {
@@ -108,9 +108,27 @@ export async function POST(req: Request) {
       { ignoreIncompleteToolCalls: true },
     );
 
-    const systemPrompt = buildSnapshotSystemPrompt({
+    // Split system prompt: the stable block (base prompt + catalogue) gets
+    // an Anthropic cache breakpoint; the dynamic block (per-page context)
+    // follows uncached. Anthropic's cache prefix is tools → system →
+    // messages, so the breakpoint on the stable system block also caches
+    // the ~8K tokens of MCP tool definitions ahead of it. Without this,
+    // every step of every turn re-prefills the full ~21K-token prefix.
+    // NOTE: cache_control must sit on MESSAGE-level providerOptions — the
+    // provider ignores it at the streamText call level.
+    const { stable, dynamic } = buildSnapshotSystemPromptParts({
       ctx: snapshotContext as SnapshotContext,
     });
+    const systemMessages = [
+      {
+        role: "system" as const,
+        content: stable,
+        providerOptions: {
+          anthropic: { cacheControl: { type: "ephemeral" as const } },
+        },
+      },
+      { role: "system" as const, content: dynamic },
+    ];
     const modelConfig = await getModelForUser(session.userId);
     logger.setModelInfo(
       modelConfig.modelId,
@@ -163,24 +181,49 @@ export async function POST(req: Request) {
 
     const result = streamText({
       model: modelConfig.model,
-      system: systemPrompt,
-      messages: modelMessages,
+      messages: [...systemMessages, ...modelMessages],
       providerOptions: modelConfig.providerOptions || {},
       tools,
       stopWhen: stepCountIs(isIndex ? STEP_LIMIT_INDEX : STEP_LIMIT_PAGE),
       onFinish: async ({ steps, totalUsage }) => {
         let totalCost = 0;
         let anyCost = false;
+        let cacheRead = 0;
+        let cacheWrite = 0;
         for (const step of steps) {
-          const c = (
-            step.providerMetadata as { gateway?: { cost?: string } } | undefined
-          )?.gateway?.cost;
-          if (c == null) continue;
-          const parsed = parseFloat(c);
-          if (Number.isFinite(parsed)) {
-            totalCost += parsed;
-            anyCost = true;
+          const meta = step.providerMetadata as
+            | {
+                gateway?: { cost?: string };
+                anthropic?: {
+                  cacheReadInputTokens?: number;
+                  cacheCreationInputTokens?: number;
+                };
+              }
+            | undefined;
+          const c = meta?.gateway?.cost;
+          if (c != null) {
+            const parsed = parseFloat(c);
+            if (Number.isFinite(parsed)) {
+              totalCost += parsed;
+              anyCost = true;
+            }
           }
+          cacheRead += meta?.anthropic?.cacheReadInputTokens ?? 0;
+          cacheWrite += meta?.anthropic?.cacheCreationInputTokens ?? 0;
+        }
+        // Temporary observability while we confirm the cache breakpoint
+        // lands through the gateway: read ≫ write after the first step
+        // means the prefix cache is working.
+        if (cacheRead || cacheWrite) {
+          console.info(
+            "[country-snapshots/chat] prompt cache: read=" +
+              cacheRead +
+              " write=" +
+              cacheWrite +
+              " tokens across " +
+              steps.length +
+              " steps",
+          );
         }
         logger.setCostUsd(anyCost ? totalCost : null);
         await logger.flush(

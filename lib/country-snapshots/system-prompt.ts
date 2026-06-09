@@ -8,37 +8,53 @@ export type SnapshotContext = {
 };
 
 /**
- * System prompt for the snapshot-area chat overlay. Layers on top of the
- * regular Surfer system prompt:
+ * System prompt for the snapshot-area chat, split into two blocks so the
+ * stable prefix can carry an Anthropic cache breakpoint:
  *
- *   1. Base Surfer prompt (with all the SDMX/dashboard authoring rules).
- *   2. If mode === "prompt": a full-catalogue dump (see catalogue-access.ts).
- *      If mode === "tool":   no catalogue text; tools handle lookups.
- *   3. A snapshot-context block describing the country/theme/indicators
- *      currently on the page.
- *   4. A scope reminder that the snapshot is read-only — the agent can
- *      investigate via MCP tools but cannot modify the snapshot itself.
- *      Customising → "Explore in Surfer" fork.
+ *   stable  — base Surfer prompt + (in prompt mode) the full catalogue dump.
+ *             Identical across every turn and step; cached at the provider.
+ *   dynamic — the per-page snapshot context (country/theme/indicators) and
+ *             scope rules. Changes between pages; never cached.
+ *
+ * Anthropic merges consecutive system messages into one multi-block system
+ * array where each block carries its own cache_control, and the cache
+ * prefix order is tools → system → messages — so a breakpoint at the end
+ * of the stable block also caches the tool definitions ahead of it.
  */
-export function buildSnapshotSystemPrompt(args: {
+export function buildSnapshotSystemPromptParts(args: {
   ctx: SnapshotContext;
   baseSystemPrompt?: string;
-}): string {
-  const parts: string[] = [];
-  parts.push(args.baseSystemPrompt ?? getBaseSystemPrompt());
-
+}): { stable: string; dynamic: string } {
+  const stableParts: string[] = [];
+  stableParts.push(args.baseSystemPrompt ?? getBaseSystemPrompt());
   if (getMode() === "prompt") {
-    parts.push("");
-    parts.push(renderCatalogueForPrompt());
+    stableParts.push("");
+    stableParts.push(renderCatalogueForPrompt());
   }
   // In tool mode the catalogue block is omitted; a list_catalogue_indicators
   // tool (Task C2) is registered separately on the chat route.
 
-  parts.push("");
+  return {
+    stable: stableParts.join("\n"),
+    dynamic: buildDynamicContext(args.ctx),
+  };
+}
+
+/** Single-string form, kept for tests and non-caching callers. */
+export function buildSnapshotSystemPrompt(args: {
+  ctx: SnapshotContext;
+  baseSystemPrompt?: string;
+}): string {
+  const { stable, dynamic } = buildSnapshotSystemPromptParts(args);
+  return stable + "\n" + dynamic;
+}
+
+function buildDynamicContext(ctx: SnapshotContext): string {
+  const parts: string[] = [];
   parts.push("# Current Snapshot Context");
 
   const isIndex =
-    args.ctx.themeSlug === "index" || args.ctx.countryCodes.length === 0;
+    ctx.themeSlug === "index" || ctx.countryCodes.length === 0;
   if (isIndex) {
     parts.push(
       "The user is on the Country Snapshots entry page, not a specific " +
@@ -62,11 +78,11 @@ export function buildSnapshotSystemPrompt(args: {
     );
   } else {
     parts.push(
-      `Country/countries on this page: ${args.ctx.countryCodes.join(", ")}`,
+      `Country/countries on this page: ${ctx.countryCodes.join(", ")}`,
     );
-    parts.push(`Theme slug: ${args.ctx.themeSlug}`);
+    parts.push(`Theme slug: ${ctx.themeSlug}`);
     parts.push(
-      `Indicators visible: ${args.ctx.indicatorIds.join(", ") || "(none)"}`,
+      `Indicators visible: ${ctx.indicatorIds.join(", ") || "(none)"}`,
     );
     parts.push(
       "You are operating as a read-only assistant for this snapshot page. " +
