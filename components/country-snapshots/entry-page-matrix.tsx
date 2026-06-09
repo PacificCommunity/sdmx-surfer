@@ -60,6 +60,13 @@ export function EntryPageMatrix({
               <span className="w-44 shrink-0 text-sm font-medium">
                 {t.title}
               </span>
+              <Link
+                href={`/countrysnapshots/regional/${t.slug}`}
+                className="rounded-full bg-[#004467] px-2 py-0.5 text-xs text-white hover:bg-[#003355]"
+                title={`Regional summary for ${t.title}`}
+              >
+                regional
+              </Link>
               {countries.map((c) => (
                 <Link
                   key={c.code}
