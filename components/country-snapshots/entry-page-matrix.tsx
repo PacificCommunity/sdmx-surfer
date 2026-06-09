@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { Country, Theme } from "@/lib/country-snapshots/catalogue";
 import { themeEmoji } from "@/lib/country-snapshots/theme-emoji";
-import { countryFlag } from "@/lib/country-snapshots/country-flag";
 
 export function EntryPageMatrix({
   countries,
@@ -14,6 +13,13 @@ export function EntryPageMatrix({
   themes: Theme[];
 }) {
   const [pivot, setPivot] = useState<"by-country" | "by-theme">("by-country");
+  const sortedCountries = useMemo(
+    () =>
+      [...countries].sort((a, b) =>
+        a.name.localeCompare(b.name, "en"),
+      ),
+    [countries],
+  );
 
   return (
     <section className="mt-8">
@@ -55,13 +61,12 @@ export function EntryPageMatrix({
 
       {pivot === "by-country" ? (
         <ul className="space-y-2">
-          {countries.map((c) => (
+          {sortedCountries.map((c) => (
             <li
               key={c.code}
               className="flex flex-wrap items-baseline gap-2 rounded-md bg-white p-3 shadow-sm"
             >
-              <span className="w-36 shrink-0 text-sm font-medium">
-                <span className="mr-1.5">{countryFlag(c.code)}</span>
+              <span className="w-44 shrink-0 text-sm font-medium">
                 {c.name}
               </span>
               {themes.map((t) => (
@@ -95,15 +100,13 @@ export function EntryPageMatrix({
               >
                 regional
               </Link>
-              {countries.map((c) => (
+              {sortedCountries.map((c) => (
                 <Link
                   key={c.code}
                   href={`/countrysnapshots/${c.code}/${t.slug}`}
                   className="rounded-full bg-[#f1f4f6] px-2 py-0.5 text-xs hover:bg-[#e5e9eb]"
-                  title={c.name}
                 >
-                  <span className="mr-1">{countryFlag(c.code)}</span>
-                  <span className="font-mono">{c.code}</span>
+                  {c.name}
                 </Link>
               ))}
             </li>

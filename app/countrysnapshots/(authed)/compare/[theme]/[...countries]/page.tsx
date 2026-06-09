@@ -12,7 +12,6 @@ import { ComparePicker } from "@/components/country-snapshots/compare-picker";
 import { ExportButton } from "@/components/country-snapshots/export-button";
 import { ChatOverlay } from "@/components/country-snapshots/chat-overlay";
 import { themeEmoji } from "@/lib/country-snapshots/theme-emoji";
-import { countryFlag } from "@/lib/country-snapshots/country-flag";
 
 const MAX_COMPARE = 5;
 const MIN_COMPARE = 2;
@@ -49,7 +48,7 @@ export default async function ComparePage({
 
   return (
     <SnapshotPageShell
-      title={`${safeCountries.map((c) => `${countryFlag(c.code)} ${c.name}`).join(" vs ")} — ${themeEmoji(theme.id)} ${theme.title}`}
+      title={`${safeCountries.map((c) => c.name).join(" vs ")} — ${themeEmoji(theme.id)} ${theme.title}`}
       subtitle={`Compare across ${codes.length} countries — ${config.items.length} indicators`}
       actions={
         <ExportButton

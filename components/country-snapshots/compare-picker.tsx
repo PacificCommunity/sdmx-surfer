@@ -1,8 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import type { Country, Theme } from "@/lib/country-snapshots/catalogue";
-import { countryFlag } from "@/lib/country-snapshots/country-flag";
 
 const MAX = 5;
 
@@ -16,6 +16,13 @@ export function ComparePicker({
   selected: string[];
 }) {
   const router = useRouter();
+  const sortedCountries = useMemo(
+    () =>
+      [...countries].sort((a, b) =>
+        a.name.localeCompare(b.name, "en"),
+      ),
+    [countries],
+  );
 
   function go(codes: string[]) {
     // Use slash-separated codes (path segments) rather than '+', because Next.js
@@ -42,7 +49,7 @@ export function ComparePicker({
         Compare ({selected.length}/{MAX})
       </p>
       <div className="flex flex-wrap gap-2">
-        {countries.map((c) => {
+        {sortedCountries.map((c) => {
           const on = selected.includes(c.code);
           return (
             <button
@@ -56,7 +63,6 @@ export function ComparePicker({
                   : "bg-[#f1f4f6] text-neutral-700 hover:bg-[#e5e9eb]")
               }
             >
-              <span className="mr-1">{countryFlag(c.code)}</span>
               {c.name}
             </button>
           );
