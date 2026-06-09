@@ -10,6 +10,7 @@ import { SnapshotPageShell } from "@/components/country-snapshots/snapshot-page-
 import { RegionalRenderer } from "@/components/country-snapshots/regional-renderer";
 import { ExportButton } from "@/components/country-snapshots/export-button";
 import { ChatOverlay } from "@/components/country-snapshots/chat-overlay";
+import { themeEmoji } from "@/lib/country-snapshots/theme-emoji";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +55,7 @@ export default async function RegionalPage({
 
   return (
     <SnapshotPageShell
-      title={`${theme.title} — regional summary`}
+      title={`${themeEmoji(theme.id)} ${theme.title} — regional summary`}
       subtitle={`${countries.length} countries · ${config.items.length} indicators`}
       actions={
         <ExportButton filenameStem={`Regional_${theme.title}`} />

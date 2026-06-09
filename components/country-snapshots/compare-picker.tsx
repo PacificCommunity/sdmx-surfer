@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import type { Country, Theme } from "@/lib/country-snapshots/catalogue";
+import { countryFlag } from "@/lib/country-snapshots/country-flag";
 
 const MAX = 5;
 
@@ -55,6 +56,7 @@ export function ComparePicker({
                   : "bg-[#f1f4f6] text-neutral-700 hover:bg-[#e5e9eb]")
               }
             >
+              <span className="mr-1">{countryFlag(c.code)}</span>
               {c.name}
             </button>
           );

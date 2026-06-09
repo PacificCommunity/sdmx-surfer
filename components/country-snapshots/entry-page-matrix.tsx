@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { Country, Theme } from "@/lib/country-snapshots/catalogue";
+import { themeEmoji } from "@/lib/country-snapshots/theme-emoji";
+import { countryFlag } from "@/lib/country-snapshots/country-flag";
 
 export function EntryPageMatrix({
   countries,
@@ -31,6 +33,7 @@ export function EntryPageMatrix({
               href={`/countrysnapshots/regional/${t.slug}`}
               className="rounded-full bg-[#004467] px-3 py-1 text-xs text-white hover:bg-[#003355]"
             >
+              <span className="mr-1">{themeEmoji(t.id)}</span>
               {t.title}
             </Link>
           ))}
@@ -57,7 +60,8 @@ export function EntryPageMatrix({
               key={c.code}
               className="flex flex-wrap items-baseline gap-2 rounded-md bg-white p-3 shadow-sm"
             >
-              <span className="w-32 shrink-0 text-sm font-medium">
+              <span className="w-36 shrink-0 text-sm font-medium">
+                <span className="mr-1.5">{countryFlag(c.code)}</span>
                 {c.name}
               </span>
               {themes.map((t) => (
@@ -66,6 +70,7 @@ export function EntryPageMatrix({
                   href={`/countrysnapshots/${c.code}/${t.slug}`}
                   className="rounded-full bg-[#f1f4f6] px-2 py-0.5 text-xs hover:bg-[#e5e9eb]"
                 >
+                  <span className="mr-1">{themeEmoji(t.id)}</span>
                   {t.title}
                 </Link>
               ))}
@@ -79,7 +84,8 @@ export function EntryPageMatrix({
               key={t.id}
               className="flex flex-wrap items-baseline gap-2 rounded-md bg-white p-3 shadow-sm"
             >
-              <span className="w-44 shrink-0 text-sm font-medium">
+              <span className="w-48 shrink-0 text-sm font-medium">
+                <span className="mr-1.5">{themeEmoji(t.id)}</span>
                 {t.title}
               </span>
               <Link
@@ -93,10 +99,11 @@ export function EntryPageMatrix({
                 <Link
                   key={c.code}
                   href={`/countrysnapshots/${c.code}/${t.slug}`}
-                  className="rounded-full bg-[#f1f4f6] px-2 py-0.5 font-mono text-xs hover:bg-[#e5e9eb]"
+                  className="rounded-full bg-[#f1f4f6] px-2 py-0.5 text-xs hover:bg-[#e5e9eb]"
                   title={c.name}
                 >
-                  {c.code}
+                  <span className="mr-1">{countryFlag(c.code)}</span>
+                  <span className="font-mono">{c.code}</span>
                 </Link>
               ))}
             </li>

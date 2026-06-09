@@ -9,6 +9,8 @@ import { SnapshotPageShell } from "@/components/country-snapshots/snapshot-page-
 import { DashboardRenderer } from "@/components/country-snapshots/dashboard-renderer";
 import { ExportButton } from "@/components/country-snapshots/export-button";
 import { ChatOverlay } from "@/components/country-snapshots/chat-overlay";
+import { themeEmoji } from "@/lib/country-snapshots/theme-emoji";
+import { countryFlag } from "@/lib/country-snapshots/country-flag";
 
 export async function generateStaticParams() {
   const cat = getSnapshotCatalogue();
@@ -39,7 +41,7 @@ export default async function Page({
 
   return (
     <SnapshotPageShell
-      title={`${country.name} — ${theme.title}`}
+      title={`${countryFlag(country.code)} ${country.name} — ${themeEmoji(theme.id)} ${theme.title}`}
       subtitle={`Snapshot of ${config.items.length} indicators`}
       actions={
         <ExportButton filenameStem={`${country.name}_${theme.title}`} />
