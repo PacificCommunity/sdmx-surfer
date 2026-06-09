@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { SnapshotContext } from "@/lib/country-snapshots/system-prompt";
@@ -20,6 +20,17 @@ export function ChatOverlay({
   // sees current data after navigation between snapshot pages.
   const ctxRef = useRef(snapshotContext);
   ctxRef.current = snapshotContext;
+
+  // Pre-warm the prompt cache for page-mode chats on mount. Fire-and-forget;
+  // the server debounces, and a failed warm only means the first turn pays
+  // the cache write as before.
+  useEffect(() => {
+    void fetch("/api/countrysnapshots/warm", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ mode: "page" }),
+    }).catch(() => {});
+  }, []);
 
   const transport = useMemo(
     () =>

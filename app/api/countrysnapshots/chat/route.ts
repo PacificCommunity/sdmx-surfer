@@ -1,4 +1,4 @@
-import { streamText, tool, convertToModelMessages, stepCountIs } from "ai";
+import { streamText, convertToModelMessages, stepCountIs } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
@@ -8,21 +8,13 @@ import { sanitizeToolInputs } from "@/lib/sanitize-messages";
 import { createRequestLogger } from "@/lib/logger";
 import { db, dashboardSessions } from "@/lib/db";
 import { requireSnapshotSession } from "@/lib/country-snapshots/auth";
+import { type SnapshotContext } from "@/lib/country-snapshots/system-prompt";
 import {
-  buildSnapshotSystemPromptParts,
-  type SnapshotContext,
-} from "@/lib/country-snapshots/system-prompt";
-import {
-  getMode,
-  catalogueTool,
-} from "@/lib/country-snapshots/catalogue-access";
+  buildSystemMessages,
+  buildSnapshotTools,
+  modeFor,
+} from "@/lib/country-snapshots/chat-assembly";
 import { checkTurnCap } from "@/lib/country-snapshots/turn-cap";
-import {
-  compileDashboardToolConfig,
-  dashboardToolConfigSchema,
-} from "@/lib/dashboard-authoring";
-import { resolveDataflowNamesFromConfig } from "@/lib/dataflow-names";
-import { getConfigTitle } from "@/lib/dashboard-schema";
 
 // Per-page snapshot chats are read-only and tightly capped. The index
 // (entry-page) mode is a full builder agent and needs more room.
@@ -93,13 +85,6 @@ export async function POST(req: Request) {
     mcpClient = await createMCPClient({ transport: mcpTransportConfig() });
     const mcpTools = await mcpClient.tools();
 
-    // The snapshot is read-only: drop update_dashboard if the MCP gateway
-    // happens to expose it. The chat overlay can investigate but not
-    // mutate.
-    const safeMcpTools = Object.fromEntries(
-      Object.entries(mcpTools).filter(([name]) => name !== "update_dashboard"),
-    );
-
     const sanitized = sanitizeToolInputs(
       messages as Array<Record<string, unknown>>,
     );
@@ -108,27 +93,15 @@ export async function POST(req: Request) {
       { ignoreIncompleteToolCalls: true },
     );
 
-    // Split system prompt: the stable block (base prompt + catalogue) gets
-    // an Anthropic cache breakpoint; the dynamic block (per-page context)
-    // follows uncached. Anthropic's cache prefix is tools → system →
-    // messages, so the breakpoint on the stable system block also caches
-    // the ~8K tokens of MCP tool definitions ahead of it. Without this,
-    // every step of every turn re-prefills the full ~21K-token prefix.
-    // NOTE: cache_control must sit on MESSAGE-level providerOptions — the
-    // provider ignores it at the streamText call level.
-    const { stable, dynamic } = buildSnapshotSystemPromptParts({
-      ctx: snapshotContext as SnapshotContext,
-    });
-    const systemMessages = [
-      {
-        role: "system" as const,
-        content: stable,
-        providerOptions: {
-          anthropic: { cacheControl: { type: "ephemeral" as const } },
-        },
-      },
-      { role: "system" as const, content: dynamic },
-    ];
+    // Tools + the stable system message form the Anthropic cache prefix.
+    // Assembly lives in chat-assembly.ts, SHARED with the warm route —
+    // both must produce a byte-identical prefix or pre-warming silently
+    // stops working.
+    const ctx = snapshotContext as SnapshotContext;
+    const mode = modeFor(ctx);
+    const systemMessages = buildSystemMessages(ctx);
+    const tools = buildSnapshotTools(mcpTools, mode);
+
     const modelConfig = await getModelForUser(session.userId);
     logger.setModelInfo(
       modelConfig.modelId,
@@ -136,55 +109,14 @@ export async function POST(req: Request) {
       modelConfig.keySource,
     );
 
-    // Index (entry-page) mode unlocks update_dashboard so the assistant can
-    // actually produce a live dashboard; per-page snapshot chats stay
-    // read-only (the canonical snapshot config must not mutate).
-    const isIndex =
-      snapshotContext.themeSlug === "index" ||
-      snapshotContext.countryCodes.length === 0;
-
-    const updateDashboardTool = tool({
-      description:
-        "Send a dashboard configuration to the live preview. " +
-        "Prefer the simplified authoring schema (intent visuals like kpi, chart, map, note). " +
-        "Always send the complete config, not just changed parts.",
-      inputSchema: z.object({ config: dashboardToolConfigSchema }),
-      execute: async ({
-        config,
-      }: {
-        config: z.infer<typeof dashboardToolConfigSchema>;
-      }) => {
-        const compiled = compileDashboardToolConfig(config);
-        compiled.dataflows = resolveDataflowNamesFromConfig(compiled);
-        return {
-          success: true,
-          dashboard: compiled,
-          message:
-            "Dashboard updated. The preview now shows: " +
-            getConfigTitle(compiled),
-        };
-      },
-    });
-
-    const indexTools = {
-      ...mcpTools,                          // index mode is allowed to mutate
-      ...(getMode() === "tool"
-        ? { list_catalogue_indicators: catalogueTool }
-        : {}),
-      update_dashboard: updateDashboardTool,
-    };
-    const pageTools =
-      getMode() === "tool"
-        ? { ...safeMcpTools, list_catalogue_indicators: catalogueTool }
-        : safeMcpTools;
-    const tools = isIndex ? indexTools : pageTools;
-
     const result = streamText({
       model: modelConfig.model,
       messages: [...systemMessages, ...modelMessages],
       providerOptions: modelConfig.providerOptions || {},
-      tools,
-      stopWhen: stepCountIs(isIndex ? STEP_LIMIT_INDEX : STEP_LIMIT_PAGE),
+      tools: tools as Parameters<typeof streamText>[0]["tools"],
+      stopWhen: stepCountIs(
+        mode === "index" ? STEP_LIMIT_INDEX : STEP_LIMIT_PAGE,
+      ),
       onFinish: async ({ steps, totalUsage }) => {
         let totalCost = 0;
         let anyCost = false;

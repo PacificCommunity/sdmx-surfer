@@ -55,6 +55,17 @@ export function ChatStarter() {
   const [capReached, setCapReached] = useState(false);
   const previewRef = useRef<HTMLDivElement | null>(null);
 
+  // Pre-warm the prompt cache so the first turn hits the cached prefix.
+  // Fire-and-forget; the server debounces, and a failed warm only means
+  // the first turn pays the cache write as before.
+  useEffect(() => {
+    void fetch("/api/countrysnapshots/warm", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ mode: "index" }),
+    }).catch(() => {});
+  }, []);
+
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
