@@ -124,16 +124,17 @@ describe("buildSnapshotConfig", () => {
     expect(lifeItem?.source?.visUrl).toBe("https://stats.x/vis");
   });
 
-  it("honours rendering on single-country: CHART→chart, TABLE→table, TEXT→text", () => {
+  it("data-shape-first routing on single-country", () => {
     const cfg = buildSnapshotConfig({
       country: fixture.countries[0],
       theme: fixture.themes[0],
       catalogue: fixture,
     });
     const types = Object.fromEntries(cfg.items.map((i) => [i.id, i.type]));
-    expect(types["II.1"]).toBe("chart"); // rendering=CHART, has data
-    expect(types["II.2"]).toBe("table"); // rendering=TABLE, has data → pivot table
-    expect(types["II.10"]).toBe("text"); // rendering=TEXT, no data source
+    expect(types["II.1"]).toBe("chart"); // ≥3 pts → line chart (was CHART)
+    expect(types["II.2"]).toBe("table"); // sparse + TABLE rendering → pivot table
+    expect(types["II.3"]).toBe("value"); // sparse + CHART rendering → value KPI
+    expect(types["II.10"]).toBe("text"); // no data → text
   });
 
   it("CHART indicators with ≥3 points get chartType=line on single-country pages", () => {
@@ -161,15 +162,15 @@ describe("buildSnapshotConfig", () => {
     expect(sparseChart?.chartType).toBeUndefined();
   });
 
-  it("TABLE indicators stay as table on compare pages (renderer pivots GEO as columns)", () => {
+  it("compare-mode uses chart visuals; GEO provides the varying dim", () => {
     const cfg = buildSnapshotConfig({
       country: [fixture.countries[0], fixture.countries[1]],
       theme: fixture.themes[0],
       catalogue: fixture,
     });
     const sparseItem = cfg.items.find((i) => i.id === "II.2");
-    expect(sparseItem?.type).toBe("table");
-    expect(sparseItem?.chartType).toBeUndefined();
+    expect(sparseItem?.type).toBe("chart");
+    expect(sparseItem?.chartType).toBe("bar");
   });
 
   it("collapses compare-mode chartType to line when any country has line", () => {

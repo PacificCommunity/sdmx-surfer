@@ -57,43 +57,32 @@ export function buildSnapshotConfig(args: {
 
       if (!hasData) {
         type = "text";
-      } else if (i.rendering === "TABLE") {
-        // The curator asked for a table — honour it. Our own SnapshotTable
-        // component pivots TIME_PERIOD on rows × (seriesConcept | GEO_PICT)
-        // on columns. Falls back to a single value column otherwise.
-        type = "table";
-      } else if (i.rendering === "MAP") {
-        // MAP isn't wired yet (needs geojson plumbing). Surface as a value
-        // card (single-country) or bar (compare).
-        if (codes.length === 1) {
-          type = "value";
-        } else {
-          type = "chart";
-          chartType = "bar";
-        }
-      } else if (i.rendering === "CHART") {
-        // Consolidated indicators carry seriesConcept (e.g. SEX). That
-        // gives bar/lollipop a varying non-time dimension to group by,
-        // so sparse data can render as a proper visual instead of a KPI.
+      } else {
+        // Data shape wins over rendering label. If there are ≥3 time
+        // points the only reasonable visual is a line chart (single or
+        // multi-series). The catalogue's TABLE label, inherited from a
+        // pre-chart Python script, is informational only for sparse data
+        // where a chart would over-imply continuity.
+        //
+        // Sparse rules:
+        //   - consolidated (has seriesConcept) → lollipop (other dim varies)
+        //   - rendering=TABLE                  → pivot table (curator intent)
+        //   - otherwise                        → value (KPI fallback)
         const hasSeriesDim = Boolean(i.seriesConcept);
-        if (codes.length === 1) {
-          if (cacheDecision === "bar" && hasSeriesDim) {
-            type = "chart";
-            chartType = "lollipop";
-          } else if (cacheDecision === "bar") {
-            type = "value";
-          } else {
-            type = "chart";
-            chartType = "line";
-          }
-        } else {
+        if (codes.length > 1) {
           type = "chart";
           chartType = cacheDecision === "bar" ? "bar" : "line";
+        } else if (cacheDecision === "line") {
+          type = "chart";
+          chartType = "line";
+        } else if (hasSeriesDim) {
+          type = "chart";
+          chartType = "lollipop";
+        } else if (i.rendering === "TABLE") {
+          type = "table";
+        } else {
+          type = "value";
         }
-      } else {
-        // rendering === "TEXT" but the indicator unexpectedly has a data
-        // URL — still surface it as a value rather than dropping.
-        type = "value";
       }
     }
 
