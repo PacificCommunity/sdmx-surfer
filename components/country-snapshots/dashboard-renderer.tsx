@@ -6,6 +6,7 @@ import type {
   DashboardItem,
 } from "@/lib/country-snapshots/config-builder";
 import { SnapshotChart, SnapshotValue } from "./snapshot-chart";
+import { SnapshotTable } from "./snapshot-table";
 import { SourceCitation } from "./source-citation";
 
 function ItemErrorFallback({ item }: { item: DashboardItem }) {
@@ -87,6 +88,17 @@ export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
                   title: { text: "" },
                 }}
                 language="en"
+              />
+            </ErrorBoundary>
+          ) : item.type === "table" ? (
+            <ErrorBoundary
+              fallback={<ItemErrorFallback item={item} />}
+              onError={(err) => logFailure(item, err as Error)}
+            >
+              <SnapshotTable
+                dataUrl={item.dataUrl}
+                seriesConcept={item.seriesConcept}
+                isCompare={config.countries.length > 1}
               />
             </ErrorBoundary>
           ) : item.chartType ? (

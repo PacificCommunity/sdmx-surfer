@@ -124,7 +124,7 @@ describe("buildSnapshotConfig", () => {
     expect(lifeItem?.source?.visUrl).toBe("https://stats.x/vis");
   });
 
-  it("honours rendering on single-country: CHART→chart, TABLE→value, TEXT→text", () => {
+  it("honours rendering on single-country: CHART→chart, TABLE→table, TEXT→text", () => {
     const cfg = buildSnapshotConfig({
       country: fixture.countries[0],
       theme: fixture.themes[0],
@@ -132,7 +132,7 @@ describe("buildSnapshotConfig", () => {
     });
     const types = Object.fromEntries(cfg.items.map((i) => [i.id, i.type]));
     expect(types["II.1"]).toBe("chart"); // rendering=CHART, has data
-    expect(types["II.2"]).toBe("value"); // rendering=TABLE, has data → KPI card
+    expect(types["II.2"]).toBe("table"); // rendering=TABLE, has data → pivot table
     expect(types["II.10"]).toBe("text"); // rendering=TEXT, no data source
   });
 
@@ -161,15 +161,15 @@ describe("buildSnapshotConfig", () => {
     expect(sparseChart?.chartType).toBeUndefined();
   });
 
-  it("TABLE indicators become bar on compare pages (GEO provides the varying dim)", () => {
+  it("TABLE indicators stay as table on compare pages (renderer pivots GEO as columns)", () => {
     const cfg = buildSnapshotConfig({
       country: [fixture.countries[0], fixture.countries[1]],
       theme: fixture.themes[0],
       catalogue: fixture,
     });
     const sparseItem = cfg.items.find((i) => i.id === "II.2");
-    expect(sparseItem?.type).toBe("chart");
-    expect(sparseItem?.chartType).toBe("bar");
+    expect(sparseItem?.type).toBe("table");
+    expect(sparseItem?.chartType).toBeUndefined();
   });
 
   it("collapses compare-mode chartType to line when any country has line", () => {

@@ -2,7 +2,7 @@ import type { Catalogue, Country, Indicator, Theme } from "./catalogue";
 import { chartTypeFor, chartTypeForCompare } from "./chart-types";
 
 export type DashboardItem = {
-  type: "chart" | "value" | "text";  // "chart"/"value" for library; "text" for placeholders
+  type: "chart" | "value" | "table" | "text";  // "table" → our own pivot renderer
   chartType?: "line" | "bar" | "lollipop";  // when type === "chart"
   seriesConcept?: string;  // SDMX dim name to set as legend.concept on the chart
   id: string;          // catalogue indicator id (e.g. "II.4"), also used as a stable in-page anchor
@@ -57,9 +57,14 @@ export function buildSnapshotConfig(args: {
 
       if (!hasData) {
         type = "text";
-      } else if (i.rendering === "TABLE" || i.rendering === "MAP") {
-        // Single-country: KPI card. Compare: bar across countries (GEO is
-        // the varying dimension so the library accepts bar there).
+      } else if (i.rendering === "TABLE") {
+        // The curator asked for a table — honour it. Our own SnapshotTable
+        // component pivots TIME_PERIOD on rows × (seriesConcept | GEO_PICT)
+        // on columns. Falls back to a single value column otherwise.
+        type = "table";
+      } else if (i.rendering === "MAP") {
+        // MAP isn't wired yet (needs geojson plumbing). Surface as a value
+        // card (single-country) or bar (compare).
         if (codes.length === 1) {
           type = "value";
         } else {
