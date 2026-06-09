@@ -2,7 +2,7 @@
 import type { Catalogue } from "./catalogue";
 
 export const catalogue: Catalogue = {
-  "generatedAt": "2026-06-08T00:00:00Z",
+  "generatedAt": "2026-06-09T00:00:00Z",
   "sourceFile": "country_snapshots_2025.xlsx",
   "countries": [
     {
@@ -393,22 +393,17 @@ export const catalogue: Catalogue = {
     {
       "id": "II.1",
       "themeId": "II",
-      "title": "Life expectancy at birth (male)",
+      "title": "Life expectancy at birth",
       "mfatName": "Life expectancy at birth, by sex",
       "rendering": "CHART",
       "dataflow": "DF_VITAL",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_VITAL,/A.[TAG_GEO].LEB.M?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=expectancy&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_VITAL&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].LEB.M&ly[cl]=TIME_PERIOD"
-    },
-    {
-      "id": "II.2",
-      "themeId": "II",
-      "title": "Life expectancy at birth (female)",
-      "mfatName": "Life expectancy at birth, by sex",
-      "rendering": "CHART",
-      "dataflow": "DF_VITAL",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_VITAL,/A.[TAG_GEO].LEB.F?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=expectancy&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_VITAL&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].LEB.F&ly[cl]=TIME_PERIOD"
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_VITAL,/A.[TAG_GEO].LEB.M+F?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?tm=expectancy&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_VITAL&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].LEB.M&ly[cl]=TIME_PERIOD",
+      "seriesConcept": "SEX",
+      "consolidatedFromIds": [
+        "II.1",
+        "II.2"
+      ]
     },
     {
       "id": "II.3",
@@ -531,57 +526,35 @@ export const catalogue: Catalogue = {
     {
       "id": "III.7",
       "themeId": "III",
-      "title": "Literacy Rates of 15-24 year olds (%)",
+      "title": "Literacy Rates of 15-24 year olds",
       "mfatName": "Literacy rate of youth (%ages 15-24) - by sex and rural/urban",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_EDU",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0019._T._T._T..?dimensionAtObservation=AllDimensions",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0019._T+F+M._T._T..?dimensionAtObservation=AllDimensions",
       "visUrl": "https://stats.pacificdata.org/vis?tm=literacy%20rate&pg=0&snb=5&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0019._T._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD",
-      "notes": "New"
-    },
-    {
-      "id": "III.8",
-      "themeId": "III",
-      "title": "Literacy Rates of 15-24 year olds (% - female)",
-      "mfatName": "Literacy rate of youth (%ages 15-24) - by sex and rural/urban",
-      "rendering": "CHART",
-      "dataflow": "DF_NMDI_EDU",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0019.F._T._T..?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=literacy%20rate&pg=0&snb=5&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0019.F._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
-      "notes": "New 2024"
-    },
-    {
-      "id": "III.9",
-      "themeId": "III",
-      "title": "Literacy Rates of 15-24 year olds (% - male)",
-      "mfatName": "Literacy rate of youth (%ages 15-24) - by sex and rural/urban",
-      "rendering": "CHART",
-      "dataflow": "DF_NMDI_EDU",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0019.M._T._T..?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=literacy%20rate&pg=0&snb=5&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0019.M._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false&lb=nm",
-      "notes": "New 2024"
+      "notes": "New | New 2024",
+      "seriesConcept": "SEX",
+      "consolidatedFromIds": [
+        "III.7",
+        "III.8",
+        "III.9"
+      ]
     },
     {
       "id": "III.10",
       "themeId": "III",
-      "title": "Literacy Rates of 15-24 year olds (% - urban)",
+      "title": "Literacy Rates of 15-24 year olds",
       "mfatName": "Literacy rate of youth (%ages 15-24) - by sex and rural/urban",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_EDU",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0019._T._T.U._T.?dimensionAtObservation=AllDimensions",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0019._T._T.U+R._T.?dimensionAtObservation=AllDimensions",
       "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators%2C0%7CNational%20Minimum%20Development%20Indicators%23NMDI%23&pg=0&fc=Development%20indicators&bp=true&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0019._T._T.U._T.&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
-      "notes": "New 2024"
-    },
-    {
-      "id": "III.11",
-      "themeId": "III",
-      "title": "Literacy Rates of 15-24 year olds (% - rural)",
-      "mfatName": "Literacy rate of youth (%ages 15-24) - by sex and rural/urban",
-      "rendering": "CHART",
-      "dataflow": "DF_NMDI_EDU",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0019._T._T.R._T.?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators%2C0%7CNational%20Minimum%20Development%20Indicators%23NMDI%23&pg=0&fc=Development%20indicators&bp=true&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0019._T._T.R._T.&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
-      "notes": "New 2024"
+      "notes": "New 2024",
+      "seriesConcept": "URBANIZATION",
+      "consolidatedFromIds": [
+        "III.10",
+        "III.11"
+      ]
     },
     {
       "id": "III.12",

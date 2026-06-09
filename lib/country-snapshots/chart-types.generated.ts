@@ -2016,268 +2016,134 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "line",
       "timePoints": 14,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": true
     },
     "CK": {
       "type": "line",
       "timePoints": 15,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": true
     },
     "FJ": {
       "type": "line",
       "timePoints": 10,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": true
     },
     "FM": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "line",
       "timePoints": 19,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": true
     },
     "KI": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "line",
       "timePoints": 5,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": true
     },
     "MP": {
       "type": "line",
       "timePoints": 5,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": true
     },
     "NC": {
       "type": "line",
       "timePoints": 20,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": true
     },
     "NR": {
       "type": "line",
       "timePoints": 10,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": true
     },
     "NU": {
-      "type": "line",
-      "timePoints": 7,
-      "detectedAt": "2026-06-08",
-      "locked": true
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
+      "locked": false
     },
     "PF": {
       "type": "line",
       "timePoints": 21,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": true
     },
     "PG": {
       "type": "line",
       "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
-      "type": "line",
-      "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
-      "type": "line",
-      "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
-      "type": "line",
-      "timePoints": 13,
-      "detectedAt": "2026-06-08",
-      "locked": true
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
+      "locked": false
     },
     "TV": {
-      "type": "line",
-      "timePoints": 6,
-      "detectedAt": "2026-06-08",
-      "locked": true
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
+      "locked": false
     },
     "VU": {
       "type": "line",
       "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
-      "type": "line",
-      "timePoints": 6,
-      "detectedAt": "2026-06-08",
-      "locked": true
-    }
-  },
-  "II.2": {
-    "AS": {
-      "type": "line",
-      "timePoints": 14,
-      "detectedAt": "2026-06-08",
-      "locked": true
-    },
-    "CK": {
-      "type": "line",
-      "timePoints": 15,
-      "detectedAt": "2026-06-08",
-      "locked": true
-    },
-    "FJ": {
-      "type": "line",
-      "timePoints": 10,
-      "detectedAt": "2026-06-08",
-      "locked": true
-    },
-    "FM": {
       "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
-    },
-    "GU": {
-      "type": "line",
-      "timePoints": 19,
-      "detectedAt": "2026-06-08",
-      "locked": true
-    },
-    "KI": {
-      "type": "line",
-      "timePoints": 3,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "MH": {
-      "type": "line",
-      "timePoints": 5,
-      "detectedAt": "2026-06-08",
-      "locked": true
-    },
-    "MP": {
-      "type": "line",
-      "timePoints": 5,
-      "detectedAt": "2026-06-08",
-      "locked": true
-    },
-    "NC": {
-      "type": "line",
-      "timePoints": 20,
-      "detectedAt": "2026-06-08",
-      "locked": true
-    },
-    "NR": {
-      "type": "line",
-      "timePoints": 10,
-      "detectedAt": "2026-06-08",
-      "locked": true
-    },
-    "NU": {
-      "type": "line",
-      "timePoints": 7,
-      "detectedAt": "2026-06-08",
-      "locked": true
-    },
-    "PF": {
-      "type": "line",
-      "timePoints": 21,
-      "detectedAt": "2026-06-08",
-      "locked": true
-    },
-    "PG": {
-      "type": "line",
-      "timePoints": 4,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PN": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PW": {
-      "type": "line",
-      "timePoints": 4,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "SB": {
-      "type": "line",
-      "timePoints": 3,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "TK": {
-      "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "TO": {
-      "type": "line",
-      "timePoints": 13,
-      "detectedAt": "2026-06-08",
-      "locked": true
-    },
-    "TV": {
-      "type": "line",
-      "timePoints": 6,
-      "detectedAt": "2026-06-08",
-      "locked": true
-    },
-    "VU": {
-      "type": "line",
-      "timePoints": 4,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "WF": {
-      "type": "line",
-      "timePoints": 3,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "WS": {
-      "type": "line",
-      "timePoints": 6,
-      "detectedAt": "2026-06-08",
-      "locked": true
     }
   },
   "II.3": {
@@ -3618,676 +3484,6 @@ export const chartTypes: ChartTypesCache = {
       "timePoints": 6,
       "detectedAt": "2026-06-08",
       "locked": true
-    }
-  },
-  "III.7": {
-    "AS": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "CK": {
-      "type": "line",
-      "timePoints": 4,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "FJ": {
-      "type": "line",
-      "timePoints": 3,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "FM": {
-      "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "GU": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "KI": {
-      "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "MH": {
-      "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "MP": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "NC": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "NR": {
-      "type": "line",
-      "timePoints": 3,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "NU": {
-      "type": "line",
-      "timePoints": 3,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PF": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PG": {
-      "type": "line",
-      "timePoints": 3,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PN": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PW": {
-      "type": "line",
-      "timePoints": 4,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "SB": {
-      "type": "line",
-      "timePoints": 3,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "TK": {
-      "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "TO": {
-      "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "TV": {
-      "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "VU": {
-      "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "WF": {
-      "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "WS": {
-      "type": "line",
-      "timePoints": 4,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    }
-  },
-  "III.8": {
-    "AS": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "CK": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "FJ": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "FM": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "GU": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "KI": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "MH": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "MP": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "NC": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "NR": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "NU": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PF": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PG": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PN": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PW": {
-      "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "SB": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "TK": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "TO": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "TV": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "VU": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "WF": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "WS": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    }
-  },
-  "III.9": {
-    "AS": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "CK": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "FJ": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "FM": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "GU": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "KI": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "MH": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "MP": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "NC": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "NR": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "NU": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PF": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PG": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PN": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PW": {
-      "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "SB": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "TK": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "TO": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "TV": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "VU": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "WF": {
-      "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "WS": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    }
-  },
-  "III.10": {
-    "AS": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "CK": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "FJ": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "FM": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "GU": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "KI": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "MH": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "MP": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "NC": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "NR": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "NU": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PF": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PG": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PN": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PW": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "SB": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "TK": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "TO": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "TV": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "VU": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "WF": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "WS": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    }
-  },
-  "III.11": {
-    "AS": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "CK": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "FJ": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "FM": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "GU": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "KI": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "MH": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "MP": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "NC": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "NR": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "NU": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PF": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PG": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PN": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "PW": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "SB": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "TK": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "TO": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "TV": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "VU": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "WF": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
-    },
-    "WS": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
     }
   },
   "III.12": {

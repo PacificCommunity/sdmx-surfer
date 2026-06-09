@@ -85,6 +85,6 @@ describe("real catalogue invariants", async () => {
   it("has the expected order of magnitude (sanity)", () => {
     expect(real.countries.length).toBeGreaterThan(15);
     expect(real.themes.length).toBeGreaterThanOrEqual(10);
-    expect(real.indicators.length).toBeGreaterThan(100);
+    expect(real.indicators.length).toBeGreaterThan(80);
   });
 });

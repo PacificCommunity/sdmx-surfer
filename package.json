@@ -12,6 +12,7 @@
     "build-index": "npx tsx scripts/build-index.ts",
     "set-password": "npx tsx scripts/set-password.ts",
     "import:country-snapshots": "npx tsx scripts/import-country-snapshots.ts --in data/country-snapshots/country_snapshots_2025.xlsx --out lib/country-snapshots/catalogue.generated.ts --report data/country-snapshots/import-report.md",
+    "consolidate:country-snapshots": "npx tsx scripts/consolidate-country-snapshot-indicators.ts --report data/country-snapshots/consolidation-report.md",
     "augment:country-snapshot-types": "npx tsx scripts/augment-country-snapshot-types.ts --report data/country-snapshots/chart-types-report.md",
     "test": "vitest run",
     "test:watch": "vitest"

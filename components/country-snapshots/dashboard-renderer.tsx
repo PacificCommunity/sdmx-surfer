@@ -101,8 +101,9 @@ export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
                   xAxisConcept: "TIME_PERIOD",
                   data: item.dataUrl,
                   title: { text: "" },
-                  // Compare mode: tell the library that REF_AREA is the
-                  // series dimension (countries become coloured series/bars).
+                  // Series dimension precedence:
+                  //   compare mode → countries vary, REF_AREA is the series
+                  //   single-country consolidated → seriesConcept (e.g. SEX)
                   ...(config.countries.length > 1
                     ? {
                         legend: {
@@ -110,7 +111,14 @@ export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
                           location: "bottom" as const,
                         },
                       }
-                    : {}),
+                    : item.seriesConcept
+                      ? {
+                          legend: {
+                            concept: item.seriesConcept,
+                            location: "bottom" as const,
+                          },
+                        }
+                      : {}),
                 }}
                 language="en"
               />

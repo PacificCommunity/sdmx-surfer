@@ -4,6 +4,7 @@ import { chartTypeFor, chartTypeForCompare } from "./chart-types";
 export type DashboardItem = {
   type: "chart" | "value" | "text";  // "chart"/"value" for library; "text" for placeholders
   chartType?: "line" | "bar" | "lollipop";  // when type === "chart"
+  seriesConcept?: string;  // SDMX dim name to set as legend.concept on the chart
   id: string;          // catalogue indicator id (e.g. "II.4"), also used as a stable in-page anchor
   title: string;
   dataUrl?: string;    // template URL with country code(s) substituted
@@ -66,16 +67,20 @@ export function buildSnapshotConfig(args: {
           chartType = "bar";
         }
       } else if (i.rendering === "CHART") {
-        // Single-country: with ≥3 time points a line reads as a proper
-        // trend. With 1-2 points a line over-implies continuity, so we
-        // fall back to a KPI value — until the consolidation pass lets
-        // us emit one chart with multiple series (M/F/Total etc.) where
-        // lollipop becomes a valid stratified visual.
-        if (codes.length === 1 && cacheDecision === "bar") {
-          type = "value";
-        } else if (codes.length === 1) {
-          type = "chart";
-          chartType = "line";
+        // Consolidated indicators carry seriesConcept (e.g. SEX). That
+        // gives bar/lollipop a varying non-time dimension to group by,
+        // so sparse data can render as a proper visual instead of a KPI.
+        const hasSeriesDim = Boolean(i.seriesConcept);
+        if (codes.length === 1) {
+          if (cacheDecision === "bar" && hasSeriesDim) {
+            type = "chart";
+            chartType = "lollipop";
+          } else if (cacheDecision === "bar") {
+            type = "value";
+          } else {
+            type = "chart";
+            chartType = "line";
+          }
         } else {
           type = "chart";
           chartType = cacheDecision === "bar" ? "bar" : "line";
@@ -90,6 +95,7 @@ export function buildSnapshotConfig(args: {
     return {
       type,
       chartType,
+      seriesConcept: i.seriesConcept,
       id: i.id,
       title: i.title,
       rendering: i.rendering,
