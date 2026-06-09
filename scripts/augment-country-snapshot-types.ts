@@ -86,6 +86,51 @@ function decideFromProbe(result: ProbeResult): {
   return { type: decide(timePoints), timePoints };
 }
 
+/**
+ * Direct fetch of the SDMX-JSON response so we can count distinct
+ * TIME_PERIOD values from the structure metadata. The MCP probe uses
+ * `firstNObservations=1` for URLs without date constraints, which makes
+ * its observation_count unreliable for the "how many years are there?"
+ * question we actually want answered.
+ *
+ * Returns the distinct TIME_PERIOD count or null on parse/network failure.
+ */
+async function countTimePeriodsDirect(url: string): Promise<number | null> {
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), 20_000);
+  try {
+    const finalUrl = url.includes("format=") ? url : url + "&format=jsondata";
+    const res = await fetch(finalUrl, {
+      signal: ctl.signal,
+      headers: {
+        Accept: "application/vnd.sdmx.data+json;version=1.0,application/json",
+        "User-Agent": "SDMX-Surfer-Catalogue-Augmenter/1.0 (+https://pacificdata.org/)",
+      },
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as {
+      data?: {
+        structure?: {
+          dimensions?: {
+            observation?: Array<{ id?: string; values?: unknown[] }>;
+            series?: Array<{ id?: string; values?: unknown[] }>;
+          };
+        };
+      };
+    };
+    const obs = json.data?.structure?.dimensions?.observation ?? [];
+    const ser = json.data?.structure?.dimensions?.series ?? [];
+    const all = [...obs, ...ser];
+    const time = all.find((d) => d?.id === "TIME_PERIOD");
+    if (!time || !Array.isArray(time.values)) return 0;
+    return time.values.length;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(t);
+  }
+}
+
 async function probeOne(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   client: any,
@@ -93,11 +138,30 @@ async function probeOne(
 ): Promise<ChartTypeEntry> {
   const now = new Date().toISOString().slice(0, 10);
   try {
+    // First ask the gateway. It handles auth, endpoint quirks, and SBS v1/v2
+    // normalisation. We only trust its observation_count when it looks
+    // plausible — for unconstrained URLs the gateway falls back to a
+    // 1-observation sample that under-reports time-series length.
     const result = (await callMcpTool(client, "probe_data_url", {
       data_url: probe.url,
       timeout_ms: 15000,
     })) as ProbeResult;
-    const { type, timePoints } = decideFromProbe(result);
+    if (result.status === "error") {
+      return { type: "error", timePoints: 0, detectedAt: now, locked: false };
+    }
+    if (result.status === "empty") {
+      return { type: "empty", timePoints: 0, detectedAt: now, locked: false };
+    }
+
+    let { type, timePoints } = decideFromProbe(result);
+    // Suspicious low counts deserve verification via a direct fetch.
+    if (timePoints <= 2) {
+      const direct = await countTimePeriodsDirect(probe.url);
+      if (direct != null && direct > timePoints) {
+        timePoints = direct;
+        type = decide(direct);
+      }
+    }
     return {
       type,
       timePoints,
