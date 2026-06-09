@@ -1,4 +1,4 @@
-import { streamText, convertToModelMessages, stepCountIs } from "ai";
+import { streamText, tool, convertToModelMessages, stepCountIs } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
@@ -17,10 +17,17 @@ import {
   catalogueTool,
 } from "@/lib/country-snapshots/catalogue-access";
 import { checkTurnCap } from "@/lib/country-snapshots/turn-cap";
+import {
+  compileDashboardToolConfig,
+  dashboardToolConfigSchema,
+} from "@/lib/dashboard-authoring";
+import { resolveDataflowNamesFromConfig } from "@/lib/dataflow-names";
+import { getConfigTitle } from "@/lib/dashboard-schema";
 
-// Conservative caps. The snapshot chat is read-only so step counts are
-// well below the main builder route.
-const STEP_LIMIT = 12;
+// Per-page snapshot chats are read-only and tightly capped. The index
+// (entry-page) mode is a full builder agent and needs more room.
+const STEP_LIMIT_PAGE = 12;
+const STEP_LIMIT_INDEX = 25;
 const MAX_MESSAGES = 200;
 const MAX_INDICATOR_IDS = 100;
 
@@ -111,10 +118,48 @@ export async function POST(req: Request) {
       modelConfig.keySource,
     );
 
-    const tools =
+    // Index (entry-page) mode unlocks update_dashboard so the assistant can
+    // actually produce a live dashboard; per-page snapshot chats stay
+    // read-only (the canonical snapshot config must not mutate).
+    const isIndex =
+      snapshotContext.themeSlug === "index" ||
+      snapshotContext.countryCodes.length === 0;
+
+    const updateDashboardTool = tool({
+      description:
+        "Send a dashboard configuration to the live preview. " +
+        "Prefer the simplified authoring schema (intent visuals like kpi, chart, map, note). " +
+        "Always send the complete config, not just changed parts.",
+      inputSchema: z.object({ config: dashboardToolConfigSchema }),
+      execute: async ({
+        config,
+      }: {
+        config: z.infer<typeof dashboardToolConfigSchema>;
+      }) => {
+        const compiled = compileDashboardToolConfig(config);
+        compiled.dataflows = resolveDataflowNamesFromConfig(compiled);
+        return {
+          success: true,
+          dashboard: compiled,
+          message:
+            "Dashboard updated. The preview now shows: " +
+            getConfigTitle(compiled),
+        };
+      },
+    });
+
+    const indexTools = {
+      ...mcpTools,                          // index mode is allowed to mutate
+      ...(getMode() === "tool"
+        ? { list_catalogue_indicators: catalogueTool }
+        : {}),
+      update_dashboard: updateDashboardTool,
+    };
+    const pageTools =
       getMode() === "tool"
         ? { ...safeMcpTools, list_catalogue_indicators: catalogueTool }
         : safeMcpTools;
+    const tools = isIndex ? indexTools : pageTools;
 
     const result = streamText({
       model: modelConfig.model,
@@ -122,7 +167,7 @@ export async function POST(req: Request) {
       messages: modelMessages,
       providerOptions: modelConfig.providerOptions || {},
       tools,
-      stopWhen: stepCountIs(STEP_LIMIT),
+      stopWhen: stepCountIs(isIndex ? STEP_LIMIT_INDEX : STEP_LIMIT_PAGE),
       onFinish: async ({ steps, totalUsage }) => {
         let totalCost = 0;
         let anyCost = false;

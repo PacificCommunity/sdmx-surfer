@@ -42,12 +42,23 @@ export function buildSnapshotSystemPrompt(args: {
   if (isIndex) {
     parts.push(
       "The user is on the Country Snapshots entry page, not a specific " +
-        "country/theme view. Help them navigate the catalogue: suggest " +
-        "country/theme combinations to inspect, summarise what's available " +
-        "across PICTs, and point them at canonical pages they should open " +
-        "next. When you suggest a page, use the shape " +
+        "country/theme view. You have full agent capability here: call " +
+        "update_dashboard to build the user a live dashboard in the " +
+        "preview pane next to the chat. Use the indicators in this " +
+        "catalogue first (they're curated and known to work); fall back " +
+        "to broader SDMX discovery only when the user's question " +
+        "genuinely needs something outside the catalogue.",
+    );
+    parts.push(
+      "When you suggest a canonical snapshot page rather than building " +
+        "a new dashboard, use links of the shape " +
         "`/countrysnapshots/<COUNTRY_CODE>/<theme-slug>` " +
         "or `/countrysnapshots/compare/<theme-slug>/<CODE>/<CODE>`.",
+    );
+    parts.push(
+      "Do not respond with handmade markdown tables of figures. If the " +
+        "user wants data, either build a dashboard with update_dashboard " +
+        "or link to the canonical snapshot page that already shows it.",
     );
   } else {
     parts.push(
@@ -57,15 +68,15 @@ export function buildSnapshotSystemPrompt(args: {
     parts.push(
       `Indicators visible: ${args.ctx.indicatorIds.join(", ") || "(none)"}`,
     );
+    parts.push(
+      "You are operating as a read-only assistant for this snapshot page. " +
+        "You can call MCP discovery tools to investigate the data shown. " +
+        "Do NOT call update_dashboard — the snapshot config is fixed. " +
+        "If the user wants to add indicators, change the time range, or " +
+        "otherwise customise a view, tell them to use the 'Explore in " +
+        "Surfer' button to fork into an editable session.",
+    );
   }
-  parts.push(
-    "You are operating as a read-only assistant. " +
-      "You can call MCP discovery tools to investigate the data. " +
-      "Do NOT call update_dashboard — snapshots are fixed. " +
-      "If the user wants to add indicators, change the time range, or " +
-      "otherwise customise a view, tell them to use the 'Explore in " +
-      "Surfer' button on a snapshot page to fork into an editable session.",
-  );
 
   return parts.join("\n");
 }

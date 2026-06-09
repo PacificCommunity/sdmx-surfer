@@ -46,7 +46,7 @@ export function buildSnapshotConfig(args: {
     //   CHART → "line" by default; "bar" only in compare mode
     //   MAP   → fall back to "value"/"line" for v1 (no geojson plumbing yet)
     let type: DashboardItem["type"] = "text";
-    let chartType: "line" | "bar" | undefined;
+    let chartType: "line" | "bar" | "lollipop" | undefined;
 
     if (dataUrl) {
       const cacheDecision =
