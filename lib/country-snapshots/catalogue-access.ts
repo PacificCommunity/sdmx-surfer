@@ -55,6 +55,11 @@ export function renderCatalogueForPrompt(
       "handmade markdown tables of figures — emit a dashboard or link " +
       "to the canonical snapshot page.",
   );
+  lines.push(
+    "5. If discovery probes (probe_data_url, get_data_availability) " +
+      "come back empty 2-3 times in a row, STOP and tell the user the " +
+      "data isn't available — do not keep permuting dimension positions.",
+  );
   lines.push("");
   for (const t of cat.themes) {
     lines.push(`## ${t.title} (themeId=${t.id}, themeSlug=${t.slug})`);
