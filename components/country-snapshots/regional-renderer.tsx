@@ -9,33 +9,19 @@ import type {
 import { SnapshotChart } from "./snapshot-chart";
 import { SourceCitation } from "./source-citation";
 import { UnavailableStrip } from "./dashboard-renderer";
-import { geoConceptForDataflow } from "@/lib/country-snapshots/dataflow-dimensions";
 
 /**
  * Can we render this indicator as one chart across all selected countries?
  *
- * The library accepts a chart with REF_AREA as the series dimension when the
- * data has multiple country values; that's what powers the existing N-country
- * compare page. For the regional view we need the same thing at scale:
- *
- *   - Indicators that resolve to a `line` chart and have no other series
- *     dimension already in use can be combined: one chart, 15 country
- *     series, legend at the bottom.
- *
- *   - Anything else (sparse → KPI/lollipop, table, missing data, already
- *     consolidated with seriesConcept=SEX, etc.) would produce a mess if
- *     forced into one chart. We surface a card pointing the user at the
- *     per-country snapshot pages instead of trying.
+ * The config builder's decision engine already modelled which dimensions
+ * vary and split consolidated indicators into per-stratum charts, so by
+ * the time items arrive here "combinable" simply means "the builder
+ * decided a chart works". Non-chart outcomes (value/table for sparse
+ * single-country data, text for no data) get a per-country drill-in card
+ * instead — 15-22 KPI cards per indicator would be noise.
  */
 function canCombine(item: DashboardItem): boolean {
-  if (item.type !== "chart") return false;
-  if (item.chartType !== "line") return false;
-  // If the indicator already varies by SEX or URBANIZATION, combining with
-  // REF_AREA would stack two series dimensions; the library can't render
-  // that as a single chart.
-  if (item.seriesConcept) return false;
-  if (!item.dataUrl) return false;
-  return true;
+  return item.type === "chart" && Boolean(item.dataUrl);
 }
 
 function ItemErrorFallback({ item }: { item: DashboardItem }) {
@@ -157,16 +143,21 @@ export function RegionalRenderer({ config }: { config: SnapshotConfig }) {
               <SnapshotChart
                 config={{
                   id: item.id,
-                  type: "line",
+                  type: item.chartType ?? "line",
                   xAxisConcept: "TIME_PERIOD",
                   data: item.dataUrl,
                   title: { text: "" },
-                  // Resolve the country dimension per dataflow (SPC uses
-                  // GEO_PICT, SDG uses REF_AREA, etc.).
-                  legend: {
-                    concept: geoConceptForDataflow(item.source?.dataflow),
-                    location: "bottom" as const,
-                  },
+                  // The builder's decision engine resolved which dimension
+                  // varies (GEO for combined views, post-split strata never
+                  // reach here with their own concept).
+                  ...(item.legendConcept
+                    ? {
+                        legend: {
+                          concept: item.legendConcept,
+                          location: "bottom" as const,
+                        },
+                      }
+                    : {}),
                 }}
                 language="en"
               />

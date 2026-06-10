@@ -21,6 +21,25 @@ vi.mock("../../lib/country-snapshots/chart-types.generated", () => ({
       WS: { type: "bar", timePoints: 1, detectedAt: "2026-06-08", locked: false },
       VU: { type: "bar", timePoints: 1, detectedAt: "2026-06-08", locked: false },
     },
+    "II.4": {
+      // Only ONE country has data — compare-mode bar would have GEO as a
+      // single-valued dim and the library throws. Must degrade.
+      TO: { type: "bar", timePoints: 2, detectedAt: "2026-06-08", locked: false },
+      WS: { type: "empty", timePoints: 0, detectedAt: "2026-06-08", locked: false },
+      VU: { type: "empty", timePoints: 0, detectedAt: "2026-06-08", locked: false },
+    },
+    "II.5": {
+      // Only one country has data but a LONG series — degrade to plain line.
+      TO: { type: "line", timePoints: 12, detectedAt: "2026-06-08", locked: true },
+      WS: { type: "error", timePoints: 0, detectedAt: "2026-06-08", locked: false },
+      VU: { type: "empty", timePoints: 0, detectedAt: "2026-06-08", locked: false },
+    },
+    "II.6": {
+      // Consolidated (SEX=M+F) with data in multiple countries.
+      TO: { type: "line", timePoints: 10, detectedAt: "2026-06-08", locked: true },
+      WS: { type: "line", timePoints: 10, detectedAt: "2026-06-08", locked: true },
+      VU: { type: "line", timePoints: 10, detectedAt: "2026-06-08", locked: true },
+    },
   },
 }));
 
@@ -68,6 +87,32 @@ const fixture: Catalogue = {
       dataflow: "DF_CENSUS",
       apiUrlTemplate: "https://x/SPC,DF_CENSUS,/A.[TAG_GEO].CENSUS",
     },
+    {
+      id: "II.4",
+      themeId: "II",
+      title: "Sparse single-source indicator",
+      rendering: "TABLE",
+      dataflow: "DF_SPARSE",
+      apiUrlTemplate: "https://x/SPC,DF_SPARSE,/A.[TAG_GEO].SPARSE",
+    },
+    {
+      id: "II.5",
+      themeId: "II",
+      title: "Long series in one country only",
+      rendering: "CHART",
+      dataflow: "DF_LONG",
+      apiUrlTemplate: "https://x/SPC,DF_LONG,/A.[TAG_GEO].LONG",
+    },
+    {
+      id: "II.6",
+      themeId: "II",
+      title: "Life expectancy at birth",
+      rendering: "CHART",
+      dataflow: "DF_VITAL2",
+      apiUrlTemplate: "https://x/SPC,DF_VITAL2,/A.[TAG_GEO].LEB.M+F?dimensionAtObservation=AllDimensions",
+      seriesConcept: "SEX",
+      consolidatedFromIds: ["II.6", "II.7"],
+    },
   ],
 };
 
@@ -110,7 +155,9 @@ describe("buildSnapshotConfig", () => {
       theme: fixture.themes[0],
       catalogue: fixture,
     });
-    expect(cfg.items.map((i) => i.id)).toEqual(["II.1", "II.2", "II.3", "II.10"]);
+    expect(cfg.items.map((i) => i.id)).toEqual([
+      "II.1", "II.2", "II.3", "II.4", "II.5", "II.6", "II.10",
+    ]);
   });
 
   it("attaches source metadata for indicators with a dataflow", () => {
@@ -181,5 +228,147 @@ describe("buildSnapshotConfig", () => {
     });
     const lifeItem = cfg.items.find((i) => i.id === "II.1");
     expect(lifeItem?.chartType).toBe("line");
+  });
+
+  // Regression: bar/lollipop in compare mode require GEO to actually VARY.
+  // When only one of the selected countries has data, the library throws
+  // "needs at least one other varying dimension" — the builder must degrade
+  // to single-country rules instead.
+  describe("compare with only one country holding data", () => {
+    it("degrades sparse single-data TABLE indicators to a table, not bar", () => {
+      const cfg = buildSnapshotConfig({
+        country: [fixture.countries[0], fixture.countries[1]],
+        theme: fixture.themes[0],
+        catalogue: fixture,
+      });
+      const item = cfg.items.find((i) => i.id === "II.4");
+      expect(item?.type).toBe("table");
+      expect(item?.chartType).toBeUndefined();
+    });
+
+    it("degrades long single-data series to a plain line", () => {
+      const cfg = buildSnapshotConfig({
+        country: [fixture.countries[0], fixture.countries[1], fixture.countries[2]],
+        theme: fixture.themes[0],
+        catalogue: fixture,
+      });
+      const item = cfg.items.find((i) => i.id === "II.5");
+      expect(item?.type).toBe("chart");
+      expect(item?.chartType).toBe("line");
+    });
+
+    it("keeps true multi-country compare as bar", () => {
+      const cfg = buildSnapshotConfig({
+        country: [fixture.countries[0], fixture.countries[1]],
+        theme: fixture.themes[0],
+        catalogue: fixture,
+      });
+      const item = cfg.items.find((i) => i.id === "II.2");
+      expect(item?.chartType).toBe("bar");
+    });
+  });
+
+  // Regression: a consolidated indicator (SEX=M+F in one URL) in compare
+  // mode would put TWO varying dims in one chart — legending on GEO merges
+  // the M/F observations per country into a zig-zag line. The builder must
+  // split into one chart per stratum with countries as the series.
+  describe("consolidated indicators in compare mode", () => {
+    it("splits SEX=M+F into one chart per stratum", () => {
+      const cfg = buildSnapshotConfig({
+        country: [fixture.countries[0], fixture.countries[1]],
+        theme: fixture.themes[0],
+        catalogue: fixture,
+      });
+      const male = cfg.items.find((i) => i.id === "II.6-M");
+      const female = cfg.items.find((i) => i.id === "II.6-F");
+      expect(male).toBeDefined();
+      expect(female).toBeDefined();
+      expect(cfg.items.find((i) => i.id === "II.6")).toBeUndefined();
+      expect(male!.title).toBe("Life expectancy at birth — Male");
+      expect(female!.title).toBe("Life expectancy at birth — Female");
+      // Each stratum URL is narrowed to one SEX value with GEO substituted.
+      expect(male!.dataUrl).toBe(
+        "https://x/SPC,DF_VITAL2,/A.TO+WS.LEB.M?dimensionAtObservation=AllDimensions",
+      );
+      expect(female!.dataUrl).toBe(
+        "https://x/SPC,DF_VITAL2,/A.TO+WS.LEB.F?dimensionAtObservation=AllDimensions",
+      );
+      // seriesConcept dropped: countries are the series now.
+      expect(male!.seriesConcept).toBeUndefined();
+      expect(male!.type).toBe("chart");
+      expect(male!.chartType).toBe("line");
+    });
+
+    it("keeps the consolidated single chart on single-country pages", () => {
+      const cfg = buildSnapshotConfig({
+        country: fixture.countries[0],
+        theme: fixture.themes[0],
+        catalogue: fixture,
+      });
+      const item = cfg.items.find((i) => i.id === "II.6");
+      expect(item).toBeDefined();
+      expect(item!.seriesConcept).toBe("SEX");
+      expect(cfg.items.find((i) => i.id === "II.6-M")).toBeUndefined();
+    });
+  });
+
+  // The decision engine's one rule: a chart series on at most ONE varying
+  // non-time dimension, named in legendConcept. These assertions pin the
+  // legend choice per scenario.
+  describe("legendConcept selection", () => {
+    it("single country, plain indicator → no legend", () => {
+      const cfg = buildSnapshotConfig({
+        country: fixture.countries[0],
+        theme: fixture.themes[0],
+        catalogue: fixture,
+      });
+      expect(cfg.items.find((i) => i.id === "II.1")!.legendConcept)
+        .toBeUndefined();
+    });
+
+    it("single country, consolidated → legend on the stratifier", () => {
+      const cfg = buildSnapshotConfig({
+        country: fixture.countries[0],
+        theme: fixture.themes[0],
+        catalogue: fixture,
+      });
+      const item = cfg.items.find((i) => i.id === "II.6")!;
+      expect(item.type).toBe("chart");
+      expect(item.legendConcept).toBe("SEX");
+    });
+
+    it("compare, plain indicator → legend on the geo dimension", () => {
+      const cfg = buildSnapshotConfig({
+        country: [fixture.countries[0], fixture.countries[1]],
+        theme: fixture.themes[0],
+        catalogue: fixture,
+      });
+      expect(cfg.items.find((i) => i.id === "II.1")!.legendConcept).toBe(
+        "GEO_PICT",
+      );
+    });
+
+    it("compare, split strata → each part legends on geo", () => {
+      const cfg = buildSnapshotConfig({
+        country: [fixture.countries[0], fixture.countries[1]],
+        theme: fixture.themes[0],
+        catalogue: fixture,
+      });
+      expect(cfg.items.find((i) => i.id === "II.6-M")!.legendConcept).toBe(
+        "GEO_PICT",
+      );
+    });
+
+    it("compare degraded to one country with data → no geo legend", () => {
+      const cfg = buildSnapshotConfig({
+        country: [fixture.countries[0], fixture.countries[1], fixture.countries[2]],
+        theme: fixture.themes[0],
+        catalogue: fixture,
+      });
+      // II.5 only has data in TO — the line must not claim GEO varies.
+      const item = cfg.items.find((i) => i.id === "II.5")!;
+      expect(item.chartType).toBe("line");
+      expect(item.legendConcept).toBeUndefined();
+    });
   });
 });

@@ -61,3 +61,19 @@ export function decide(timePoints: number): ChartTypeDecision {
   if (timePoints >= LINE_THRESHOLD) return "line";
   return "bar";
 }
+
+/**
+ * Per-series time-point count for (indicator, country), or null when the
+ * pair was never probed. Callers should treat null as "assume a long
+ * series" — the line chart it leads to is the safest visual when we
+ * don't know the shape.
+ */
+export function timePointsFor(
+  indicatorId: string,
+  countryCode: string,
+): number | null {
+  const entry = cached[indicatorId]?.[countryCode];
+  if (!entry) return null;
+  if (entry.type === "empty" || entry.type === "error") return 0;
+  return entry.timePoints;
+}

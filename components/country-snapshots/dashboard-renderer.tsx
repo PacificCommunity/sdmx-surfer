@@ -8,7 +8,6 @@ import type {
 import { SnapshotChart, SnapshotValue } from "./snapshot-chart";
 import { SnapshotTable } from "./snapshot-table";
 import { SourceCitation } from "./source-citation";
-import { geoConceptForDataflow } from "@/lib/country-snapshots/dataflow-dimensions";
 
 function ItemErrorFallback({ item }: { item: DashboardItem }) {
   return (
@@ -143,29 +142,17 @@ export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
                   xAxisConcept: "TIME_PERIOD",
                   data: item.dataUrl,
                   title: { text: "" },
-                  // Series dimension precedence:
-                  //   compare mode → countries vary, geo dim is the series
-                  //   single-country consolidated → seriesConcept (e.g. SEX)
-                  // The geo dim varies by dataflow (GEO_PICT for SPC,
-                  // REF_AREA for SDG-family, etc.); resolve from
-                  // dataflow-dimensions.json.
-                  ...(config.countries.length > 1
+                  // The config builder's decision engine already worked out
+                  // which dimension (if any) varies and should be the chart
+                  // series — no page-type logic belongs here.
+                  ...(item.legendConcept
                     ? {
                         legend: {
-                          concept: geoConceptForDataflow(
-                            item.source?.dataflow,
-                          ),
+                          concept: item.legendConcept,
                           location: "bottom" as const,
                         },
                       }
-                    : item.seriesConcept
-                      ? {
-                          legend: {
-                            concept: item.seriesConcept,
-                            location: "bottom" as const,
-                          },
-                        }
-                      : {}),
+                    : {}),
                 }}
                 language="en"
               />
