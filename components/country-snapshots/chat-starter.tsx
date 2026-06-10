@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { SDMXDashboardConfig } from "@/lib/types";
 import { SDMXDashboardDynamic } from "@/components/sdmx-dashboard-dynamic";
+import { ChatMarkdown } from "./chat-markdown";
 
 // Curated examples. Kept regionally-neutral and varied across themes.
 const EXAMPLES = [
@@ -229,20 +230,25 @@ export function ChatStarter() {
           </div>
         ) : (
           <div className="mt-4 max-h-[40vh] overflow-y-auto rounded-md bg-[#f7fafc] p-3 text-sm">
-            {messages.map((m) => (
-              <div key={m.id} className="mb-3">
-                <div className="text-xs font-medium text-neutral-500">
-                  {m.role === "user" ? "You" : "Assistant"}
+            {messages.map((m) => {
+              const text =
+                m.parts
+                  ?.filter((p) => p.type === "text")
+                  .map((p) => (p as { text?: string }).text ?? "")
+                  .join("") ?? "";
+              return (
+                <div key={m.id} className="mb-3">
+                  <div className="text-xs font-medium text-neutral-500">
+                    {m.role === "user" ? "You" : "Assistant"}
+                  </div>
+                  {m.role === "assistant" ? (
+                    <ChatMarkdown text={text} />
+                  ) : (
+                    <div className="whitespace-pre-wrap">{text}</div>
+                  )}
                 </div>
-                <div className="whitespace-pre-wrap">
-                  {m.parts
-                    ?.filter((p) => p.type === "text")
-                    .map((p, idx) => (
-                      <span key={idx}>{(p as { text?: string }).text}</span>
-                    ))}
-                </div>
-              </div>
-            ))}
+              );
+            })}
             {busy ? (
               <p className="text-xs italic text-neutral-500">thinking…</p>
             ) : null}

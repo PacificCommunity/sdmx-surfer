@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { SnapshotContext } from "@/lib/country-snapshots/system-prompt";
+import { ChatMarkdown } from "./chat-markdown";
 
 export function ChatOverlay({
   snapshotContext,
@@ -87,20 +88,25 @@ export function ChatOverlay({
                 customise it.
               </p>
             ) : null}
-            {messages.map((m) => (
-              <div key={m.id} className="mb-3">
-                <div className="text-xs font-medium text-neutral-500">
-                  {m.role === "user" ? "You" : "Assistant"}
+            {messages.map((m) => {
+              const text =
+                m.parts
+                  ?.filter((p) => p.type === "text")
+                  .map((p) => (p as { text?: string }).text ?? "")
+                  .join("") ?? "";
+              return (
+                <div key={m.id} className="mb-3">
+                  <div className="text-xs font-medium text-neutral-500">
+                    {m.role === "user" ? "You" : "Assistant"}
+                  </div>
+                  {m.role === "assistant" ? (
+                    <ChatMarkdown text={text} />
+                  ) : (
+                    <div className="whitespace-pre-wrap text-sm">{text}</div>
+                  )}
                 </div>
-                <div className="whitespace-pre-wrap text-sm">
-                  {m.parts
-                    ?.filter((p) => p.type === "text")
-                    .map((p, idx) => (
-                      <span key={idx}>{(p as { text?: string }).text}</span>
-                    ))}
-                </div>
-              </div>
-            ))}
+              );
+            })}
             {status === "streaming" || status === "submitted" ? (
               <p className="text-xs italic text-neutral-500">thinking…</p>
             ) : null}
