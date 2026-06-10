@@ -22,6 +22,14 @@ export function ChatOverlay({
   const ctxRef = useRef(snapshotContext);
   ctxRef.current = snapshotContext;
 
+  // One conversation id for the lifetime of this overlay mount; the server
+  // upserts the whole exchange into a single dashboardSessions row.
+  const sessionIdRef = useRef<string>(
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : "",
+  );
+
   // Pre-warm the prompt cache for page-mode chats on mount. Fire-and-forget;
   // the server debounces, and a failed warm only means the first turn pays
   // the cache write as before.
@@ -42,6 +50,9 @@ export function ChatOverlay({
             ...(body as Record<string, unknown>),
             messages,
             snapshotContext: ctxRef.current,
+            ...(sessionIdRef.current
+              ? { sessionId: sessionIdRef.current }
+              : {}),
           },
         }),
       }),

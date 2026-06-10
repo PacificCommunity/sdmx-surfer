@@ -49,4 +49,24 @@ describe("snapshot auth", () => {
     process.env.COUNTRY_SNAPSHOTS_PASSWORD = "RotatedPassword";
     expect(verifyCookie(value)).toBeNull();
   });
+
+  it("does not throw on multibyte candidate passwords", () => {
+    // String .length counts UTF-16 units, not bytes — a raw-buffer
+    // timingSafeEqual comparison used to throw RangeError here.
+    expect(verifyPassword("Cöuntry™Snapsh😀")).toBe(false);
+    expect(verifyPassword("🦀".repeat(8))).toBe(false);
+  });
+
+  it("treats missing configuration as unauthenticated, never a throw", () => {
+    const { value } = mintCookieValue();
+    const savedSecret = process.env.NEXTAUTH_SECRET;
+    delete process.env.NEXTAUTH_SECRET;
+    // verifyCookie runs in the layout gate and on the login page itself,
+    // so a config error must read as "not logged in", not a 500.
+    expect(verifyCookie(value)).toBeNull();
+    process.env.NEXTAUTH_SECRET = savedSecret;
+    delete process.env.COUNTRY_SNAPSHOTS_PASSWORD;
+    expect(verifyCookie(value)).toBeNull();
+    expect(verifyPassword("CountrySnapshots")).toBe(false);
+  });
 });

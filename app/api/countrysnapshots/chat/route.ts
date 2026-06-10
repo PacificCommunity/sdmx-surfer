@@ -1,7 +1,6 @@
 import { streamText, convertToModelMessages, stepCountIs } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
-import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { mcpTransportConfig } from "@/lib/mcp-client";
 import { getModelForUser } from "@/lib/model-router";
 import { sanitizeToolInputs } from "@/lib/sanitize-messages";
@@ -12,6 +11,7 @@ import { type SnapshotContext } from "@/lib/country-snapshots/system-prompt";
 import {
   buildSystemMessages,
   buildSnapshotTools,
+  chatRequestSchema,
   modeFor,
 } from "@/lib/country-snapshots/chat-assembly";
 import { checkTurnCap } from "@/lib/country-snapshots/turn-cap";
@@ -20,22 +20,6 @@ import { checkTurnCap } from "@/lib/country-snapshots/turn-cap";
 // (entry-page) mode is a full builder agent and needs more room.
 const STEP_LIMIT_PAGE = 12;
 const STEP_LIMIT_INDEX = 25;
-const MAX_MESSAGES = 200;
-const MAX_INDICATOR_IDS = 100;
-
-// countryCodes / themeSlug / indicatorIds all relax to empty for the
-// entry-page catalogue-wide mode. Page-scoped chats fill them in.
-const snapshotContextSchema = z.object({
-  countryCodes: z.array(z.string()).max(5),
-  themeSlug: z.string(),
-  indicatorIds: z.array(z.string()).max(MAX_INDICATOR_IDS),
-});
-
-const chatRequestSchema = z.object({
-  messages: z.array(z.unknown()).max(MAX_MESSAGES),
-  snapshotContext: snapshotContextSchema,
-  sessionId: z.string().optional(),
-});
 
 export const maxDuration = 120;
 
@@ -170,6 +154,10 @@ export async function POST(req: Request) {
             : undefined,
         );
         // Persist the conversation to dashboardSessions for resumability.
+        // The client generates one uuid per conversation and sends it on
+        // every turn, so the whole exchange lives in ONE row (update-first,
+        // insert on the first turn). The update predicate scopes by owner —
+        // a client-supplied sessionId must never touch another user's row.
         try {
           const finalText = steps[steps.length - 1]?.text ?? "";
           const updatedMessages = [
@@ -177,21 +165,32 @@ export async function POST(req: Request) {
             { role: "assistant", content: finalText },
           ];
           if (sessionId) {
-            await db
+            const updated = await db
               .update(dashboardSessions)
               .set({
                 messages: updatedMessages as unknown as never,
                 updated_at: new Date(),
               })
-              .where(eq(dashboardSessions.id, sessionId));
-          } else {
-            await db.insert(dashboardSessions).values({
-              user_id: session.userId,
-              title: `Snapshot chat — ${snapshotContext.countryCodes.join("+")} ${snapshotContext.themeSlug}`,
-              messages: updatedMessages as unknown as never,
-              config_history: [] as unknown as never,
-              config_pointer: -1,
-            });
+              .where(
+                and(
+                  eq(dashboardSessions.id, sessionId),
+                  eq(dashboardSessions.user_id, session.userId),
+                ),
+              )
+              .returning({ id: dashboardSessions.id });
+            if (updated.length === 0) {
+              // First turn of this conversation (or a uuid we don't own —
+              // in which case the insert below fails on the primary key
+              // and we log + move on rather than clobbering anything).
+              await db.insert(dashboardSessions).values({
+                id: sessionId,
+                user_id: session.userId,
+                title: `Snapshot chat — ${snapshotContext.countryCodes.join("+") || "catalogue"} ${snapshotContext.themeSlug}`,
+                messages: updatedMessages as unknown as never,
+                config_history: [] as unknown as never,
+                config_pointer: -1,
+              });
+            }
           }
         } catch (err) {
           console.warn(
@@ -206,6 +205,13 @@ export async function POST(req: Request) {
         logger.recordError(
           error instanceof Error ? error.message : String(error),
         );
+        await logger.flush().catch(() => {});
+        if (mcpClient) await mcpClient.close().catch(() => {});
+      },
+      // The AI SDK fires onAbort (not onFinish) when the client disconnects
+      // mid-stream — e.g. the user navigates between snapshot pages while
+      // the assistant is replying. Without this the MCP HTTP session leaks.
+      onAbort: async () => {
         await logger.flush().catch(() => {});
         if (mcpClient) await mcpClient.close().catch(() => {});
       },

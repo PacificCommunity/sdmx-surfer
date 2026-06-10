@@ -52,9 +52,19 @@ function extractLatestDashboard(
   return null;
 }
 
+function newConversationId(): string {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : "";
+}
+
 export function ChatStarter() {
   const [capReached, setCapReached] = useState(false);
   const previewRef = useRef<HTMLDivElement | null>(null);
+
+  // One conversation id per chat; regenerated on "New chat" so each
+  // conversation lands in its own dashboardSessions row.
+  const sessionIdRef = useRef<string>(newConversationId());
 
   // Pre-warm the prompt cache so the first turn hits the cached prefix.
   // Fire-and-forget; the server debounces, and a failed warm only means
@@ -76,6 +86,9 @@ export function ChatStarter() {
             ...(body as Record<string, unknown>),
             messages,
             snapshotContext: INDEX_CONTEXT,
+            ...(sessionIdRef.current
+              ? { sessionId: sessionIdRef.current }
+              : {}),
           },
         }),
       }),
@@ -169,7 +182,10 @@ export function ChatStarter() {
           {messages.length > 0 ? (
             <button
               type="button"
-              onClick={() => setMessages([])}
+              onClick={() => {
+                sessionIdRef.current = newConversationId();
+                setMessages([]);
+              }}
               className="text-xs text-neutral-500 hover:underline"
             >
               New chat

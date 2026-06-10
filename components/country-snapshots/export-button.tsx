@@ -37,7 +37,10 @@ export function ExportButton({ filenameStem }: { filenameStem: string }) {
     setBusy(true);
     setToast(null);
     try {
-      const html2canvasMod = await import("html2canvas");
+      // html2canvas-pro, not html2canvas: Tailwind v4 emits oklch()/
+      // color-mix() values that html2canvas 1.4.1 throws on at capture
+      // time ("unsupported color function"). The -pro fork parses them.
+      const html2canvasMod = await import("html2canvas-pro");
       const html2canvas = html2canvasMod.default;
       const jspdfMod = await import("jspdf");
       const { jsPDF } = jspdfMod;

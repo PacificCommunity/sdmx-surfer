@@ -1,11 +1,171 @@
 {
-  "DF_VITAL": ["FREQ", "GEO_PICT", "INDICATOR", "SEX"],
-  "DF_NMDI_EDU": ["FREQ", "GEO_PICT", "INDICATOR", "SEX", "AGE", "URBANIZATION", "DISABILITY", "COMPOSITE_BREAKDOWN"],
-  "DF_NMDI_HEA": ["FREQ", "GEO_PICT", "INDICATOR", "SEX", "AGE", "URBANIZATION", "DISABILITY", "COMPOSITE_BREAKDOWN"],
-  "DF_WBWDI": ["FREQ", "GEO_PICT", "INDICATOR"],
-  "DF_POP_PROJ": ["FREQ", "GEO_PICT", "INDICATOR", "SEX", "AGE"],
-  "DF_KEYFACTS": ["FREQ", "GEO_PICT", "INDICATOR"],
-  "DF_SOCECO": ["FREQ", "GEO_PICT", "INDICATOR"],
-  "DF_NATIONAL_ACCOUNTS": ["FREQ", "CURRENCY", "GEO_PICT", "INDICATOR"],
-  "DF_PAM": ["FREQ", "GEO_PICT", "INDICATOR", "DONOR", "COMMITTED_SPENT", "FLOW_TYPE"]
+  "DF_DIGITAL_DEVELOPMENT": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR"
+  ],
+  "DF_EGOV": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR"
+  ],
+  "DF_EMPRATES": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR",
+    "SEX",
+    "AGE",
+    "URBANIZATION",
+    "DISABILITY"
+  ],
+  "DF_HHCOUNTS": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR"
+  ],
+  "DF_KEYFACTS": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR"
+  ],
+  "DF_NATIONAL_ACCOUNTS": [
+    "FREQ",
+    "CURRENCY",
+    "GEO_PICT",
+    "INDICATOR"
+  ],
+  "DF_NMDI": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR",
+    "SEX",
+    "AGE",
+    "URBANIZATION",
+    "DISABILITY",
+    "COMPOSITE_BREAKDOWN"
+  ],
+  "DF_NMDI_EDU": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR",
+    "SEX",
+    "AGE",
+    "URBANIZATION",
+    "DISABILITY",
+    "COMPOSITE_BREAKDOWN"
+  ],
+  "DF_NMDI_FIS": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR",
+    "SEX",
+    "AGE",
+    "URBANIZATION",
+    "DISABILITY",
+    "COMPOSITE_BREAKDOWN"
+  ],
+  "DF_NMDI_HEA": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR",
+    "SEX",
+    "AGE",
+    "URBANIZATION",
+    "DISABILITY",
+    "COMPOSITE_BREAKDOWN"
+  ],
+  "DF_OVERSEAS_VISITORS": [
+    "FREQ",
+    "GEO_PICT",
+    "OVERSEAS_VISITORS_TYPE",
+    "INDICATOR"
+  ],
+  "DF_PAM": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR",
+    "DONOR",
+    "COMMITTED_SPENT",
+    "FLOW_TYPE"
+  ],
+  "DF_POP_AGE": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR",
+    "SEX"
+  ],
+  "DF_POP_COAST": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR",
+    "RANGE"
+  ],
+  "DF_POP_DENSITY": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR"
+  ],
+  "DF_POP_PROJ": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR",
+    "SEX",
+    "AGE"
+  ],
+  "DF_POP_URBAN": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR",
+    "URBANIZATION"
+  ],
+  "DF_PRISON": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR"
+  ],
+  "DF_SOCECO": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR"
+  ],
+  "DF_TOURISM_EARNINGS": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR",
+    "CURRENCY"
+  ],
+  "DF_TRADE_FOOD": [
+    "FREQ",
+    "INDICATOR",
+    "IMPORTER",
+    "EXPORTER",
+    "COMMODITY",
+    "HEALTH_CLASSIFICATION"
+  ],
+  "DF_UIS": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR"
+  ],
+  "DF_VITAL": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR",
+    "SEX"
+  ],
+  "DF_WBDAI": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR"
+  ],
+  "DF_WBWDI": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR"
+  ],
+  "DF_WBWGI": [
+    "FREQ",
+    "GEO_PICT",
+    "INDICATOR"
+  ]
 }

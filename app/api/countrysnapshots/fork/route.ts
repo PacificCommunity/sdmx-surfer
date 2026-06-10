@@ -69,9 +69,15 @@ async function handle(req: Request) {
   // Real Surfer auth required to own the forked session.
   const surferSession = await auth();
   if (!surferSession?.user?.userId) {
-    // Round-trip the user through /login and back to this exact URL.
-    const next = encodeURIComponent(req.url);
-    return NextResponse.redirect(new URL(`/login?next=${next}`, req.url), 303);
+    // Round-trip through /login and back to this exact fork request. The
+    // login page reads `callbackUrl` (not `next`) and its safety check
+    // requires a same-origin path — so pass pathname+search, never the
+    // absolute URL.
+    const callbackUrl = encodeURIComponent(url.pathname + url.search);
+    return NextResponse.redirect(
+      new URL(`/login?callbackUrl=${callbackUrl}`, req.url),
+      303,
+    );
   }
 
   const cat = getSnapshotCatalogue();

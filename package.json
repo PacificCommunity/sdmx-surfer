@@ -47,6 +47,7 @@
     "highcharts-react-official": "^3.2.3",
     "html-react-parser": "^5.2.17",
     "html2canvas": "^1.4.1",
+    "html2canvas-pro": "^2.0.4",
     "jspdf": "^4.2.1",
     "mermaid": "^11.13.0",
     "next": "^16.2.7",

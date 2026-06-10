@@ -10,6 +10,7 @@ const ALLOWED_PATHS = [
   "scripts/import-country-snapshots.ts",
   "scripts/augment-country-snapshot-types.ts",
   "scripts/consolidate-country-snapshot-indicators.ts",
+  "scripts/generate-dataflow-dimensions.ts",
   "tests/country-snapshots",
 ];
 

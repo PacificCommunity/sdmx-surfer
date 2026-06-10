@@ -6,133 +6,133 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -338,10 +338,10 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "PF": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "PG": {
       "type": "line",
@@ -408,7 +408,7 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
@@ -426,13 +426,13 @@ export const chartTypes: ChartTypesCache = {
     "FM": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
@@ -444,37 +444,37 @@ export const chartTypes: ChartTypesCache = {
     "MH": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
@@ -486,19 +486,19 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
@@ -510,299 +510,299 @@ export const chartTypes: ChartTypesCache = {
     "TO": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
   "I.8": {
     "AS": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "CK": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "FJ": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "FM": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "GU": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "KI": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "MH": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "MP": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "NC": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "NR": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "NU": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "PF": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "PG": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "PN": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "PW": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "SB": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "TK": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "TO": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "TV": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "VU": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "WF": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "WS": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 100,
+      "detectedAt": "2026-06-09",
+      "locked": true
     }
   },
   "I.9": {
     "AS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -944,7 +944,7 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
@@ -968,25 +968,25 @@ export const chartTypes: ChartTypesCache = {
     "GU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
@@ -1010,37 +1010,37 @@ export const chartTypes: ChartTypesCache = {
     "PF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -1052,82 +1052,82 @@ export const chartTypes: ChartTypesCache = {
     "TV": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
   "I.12": {
     "AS": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "CK": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "FJ": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "FM": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "GU": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "KI": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "MH": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "MP": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "NC": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "NR": {
       "type": "line",
@@ -1136,70 +1136,70 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "NU": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "PF": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "PG": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "SB": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "TK": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "TO": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "TV": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "VU": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "WF": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 101,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "WS": {
       "type": "line",
@@ -1510,7 +1510,7 @@ export const chartTypes: ChartTypesCache = {
     "KI": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
@@ -1522,13 +1522,13 @@ export const chartTypes: ChartTypesCache = {
     "MP": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
@@ -1540,13 +1540,13 @@ export const chartTypes: ChartTypesCache = {
     "NU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
@@ -1564,7 +1564,7 @@ export const chartTypes: ChartTypesCache = {
     "PW": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
@@ -1754,7 +1754,7 @@ export const chartTypes: ChartTypesCache = {
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
@@ -1808,7 +1808,7 @@ export const chartTypes: ChartTypesCache = {
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
@@ -1826,25 +1826,25 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -1868,7 +1868,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -1888,7 +1888,7 @@ export const chartTypes: ChartTypesCache = {
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
@@ -1930,7 +1930,7 @@ export const chartTypes: ChartTypesCache = {
     "NC": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
@@ -1942,13 +1942,13 @@ export const chartTypes: ChartTypesCache = {
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
@@ -1960,7 +1960,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -1978,7 +1978,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -2002,13 +2002,13 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -2033,7 +2033,7 @@ export const chartTypes: ChartTypesCache = {
     },
     "FM": {
       "type": "bar",
-      "timePoints": 2,
+      "timePoints": 1,
       "detectedAt": "2026-06-09",
       "locked": false
     },
@@ -2044,8 +2044,8 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "KI": {
-      "type": "line",
-      "timePoints": 3,
+      "type": "bar",
+      "timePoints": 1,
       "detectedAt": "2026-06-09",
       "locked": false
     },
@@ -2074,10 +2074,10 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "NU": {
-      "type": "bar",
-      "timePoints": 1,
+      "type": "line",
+      "timePoints": 7,
       "detectedAt": "2026-06-09",
-      "locked": false
+      "locked": true
     },
     "PF": {
       "type": "line",
@@ -2098,34 +2098,34 @@ export const chartTypes: ChartTypesCache = {
       "locked": false
     },
     "PW": {
-      "type": "bar",
-      "timePoints": 1,
+      "type": "line",
+      "timePoints": 4,
       "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
-      "type": "bar",
-      "timePoints": 1,
+      "type": "line",
+      "timePoints": 3,
       "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "bar",
-      "timePoints": 1,
+      "timePoints": 2,
       "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
-      "type": "bar",
-      "timePoints": 1,
+      "type": "line",
+      "timePoints": 13,
       "detectedAt": "2026-06-09",
-      "locked": false
+      "locked": true
     },
     "TV": {
-      "type": "bar",
-      "timePoints": 1,
+      "type": "line",
+      "timePoints": 6,
       "detectedAt": "2026-06-09",
-      "locked": false
+      "locked": true
     },
     "VU": {
       "type": "line",
@@ -2140,10 +2140,10 @@ export const chartTypes: ChartTypesCache = {
       "locked": false
     },
     "WS": {
-      "type": "bar",
-      "timePoints": 1,
+      "type": "line",
+      "timePoints": 6,
       "detectedAt": "2026-06-09",
-      "locked": false
+      "locked": true
     }
   },
   "II.3": {
@@ -2168,7 +2168,7 @@ export const chartTypes: ChartTypesCache = {
     "FM": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
@@ -2180,7 +2180,7 @@ export const chartTypes: ChartTypesCache = {
     "KI": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
@@ -2228,7 +2228,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -2240,13 +2240,13 @@ export const chartTypes: ChartTypesCache = {
     "SB": {
       "type": "line",
       "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -2270,7 +2270,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -2284,13 +2284,13 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
@@ -2301,116 +2301,116 @@ export const chartTypes: ChartTypesCache = {
     },
     "FM": {
       "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "timePoints": 2,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
-      "type": "line",
-      "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
-      "type": "line",
-      "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
-      "type": "line",
-      "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "line",
       "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
-      "type": "line",
-      "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "line",
       "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
-      "type": "line",
-      "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -2418,7 +2418,7 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
@@ -2442,7 +2442,7 @@ export const chartTypes: ChartTypesCache = {
     "GU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
@@ -2460,13 +2460,13 @@ export const chartTypes: ChartTypesCache = {
     "MP": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
@@ -2484,7 +2484,7 @@ export const chartTypes: ChartTypesCache = {
     "PF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
@@ -2496,7 +2496,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -2514,7 +2514,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -2538,21 +2538,21 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 10,
+      "detectedAt": "2026-06-09",
+      "locked": true
     }
   },
   "II.12": {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
@@ -2576,7 +2576,7 @@ export const chartTypes: ChartTypesCache = {
     "GU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
@@ -2594,20 +2594,20 @@ export const chartTypes: ChartTypesCache = {
     "MP": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 7,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "NU": {
       "type": "line",
@@ -2618,7 +2618,7 @@ export const chartTypes: ChartTypesCache = {
     "PF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
@@ -2630,7 +2630,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -2648,7 +2648,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -2672,21 +2672,21 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 7,
+      "detectedAt": "2026-06-09",
+      "locked": true
     }
   },
   "II.13": {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
@@ -2710,7 +2710,7 @@ export const chartTypes: ChartTypesCache = {
     "GU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
@@ -2728,13 +2728,13 @@ export const chartTypes: ChartTypesCache = {
     "MP": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
@@ -2752,7 +2752,7 @@ export const chartTypes: ChartTypesCache = {
     "PF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
@@ -2764,7 +2764,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -2782,7 +2782,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -2806,7 +2806,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -2820,13 +2820,13 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
@@ -2844,49 +2844,49 @@ export const chartTypes: ChartTypesCache = {
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 22,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "MH": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
@@ -2898,13 +2898,13 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
@@ -2916,7 +2916,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -2928,7 +2928,7 @@ export const chartTypes: ChartTypesCache = {
     "TV": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
@@ -2940,7 +2940,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -2954,133 +2954,133 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -3088,115 +3088,115 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 7,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "line",
       "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
@@ -3208,13 +3208,13 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -3222,7 +3222,7 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
@@ -3234,19 +3234,19 @@ export const chartTypes: ChartTypesCache = {
     "FJ": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
@@ -3258,25 +3258,25 @@ export const chartTypes: ChartTypesCache = {
     "MH": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
@@ -3288,25 +3288,25 @@ export const chartTypes: ChartTypesCache = {
     "PF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "line",
       "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
@@ -3318,7 +3318,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -3330,7 +3330,7 @@ export const chartTypes: ChartTypesCache = {
     "TV": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
@@ -3342,7 +3342,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -3356,73 +3356,73 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
@@ -3434,13 +3434,13 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "line",
       "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
@@ -3452,13 +3452,13 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "line",
       "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
@@ -3476,7 +3476,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -3486,107 +3486,375 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     }
   },
-  "III.12": {
+  "III.7": {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "type": "line",
+      "timePoints": 4,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
-      "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "type": "line",
+      "timePoints": 3,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "timePoints": 2,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "type": "line",
+      "timePoints": 3,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "SB": {
+      "type": "line",
+      "timePoints": 3,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "TK": {
+      "type": "bar",
+      "timePoints": 2,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "TO": {
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "TV": {
+      "type": "bar",
+      "timePoints": 2,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "VU": {
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "WF": {
+      "type": "bar",
+      "timePoints": 2,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "WS": {
+      "type": "bar",
+      "timePoints": 2,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    }
+  },
+  "III.10": {
+    "AS": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "CK": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "FJ": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "FM": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "GU": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "KI": {
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "MH": {
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "MP": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "NC": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "NR": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "NU": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "PF": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "PG": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "PN": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "PW": {
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "TO": {
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "TV": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "VU": {
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "WF": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "WS": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    }
+  },
+  "III.12": {
+    "AS": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "CK": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "FJ": {
+      "type": "bar",
+      "timePoints": 2,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "FM": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "GU": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "KI": {
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "MH": {
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "MP": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "NC": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "NR": {
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "NU": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "PF": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "PG": {
+      "type": "line",
+      "timePoints": 3,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "PN": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "PW": {
+      "type": "line",
+      "timePoints": 3,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "SB": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
+      "locked": false
+    },
+    "TK": {
+      "type": "empty",
+      "timePoints": 0,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -3598,7 +3866,7 @@ export const chartTypes: ChartTypesCache = {
     "TV": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
@@ -3610,7 +3878,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -3624,103 +3892,103 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -3732,7 +4000,7 @@ export const chartTypes: ChartTypesCache = {
     "TV": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
@@ -3744,7 +4012,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -3758,103 +4026,103 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -3866,7 +4134,7 @@ export const chartTypes: ChartTypesCache = {
     "TV": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
@@ -3878,7 +4146,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -3892,14 +4160,14 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 16,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "FJ": {
       "type": "line",
@@ -3908,15 +4176,15 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "FM": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 16,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "GU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
@@ -3932,10 +4200,10 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "MP": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 16,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "NC": {
       "type": "line",
@@ -3950,10 +4218,10 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "NU": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 16,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "PF": {
       "type": "line",
@@ -3962,15 +4230,15 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "PG": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 15,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -3988,7 +4256,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -4000,25 +4268,25 @@ export const chartTypes: ChartTypesCache = {
     "TV": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -4026,7 +4294,7 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
@@ -4050,7 +4318,7 @@ export const chartTypes: ChartTypesCache = {
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
@@ -4068,13 +4336,13 @@ export const chartTypes: ChartTypesCache = {
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
@@ -4086,13 +4354,13 @@ export const chartTypes: ChartTypesCache = {
     "NU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
@@ -4104,7 +4372,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -4122,7 +4390,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -4146,7 +4414,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -4160,13 +4428,13 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
@@ -4184,7 +4452,7 @@ export const chartTypes: ChartTypesCache = {
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
@@ -4202,7 +4470,7 @@ export const chartTypes: ChartTypesCache = {
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
@@ -4214,13 +4482,13 @@ export const chartTypes: ChartTypesCache = {
     "NR": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
@@ -4238,7 +4506,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -4256,7 +4524,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -4280,7 +4548,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -4294,13 +4562,13 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
@@ -4318,7 +4586,7 @@ export const chartTypes: ChartTypesCache = {
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
@@ -4336,7 +4604,7 @@ export const chartTypes: ChartTypesCache = {
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
@@ -4348,13 +4616,13 @@ export const chartTypes: ChartTypesCache = {
     "NR": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
@@ -4372,7 +4640,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -4390,13 +4658,13 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
@@ -4406,15 +4674,15 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "VU": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 44,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -4428,13 +4696,13 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
@@ -4444,33 +4712,33 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "FM": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 30,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 45,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "MH": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 28,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
@@ -4482,13 +4750,13 @@ export const chartTypes: ChartTypesCache = {
     "NR": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
@@ -4506,14 +4774,14 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 24,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "SB": {
       "type": "line",
@@ -4524,7 +4792,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -4536,7 +4804,7 @@ export const chartTypes: ChartTypesCache = {
     "TV": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
@@ -4548,7 +4816,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -4562,133 +4830,133 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
-      "type": "line",
-      "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
-      "type": "line",
-      "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "line",
       "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -4706,16 +4974,16 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "FJ": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 17,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "FM": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 17,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "GU": {
       "type": "line",
@@ -4732,7 +5000,7 @@ export const chartTypes: ChartTypesCache = {
     "MH": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
@@ -4774,7 +5042,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -4816,7 +5084,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -4872,14 +5140,14 @@ export const chartTypes: ChartTypesCache = {
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 7,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "NR": {
       "type": "line",
@@ -4894,10 +5162,10 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "PF": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 6,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "PG": {
       "type": "line",
@@ -4908,7 +5176,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -4926,7 +5194,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -4950,7 +5218,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -5006,14 +5274,14 @@ export const chartTypes: ChartTypesCache = {
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 7,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "NR": {
       "type": "line",
@@ -5028,10 +5296,10 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "PF": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 6,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "PG": {
       "type": "line",
@@ -5042,7 +5310,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -5060,7 +5328,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -5084,7 +5352,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -5140,13 +5408,13 @@ export const chartTypes: ChartTypesCache = {
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
@@ -5164,7 +5432,7 @@ export const chartTypes: ChartTypesCache = {
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
@@ -5176,7 +5444,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -5194,7 +5462,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -5218,7 +5486,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -5274,13 +5542,13 @@ export const chartTypes: ChartTypesCache = {
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "type": "line",
+      "timePoints": 4,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
@@ -5296,9 +5564,9 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "PF": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "type": "line",
+      "timePoints": 4,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
@@ -5310,7 +5578,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -5328,7 +5596,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -5352,7 +5620,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -5408,13 +5676,13 @@ export const chartTypes: ChartTypesCache = {
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
@@ -5432,7 +5700,7 @@ export const chartTypes: ChartTypesCache = {
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
@@ -5444,7 +5712,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -5462,7 +5730,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -5486,7 +5754,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -5542,14 +5810,14 @@ export const chartTypes: ChartTypesCache = {
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 7,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "NR": {
       "type": "line",
@@ -5564,10 +5832,10 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "PF": {
-      "type": "empty",
-      "timePoints": 0,
-      "detectedAt": "2026-06-08",
-      "locked": false
+      "type": "line",
+      "timePoints": 6,
+      "detectedAt": "2026-06-09",
+      "locked": true
     },
     "PG": {
       "type": "line",
@@ -5578,7 +5846,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -5596,7 +5864,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -5620,7 +5888,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -5694,7 +5962,7 @@ export const chartTypes: ChartTypesCache = {
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
@@ -5712,7 +5980,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -5730,7 +5998,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -5754,7 +6022,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -5768,13 +6036,13 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
@@ -5790,9 +6058,9 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "GU": {
-      "type": "empty",
+      "type": "error",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
@@ -5808,15 +6076,15 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "MP": {
-      "type": "empty",
+      "type": "error",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
@@ -5828,13 +6096,13 @@ export const chartTypes: ChartTypesCache = {
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
@@ -5846,7 +6114,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -5864,7 +6132,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -5888,7 +6156,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -5902,13 +6170,13 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
@@ -5926,13 +6194,13 @@ export const chartTypes: ChartTypesCache = {
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
@@ -5950,13 +6218,13 @@ export const chartTypes: ChartTypesCache = {
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
@@ -5968,37 +6236,37 @@ export const chartTypes: ChartTypesCache = {
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
-      "type": "empty",
+      "type": "error",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -6010,19 +6278,19 @@ export const chartTypes: ChartTypesCache = {
     "TV": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
-      "type": "empty",
+      "type": "error",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
-      "type": "empty",
+      "type": "error",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -6036,13 +6304,13 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
@@ -6060,13 +6328,13 @@ export const chartTypes: ChartTypesCache = {
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
@@ -6084,13 +6352,13 @@ export const chartTypes: ChartTypesCache = {
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
@@ -6102,37 +6370,37 @@ export const chartTypes: ChartTypesCache = {
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -6144,19 +6412,19 @@ export const chartTypes: ChartTypesCache = {
     "TV": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -6248,7 +6516,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -6290,7 +6558,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -6304,133 +6572,133 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -6438,13 +6706,13 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
@@ -6480,7 +6748,7 @@ export const chartTypes: ChartTypesCache = {
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
@@ -6516,7 +6784,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -6534,7 +6802,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -6572,133 +6840,133 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -6706,133 +6974,133 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "line",
       "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "type": "line",
+      "timePoints": 3,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -6846,7 +7114,7 @@ export const chartTypes: ChartTypesCache = {
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
@@ -6882,7 +7150,7 @@ export const chartTypes: ChartTypesCache = {
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
@@ -6900,7 +7168,7 @@ export const chartTypes: ChartTypesCache = {
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
@@ -6918,7 +7186,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -6936,7 +7204,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -6960,7 +7228,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -6974,133 +7242,133 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "line",
       "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -7108,133 +7376,133 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
-      "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "type": "line",
+      "timePoints": 3,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "line",
       "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "bar",
-      "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "timePoints": 2,
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -7242,133 +7510,133 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -7510,13 +7778,13 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
@@ -7534,7 +7802,7 @@ export const chartTypes: ChartTypesCache = {
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
@@ -7546,13 +7814,13 @@ export const chartTypes: ChartTypesCache = {
     "MH": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
@@ -7564,13 +7832,13 @@ export const chartTypes: ChartTypesCache = {
     "NR": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
@@ -7588,7 +7856,7 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
@@ -7606,7 +7874,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -7630,7 +7898,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -7644,133 +7912,133 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -7778,133 +8046,133 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
-      "type": "empty",
+      "type": "error",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -7912,147 +8180,147 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
-      "type": "empty",
+      "type": "error",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
   "XI.1": {
     "AS": {
       "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
@@ -8062,9 +8330,9 @@ export const chartTypes: ChartTypesCache = {
       "locked": true
     },
     "FM": {
-      "type": "line",
-      "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
@@ -8076,19 +8344,19 @@ export const chartTypes: ChartTypesCache = {
     "KI": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
@@ -8106,7 +8374,7 @@ export const chartTypes: ChartTypesCache = {
     "NU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
@@ -8118,31 +8386,31 @@ export const chartTypes: ChartTypesCache = {
     "PG": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "line",
       "timePoints": 4,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -8153,26 +8421,26 @@ export const chartTypes: ChartTypesCache = {
     },
     "TV": {
       "type": "bar",
-      "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
-      "type": "line",
-      "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "type": "bar",
+      "timePoints": 1,
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -8180,13 +8448,13 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
@@ -8198,7 +8466,7 @@ export const chartTypes: ChartTypesCache = {
     "FM": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
@@ -8210,19 +8478,19 @@ export const chartTypes: ChartTypesCache = {
     "KI": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
@@ -8234,13 +8502,13 @@ export const chartTypes: ChartTypesCache = {
     "NR": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
@@ -8258,13 +8526,13 @@ export const chartTypes: ChartTypesCache = {
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
@@ -8276,7 +8544,7 @@ export const chartTypes: ChartTypesCache = {
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
@@ -8288,7 +8556,7 @@ export const chartTypes: ChartTypesCache = {
     "TV": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
@@ -8300,7 +8568,7 @@ export const chartTypes: ChartTypesCache = {
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
@@ -8314,133 +8582,133 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -8448,133 +8716,133 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "line",
       "timePoints": 3,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "bar",
       "timePoints": 2,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "bar",
       "timePoints": 1,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -8582,133 +8850,133 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   },
@@ -8716,133 +8984,133 @@ export const chartTypes: ChartTypesCache = {
     "AS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "CK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FJ": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "FM": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "GU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "KI": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MH": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "MP": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NC": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NR": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "NU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PG": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PN": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "PW": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "SB": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TK": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TO": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "TV": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "VU": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WF": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     },
     "WS": {
       "type": "empty",
       "timePoints": 0,
-      "detectedAt": "2026-06-08",
+      "detectedAt": "2026-06-09",
       "locked": false
     }
   }

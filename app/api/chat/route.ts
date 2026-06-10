@@ -311,6 +311,12 @@ export async function POST(req: Request) {
         await logger.flush().catch(() => {});
         if (mcpClient) await mcpClient.close().catch(() => {});
       },
+      // Client disconnected mid-stream (tab closed, navigation). onFinish
+      // does not fire in that case; close the MCP session here too.
+      onAbort: async () => {
+        await logger.flush().catch(() => {});
+        if (mcpClient) await mcpClient.close().catch(() => {});
+      },
     });
 
     return result.toUIMessageStreamResponse();

@@ -29,6 +29,29 @@ export function modeFor(ctx: SnapshotContext): SnapshotChatMode {
     : "page";
 }
 
+// Request shape for /api/countrysnapshots/chat. Lives here (not in the
+// route file) so tests can exercise it directly.
+//
+// countryCodes upper bound must fit the LARGEST surface that mounts a chat:
+// the regional summary passes every country in scope (22 when ?scope=all).
+// It was previously max(5) — the compare-page limit — which made every
+// regional-page chat turn fail validation with a 500.
+const MAX_COUNTRY_CODES = 30;
+const MAX_INDICATOR_IDS = 100;
+const MAX_MESSAGES = 200;
+
+export const snapshotContextSchema = z.object({
+  countryCodes: z.array(z.string()).max(MAX_COUNTRY_CODES),
+  themeSlug: z.string(),
+  indicatorIds: z.array(z.string()).max(MAX_INDICATOR_IDS),
+});
+
+export const chatRequestSchema = z.object({
+  messages: z.array(z.unknown()).max(MAX_MESSAGES),
+  snapshotContext: snapshotContextSchema,
+  sessionId: z.string().uuid().optional(),
+});
+
 /**
  * The system messages for a snapshot chat: a stable block carrying the
  * Anthropic cache breakpoint, then the per-page dynamic context. The cache
