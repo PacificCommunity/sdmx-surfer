@@ -53,6 +53,28 @@ export function ExportButton({ filenameStem }: { filenameStem: string }) {
         return;
       }
 
+      // Snapshot every link's position BEFORE the capture await — the DOM
+      // can reflow while html2canvas runs. The captured image is flat, so
+      // links survive as invisible clickable rectangles overlaid at the
+      // same (scaled) positions. The DOM's a.href property resolves
+      // relative paths against the current origin, which is exactly what
+      // a PDF opened outside the app needs.
+      const targetRect = target.getBoundingClientRect();
+      const links = Array.from(
+        target.querySelectorAll<HTMLAnchorElement>("a[href]"),
+      )
+        .map((a) => {
+          const r = a.getBoundingClientRect();
+          return {
+            url: a.href,
+            x: r.left - targetRect.left,
+            y: r.top - targetRect.top,
+            w: r.width,
+            h: r.height,
+          };
+        })
+        .filter((l) => l.w > 0 && l.h > 0 && l.url);
+
       const canvas = await html2canvas(target, {
         scale: 2,
         useCORS: true,
@@ -69,40 +91,64 @@ export function ExportButton({ filenameStem }: { filenameStem: string }) {
       const pageH = pdf.internal.pageSize.getHeight();
       const stamp = new Date().toISOString().slice(0, 10);
 
-      pdf.setFontSize(8);
-      pdf.text(
-        `SDMX Surfer — Country Snapshot — ${filenameStem.replace(/_/g, " ")} — ${stamp}`,
-        20,
-        14,
-      );
-
-      const imgW = pageW - 40;
+      const margin = 20;
+      const imgW = pageW - margin * 2;
       const imgH = imgW * (canvas.height / canvas.width);
-      let remaining = imgH;
-      const position = 20;
+      const position = margin;
+      const pageContentH = pageH - margin * 2;
+      const pageCount = Math.max(1, Math.ceil(imgH / pageContentH));
 
-      if (imgH <= pageH - 40) {
-        pdf.addImage(imgData, "PNG", 20, position, imgW, imgH);
-      } else {
-        // Slice the canvas across multiple pages.
-        let yOffset = 0;
-        const pageContentH = pageH - 40;
-        while (remaining > 0) {
-          pdf.addImage(imgData, "PNG", 20, position - yOffset, imgW, imgH);
-          remaining -= pageContentH;
-          if (remaining > 0) {
-            pdf.addPage();
-            yOffset += pageContentH;
-          }
-        }
+      // Draw the image slice on every page.
+      for (let page = 0; page < pageCount; page++) {
+        if (page > 0) pdf.addPage();
+        pdf.addImage(
+          imgData,
+          "PNG",
+          margin,
+          position - page * pageContentH,
+          imgW,
+          imgH,
+        );
       }
 
-      pdf.setFontSize(7);
-      pdf.text(
-        `Data sourced from .Stat (Pacific Data Hub). Retrieved ${stamp}.`,
-        20,
-        pageH - 14,
-      );
+      // Map DOM CSS-pixel coordinates to PDF points: the image spans the
+      // target's CSS width across imgW points.
+      const scale = imgW / targetRect.width;
+
+      // Header, footer, and link annotations per page — drawn AFTER the
+      // image so the chrome isn't overpainted by the page-1 slice.
+      for (let page = 0; page < pageCount; page++) {
+        pdf.setPage(page + 1);
+        pdf.setFontSize(8);
+        pdf.text(
+          `SDMX Surfer — Country Snapshot — ${filenameStem.replace(/_/g, " ")} — ${stamp}`,
+          margin,
+          14,
+        );
+        pdf.setFontSize(7);
+        pdf.text(
+          `Data sourced from .Stat (Pacific Data Hub). Retrieved ${stamp}.` +
+            (pageCount > 1 ? `  ·  Page ${page + 1}/${pageCount}` : ""),
+          margin,
+          pageH - 8,
+        );
+      }
+      for (const link of links) {
+        const yDoc = link.y * scale; // y within the full image, in points
+        const page = Math.min(
+          pageCount - 1,
+          Math.max(0, Math.floor(yDoc / pageContentH)),
+        );
+        const yOnPage = position + (yDoc - page * pageContentH);
+        pdf.setPage(page + 1);
+        pdf.link(
+          margin + link.x * scale,
+          yOnPage,
+          link.w * scale,
+          link.h * scale,
+          { url: link.url },
+        );
+      }
 
       pdf.save(`${filenameStem.replace(/\s+/g, "_")}_${stamp}.pdf`);
     } catch (err) {
