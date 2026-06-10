@@ -8,6 +8,7 @@ import type {
 } from "@/lib/country-snapshots/config-builder";
 import { SnapshotChart } from "./snapshot-chart";
 import { SourceCitation } from "./source-citation";
+import { UnavailableStrip } from "./dashboard-renderer";
 import { geoConceptForDataflow } from "@/lib/country-snapshots/dataflow-dimensions";
 
 /**
@@ -121,9 +122,16 @@ function logFailure(item: DashboardItem, err: Error) {
 export function RegionalRenderer({ config }: { config: SnapshotConfig }) {
   const countryCodes = config.countries.map((c) => c.code);
 
+  // Indicators with no data source at all go to the compact strip — a
+  // per-country drill-in card is pointless when there's nothing to drill
+  // into anywhere. Items WITH data but not combinable keep their card
+  // (its country links are genuinely useful there).
+  const withData = config.items.filter((i) => Boolean(i.dataUrl));
+  const unavailable = config.items.filter((i) => !i.dataUrl);
+
   return (
     <div className="space-y-10" data-snapshot-pdf-target>
-      {config.items.map((item) => (
+      {withData.map((item) => (
         <section
           key={item.id}
           id={item.id}
@@ -179,6 +187,7 @@ export function RegionalRenderer({ config }: { config: SnapshotConfig }) {
           ) : null}
         </section>
       ))}
+      <UnavailableStrip items={unavailable} />
     </div>
   );
 }

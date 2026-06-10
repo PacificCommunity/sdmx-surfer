@@ -48,10 +48,45 @@ function logFailure(item: DashboardItem, err: Error) {
   }).catch(() => {});
 }
 
+/** Items that can actually render something. The rest go to the strip. */
+function isRenderable(
+  item: DashboardItem,
+): item is DashboardItem & { dataUrl: string } {
+  return item.type !== "text" && Boolean(item.dataUrl);
+}
+
+/**
+ * Compact one-strip summary for indicators we can't render — either no
+ * data source in the catalogue, or the chart-type cache says the query
+ * returns nothing. Full-size "no data" cards made some themes feel a
+ * third empty; the strip keeps the gaps honest without the dead weight.
+ */
+export function UnavailableStrip({ items }: { items: DashboardItem[] }) {
+  if (items.length === 0) return null;
+  return (
+    <section className="rounded-md bg-[#f1f4f6] p-4">
+      <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+        Not currently available ({items.length})
+      </h2>
+      <p className="mt-2 text-xs leading-relaxed text-neutral-600">
+        {items.map((item, i) => (
+          <span key={item.id} id={item.id} className="scroll-mt-16">
+            {i > 0 ? " · " : ""}
+            <span className="font-medium">{item.id}</span> {item.title}
+          </span>
+        ))}
+      </p>
+    </section>
+  );
+}
+
 export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
+  const renderable = config.items.filter(isRenderable);
+  const unavailable = config.items.filter((i) => !isRenderable(i));
+
   return (
     <div className="space-y-10" data-snapshot-pdf-target>
-      {config.items.map((item) => (
+      {renderable.map((item) => (
         <section
           key={item.id}
           id={item.id}
@@ -69,13 +104,7 @@ export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
             <p className="mb-2 text-xs italic text-neutral-500">{item.notes}</p>
           ) : null}
 
-          {item.type === "text" || !item.dataUrl ? (
-            <p className="rounded-md bg-[#f7fafc] p-4 text-sm italic text-neutral-500">
-              {item.dataUrl
-                ? "No usable data available yet for this indicator."
-                : "No data source for this indicator yet."}
-            </p>
-          ) : item.type === "value" ? (
+          {item.type === "value" ? (
             <ErrorBoundary
               fallback={<ItemErrorFallback item={item} />}
               onError={(err) => logFailure(item, err as Error)}
@@ -151,6 +180,7 @@ export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
           ) : null}
         </section>
       ))}
+      <UnavailableStrip items={unavailable} />
     </div>
   );
 }
