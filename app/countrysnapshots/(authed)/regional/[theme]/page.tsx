@@ -10,6 +10,7 @@ import { SnapshotPageShell } from "@/components/country-snapshots/snapshot-page-
 import { RegionalRenderer } from "@/components/country-snapshots/regional-renderer";
 import { ExportButton } from "@/components/country-snapshots/export-button";
 import { ChatOverlay } from "@/components/country-snapshots/chat-overlay";
+import { IndicatorToc } from "@/components/country-snapshots/indicator-toc";
 import { themeEmoji } from "@/lib/country-snapshots/theme-emoji";
 
 export const dynamic = "force-dynamic";
@@ -73,7 +74,14 @@ export default async function RegionalPage({
         </Link>
       </div>
 
-      <RegionalRenderer config={config} />
+      <div className="flex gap-6">
+        <div className="min-w-0 flex-1">
+          <RegionalRenderer config={config} />
+        </div>
+        <IndicatorToc
+          entries={config.items.map((i) => ({ id: i.id, title: i.title }))}
+        />
+      </div>
 
       <ChatOverlay
         snapshotContext={{
