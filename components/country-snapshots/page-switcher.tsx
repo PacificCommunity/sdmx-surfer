@@ -31,8 +31,7 @@ export function PageSwitcher({
     [sortedCountries, currentCountry],
   );
 
-  const selectClass =
-    "rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 shadow-sm";
+  const selectClass = SELECT_CLASS;
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -85,5 +84,104 @@ export function PageSwitcher({
         ))}
       </select>
     </div>
+  );
+}
+
+const SELECT_CLASS =
+  "rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 shadow-sm";
+
+/**
+ * In-place navigation for N-country compare pages: switch theme while
+ * keeping the same country selection, or drop into a single-country view.
+ * (Adding/removing countries is the ComparePicker's job.)
+ */
+export function CompareSwitcher({
+  countries,
+  themes,
+  currentTheme,
+  selectedCodes,
+}: {
+  countries: Country[];
+  themes: Theme[];
+  currentTheme: string; // slug
+  selectedCodes: string[];
+}) {
+  const router = useRouter();
+  const sortedCountries = useMemo(
+    () => [...countries].sort((a, b) => a.name.localeCompare(b.name, "en")),
+    [countries],
+  );
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <select
+        aria-label="Switch theme (keeps selected countries)"
+        className={SELECT_CLASS}
+        value={currentTheme}
+        onChange={(e) =>
+          router.push(
+            `/countrysnapshots/compare/${e.target.value}/${selectedCodes.join("/")}`,
+          )
+        }
+      >
+        {themes.map((t) => (
+          <option key={t.id} value={t.slug}>
+            {themeEmoji(t.id)} {t.title}
+          </option>
+        ))}
+      </select>
+
+      <select
+        aria-label="View a single country instead"
+        className={SELECT_CLASS}
+        value=""
+        onChange={(e) => {
+          if (!e.target.value) return;
+          router.push(`/countrysnapshots/${e.target.value}/${currentTheme}`);
+        }}
+      >
+        <option value="">View single country…</option>
+        {sortedCountries.map((c) => (
+          <option key={c.code} value={c.code}>
+            {selectedCodes.includes(c.code) ? "• " : ""}
+            {c.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+/**
+ * Theme switching for the regional summary page, preserving the
+ * MFAT-15 / all-22 scope toggle.
+ */
+export function RegionalSwitcher({
+  themes,
+  currentTheme,
+  scope,
+}: {
+  themes: Theme[];
+  currentTheme: string; // slug
+  scope: "mfat" | "all";
+}) {
+  const router = useRouter();
+  return (
+    <select
+      aria-label="Switch theme"
+      className={SELECT_CLASS}
+      value={currentTheme}
+      onChange={(e) =>
+        router.push(
+          `/countrysnapshots/regional/${e.target.value}?scope=${scope}`,
+        )
+      }
+    >
+      {themes.map((t) => (
+        <option key={t.id} value={t.slug}>
+          {themeEmoji(t.id)} {t.title}
+        </option>
+      ))}
+    </select>
   );
 }

@@ -11,6 +11,7 @@ import { DashboardRenderer } from "@/components/country-snapshots/dashboard-rend
 import { ComparePicker } from "@/components/country-snapshots/compare-picker";
 import { ExportButton } from "@/components/country-snapshots/export-button";
 import { ChatOverlay } from "@/components/country-snapshots/chat-overlay";
+import { CompareSwitcher } from "@/components/country-snapshots/page-switcher";
 import { themeEmoji } from "@/lib/country-snapshots/theme-emoji";
 
 const MAX_COMPARE = 5;
@@ -56,6 +57,14 @@ export default async function ComparePage({
         />
       }
     >
+      <div className="mb-4">
+        <CompareSwitcher
+          countries={cat.countries}
+          themes={cat.themes}
+          currentTheme={theme.slug}
+          selectedCodes={codes}
+        />
+      </div>
       <ComparePicker theme={theme} countries={cat.countries} selected={codes} />
       <DashboardRenderer config={config} />
       <ChatOverlay

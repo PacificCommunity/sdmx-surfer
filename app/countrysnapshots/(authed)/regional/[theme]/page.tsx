@@ -11,6 +11,7 @@ import { RegionalRenderer } from "@/components/country-snapshots/regional-render
 import { ExportButton } from "@/components/country-snapshots/export-button";
 import { ChatOverlay } from "@/components/country-snapshots/chat-overlay";
 import { IndicatorToc } from "@/components/country-snapshots/indicator-toc";
+import { RegionalSwitcher } from "@/components/country-snapshots/page-switcher";
 import { themeEmoji } from "@/lib/country-snapshots/theme-emoji";
 
 export const dynamic = "force-dynamic";
@@ -62,16 +63,23 @@ export default async function RegionalPage({
         <ExportButton filenameStem={`Regional_${theme.title}`} />
       }
     >
-      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3 rounded-md bg-white p-3 shadow-sm">
-        <div className="text-xs text-neutral-600">
-          Showing {scope === "mfat" ? "MFAT-priority" : "all"} countries.
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md bg-white p-3 shadow-sm">
+        <RegionalSwitcher
+          themes={cat.themes}
+          currentTheme={theme.slug}
+          scope={scope}
+        />
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-neutral-600">
+            Showing {scope === "mfat" ? "MFAT-priority" : "all"} countries.
+          </span>
+          <Link
+            href={`/countrysnapshots/regional/${theme.slug}?scope=${otherScope}`}
+            className="text-xs text-[#006970] underline"
+          >
+            Switch to {otherScopeLabel}
+          </Link>
         </div>
-        <Link
-          href={`/countrysnapshots/regional/${theme.slug}?scope=${otherScope}`}
-          className="text-xs text-[#006970] underline"
-        >
-          Switch to {otherScopeLabel}
-        </Link>
       </div>
 
       <div className="flex gap-6">
