@@ -259,6 +259,71 @@ export function buildSnapshotConfig(args: {
   return { countries, theme: args.theme, items };
 }
 
+/**
+ * Translate a SnapshotConfig into the NATIVE dashboard config shape that
+ * the main Surfer builder loads, previews, and lets the agent iterate on
+ * (lib/types.ts SDMXDashboardConfig). Used by the fork-to-Surfer handshake:
+ * seeding the session with our internal SnapshotConfig shape crashes the
+ * builder preview, which only understands the library schema.
+ *
+ *   chart → line/bar visual with the item's legend concept
+ *   value → value visual (latest observation)
+ *   table → value visual (no native table type)
+ *   text  → omitted (nothing to render; the catalogue gap is noted in the
+ *           seeded chat message instead)
+ */
+export function toNativeDashboardConfig(config: SnapshotConfig): {
+  id: string;
+  rows: Array<{ columns: Array<Record<string, unknown>> }>;
+  header: { title: { text: string } };
+} {
+  const visuals = config.items
+    .filter((item) => item.type !== "text" && item.dataUrl)
+    .map((item) => {
+      if (item.type === "chart") {
+        return {
+          id: item.id.replace(/[^a-zA-Z0-9_-]/g, "_"),
+          type: item.chartType ?? "line",
+          title: { text: item.title },
+          data: item.dataUrl!,
+          xAxisConcept: "TIME_PERIOD",
+          yAxisConcept: "OBS_VALUE",
+          ...(item.legendConcept
+            ? {
+                legend: {
+                  concept: item.legendConcept,
+                  location: "bottom" as const,
+                },
+              }
+            : {}),
+        };
+      }
+      // value + table → KPI value visual
+      return {
+        id: item.id.replace(/[^a-zA-Z0-9_-]/g, "_"),
+        type: "value" as const,
+        title: { text: item.title },
+        data: item.dataUrl!,
+        xAxisConcept: "OBS_VALUE",
+      };
+    });
+
+  // Two visuals per row, matching the builder's usual layout density.
+  const rows: Array<{ columns: Array<Record<string, unknown>> }> = [];
+  for (let k = 0; k < visuals.length; k += 2) {
+    rows.push({ columns: visuals.slice(k, k + 2) });
+  }
+
+  const countryNames = config.countries.map((c) => c.name).join(" vs ");
+  return {
+    id: `snapshot-fork-${config.theme.slug}`,
+    rows,
+    header: {
+      title: { text: `${countryNames} — ${config.theme.title}` },
+    },
+  };
+}
+
 function bareItem(
   i: Indicator,
   dataUrl: string | undefined,

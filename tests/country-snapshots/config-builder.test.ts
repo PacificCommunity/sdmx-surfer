@@ -43,7 +43,10 @@ vi.mock("../../lib/country-snapshots/chart-types.generated", () => ({
   },
 }));
 
-import { buildSnapshotConfig } from "../../lib/country-snapshots/config-builder";
+import {
+  buildSnapshotConfig,
+  toNativeDashboardConfig,
+} from "../../lib/country-snapshots/config-builder";
 import type { Catalogue } from "../../lib/country-snapshots/catalogue";
 
 const fixture: Catalogue = {
@@ -384,5 +387,65 @@ describe("buildSnapshotConfig", () => {
         expect(item.missingCountries).toBeUndefined();
       }
     });
+  });
+});
+
+// The fork-to-Surfer handshake seeds the builder with this shape; the
+// builder's preview only understands the native library schema, so the
+// converter must emit `rows[].columns[]` visuals with real data URLs.
+describe("toNativeDashboardConfig", () => {
+  it("converts charts and values, drops text items, chunks rows of 2", () => {
+    const cfg = buildSnapshotConfig({
+      country: [
+        // sorted-by-name fixture countries: TO and WS both have data
+        ...[0, 1].map((k) => {
+          const all = [
+            { code: "TO", name: "Tonga", region: "POL" as const, mfatRelevant: true },
+            { code: "WS", name: "Samoa", region: "POL" as const, mfatRelevant: true },
+          ];
+          return all[k];
+        }),
+      ],
+      theme: { id: "II", slug: "health", title: "Health", order: 2 },
+      catalogue: {
+        generatedAt: "x",
+        sourceFile: "x",
+        countries: [
+          { code: "TO", name: "Tonga", region: "POL", mfatRelevant: true },
+          { code: "WS", name: "Samoa", region: "POL", mfatRelevant: true },
+        ],
+        themes: [{ id: "II", slug: "health", title: "Health", order: 2 }],
+        indicators: [
+          {
+            id: "II.1",
+            themeId: "II",
+            title: "Life expectancy",
+            rendering: "CHART",
+            dataflow: "DF_LIFE",
+            apiUrlTemplate: "https://x/SPC,DF_LIFE,/A.[TAG_GEO].LIFE",
+          },
+          {
+            id: "II.10",
+            themeId: "II",
+            title: "Static fact",
+            rendering: "TEXT",
+          },
+        ],
+      },
+    });
+    const native = toNativeDashboardConfig(cfg);
+
+    expect(native.header.title.text).toBe("Tonga vs Samoa — Health");
+    // text item dropped; one chart visual remains
+    const visuals = native.rows.flatMap((r) => r.columns);
+    expect(visuals).toHaveLength(1);
+    expect(visuals[0]).toMatchObject({
+      type: "line",
+      data: "https://x/SPC,DF_LIFE,/A.TO+WS.LIFE",
+      xAxisConcept: "TIME_PERIOD",
+      legend: { concept: "GEO_PICT" },
+    });
+    // builder-native shape: rows of `columns`
+    expect(native.rows[0]).toHaveProperty("columns");
   });
 });

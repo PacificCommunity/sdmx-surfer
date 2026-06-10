@@ -8,7 +8,10 @@ import {
   getThemeBySlug,
   type Country,
 } from "@/lib/country-snapshots/catalogue";
-import { buildSnapshotConfig } from "@/lib/country-snapshots/config-builder";
+import {
+  buildSnapshotConfig,
+  toNativeDashboardConfig,
+} from "@/lib/country-snapshots/config-builder";
 
 /**
  * Fork a Country Snapshot into the authenticated Surfer space.
@@ -81,25 +84,45 @@ async function handle(req: Request) {
   }
 
   const cat = getSnapshotCatalogue();
-  const config = buildSnapshotConfig({
+  const snapshotConfig = buildSnapshotConfig({
     country: countries.length === 1 ? countries[0] : countries,
     theme,
     catalogue: cat,
   });
+  // The builder loads, previews, and iterates on the NATIVE dashboard
+  // schema — seeding the raw SnapshotConfig shape crashes its preview.
+  const nativeConfig = toNativeDashboardConfig(snapshotConfig);
 
   const title =
     countries.map((c) => c.name).join(" vs ") +
     " — " +
     theme.title +
     " (forked from snapshot)";
+
+  const omitted = snapshotConfig.items.filter(
+    (i) => i.type === "text" || !i.dataUrl,
+  );
+  // The builder renders UIMessages: { id, role, parts: [...] }. A bare
+  // { role, content } ModelMessage has no `parts` array and crashes
+  // MessageBubble at message.parts.map.
   const forkNote = {
-    role: "system" as const,
-    content:
-      "This session was forked from a Country Snapshot for " +
-      countries.map((c) => c.name).join(", ") +
-      ", " +
-      theme.title +
-      ". Use update_dashboard to customise the visuals, time ranges, or add indicators.",
+    id: crypto.randomUUID(),
+    role: "assistant" as const,
+    parts: [
+      {
+        type: "text" as const,
+        text:
+          "This session was forked from the Country Snapshot for **" +
+          countries.map((c) => c.name).join(", ") +
+          " — " +
+          theme.title +
+          "**. The dashboard on the right mirrors the snapshot" +
+          (omitted.length > 0
+            ? ` (${omitted.length} indicator${omitted.length === 1 ? " is" : "s are"} not included because they have no data here)`
+            : "") +
+          ". Ask me to customise it — change time ranges, add or drop indicators, switch chart types, or bring in other countries.",
+      },
+    ],
   };
 
   const [row] = await db
@@ -107,7 +130,7 @@ async function handle(req: Request) {
     .values({
       user_id: surferSession.user.userId,
       title,
-      config_history: [config] as unknown as never,
+      config_history: [nativeConfig] as unknown as never,
       config_pointer: 0,
       messages: [forkNote] as unknown as never,
     })
