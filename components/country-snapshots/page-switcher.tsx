@@ -32,7 +32,7 @@ export function PageSwitcher({
   );
 
   const selectClass =
-    "rounded-md border border-neutral-200 bg-white px-2 py-1.5 text-xs text-neutral-700 shadow-sm";
+    "rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 shadow-sm";
 
   return (
     <div className="flex flex-wrap items-center gap-2">
