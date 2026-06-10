@@ -10,6 +10,7 @@ import { DashboardRenderer } from "@/components/country-snapshots/dashboard-rend
 import { ExportButton } from "@/components/country-snapshots/export-button";
 import { ChatOverlay } from "@/components/country-snapshots/chat-overlay";
 import { IndicatorToc } from "@/components/country-snapshots/indicator-toc";
+import { PageSwitcher } from "@/components/country-snapshots/page-switcher";
 import { themeEmoji } from "@/lib/country-snapshots/theme-emoji";
 
 export async function generateStaticParams() {
@@ -33,10 +34,11 @@ export default async function Page({
   const theme = getThemeBySlug(themeSlug);
   if (!country || !theme) notFound();
 
+  const cat = getSnapshotCatalogue();
   const config = buildSnapshotConfig({
     country,
     theme,
-    catalogue: getSnapshotCatalogue(),
+    catalogue: cat,
   });
 
   return (
@@ -47,6 +49,14 @@ export default async function Page({
         <ExportButton filenameStem={`${country.name}_${theme.title}`} />
       }
     >
+      <div className="mb-4">
+        <PageSwitcher
+          countries={cat.countries}
+          themes={cat.themes}
+          currentCountry={country.code}
+          currentTheme={theme.slug}
+        />
+      </div>
       <div className="flex gap-6">
         <div className="min-w-0 flex-1">
           <DashboardRenderer config={config} />
