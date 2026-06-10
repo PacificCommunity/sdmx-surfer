@@ -359,16 +359,30 @@ describe("buildSnapshotConfig", () => {
       );
     });
 
-    it("compare degraded to one country with data → no geo legend", () => {
+    it("compare degraded to one country with data → line still NAMES that country", () => {
       const cfg = buildSnapshotConfig({
         country: [fixture.countries[0], fixture.countries[1], fixture.countries[2]],
         theme: fixture.themes[0],
         catalogue: fixture,
       });
-      // II.5 only has data in TO — the line must not claim GEO varies.
+      // II.5 only has data in TO. GEO doesn't vary, so this is a single
+      // series — but a one-entry legend labels which country it shows,
+      // and the missing countries are surfaced explicitly.
       const item = cfg.items.find((i) => i.id === "II.5")!;
       expect(item.chartType).toBe("line");
-      expect(item.legendConcept).toBeUndefined();
+      expect(item.legendConcept).toBe("GEO_PICT");
+      expect(item.missingCountries).toEqual(["Samoa", "Vanuatu"]);
+    });
+
+    it("single-country pages never carry missingCountries", () => {
+      const cfg = buildSnapshotConfig({
+        country: fixture.countries[0],
+        theme: fixture.themes[0],
+        catalogue: fixture,
+      });
+      for (const item of cfg.items) {
+        expect(item.missingCountries).toBeUndefined();
+      }
     });
   });
 });

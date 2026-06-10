@@ -7,6 +7,10 @@ export type DashboardItem = {
   chartType?: "line" | "bar"; // when type === "chart"
   legendConcept?: string; // chart series dim, when one varies (GEO_PICT, SEX, …)
   seriesConcept?: string; // the indicator's stratifier identity (for table pivots)
+  // On multi-country pages: selected countries with NO data for this
+  // indicator. Rendered as a per-item note so partially-covered compares
+  // don't silently drop countries.
+  missingCountries?: string[];
   id: string; // catalogue indicator id (e.g. "II.4"), also a stable in-page anchor
   title: string;
   dataUrl?: string; // template URL with country code(s) substituted
@@ -181,25 +185,58 @@ export function buildSnapshotConfig(args: {
       varying.push({ concept: i.seriesConcept, role: "stratum" });
     }
 
+    // On multi-country pages, name the countries that contribute nothing —
+    // a compare that silently drops a country reads as a bug.
+    const missingCountries =
+      codes.length > 1 && withData.length > 0
+        ? perCountryPoints
+            .filter((e) => e.points === 0)
+            .map(
+              (e) =>
+                countries.find((c) => c.code === e.code)?.name ?? e.code,
+            )
+        : undefined;
+
+    // A degraded multi-country chart (only one country has data) carries no
+    // varying geo dim, but the line should still SAY which country it shows.
+    // A single-valued legend names the series — safe for line, and bar never
+    // reaches this state (sparse single-data routes to value/table).
+    const nameTheLonelyLine = (d: VisualDecision): VisualDecision =>
+      d.kind === "chart" &&
+      d.chartType === "line" &&
+      !d.legendConcept &&
+      codes.length > 1
+        ? { ...d, legendConcept: geoConceptForDataflow(i.dataflow) }
+        : d;
+
     // --- Decide ------------------------------------------------------------
-    const decision = decideVisual({
-      varying,
-      timePoints,
-      renderingHint: i.rendering,
-    });
+    const decision = nameTheLonelyLine(
+      decideVisual({
+        varying,
+        timePoints,
+        renderingHint: i.rendering,
+      }),
+    );
 
     if (decision.kind !== "split") {
-      return [bareItem(i, resolveUrl(i.apiUrlTemplate, codes), decision)];
+      return [
+        {
+          ...bareItem(i, resolveUrl(i.apiUrlTemplate, codes), decision),
+          missingCountries,
+        },
+      ];
     }
 
     // Split on the stratifier: one item per stratum value, each re-decided
     // with the stratifier fixed (so only GEO — if anything — varies).
     return strata!.values.map((v) => {
-      const subDecision = decideVisual({
-        varying: varying.filter((d) => d.role !== "stratum"),
-        timePoints,
-        renderingHint: i.rendering,
-      });
+      const subDecision = nameTheLonelyLine(
+        decideVisual({
+          varying: varying.filter((d) => d.role !== "stratum"),
+          timePoints,
+          renderingHint: i.rendering,
+        }),
+      );
       // With the stratifier fixed at most one dim remains, so a second
       // split is impossible; the guard is for the type system.
       const resolved =
@@ -214,6 +251,7 @@ export function buildSnapshotConfig(args: {
         ),
         id: `${i.id}-${v}`,
         title: `${i.title} — ${stratumLabel(v)}`,
+        missingCountries,
       };
     });
   });
