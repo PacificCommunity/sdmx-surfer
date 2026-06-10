@@ -1,10 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+/**
+ * Count visible loading skeletons inside the PDF capture target. All our
+ * loading placeholders (dynamic-import skeletons for charts/values, the
+ * table's fetch placeholder) use the `animate-pulse` class, so this is a
+ * cheap, plumbing-free readiness signal.
+ */
+function countPendingCharts(): number {
+  const target = document.querySelector("[data-snapshot-pdf-target]");
+  if (!target) return 0;
+  return target.querySelectorAll(".animate-pulse").length;
+}
 
 export function ExportButton({ filenameStem }: { filenameStem: string }) {
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [pending, setPending] = useState(0);
+
+  // Poll for outstanding chart skeletons so the button can hold itself
+  // until the page is fully rendered — exporting too early baked grey
+  // placeholder boxes into the PDF. Polling stops once everything is
+  // loaded (and the effect re-arms on remount, i.e. page navigation).
+  useEffect(() => {
+    setPending(countPendingCharts());
+    const interval = setInterval(() => {
+      const n = countPendingCharts();
+      setPending(n);
+      if (n === 0) clearInterval(interval);
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
 
   async function exportPdf() {
     setBusy(true);
@@ -83,15 +110,26 @@ export function ExportButton({ filenameStem }: { filenameStem: string }) {
     }
   }
 
+  const waiting = pending > 0;
+
   return (
     <div className="flex items-center gap-3">
       <button
         type="button"
         onClick={exportPdf}
-        disabled={busy}
+        disabled={busy || waiting}
         className="rounded-md bg-[#006970] px-3 py-1.5 text-xs text-white shadow-sm disabled:opacity-60"
+        title={
+          waiting
+            ? "Waiting for all charts to finish loading"
+            : "Download this page as a PDF"
+        }
       >
-        {busy ? "Generating…" : "Download PDF"}
+        {busy
+          ? "Generating…"
+          : waiting
+            ? `Charts loading (${pending})…`
+            : "Download PDF"}
       </button>
       {toast ? (
         <span className="text-xs text-amber-700">{toast}</span>
