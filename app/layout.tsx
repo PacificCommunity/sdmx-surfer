@@ -4,6 +4,7 @@ import "sdmx-dashboard-components/dist/index.css";
 import "./globals.css";
 import { BRAND_GOOGLE_FONTS_HREF } from "@/lib/brand-theme";
 import { SdmxProxyBoot } from "./sdmx-proxy-boot";
+import { DevHostBanner } from "@/components/dev-host-banner";
 
 export const metadata: Metadata = {
   title: "SDMX Surfer",
@@ -25,6 +26,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-surface">
         <SdmxProxyBoot />
+        <DevHostBanner />
         {children}
       </body>
     </html>
