@@ -34,13 +34,13 @@ export function DevHostBanner() {
 
   return (
     <div className="fixed inset-x-0 top-0 z-[100] flex justify-center px-3 pt-3">
-      <div className="flex max-w-2xl items-center gap-3 rounded-lg bg-[#004467]/85 px-4 py-2.5 text-sm text-white shadow-lg backdrop-blur-[20px]">
+      <div className="flex max-w-2xl items-center gap-3 rounded-lg bg-[#c2410c]/85 px-4 py-2.5 text-sm text-white shadow-lg backdrop-blur-[20px]">
         <p className="leading-snug">
           You are on the <span className="font-semibold">development</span>{" "}
           version of SDMX Surfer. Stay here to try what&apos;s next, or use{" "}
           <a
             href={stableUrl}
-            className="font-semibold underline decoration-[#6fd6df] underline-offset-2 hover:text-[#6fd6df]"
+            className="font-semibold underline decoration-[#fed7aa] underline-offset-2 hover:text-[#fed7aa]"
           >
             sdmxsurfer.net
           </a>{" "}
