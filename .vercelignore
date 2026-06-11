@@ -2,5 +2,8 @@
 # Only the pre-built index (dataflow-index.json) is needed at runtime
 models/granite-embedding-small-r2/
 
-# Maintenance and smoke-test scripts — run locally, never served
-scripts/
+# Maintenance and smoke-test scripts — run locally, never served.
+# apply-patches.mjs is the exception: postinstall needs it on Vercel, and
+# without it any cold-cache build fails its unpatched-node_modules guard.
+scripts/*
+!scripts/apply-patches.mjs
