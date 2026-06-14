@@ -34,11 +34,13 @@ const ROOT = process.cwd();
 /** @type {Patch[]} */
 const PATCHES = [
   {
-    name: "sdmx-json-parser: normalise SBS SDMX-JSON v1.0 responses into v2.0 shape",
+    name: "sdmx-json-parser: normalise .Stat SDMX-JSON v1.0 responses into v2.0 shape",
     file: "node_modules/sdmx-json-parser/dist/parser.js",
+    // Sentinel kept verbatim from the original SBS-era patch so node_modules
+    // cached with the patch applied still pass the already-applied check.
     sentinel: "SBS-v1-to-v2 normalisation",
     reason:
-      "SBS endpoint downgrades to SDMX-JSON v1.0 (data.structure singular) when format=jsondata is in the URL, even with Accept v2.0.0. The bundled parser only handles v2.0; reshape on read. Remove when SBS upgrades.",
+      "The parser hardcodes format=jsondata onto every data URL, and on current .Stat NSI builds that parameter selects SDMX-JSON v1.0 (data.structure singular) regardless of Accept header — verified 2026-06-12 on BOTH stats-sdmx-disseminate.pacificdata.org and data-sdmx-disseminate.sbs.gov.ws. The parser reads only the v2.0 shape, so this normalisation is load-bearing for every endpoint, SPC included. Other .Stat providers (FBOS, ILO, STATSNZ, ABS) still map jsondata to v2.0 and are expected to flip as their NSI upgrades; this normalisation covers them automatically because it keys on response shape, not endpoint. Known gap left for the upstream fix: ECB serves v1.0 with structure/dataSets at the document root (no data envelope), which this normaliser does not reach. Full survey: scripts/survey-sdmx-json-versions.mjs. Remove only when the upstream parser fix lands (docs/sdmx-dashboard-components-improvements.md §5: drop the format param, send the v2 Accept header, keep read tolerance for both v1.0 dialects). Do NOT remove on any endpoint upgrade.",
     before:
       "this.getJSON=JSON.parse(i),Object.keys(T).length>0&&(this.getJSON.data.dataSets[0].observations=T,delete this.getJSON.data.dataSets[0].series)",
     after:

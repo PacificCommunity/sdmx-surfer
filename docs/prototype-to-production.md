@@ -1,10 +1,25 @@
 # Prototype to Production
 
-**Status:** working draft, June 2026
-**Scope:** strategy and open questions for moving SDMX Surfer from alpha to public launch
-**Purpose:** a single page to anchor the conversation with management, sufficiently concrete that each decision can be made by reading one section
+Giulio Valentino Dalla Riva · SDD - SPC · 10 June 2026
 
-This document is a discussion aid. Where a section ends in *Open questions*, those are items only management can decide, and they block the work that follows.
+## Status
+
+Updated 2026-06-12.
+
+**Done since the first draft:**
+
+- Production domain live: `sdmxsurfer.net` (apex canonical, TLS, `www` redirects). Registered as an interim choice; §7.3 can still place the service under an SPC URL, with a redirect preserving existing links. (2026-06-11)
+- Resend sender moved to `surfer@sdmxsurfer.net` on the verified production domain. (2026-06-11)
+- Standing development environment: `sdmx-surfer.vercel.app` serves the active development branch against an isolated database branch, with a banner pointing visitors to the stable domain. Closes the "verify environment variable hygiene" item in §4.1 as a side effect. (2026-06-11)
+- Library-debt spec drafted (`docs/sdmx-dashboard-components-improvements.md`): the rendering and parser fixes SDMX Surfer carries as runtime patches, written up for upstreaming to `sdmx-dashboard-components` and `sdmx-json-parser`. A working parser fix with tests is ready on a local branch. Retires the build-fragility risk the binary patches carry. (2026-06-12)
+
+**Next in the decision-independent queue (§10):** open-tier cap migration shipped dark, model-drift regression suite, operations floor (error tracking, uptime probe, runbook), OAuth wiring behind flags, secrets inventory and rotation procedure, `next-auth 4 → 5`, accessibility pass.
+
+**Waiting on management:** the §8 blockers, unchanged.
+
+## Executive summary
+
+SDMX Surfer's invite-only alpha is wrapping up with roughly 50 users across Pacific governments and partner organisations, and positive feedback. This document proposes the path to a public service: a time-boxed public beta in Q3 2026 on the current infrastructure, followed by a public launch in Q4 under a tiered access model with usage caps. The remaining technical work is modest and well understood: public sign-in providers plus institutional SSO, per-tier usage caps, model-drift monitoring, interface alignment with SPC conventions, and the operational basics of a public service (error tracking, dashboards, an uptime probe, a runbook, an on-call contact). What gates the timeline is a short list of governance decisions only management can make: who owns the product, which budget line carries the costs, where the service lives, and how published dashboards are moderated. Section 8 consolidates these into beta blockers, needing answers by early Q3, and launch blockers, needed by late Q3; everything else can be resolved during or after launch. Each section below closes with the open questions it depends on; they are written so that a decision can be made by reading that section alone.
 
 ---
 
@@ -18,6 +33,7 @@ The alpha is closing. Roughly 50 users across Pacific governments and partner or
 - Per-request usage logging with token counts and authoritative cost via the AI Gateway
 - BYOK support so power users can attach their own API keys
 - An admin surface for invite management, audit logs, usage overview, and published-dashboard moderation
+- A standing development environment (dedicated dev URL and isolated database branch), so changes are exercised at a public URL before they reach the stable domain
 - A dependency security audit refreshed on 2026-06-08 in `SECURITY_AUDIT.md`. Zero high-severity advisories. Eleven moderate items remain, each individually classified: every one is either dev-tooling (drizzle-kit's bundled esbuild), build-time (next's nested postcss), or part of the planned `next-auth 4 → 5` migration backlog (nodemailer and uuid chains). None has a production runtime exposure path. The audit narrowed from 16 to 11 advisories via patch bumps to `resend`, `next`, `next-auth`, and one autofix.
 
 The recurring operational pain point is global SDMX endpoint instability, which is outside our control and which we already mitigate partially through retries and structure caching.
@@ -43,7 +59,7 @@ The plan, stated as plainly as possible:
 3. Wire up usage caps tied to user tier (open-tier vs VIP), defined in §6.
 4. Stand up model-drift monitoring so we can react to model deprecations and quality regressions calmly rather than urgently.
 5. Bring the UI into alignment with SPC and Pacific Data Hub conventions before public launch.
-6. Decide governance (§8) in parallel with the technical work, because governance choices change the timeline.
+6. Decide governance (§7) in parallel with the technical work, because governance choices change the timeline.
 
 If management cannot resolve §8 by early Q3, we should still ship beta on the current setup and treat governance as a launch blocker rather than a beta blocker.
 
@@ -55,20 +71,20 @@ If management cannot resolve §8 by early Q3, we should still ship beta on the c
 
 We have two realistic options for the beta-to-launch path. We are not deciding today which one we operate for the long term.
 
-**Option A — Keep the current infrastructure.**
+**Option A: keep the current infrastructure.**
 
 What we do:
 
-- Point a production domain at the existing Vercel deployment.
-- Change the Resend sender domain to the production address.
-- Verify environment variable hygiene in Vercel and Railway.
+- Point a production domain at the existing Vercel deployment. *Done 2026-06-11: `sdmxsurfer.net`.*
+- Change the Resend sender domain to the production address. *Done 2026-06-11: `surfer@sdmxsurfer.net`.*
+- Verify environment variable hygiene in Vercel and Railway. *Done 2026-06-11, as part of standing up the development environment.*
 - Add an internal status page that surfaces per-endpoint SDMX health.
 
 What we get: launch in weeks, not months. Vercel handles TLS, autoscaling, previews. Railway handles the gateway. Neon handles Postgres backups. Predictable behaviour, with vendor support if something fails.
 
 What we pay: variable costs that scale with usage, vendor coupling, a small but real risk that the AI SDK / Vercel function surface changes under us.
 
-**Option B — Self-hosted on a single VPS (Vultr or similar).**
+**Option B: self-hosted on a single VPS (Vultr or similar).**
 
 What we do:
 
@@ -86,7 +102,7 @@ What we pay: we become our own platform team. The work to reach feature parity w
 #### Open questions
 
 1. Does SPC governance permit running on Vercel and Railway for a public service, or is there a requirement for hosting in a specific jurisdiction or on owned infrastructure?
-2. Is there an SPC-managed domain we should use, or do we register a fresh one?
+2. ~~Is there an SPC-managed domain we should use, or do we register a fresh one?~~ *Decided 2026-06-11: registered `sdmxsurfer.net` as the interim production domain. If §7.3 lands on an SPC URL, we re-point and keep a redirect.*
 3. What is the acceptable monthly running cost during beta, and during launch?
 
 ### 4.2 Secrets and security posture
@@ -303,7 +319,7 @@ Proposed model:
 - A "report this dashboard" link goes to a moderation address.
 - Strikes against a user (multiple unpublishes) trigger account review.
 
-This matches what already exists in the admin surface, modulo the reporting flow.
+This matches what already exists in the admin surface; only the reporting flow is new work.
 
 #### Open questions
 
@@ -348,7 +364,7 @@ Consolidated from the open questions above. These are listed so we can see the f
 
 **Blocking beta (need answers by early Q3 2026):**
 
-- Production domain and Resend sender domain (§4.1, §7.3).
+- ~~Production domain and Resend sender domain (§4.1, §7.3).~~ *Resolved 2026-06-11 with `sdmxsurfer.net` as the interim domain; §7.3 placement remains a launch question.*
 - Acceptable monthly running cost cap (§4.1, §7.2).
 - Open-tier cap numbers (§6.1).
 - Named owner and on-call (§5, §7.1).
@@ -379,7 +395,7 @@ Stated plainly:
 
 If management agrees with the shape of this document, the immediate work is:
 
-1. Schedule a governance meeting to resolve §8.1 (beta blockers).
+1. Schedule a governance meeting to resolve the beta blockers in §8.
 2. Begin §4.3 (OAuth providers) and §4.4 (model drift monitoring) in parallel; both are independent of governance.
 3. Draft the runbook (§5) so that whoever is named on-call has something to work from.
 4. Prepare the open-tier cap migration so it can ship on day one of beta.
