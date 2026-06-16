@@ -1,20 +1,20 @@
 /**
- * NextAuth v4 configuration with Drizzle adapter and Resend magic links.
+ * Auth.js (NextAuth v5) configuration with the Drizzle adapter and Resend
+ * magic links. Runs in the Node runtime only (it imports the DB client and,
+ * via lib/password.ts, the native @node-rs/argon2 binding). The edge-safe
+ * subset used by the middleware lives in lib/auth.config.ts.
  *
- * NOTE: This project uses next-auth v4 (not Auth.js v5).
- * - No built-in Resend provider in v4; we use EmailProvider with a custom
- *   sendVerificationRequest that calls the Resend SDK directly.
- * - NextAuth() in v4 returns a handler function, not { handlers, auth, signIn, signOut }.
- *   We expose a `handlers` object shaped { GET, POST } for App Router compatibility,
- *   plus re-export authOptions for getServerSession() calls elsewhere.
+ * Magic links use a custom `email`-type provider whose sendVerificationRequest
+ * calls the Resend SDK directly. We deliberately do NOT use
+ * `next-auth/providers/email` / `next-auth/providers/nodemailer`, which eagerly
+ * import nodemailer; avoiding them keeps nodemailer out of the dependency tree.
  */
 
-import NextAuth, { type NextAuthOptions, type DefaultSession } from "next-auth";
-import { getServerSession } from "next-auth/next";
-import EmailProvider from "next-auth/providers/email";
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
+import { authConfig } from "./auth.config";
 import {
   db,
   authUsers,
@@ -32,44 +32,18 @@ import {
 import { isCredentialAttemptThrottled } from "./auth-throttle";
 
 // ---------------------------------------------------------------------------
-// Module augmentation: extend Session / JWT types with role + userId
-// ---------------------------------------------------------------------------
-declare module "next-auth" {
-  interface Session {
-    user: {
-      userId: string;
-      role: string;
-    } & DefaultSession["user"];
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    userId?: string;
-    role?: string;
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-type MaybeHeaders = Record<string, string | string[] | undefined> | undefined;
-
-function extractIp(
-  req: { headers?: MaybeHeaders } | undefined,
-): string | null {
-  const headers = req?.headers;
-  if (!headers) return null;
-  const raw =
-    headers["x-forwarded-for"] ??
-    headers["x-real-ip"] ??
-    headers["X-Forwarded-For"];
+// In v5 the credentials `authorize` receives a Web `Request`, whose headers are
+// a `Headers` object (not a plain map as in v4).
+function extractIp(request: Request | undefined): string | null {
+  const headers = request?.headers;
+  if (!headers || typeof headers.get !== "function") return null;
+  const raw = headers.get("x-forwarded-for") ?? headers.get("x-real-ip");
   if (!raw) return null;
-  const str = Array.isArray(raw) ? raw[0] : raw;
-  if (!str) return null;
   // x-forwarded-for may contain a comma-separated chain; take the first entry
-  const first = str.split(",")[0]?.trim();
+  const first = raw.split(",")[0]?.trim();
   return first || null;
 }
 
@@ -104,7 +78,6 @@ function buildMagicLinkBody(verifyUrl: string): { html: string; text: string } {
 async function sendMagicLink(params: {
   identifier: string;
   url: string;
-  provider: { from: string };
 }): Promise<void> {
   const { identifier, url } = params;
 
@@ -123,13 +96,14 @@ async function sendMagicLink(params: {
   // In production: send via Resend
   // Store the callback URL server-side and send only a reference ID in the email.
   // This defeats Outlook SafeLinks which extracts and pre-fetches URLs from emails,
-  // consuming the single-use NextAuth token before the user clicks.
+  // consuming the single-use Auth.js token before the user clicks.
   const { Resend } = await import("resend");
   const crypto = await import("node:crypto");
   const resend = new Resend(process.env.RESEND_API_KEY);
   const from = process.env.EMAIL_FROM || "noreply@example.com";
   const host = new URL(url).host;
-  const baseUrl = process.env.NEXTAUTH_URL || "https://" + host;
+  const baseUrl =
+    process.env.AUTH_URL || process.env.NEXTAUTH_URL || "https://" + host;
 
   // Store the callback URL in the database with a random reference ID
   const refId = crypto.randomBytes(16).toString("hex");
@@ -174,9 +148,28 @@ async function sendMagicLink(params: {
 }
 
 // ---------------------------------------------------------------------------
-// Auth options
+// Custom email (magic link) provider.
+//
+// Shaped like @auth/core's HTTP email providers (resend, sendgrid, …): a plain
+// `type: "email"` object with our own sendVerificationRequest. Importing
+// next-auth/providers/email would pull in nodemailer, which we are removing.
 // ---------------------------------------------------------------------------
-export const authOptions: NextAuthOptions = {
+const emailProvider = {
+  id: "email",
+  type: "email" as const,
+  name: "Email",
+  from: process.env.EMAIL_FROM ?? "noreply@example.com",
+  maxAge: 15 * 60, // token validity: 15 minutes
+  sendVerificationRequest: sendMagicLink,
+  options: {},
+};
+
+// ---------------------------------------------------------------------------
+// NextAuth v5 — handlers + auth() + signIn/signOut, all from one call
+// ---------------------------------------------------------------------------
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
+
   // Drizzle adapter — map to our custom table names
   adapter: DrizzleAdapter(db, {
     usersTable: authUsers,
@@ -184,23 +177,8 @@ export const authOptions: NextAuthOptions = {
     verificationTokensTable: authVerificationTokens,
   }),
 
-  // JWT sessions (no database sessions table required)
-  session: {
-    strategy: "jwt",
-  },
-
-  // Custom pages
-  pages: {
-    signIn: "/login",
-    verifyRequest: "/login?verify=1",
-  },
-
   providers: [
-    EmailProvider({
-      from: process.env.EMAIL_FROM ?? "noreply@example.com",
-      maxAge: 15 * 60, // 15 minutes
-      sendVerificationRequest: sendMagicLink,
-    }),
+    emailProvider,
 
     // Admin-provisioned password sign-in. Users do not self-register here;
     // passwords are set by an admin via the admin panel or CLI, and the user
@@ -213,7 +191,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, req) {
+      async authorize(credentials, request) {
         // Generic failure — never signals which part mismatched, to avoid
         // account enumeration and password-oracle attacks.
         const fail = async (
@@ -226,7 +204,7 @@ export const authOptions: NextAuthOptions = {
               user_id: userId,
               email: email ?? "",
               event_type: "login_failure",
-              ip: extractIp(req),
+              ip: extractIp(request),
               metadata: { reason },
             });
           } catch {
@@ -235,8 +213,14 @@ export const authOptions: NextAuthOptions = {
           return null;
         };
 
-        const email = credentials?.email?.toLowerCase().trim();
-        const password = credentials?.password;
+        const email =
+          typeof credentials?.email === "string"
+            ? credentials.email.toLowerCase().trim()
+            : "";
+        const password =
+          typeof credentials?.password === "string"
+            ? credentials.password
+            : "";
         if (!email || !password) return fail("missing_fields", null, null);
 
         if (await isCredentialAttemptThrottled(email)) {
@@ -273,7 +257,7 @@ export const authOptions: NextAuthOptions = {
                 user_id: user.id,
                 email,
                 event_type: "account_locked",
-                ip: extractIp(req),
+                ip: extractIp(request),
               });
             } catch {
               // ignore audit failures
@@ -288,7 +272,7 @@ export const authOptions: NextAuthOptions = {
             user_id: user.id,
             email,
             event_type: "login_success",
-            ip: extractIp(req),
+            ip: extractIp(request),
           });
         } catch {
           // ignore audit failures
@@ -304,6 +288,8 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
+    ...authConfig.callbacks,
+
     // Block sign-in for emails not in the allowlist
     async signIn({ user }) {
       if (!user.email) return false;
@@ -316,7 +302,8 @@ export const authOptions: NextAuthOptions = {
       return rows.length > 0;
     },
 
-    // On first sign-in (user object is present), fetch role from DB and store in token
+    // On first sign-in (user object is present), fetch role from DB and store
+    // it in the token. Runs in the Node runtime only.
     async jwt({ token, user }) {
       if (user && user.email) {
         const rows = await db
@@ -331,38 +318,5 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-
-    // Copy userId and role from token into session
-    async session({ session, token }) {
-      if (token.userId) {
-        session.user.userId = token.userId;
-      }
-      if (token.role) {
-        session.user.role = token.role;
-      }
-      return session;
-    },
   },
-};
-
-// ---------------------------------------------------------------------------
-// NextAuth handler and convenience exports
-//
-// next-auth v4: NextAuth(options) returns a single handler function that
-// handles both GET and POST.  Wrap it into a { GET, POST } shape so the
-// App Router route file can do:
-//   export const { GET, POST } = handlers;
-// ---------------------------------------------------------------------------
-const handler = NextAuth(authOptions);
-
-export const handlers = {
-  GET: handler,
-  POST: handler,
-} as const;
-
-// Re-export a typed getServerSession helper bound to authOptions
-export const auth = () => getServerSession(authOptions);
-
-// Stub exports for sign-in / sign-out (callers can use next-auth/react or
-// redirect to /api/auth/signin / /api/auth/signout directly in v4).
-export { signIn, signOut } from "next-auth/react";
+});
