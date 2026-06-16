@@ -1,8 +1,10 @@
 # Security Audit — sdmx/dashboarder
 
-**Date:** 2026-06-08
-**Stack:** Next.js 16 + React 19 + Drizzle + next-auth 4, deployed to Vercel
+**Date:** 2026-06-08 (last full audit); updated 2026-06-16
+**Stack:** Next.js 16 + React 19 + Drizzle + Auth.js v5, deployed to Vercel
 **Auditor:** automated (`npm audit`, `npm outdated`) plus manual exposure review
+
+> **Update 2026-06-16 — Auth.js v5 migration landed.** Migrated `next-auth 4 → 5` and removed `nodemailer` entirely (`npm ls nodemailer` → empty). This resolves §3.1 (the nodemailer chain and its low-severity `@auth/core` / `@auth/drizzle-adapter` echoes) and §3.2 (`next-auth → uuid`). The magic-link flow now uses a custom Resend `email` provider that never imports nodemailer. Remaining items are dev-tooling (`esbuild` via drizzle-kit/tsx — surfaced as high after this date by new advisories, no production runtime path) and build-time (`postcss` via next, `uuid` via exceljs). Re-run `npm audit` for the current count.
 
 ## Headline
 
@@ -37,7 +39,7 @@ npm test        # 127 tests pass across 11 files
 
 All four remaining issue groups are either dev-only, build-time-only, or guarded by application-level controls. None have a production runtime path that is exploitable in our deployment shape.
 
-### 3.1 `nodemailer ≤ 8.0.4` — moderate, no upstream fix
+### 3.1 `nodemailer ≤ 8.0.4` — moderate ✅ RESOLVED 2026-06-16 (Auth.js v5 migration removed nodemailer)
 
 - **Advisories:** GHSA-vvjj-xcjg-gr5g (CRLF in transport `name`), GHSA-c7w3-x93f-qmm8 (unsanitized `envelope.size`)
 - **Chain:** direct `nodemailer ^7.0.13`, plus `next-auth 4` → `@auth/core` → `nodemailer`, plus `@auth/drizzle-adapter` → `@auth/core` → `nodemailer`
@@ -45,7 +47,7 @@ All four remaining issue groups are either dev-only, build-time-only, or guarded
 - **Verified by:** grep across `lib/` and `app/` for `createTransport`, `envelope`, and `transport.name` confirms no user input pathways.
 - **Resolution path:** the `next-auth 4 → 5 (Auth.js)` migration removes the legacy `nodemailer` flows entirely. Tracked as a dedicated piece of work for beta.
 
-### 3.2 `uuid < 11.1.1` via `next-auth` — moderate
+### 3.2 `uuid < 11.1.1` via `next-auth` — moderate ✅ RESOLVED 2026-06-16 (the `next-auth → uuid` chain is gone in v5; a separate `exceljs → uuid` chain remains, dev/import-script only)
 
 - **Advisory:** GHSA-w5hq-g745-h8pq (missing buffer bounds check in `v3`/`v5`/`v6` when an explicit `buf` is passed)
 - **Chain:** `next-auth 4` → `uuid`

@@ -12,8 +12,9 @@ Updated 2026-06-12.
 - Resend sender moved to `surfer@sdmxsurfer.net` on the verified production domain. (2026-06-11)
 - Standing development environment: `sdmx-surfer.vercel.app` serves the active development branch against an isolated database branch, with a banner pointing visitors to the stable domain. Closes the "verify environment variable hygiene" item in §4.1 as a side effect. (2026-06-11)
 - Library-debt spec drafted (`docs/sdmx-dashboard-components-improvements.md`): the rendering and parser fixes SDMX Surfer carries as runtime patches, written up for upstreaming to `sdmx-dashboard-components` and `sdmx-json-parser`. A working parser fix with tests is ready on a local branch. Retires the build-fragility risk the binary patches carry. (2026-06-12)
+- `next-auth 4 → 5` (Auth.js v5) migration landed and `nodemailer` removed entirely, closing the largest residual cluster of moderate advisories (`SECURITY_AUDIT.md` §3.1/§3.2). No environment variables renamed (`AUTH_SECRET ?? NEXTAUTH_SECRET` fallback); one-time forced re-login on deploy. (2026-06-16)
 
-**Next in the decision-independent queue (§10):** open-tier cap migration shipped dark, model-drift regression suite, operations floor (error tracking, uptime probe, runbook), OAuth wiring behind flags, secrets inventory and rotation procedure, `next-auth 4 → 5`, accessibility pass.
+**Next in the decision-independent queue (§10):** open-tier cap migration shipped dark, model-drift regression suite, operations floor (error tracking, uptime probe, runbook), OAuth wiring behind flags, secrets inventory and rotation procedure, accessibility pass.
 
 **Waiting on management:** the §8 blockers, unchanged.
 
