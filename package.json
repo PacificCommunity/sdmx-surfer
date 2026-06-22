@@ -1,6 +1,9 @@
 {
   "name": "sdmx-dashboarder",
   "version": "0.1.0",
+  "description": "SDMX Surfer: explore Pacific SDMX statistics through conversation and build dashboards.",
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "author": "Giulio Valentino Dalla Riva (SDD, The Pacific Community)",
   "private": true,
   "type": "module",
   "scripts": {

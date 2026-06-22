@@ -505,4 +505,18 @@ See [`docs/current-architecture.md`](docs/current-architecture.md) for the imple
 
 ## License
 
+Copyright 2026 The Pacific Community (SPC). This project is licensed for
+**noncommercial use**, with two licenses covering different parts:
+
+- **Source code** (the application and its scripts): PolyForm Noncommercial
+  License 1.0.0. See [`LICENSE`](LICENSE).
+- **Documentation, specifications, and design assets** (`docs/`, the top-level
+  architecture/spec documents, `stitch_assets/`): Creative Commons
+  Attribution-NonCommercial 4.0 International (CC BY-NC 4.0). See
+  [`LICENSE-DOCS`](LICENSE-DOCS).
+
+Both require attribution to The Pacific Community (SPC) and prohibit commercial
+use. Lead developer: Giulio Valentino Dalla Riva (SDD, SPC); copyright is held
+by SPC. See [`AUTHORS`](AUTHORS) for credits.
+
 See `dashboard-architecture.md` for project context and phased delivery plan.
