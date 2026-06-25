@@ -4,7 +4,29 @@ Giulio Valentino Dalla Riva · SDD - SPC · 10 June 2026
 
 ## Status
 
-Updated 2026-06-12.
+Updated 2026-06-25.
+
+**The headline gap: production runs old code.** Everything below that is "done"
+landed on the `country-snapshots` branch, which deploys to the development
+environment (`sdmx-surfer.vercel.app`), not to production. The production domain
+`sdmxsurfer.net` still serves `main`, which is ~62 commits behind. The single
+largest "move to production" step is therefore an integration one: merge the
+accumulated work to `main`, set the production environment variables (the
+Country Snapshots trio and the Auth.js secret), decide whether the Country
+Snapshots module ships in production (`INCLUDE_COUNTRY_SNAPSHOTS`), and deploy.
+
+**Done since 2026-06-12:**
+
+- Improved `sdmx-json-parser` (0.3.2) and `sdmx-dashboard-components` (0.4.7)
+  built, vendored, and deployed to the dev environment; fixes the cross-provider
+  rendering (BIS, ECB dialects) the runtime patches used to paper over. Retires
+  the binary-patch build fragility. (2026-06-25)
+- Default platform model upgraded Sonnet 4.6 to Opus 4.8. (2026-06-19)
+- Licensing approved and added: PolyForm Noncommercial 1.0.0 for code, CC BY-NC
+  4.0 for docs, copyright The Pacific Community (SPC). Closes the licensing
+  governance item. (2026-06-25)
+
+**Done since the first draft:**
 
 **Done since the first draft:**
 
@@ -14,9 +36,9 @@ Updated 2026-06-12.
 - Library-debt spec drafted (`docs/sdmx-dashboard-components-improvements.md`): the rendering and parser fixes SDMX Surfer carries as runtime patches, written up for upstreaming to `sdmx-dashboard-components` and `sdmx-json-parser`. A working parser fix with tests is ready on a local branch. Retires the build-fragility risk the binary patches carry. (2026-06-12)
 - `next-auth 4 → 5` (Auth.js v5) migration landed and `nodemailer` removed entirely, closing the largest residual cluster of moderate advisories (`SECURITY_AUDIT.md` §3.1/§3.2). No environment variables renamed (`AUTH_SECRET ?? NEXTAUTH_SECRET` fallback); one-time forced re-login on deploy. (2026-06-16)
 
-**Next in the decision-independent queue (§10):** open-tier cap migration shipped dark, model-drift regression suite, operations floor (error tracking, uptime probe, runbook), OAuth wiring behind flags, secrets inventory and rotation procedure, accessibility pass.
+**Next in the decision-independent queue (§10):** merge to `main` + production deploy + prod env config (the integration step above), open-tier cap migration shipped dark, operations floor (error tracking, uptime probe, runbook), OAuth wiring behind flags, model-drift regression suite, secrets inventory and rotation procedure, accessibility pass.
 
-**Waiting on management:** the §8 blockers, unchanged.
+**Waiting on management:** the §8 blockers, minus licensing (now approved). The three remaining beta blockers are the monthly cost cap, the open-tier cap numbers, and the named owner / on-call.
 
 ## Executive summary
 
