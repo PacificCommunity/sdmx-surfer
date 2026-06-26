@@ -413,18 +413,18 @@ Consolidated from the open questions above. These are listed so we can see the f
 - ~~Production domain and Resend sender domain (§4.1, §7.3).~~ *Resolved 2026-06-11 (`sdmxsurfer.net` interim); final placement `surfer.pacificdata.org` decided 2026-06-26. Resend removed with the OAuth decision.*
 - ~~Acceptable running cost cap (§4.1, §7.2).~~ *Decided 2026-06-26: hard cap USD 1,000 cumulative, tunable.*
 - ~~Open-tier cap numbers (§6.1).~~ *Decided 2026-06-26: 20 turns/day, 5 dashboards, tunable; refine from usage.*
-- **Named owner and on-call (§5, §7.1).** Still open. This is now the only remaining beta blocker.
+- ~~Named owner and on-call (§5, §7.1).~~ *Decided 2026-06-26: Giulio Valentino Dalla Riva (SDD) is owner and on-call for the capped beta.* **All beta blockers are now resolved; the capped beta is unblocked on governance.**
 
 **Blocking launch (need answers by late Q3 2026):**
 
-- ~~Authentication providers (§4.3).~~ *Decided 2026-06-26: OAuth-only, Google + Microsoft + GitHub on Auth.js.* Any email-domain restriction (§4.3 Q3) is still open but not blocking.
-- Visual alignment and accessibility sign-off (§4.5).
-- Public dashboard moderation process (§7.4).
-- KPIs and reporting cadence (§7.6).
-- Hosting jurisdiction and compliance requirements (§4.1). The `surfer.pacificdata.org` choice puts the URL under SPC, but the underlying infrastructure (Vercel, Railway, Neon) is non-Pacific; whether that satisfies SPC data-residency requirements is the remaining compliance question.
+- ~~Authentication providers (§4.3).~~ *Decided 2026-06-26: OAuth-only, Google + Microsoft + GitHub on Auth.js; accept any authenticated identity (no email-domain restriction).*
+- Visual alignment and accessibility sign-off (§4.5). Still a real task (the WCAG pass is work, not just a decision); not required for the capped beta. No French language support to start (revisit at full launch).
+- ~~Public dashboard moderation process (§7.4).~~ *Decided 2026-06-26 (interim): SDD owns moderation; process kept deliberately vague for the capped beta, formalised before full launch.*
+- ~~KPIs and reporting cadence (§7.6).~~ *Decided 2026-06-26 (interim): instrument and count everything; pick the headline KPIs after beta data exists.*
+- ~~Hosting jurisdiction and compliance (§4.1).~~ *Decided 2026-06-26: acceptable for the first capped launch on Vercel/Railway/Neon; revisit (possibly self-hosting on SPC-controlled infrastructure) before stable production.*
 - ~~Where the service sits and under whose URL (§7.3).~~ *Decided 2026-06-26: `surfer.pacificdata.org`.*
 
-Everything else can be resolved during or after launch.
+VIP tier and per-partner auto-VIP are deferred (build later). Everything else can be resolved during or after launch.
 
 ## 9. Risks
 
