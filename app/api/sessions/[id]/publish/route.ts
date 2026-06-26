@@ -4,6 +4,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, dashboardSessions } from "@/lib/db";
 import { checkCsrf } from "@/lib/csrf";
+import { checkDashboardQuota } from "@/lib/usage-caps";
 
 export const maxDuration = 25;
 
@@ -47,6 +48,21 @@ export async function POST(
   const publicTitle = parsed.data.publicTitle.trim();
   const publicDescription = parsed.data.publicDescription.trim();
   const publishedAt = new Date();
+
+  // Open-tier published-dashboard quota (admins exempt). Excludes this session
+  // so re-publishing an already-public dashboard is never blocked.
+  if (session.user.role !== "admin") {
+    const quota = await checkDashboardQuota(userId, id);
+    if (!quota.allowed) {
+      return NextResponse.json(
+        {
+          error: "dashboard_quota",
+          message: `You have reached the limit of ${quota.cap} published dashboards. Unpublish one to publish another.`,
+        },
+        { status: 429 },
+      );
+    }
+  }
 
   try {
     const rows = await db

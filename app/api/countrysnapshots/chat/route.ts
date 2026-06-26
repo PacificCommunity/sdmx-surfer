@@ -15,6 +15,7 @@ import {
   modeFor,
 } from "@/lib/country-snapshots/chat-assembly";
 import { checkTurnCap } from "@/lib/country-snapshots/turn-cap";
+import { checkGlobalBudget } from "@/lib/usage-caps";
 
 // Per-page snapshot chats are read-only and tightly capped. The index
 // (entry-page) mode is a full builder agent and needs more room.
@@ -27,6 +28,19 @@ export async function POST(req: Request) {
   const session = await requireSnapshotSession();
   if (!session) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Global AI budget circuit breaker applies everywhere, snapshots included.
+  const budget = await checkGlobalBudget();
+  if (!budget.allowed) {
+    return Response.json(
+      {
+        error: "global_budget",
+        message:
+          "SDMX Surfer has reached its AI usage budget for now, so new requests are paused while it is topped up. The snapshot pages themselves are still available.",
+      },
+      { status: 503 },
+    );
   }
 
   const cap = await checkTurnCap(session.userId);

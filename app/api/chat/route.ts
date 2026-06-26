@@ -4,6 +4,7 @@ import { mcpTransportConfig } from "@/lib/mcp-client";
 import { getModelForUser } from "@/lib/model-router";
 import { auth } from "@/lib/auth";
 import { checkCsrf } from "@/lib/csrf";
+import { checkChatAllowed } from "@/lib/usage-caps";
 import { z } from "zod";
 import {
   getConfigTitle,
@@ -90,6 +91,17 @@ export async function POST(req: Request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
   const userId = session.user.userId;
+
+  // Usage caps: global AI budget (everyone) + per-user daily turns (open tier;
+  // admins exempt). Refuse before any model spend if a limit is reached.
+  const cap = await checkChatAllowed(userId, session.user.role);
+  if (!cap.allowed) {
+    return Response.json(
+      { error: cap.reason, message: cap.message },
+      { status: cap.status },
+    );
+  }
+
   const sessionId = req.headers.get("x-session-id") || "anonymous";
   const logger = createRequestLogger(userId, sessionId);
   let mcpClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
