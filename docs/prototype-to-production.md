@@ -4,19 +4,30 @@ Giulio Valentino Dalla Riva · SDD - SPC · 10 June 2026
 
 ## Status
 
-Updated 2026-06-25.
+Updated 2026-06-26.
 
-**The headline gap: production runs old code.** Everything below that is "done"
-landed on the `country-snapshots` branch, which deploys to the development
-environment (`sdmx-surfer.vercel.app`), not to production. The production domain
-`sdmxsurfer.net` still serves `main`, which is ~62 commits behind. The single
-largest "move to production" step is therefore an integration one: merge the
-accumulated work to `main`, set the production environment variables (the
-Country Snapshots trio and the Auth.js secret), decide whether the Country
-Snapshots module ships in production (`INCLUDE_COUNTRY_SNAPSHOTS`), and deploy.
+**The headline gap: production still runs mostly-old code.** On 2026-06-26 the
+licence and the Opus 4.8 default were cherry-picked to `main` and deployed to
+production, so those two are live. Everything else "done" still sits on the
+`country-snapshots` branch, which deploys only to the development environment
+(`sdmx-surfer.vercel.app`): the Country Snapshots feature, the Auth.js v5
+migration, and the BIS/library fixes are not yet on `main`. The largest
+remaining "move to production" step is that integration: merge the accumulated
+work to `main`, set the production environment variables (the Country Snapshots
+trio and the Auth.js secret), decide whether the Country Snapshots module ships
+in production (`INCLUDE_COUNTRY_SNAPSHOTS`), and deploy.
+
+**Governance decisions made 2026-06-26 (see §4.3, §6.1, §7.2, §7.3):**
+
+- Final URL placement: `surfer.pacificdata.org` (Pacific Data Hub subdomain).
+- AI cost cap: hard USD 1,000 cumulative, tunable, with graceful degradation.
+- Open-tier per-user caps: 20 agent turns/day, 5 published dashboards, tunable.
+- Authentication: OAuth-only on Auth.js with Google + Microsoft + GitHub; the
+  email allowlist, Resend, and the planned Okta/Keycloak SSO are dropped.
 
 **Done since 2026-06-12:**
 
+- Licence and Opus 4.8 default pushed to `main` and deployed to production. (2026-06-26)
 - Improved `sdmx-json-parser` (0.3.2) and `sdmx-dashboard-components` (0.4.7)
   built, vendored, and deployed to the dev environment; fixes the cross-provider
   rendering (BIS, ECB dialects) the runtime patches used to paper over. Retires
@@ -28,17 +39,15 @@ Snapshots module ships in production (`INCLUDE_COUNTRY_SNAPSHOTS`), and deploy.
 
 **Done since the first draft:**
 
-**Done since the first draft:**
-
 - Production domain live: `sdmxsurfer.net` (apex canonical, TLS, `www` redirects). Registered as an interim choice; §7.3 can still place the service under an SPC URL, with a redirect preserving existing links. (2026-06-11)
 - Resend sender moved to `surfer@sdmxsurfer.net` on the verified production domain. (2026-06-11)
 - Standing development environment: `sdmx-surfer.vercel.app` serves the active development branch against an isolated database branch, with a banner pointing visitors to the stable domain. Closes the "verify environment variable hygiene" item in §4.1 as a side effect. (2026-06-11)
 - Library-debt spec drafted (`docs/sdmx-dashboard-components-improvements.md`): the rendering and parser fixes SDMX Surfer carries as runtime patches, written up for upstreaming to `sdmx-dashboard-components` and `sdmx-json-parser`. A working parser fix with tests is ready on a local branch. Retires the build-fragility risk the binary patches carry. (2026-06-12)
 - `next-auth 4 → 5` (Auth.js v5) migration landed and `nodemailer` removed entirely, closing the largest residual cluster of moderate advisories (`SECURITY_AUDIT.md` §3.1/§3.2). No environment variables renamed (`AUTH_SECRET ?? NEXTAUTH_SECRET` fallback); one-time forced re-login on deploy. (2026-06-16)
 
-**Next in the decision-independent queue (§10):** merge to `main` + production deploy + prod env config (the integration step above), open-tier cap migration shipped dark, operations floor (error tracking, uptime probe, runbook), OAuth wiring behind flags, model-drift regression suite, secrets inventory and rotation procedure, accessibility pass.
+**Next in the decision-independent queue (§10):** merge to `main` + production deploy + prod env config (the integration step above), OAuth migration (Google + Microsoft + GitHub; remove allowlist/Resend), usage-cap enforcement (per-user daily/dashboard limits + global USD 1,000 budget, with tunable limits), point the product at `surfer.pacificdata.org`, operations floor (error tracking, uptime probe, runbook), model-drift regression suite, secrets inventory and rotation procedure, accessibility pass.
 
-**Waiting on management:** the §8 blockers, minus licensing (now approved). The three remaining beta blockers are the monthly cost cap, the open-tier cap numbers, and the named owner / on-call.
+**Waiting on management:** the only remaining **beta** blocker is the named owner / on-call (§7.1, §5). Launch blockers still open: accessibility sign-off, moderation process, KPIs, and the hosting-jurisdiction/compliance question (the URL is now under SPC, but Vercel/Railway/Neon are non-Pacific).
 
 ## Executive summary
 
@@ -172,12 +181,13 @@ The database schema already includes the OAuth accounts table (`auth_accounts`).
 
 Effort: two to four days, depending on how much of the linking logic we want from day one.
 
+**Decided 2026-06-26: OAuth-only sign-in on the existing Auth.js (NextAuth v5) stack, with Google, Microsoft, and GitHub.** Rationale: Google plus Microsoft covers nearly all institutional and personal users (Microsoft, not GitHub, is the real coverage gap for a government audience; GitHub is added for the developer-leaning subset). Keeping the providers on our own Auth.js stack leaves identities in our Neon database rather than a third-party identity SaaS, which fits the hosting-jurisdiction posture (§4.1, §7.3) and avoids discarding the recently completed v4 to v5 migration. Consequences: the email allowlist and the Resend magic-link/password flows are removed (sign-up is open to anyone who can authenticate with a supported provider; password reset is owned by the OAuth provider, so no transactional email service is needed). The Okta/Keycloak SSO is dropped from scope and can be re-added later if an institutional partner requires it. Country Snapshots stays behind its own shared password, independent of this change.
+
 #### Open questions
 
-1. Is Okta or Keycloak the canonical SPC identity provider for this product? If both, which takes precedence in the UI?
-2. Who at SPC owns the Okta/Keycloak app registration and approves the callback URLs and scopes?
-3. For the open public tier (§6), do we accept Google and GitHub, or only one?
-4. Do we restrict any email domains (block free email, allow only `.gov` and named partner domains, etc.) in the open tier?
+1. ~~Okta vs Keycloak? Which providers for the open tier?~~ *Decided 2026-06-26: OAuth-only on Auth.js with Google + Microsoft + GitHub; no Okta/Keycloak; allowlist and Resend removed.*
+2. Who at SPC owns the OAuth app registrations (Google Cloud, Azure/Entra, GitHub) and approves the callback URLs and scopes?
+3. Do we restrict any email domains (block free email, allow only `.gov` and named partner domains, etc.), or accept any authenticated identity in the open tier?
 
 ### 4.4 Model drift monitoring
 
@@ -253,17 +263,28 @@ Proposed model:
 | VIP | Users explicitly designated by SPC | Generous (effectively uncapped within reason) | Manual or invitation-based assignment |
 | Internal | Admins | No cap, plus admin tools | Role on `auth_users.role` |
 
-The split is enforced via three mechanisms:
+The split is enforced via four mechanisms:
 
 1. A `tier` column on `auth_users` (small migration).
 2. Per-request budget checks in the chat route that read the tier and the user's current period usage.
 3. Friendly UI messages when caps are hit, explaining how to request VIP access.
+4. **Tunable limits.** The cap figures (per-user daily turns, dashboard count, and the §7.2 global budget) are not hard-coded. For beta they are environment variables (`OPEN_TIER_DAILY_TURNS`, `OPEN_TIER_MAX_DASHBOARDS`, `AI_BUDGET_CAP_USD`), so they can be raised or lowered per deploy. The better long-term form is an admin-editable config row surfaced in the existing admin panel, so limits can be tuned at runtime without a redeploy; that is the recommended follow-up once the env-var version is live.
 
 This avoids two failure modes: anonymous abuse drains the budget overnight, and good users get blocked because the system treats everyone the same.
 
+**Adopted starting numbers (2026-06-26, tunable per the above):**
+
+| Limit | Open tier | Notes |
+|---|---|---|
+| Agent turns per day | 20 | Resets daily. The primary fairness and abuse lever. |
+| Published dashboards | 5 total | Cumulative, not per period. |
+| Global AI budget | USD 1,000 cumulative | The §7.2 hard cap; degrades the service for everyone when reached. |
+
+These are a conservative starting point, not a tuned answer. The right values come from the real cost-per-conversation observed in `usage_logs.cost_usd` once Opus 4.8 beta traffic exists; expect to revisit them in the first week of beta. VIP and Internal tiers are effectively uncapped within reason.
+
 #### Open questions
 
-1. What are the actual numbers for the open-tier cap? Suggested starting point: 20 agent turns per day, 5 published dashboards total, with a periodic reset.
+1. ~~What are the actual numbers for the open-tier cap?~~ *Decided 2026-06-26: start at 20 agent turns/day and 5 published dashboards, under a global USD 1,000 cap; all tunable (env vars now, admin config later); refine from real usage.*
 2. What is the formal process for someone to request VIP status? Email to whom? Approved by whom?
 3. Do we maintain a public list of partner organisations whose members are automatically VIP, or is every assignment manual?
 4. Do we allow account deletion on user request, and is there a retention policy on usage logs?
@@ -307,10 +328,12 @@ The product can sit under PDH (Pacific Data Hub) or under SDD (Statistics for De
 
 For reference, the variable costs to plan for are LLM API spend (the dominant line) plus hosting plus email delivery. A rough envelope for beta is in the low hundreds of USD per month; launch with active marketing could be an order of magnitude higher.
 
+**Decided 2026-06-26: a hard cap of USD 1,000 on cumulative AI usage.** When tracked spend (the authoritative `usage_logs.cost_usd` from the AI Gateway) reaches the cap, the agent loop stops accepting new requests and the service degrades gracefully: existing dashboards stay viewable, but new chat turns are refused with a message until the cap is raised or reset. This is the global circuit breaker; the per-user caps in §6.1 keep any single user from consuming a disproportionate share before the global cap is reached. The cap figure must be tunable without a redeploy (see §6.1). Note: with the default model now Opus 4.8 (input/output USD 5/25 per MTok), the per-conversation cost is higher than on Sonnet 4.6; the cap and per-user numbers should be re-checked against real `usage_logs` cost once beta traffic starts.
+
 #### Open questions
 
-1. Which budget line is the cost charged to?
-2. What is the monthly cap, and what happens when we hit it? (Soft cap with email, hard cap with service degradation, request supplementary budget?)
+1. Which budget line is the USD 1,000 charged to (SDD, PDH, or shared per §7.1)?
+2. ~~What is the cap, and what happens when we hit it?~~ *Decided 2026-06-26: hard cap of USD 1,000 cumulative; service degrades (existing dashboards viewable, new agent turns refused) on reaching it.*
 3. Is there an existing SPC mechanism for partner organisations to contribute to running costs?
 
 ### 7.3 Where it sits
@@ -324,11 +347,11 @@ Options:
 
 The choice affects branding, perceived authority, link permanence, and the institutional standards we have to meet.
 
+**Decided 2026-06-26: a standalone subdomain of the Pacific Data Hub, `surfer.pacificdata.org`.** This sits the product under Pacific Data Hub authority (SPC controls `pacificdata.org` DNS) while keeping it a distinct, link-stable product page. The interim `sdmxsurfer.net` redirects to it once the subdomain is live; existing links keep working. Practical steps: add `surfer.pacificdata.org` as a domain on the Vercel project, point a CNAME from PDH DNS, set `NEXTAUTH_URL`/`AUTH_URL` and the OAuth callback URLs to the new host, then redirect `sdmxsurfer.net`.
+
 #### Open questions
 
-1. Which of the above is preferred?
-2. What URL?
-3. Who controls the DNS for that URL?
+1. ~~Which of the above is preferred? What URL? Who controls the DNS?~~ *Decided 2026-06-26: `surfer.pacificdata.org`, DNS via Pacific Data Hub (SPC).*
 
 ### 7.4 Public dashboard moderation
 
@@ -387,19 +410,19 @@ Consolidated from the open questions above. These are listed so we can see the f
 
 **Blocking beta (need answers by early Q3 2026):**
 
-- ~~Production domain and Resend sender domain (§4.1, §7.3).~~ *Resolved 2026-06-11 with `sdmxsurfer.net` as the interim domain; §7.3 placement remains a launch question.*
-- Acceptable monthly running cost cap (§4.1, §7.2).
-- Open-tier cap numbers (§6.1).
-- Named owner and on-call (§5, §7.1).
+- ~~Production domain and Resend sender domain (§4.1, §7.3).~~ *Resolved 2026-06-11 (`sdmxsurfer.net` interim); final placement `surfer.pacificdata.org` decided 2026-06-26. Resend removed with the OAuth decision.*
+- ~~Acceptable running cost cap (§4.1, §7.2).~~ *Decided 2026-06-26: hard cap USD 1,000 cumulative, tunable.*
+- ~~Open-tier cap numbers (§6.1).~~ *Decided 2026-06-26: 20 turns/day, 5 dashboards, tunable; refine from usage.*
+- **Named owner and on-call (§5, §7.1).** Still open. This is now the only remaining beta blocker.
 
 **Blocking launch (need answers by late Q3 2026):**
 
-- Authentication providers and any domain restrictions (§4.3).
+- ~~Authentication providers (§4.3).~~ *Decided 2026-06-26: OAuth-only, Google + Microsoft + GitHub on Auth.js.* Any email-domain restriction (§4.3 Q3) is still open but not blocking.
 - Visual alignment and accessibility sign-off (§4.5).
 - Public dashboard moderation process (§7.4).
 - KPIs and reporting cadence (§7.6).
-- Hosting jurisdiction and compliance requirements (§4.1).
-- Where the service sits and under whose URL (§7.3).
+- Hosting jurisdiction and compliance requirements (§4.1). The `surfer.pacificdata.org` choice puts the URL under SPC, but the underlying infrastructure (Vercel, Railway, Neon) is non-Pacific; whether that satisfies SPC data-residency requirements is the remaining compliance question.
+- ~~Where the service sits and under whose URL (§7.3).~~ *Decided 2026-06-26: `surfer.pacificdata.org`.*
 
 Everything else can be resolved during or after launch.
 
