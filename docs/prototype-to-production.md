@@ -4,18 +4,19 @@ Giulio Valentino Dalla Riva · SDD - SPC · 10 June 2026
 
 ## Status
 
-Updated 2026-06-26.
+Updated 2026-07-23.
 
-**The headline gap: production still runs mostly-old code.** On 2026-06-26 the
-licence and the Opus 4.8 default were cherry-picked to `main` and deployed to
-production, so those two are live. Everything else "done" still sits on the
-`country-snapshots` branch, which deploys only to the development environment
-(`sdmx-surfer.vercel.app`): the Country Snapshots feature, the Auth.js v5
-migration, and the BIS/library fixes are not yet on `main`. The largest
-remaining "move to production" step is that integration: merge the accumulated
-work to `main`, set the production environment variables (the Country Snapshots
-trio and the Auth.js secret), decide whether the Country Snapshots module ships
-in production (`INCLUDE_COUNTRY_SNAPSHOTS`), and deploy.
+**The dev line is now in production.** After a verification pass (typecheck,
+213 tests, production build, live dev-environment checks, and a usage-log
+review showing zero errors across the deployed usage since June), the full
+`country-snapshots` line was merged to `main` and deployed to `sdmxsurfer.net`
+on 2026-07-23. Production now runs: the Country Snapshots module (behind its
+shared password, now set in the production environment), Auth.js v5 (existing
+sessions get a one-time re-login), the usage caps (defaults: 20 turns/day, 5
+dashboards, USD 1,000 global budget), the improved vendored libraries (parser
+0.3.2 / components 0.4.7, patch machinery removed), and Opus 4.8 as the
+default model. `main` and `country-snapshots` are content-identical as of this
+merge; development continues on `country-snapshots`.
 
 **Governance decisions made 2026-06-26 (see §4.3, §6.1, §7.2, §7.3):**
 
