@@ -12,6 +12,9 @@ const PRICING: Record<string, ModelPrice> = {
   // Anthropic
   "claude-haiku-4-5": { input: 1.0, output: 5.0 },
   "claude-sonnet-4-6": { input: 3.0, output: 15.0 },
+  // Standard rate; intro pricing ($2/$10 through 2026-08-31) bills lower via
+  // the gateway — this table is only the fallback when gateway cost is null.
+  "claude-sonnet-5": { input: 3.0, output: 15.0 },
   "claude-opus-4-6": { input: 5.0, output: 25.0 },
   "claude-opus-4-8": { input: 5.0, output: 25.0 },
   // OpenAI

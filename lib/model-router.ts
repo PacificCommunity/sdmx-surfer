@@ -87,7 +87,8 @@ function platformAnthropic(modelId: string): ModelConfig {
 }
 
 const DEFAULT_MODELS: Record<string, string> = {
-  anthropic: "claude-sonnet-4-6",
+  // Same standard price as Sonnet 4.6, newer generation — cost-neutral for BYOK.
+  anthropic: "claude-sonnet-5",
   openai: "gpt-4.1-mini",
   google: "gemini-3-flash-preview",
   mistral: "mistral-large-latest",
@@ -192,8 +193,8 @@ export async function getModelForUser(
     }
   }
 
-  // No BYOK key found — use platform Anthropic path (Opus 4.8, the default)
-  return platformAnthropic("claude-opus-4-8");
+  // No BYOK key found — use platform Anthropic path (Sonnet 5, the default)
+  return platformAnthropic("claude-sonnet-5");
 }
 
 /**
