@@ -1,0 +1,166 @@
+# Import report for country_snapshots_2025.xlsx
+
+### URL fixups (72)
+
+- I.1: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_KEYFACTS,1.0/A.[TAG_GEO].GOV?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_KEYFACTS,/A.[TAG_GEO].GOV?dimensionAtObservation=AllDimensions
+- I.5: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_POP_PROJ,3.0/A.[TAG_GEO].MIDYEARPOPEST._T._T?startPeriod=2015&endPeriod=2025&dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_PROJ,/A.[TAG_GEO].MIDYEARPOPEST._T._T?startPeriod=2015&endPeriod=2025&dimensionAtObservation=AllDimensions
+- I.6: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_POP_URBAN,1.0/A.[TAG_GEO].POPRFCOU.U?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_URBAN,/A.[TAG_GEO].POPRFCOU.U?dimensionAtObservation=AllDimensions
+- I.7: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_POP_AGE,1.0/A.[TAG_GEO].MEDIANAGE._T?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_AGE,/A.[TAG_GEO].MEDIANAGE._T?dimensionAtObservation=AllDimensions
+- I.8: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_POP_PROJ,3.0/A.[TAG_GEO].POPYGR._T._T?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_PROJ,/A.[TAG_GEO].POPYGR._T._T?dimensionAtObservation=AllDimensions
+- I.9: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_HHCOUNTS,1.0/A.[TAG_GEO].HHSZ?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_HHCOUNTS,/A.[TAG_GEO].HHSZ?dimensionAtObservation=AllDimensions
+- I.10: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_POP_DENSITY,1.0/A.[TAG_GEO].POPDENSITY?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_DENSITY,/A.[TAG_GEO].POPDENSITY?dimensionAtObservation=AllDimensions
+- I.11: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_POP_AGE,1.0/A.[TAG_GEO].DEPRATIO1564._T?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_AGE,/A.[TAG_GEO].DEPRATIO1564._T?dimensionAtObservation=AllDimensions
+- I.12: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_AGE,1.0/A..POPYOUTH._T?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_AGE,/A..POPYOUTH._T?dimensionAtObservation=AllDimensions
+- I.13: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_POP_COAST,2.0/A.[TAG_GEO].COASTALPOPRF.1KM?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_COAST,/A.[TAG_GEO].COASTALPOPRF.1KM?dimensionAtObservation=AllDimensions
+- I.14: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_POP_COAST,2.0/A.[TAG_GEO].COASTALPOPRF.5KM?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_COAST,/A.[TAG_GEO].COASTALPOPRF.5KM?dimensionAtObservation=AllDimensions
+- I.15: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_POP_COAST,2.0/A.[TAG_GEO].COASTALPOPRF.10KM?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_COAST,/A.[TAG_GEO].COASTALPOPRF.10KM?dimensionAtObservation=AllDimensions
+- I.16: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_POP_DENSITY,1.0/A.[TAG_GEO].LANDAREA?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_DENSITY,/A.[TAG_GEO].LANDAREA?dimensionAtObservation=AllDimensions
+- I.17: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_WBWDI,1.0/A.[TAG_GEO].AG_LND_FRST_ZS?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].AG_LND_FRST_ZS?dimensionAtObservation=AllDimensions
+- I.18: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_WBWDI,1.0/A.[TAG_GEO].AG_LND_AGRI_ZS?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].AG_LND_AGRI_ZS?dimensionAtObservation=AllDimensions
+- II.1: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_VITAL,1.0/A.[TAG_GEO].LEB.M?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_VITAL,/A.[TAG_GEO].LEB.M?dimensionAtObservation=AllDimensions
+- II.2: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_VITAL,1.0/A.[TAG_GEO].LEB.F?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_VITAL,/A.[TAG_GEO].LEB.F?dimensionAtObservation=AllDimensions
+- II.3: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_VITAL,1.0/A.[TAG_GEO].TFR.?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_VITAL,/A.[TAG_GEO].TFR.?dimensionAtObservation=AllDimensions
+- II.9: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,1.0/A.[TAG_GEO].NMDI0116.._T._T..?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A.[TAG_GEO].NMDI0116.._T._T..?dimensionAtObservation=AllDimensions
+- II.11: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,1.0/A..NMDI0103._T._T._T..?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A..NMDI0103._T._T._T..?dimensionAtObservation=AllDimensions
+- II.12: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,1.0/A..NMDI0145._T._T._T..?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A..NMDI0145._T._T._T..?dimensionAtObservation=AllDimensions
+- II.13: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,1.0/A..NMDI0146._T._T._T..?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A..NMDI0146._T._T._T..?dimensionAtObservation=AllDimensions
+- II.14: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,1.0/A.[TAG_GEO].SH_DTH_NCD._T._T._T..?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A.[TAG_GEO].SH_DTH_NCD._T._T._T..?dimensionAtObservation=AllDimensions
+- II.15: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,1.0/A.[TAG_GEO].NMDI0131._T._T._T..?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A.[TAG_GEO].NMDI0131._T._T._T..?dimensionAtObservation=AllDimensions
+- III.1: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,1.0/A.[TAG_GEO].NMDI0429._T._T._T..?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0429._T._T._T..?dimensionAtObservation=AllDimensions
+- III.2: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,1.0/A.[TAG_GEO].NMDI0020._T._T._T..?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0020._T._T._T..?dimensionAtObservation=AllDimensions
+- III.5: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,1.0/A..NMDI0431._T._T._T..?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A..NMDI0431._T._T._T..?dimensionAtObservation=AllDimensions
+- III.7: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,1.0/A.[TAG_GEO].NMDI0019._T._T._T..?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0019._T._T._T..?dimensionAtObservation=AllDimensions
+- III.8: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,1.0/A..NMDI0019.F._T._T..?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A..NMDI0019.F._T._T..?dimensionAtObservation=AllDimensions
+- III.9: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,1.0/A..NMDI0019.M._T._T..?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A..NMDI0019.M._T._T..?dimensionAtObservation=AllDimensions
+- III.10: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,1.0/A..NMDI0019._T._T.U._T.?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A..NMDI0019._T._T.U._T.?dimensionAtObservation=AllDimensions
+- III.11: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,1.0/A..NMDI0019._T._T.R._T.?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A..NMDI0019._T._T.R._T.?dimensionAtObservation=AllDimensions
+- III.12: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_UIS,1.0/A..LR_AG25T64?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_UIS,/A..LR_AG25T64?dimensionAtObservation=AllDimensions
+- III.13: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_UIS,1.0/A..LR_AG25T64_F?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_UIS,/A..LR_AG25T64_F?dimensionAtObservation=AllDimensions
+- III.14: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_UIS,1.0/A..LR_AG25T64_M?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_UIS,/A..LR_AG25T64_M?dimensionAtObservation=AllDimensions
+- IV.1: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_NATIONAL_ACCOUNTS,1.0/A.USD.[TAG_GEO].GDPCVR?endPeriod=2021&dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NATIONAL_ACCOUNTS,/A.USD.[TAG_GEO].GDPCVR?endPeriod=2021&dimensionAtObservation=AllDimensions
+- IV.2: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_SOCECO,1.0/A.[TAG_GEO].OFB2GDP?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SOCECO,/A.[TAG_GEO].OFB2GDP?dimensionAtObservation=AllDimensions
+- IV.3: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_WBWDI,1.0/A.[TAG_GEO].NV_AGR_TOTL_ZS?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].NV_AGR_TOTL_ZS?dimensionAtObservation=AllDimensions
+- IV.4: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_WBWDI,1.0/A.[TAG_GEO].NV_IND_TOTL_ZS?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].NV_IND_TOTL_ZS?dimensionAtObservation=AllDimensions
+- IV.5: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_WBWDI,1.0/A.[TAG_GEO].NV_SRV_TOTL_ZS?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].NV_SRV_TOTL_ZS?dimensionAtObservation=AllDimensions
+- IV.9: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_WBWDI,1.0/A.[TAG_GEO].SI_POV_GINI?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].SI_POV_GINI?dimensionAtObservation=AllDimensions
+- IV.11: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_NATIONAL_ACCOUNTS,1.0/A.USD.[TAG_GEO].GDPCPC?endPeriod=2021&dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NATIONAL_ACCOUNTS,/A.USD.[TAG_GEO].GDPCPC?endPeriod=2021&dimensionAtObservation=AllDimensions
+- V.1: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_EGOV,1.0/A.[TAG_GEO].EGI?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_EGOV,/A.[TAG_GEO].EGI?dimensionAtObservation=AllDimensions
+- V.2: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_TOURISM_EARNINGS,1.0/A.[TAG_GEO].EARN2GDP.USD?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_TOURISM_EARNINGS,/A.[TAG_GEO].EARN2GDP.USD?dimensionAtObservation=AllDimensions
+- V.3: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_TOURISM_EARNINGS,1.0/A.[TAG_GEO].EARN2VIS.USD?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_TOURISM_EARNINGS,/A.[TAG_GEO].EARN2VIS.USD?dimensionAtObservation=AllDimensions
+- V.4: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_OVERSEAS_VISITORS,2.0/A.[TAG_GEO]._T.NOSVA?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_OVERSEAS_VISITORS,/A.[TAG_GEO]._T.NOSVA?dimensionAtObservation=AllDimensions
+- V.5: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_WBDAI,1.0/A.[TAG_GEO].DAI?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBDAI,/A.[TAG_GEO].DAI?dimensionAtObservation=AllDimensions
+- V.6: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_DIGITAL_DEVELOPMENT,1.0/A.[TAG_GEO].DD024?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_DIGITAL_DEVELOPMENT,/A.[TAG_GEO].DD024?dimensionAtObservation=AllDimensions
+- V.8: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_NMDI_FIS,1.0/A.[TAG_GEO].NMDI0057._T._T._T..?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_FIS,/A.[TAG_GEO].NMDI0057._T._T._T..?dimensionAtObservation=AllDimensions
+- V.9: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_NMDI_FIS,1.0/A.[TAG_GEO].NMDI0059._T._T._T..?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_FIS,/A.[TAG_GEO].NMDI0059._T._T._T..?dimensionAtObservation=AllDimensions
+- VI.4: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_WBWDI,1.0/A.[TAG_GEO].EG_ELC_RNEW_ZS?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].EG_ELC_RNEW_ZS?dimensionAtObservation=AllDimensions
+- VI.5: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_NMDI,1.0/A.[TAG_GEO].NMDI0134._T._T._T..?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI,/A.[TAG_GEO].NMDI0134._T._T._T..?dimensionAtObservation=AllDimensions
+- VI.6: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_NMDI,1.0/A.[TAG_GEO].NMDI0133._T._T._T..?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI,/A.[TAG_GEO].NMDI0133._T._T._T..?dimensionAtObservation=AllDimensions
+- VII.2: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_WBWDI,1.0/A.[TAG_GEO].EN_ATM_CO2E_PC?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].EN_ATM_CO2E_PC?dimensionAtObservation=AllDimensions
+- VII.8: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_POP_URBAN,1.0/A.[TAG_GEO].POPRFCOU.R?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_URBAN,/A.[TAG_GEO].POPRFCOU.R?dimensionAtObservation=AllDimensions
+- VII.9: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_WBWDI,1.0/A.[TAG_GEO].TM_VAL_FOOD_ZS_UN?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].TM_VAL_FOOD_ZS_UN?dimensionAtObservation=AllDimensions
+- VIII.1: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_KEYFACTS,1.0/A.[TAG_GEO].EEZ?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_KEYFACTS,/A.[TAG_GEO].EEZ?dimensionAtObservation=AllDimensions
+- VIII.8: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_TRADE_FOOD,1.0/A.Q._T+AS+CK+FJ+FM+GU+KI+MH+MP+NC+NR+NU+PF+PG+PN+PW+SB+TK+TO+TV+VU+WF+WS._T.03?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_TRADE_FOOD,/A.Q._T+AS+CK+FJ+FM+GU+KI+MH+MP+NC+NR+NU+PF+PG+PN+PW+SB+TK+TO+TV+VU+WF+WS._T.03?dimensionAtObservation=AllDimensions
+- VIII.9: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_TRADE_FOOD,1.0/A.Q._T.NR+WF+TV+TO+WS+NU+PF+CK+AS+PW+MH+KI+GU+FM+VU+SB+PG+NC+FJ.03?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_TRADE_FOOD,/A.Q._T.NR+WF+TV+TO+WS+NU+PF+CK+AS+PW+MH+KI+GU+FM+VU+SB+PG+NC+FJ.03?dimensionAtObservation=AllDimensions
+- IX.1: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_WBWGI,1.0/A.[TAG_GEO].VA_EST?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].VA_EST?dimensionAtObservation=AllDimensions
+- IX.2: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_WBWGI,1.0/A.[TAG_GEO].RL_EST?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].RL_EST?dimensionAtObservation=AllDimensions
+- IX.3: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_WBWGI,1.0/A.[TAG_GEO].GE_EST?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].GE_EST?dimensionAtObservation=AllDimensions
+- IX.4: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_WBWGI,1.0/A.[TAG_GEO].CC_EST?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].CC_EST?dimensionAtObservation=AllDimensions
+- IX.5: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_WBWGI,1.0/A.[TAG_GEO].RQ_EST?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].RQ_EST?dimensionAtObservation=AllDimensions
+- IX.6: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_WBWGI,1.0/A.[TAG_GEO].PV_EST?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].PV_EST?dimensionAtObservation=AllDimensions
+- IX.7: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_PRISON,1.0/A.[TAG_GEO].COUNT?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_PRISON,/A.[TAG_GEO].COUNT?dimensionAtObservation=AllDimensions
+- XI.1: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_VITAL,1.0/A.[TAG_GEO].TNFR._T?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_VITAL,/A.[TAG_GEO].TNFR._T?dimensionAtObservation=AllDimensions
+- XI.3: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_WBWDI,1.0/A.[TAG_GEO].SL_TLF_CACT_FM_ZS?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].SL_TLF_CACT_FM_ZS?dimensionAtObservation=AllDimensions
+- XI.7: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_EMPRATES,1.0/A.[TAG_GEO].LFPARTRATE.F._T._T._T?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_EMPRATES,/A.[TAG_GEO].LFPARTRATE.F._T._T._T?dimensionAtObservation=AllDimensions
+- XI.8: https://stats-nsi-stable.pacificdata.org/rest/data/SPC,DF_EMPRATES,1.0/A.[TAG_GEO].LFPARTRATE.M._T._T._T?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_EMPRATES,/A.[TAG_GEO].LFPARTRATE.M._T._T._T?dimensionAtObservation=AllDimensions
+- XII.5: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_PAM,1.0/A.VU+TV+TO+SB+WS+PG+PW+NU+NR+FM+MH+KI+FJ+CK.TRVAL._T.SPE._T?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_PAM,/A.VU+TV+TO+SB+WS+PG+PW+NU+NR+FM+MH+KI+FJ+CK.TRVAL._T.SPE._T?dimensionAtObservation=AllDimensions
+- XII.6: https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_PAM,1.0/A.VU+TV+TO+SB+WS+PG+PW+NU+NR+FM+MH+KI+FJ+CK.TRVAL._T.COM._T?dimensionAtObservation=AllDimensions -> https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_PAM,/A.VU+TV+TO+SB+WS+PG+PW+NU+NR+FM+MH+KI+FJ+CK.TRVAL._T.COM._T?dimensionAtObservation=AllDimensions
+
+### Indicators without data source (30)
+
+- I.2
+- I.3
+- I.19
+- I.20
+- I.21
+- I.22
+- II.23
+- III.6
+- III.21
+- III.22
+- III.23
+- III.24
+- IV.12
+- VII.1
+- VII.3
+- VII.11
+- VIII.5
+- VIII.6
+- VIII.7
+- IX.11
+- IX.12
+- X.3
+- XI.9
+- XI.10
+- XI.11
+- XI.12
+- XI.13
+- XI.14
+- XII.3
+- XII.4
+
+### Skipped rows (50)
+
+- INDICATORS I.4: SDG dataflow DF_SDG_05 dropped pending refreshed indicator list
+- INDICATORS row 25: unknown type "PICTURE"
+- INDICATORS II.4: SDG dataflow DF_SDG_03 dropped pending refreshed indicator list
+- INDICATORS II.5: SDG dataflow DF_SDG_03 dropped pending refreshed indicator list
+- INDICATORS II.6: SDG dataflow DF_SDG_03 dropped pending refreshed indicator list
+- INDICATORS II.7: SDG dataflow DF_SDG_02 dropped pending refreshed indicator list
+- INDICATORS II.8: SDG dataflow DF_SDG_03 dropped pending refreshed indicator list
+- INDICATORS II.10: SDG dataflow DF_SDG_03 dropped pending refreshed indicator list
+- INDICATORS II.16: SDG dataflow DF_SDG_03 dropped pending refreshed indicator list
+- INDICATORS II.17: SDG dataflow DF_SDG_03 dropped pending refreshed indicator list
+- INDICATORS II.18: SDG dataflow DF_SDG_03 dropped pending refreshed indicator list
+- INDICATORS II.19: SDG dataflow DF_SDG_03 dropped pending refreshed indicator list
+- INDICATORS II.20: SDG dataflow DF_SDG_03 dropped pending refreshed indicator list
+- INDICATORS II.21: SDG dataflow DF_SDG_03 dropped pending refreshed indicator list
+- INDICATORS II.22: SDG dataflow DF_SDG_03 dropped pending refreshed indicator list
+- INDICATORS III.3: SDG dataflow DF_SDG_04 dropped pending refreshed indicator list
+- INDICATORS III.4: SDG dataflow DF_SDG_04 dropped pending refreshed indicator list
+- INDICATORS III.15: SDG dataflow DF_SDG_04 dropped pending refreshed indicator list
+- INDICATORS III.16: SDG dataflow DF_SDG_04 dropped pending refreshed indicator list
+- INDICATORS III.17: SDG dataflow DF_SDG_04 dropped pending refreshed indicator list
+- INDICATORS III.18: SDG dataflow DF_SDG_04 dropped pending refreshed indicator list
+- INDICATORS III.19: SDG dataflow DF_SDG_04 dropped pending refreshed indicator list
+- INDICATORS III.20: SDG dataflow DF_SDG_04 dropped pending refreshed indicator list
+- INDICATORS IV.6: SDG dataflow DF_SDG_01 dropped pending refreshed indicator list
+- INDICATORS IV.7: SDG dataflow DF_SDG_08 dropped pending refreshed indicator list
+- INDICATORS IV.8: SDG dataflow DF_SDG_08 dropped pending refreshed indicator list
+- INDICATORS IV.10: SDG dataflow DF_SDG_08 dropped pending refreshed indicator list
+- INDICATORS V.7: SDG dataflow DF_SDG_17 dropped pending refreshed indicator list
+- INDICATORS VI.1: SDG dataflow DF_SDG_07 dropped pending refreshed indicator list
+- INDICATORS VI.2: SDG dataflow DF_SDG_07 dropped pending refreshed indicator list
+- INDICATORS VI.3: SDG dataflow DF_SDG_07 dropped pending refreshed indicator list
+- INDICATORS VII.4: SDG dataflow DF_SDG_15 dropped pending refreshed indicator list
+- INDICATORS VII.5: SDG dataflow DF_SDG_11 dropped pending refreshed indicator list
+- INDICATORS VII.6: SDG dataflow DF_SDG_11 dropped pending refreshed indicator list
+- INDICATORS VII.7: SDG dataflow DF_SDG_11 dropped pending refreshed indicator list
+- INDICATORS VII.10: SDG dataflow DF_SDG_15 dropped pending refreshed indicator list
+- INDICATORS VIII.2: SDG dataflow DF_SDG_14 dropped pending refreshed indicator list
+- INDICATORS VIII.3: SDG dataflow DF_SDG_14 dropped pending refreshed indicator list
+- INDICATORS VIII.4: SDG dataflow DF_SDG_14 dropped pending refreshed indicator list
+- INDICATORS IX.8: SDG dataflow DF_SDG_16 dropped pending refreshed indicator list
+- INDICATORS IX.9: SDG dataflow DF_SDG_16 dropped pending refreshed indicator list
+- INDICATORS IX.10: SDG dataflow DF_SDG_16 dropped pending refreshed indicator list
+- INDICATORS X.1: SDG dataflow DF_SDG_16 dropped pending refreshed indicator list
+- INDICATORS X.2: SDG dataflow DF_SDG_16 dropped pending refreshed indicator list
+- INDICATORS XI.2: SDG dataflow DF_SDG_05 dropped pending refreshed indicator list
+- INDICATORS XI.4: SDG dataflow DF_SDG_05 dropped pending refreshed indicator list
+- INDICATORS XI.5: SDG dataflow DF_SDG_05 dropped pending refreshed indicator list
+- INDICATORS XI.6: SDG dataflow DF_SDG_05 dropped pending refreshed indicator list
+- INDICATORS XII.1: SDG dataflow DF_SDG_10 dropped pending refreshed indicator list
+- INDICATORS XII.2: SDG dataflow DF_SDG_17 dropped pending refreshed indicator list
+
+### Duplicates rejected
+
+_None._

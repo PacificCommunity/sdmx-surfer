@@ -4,6 +4,7 @@ import { mcpTransportConfig } from "@/lib/mcp-client";
 import { getModelForUser } from "@/lib/model-router";
 import { auth } from "@/lib/auth";
 import { checkCsrf } from "@/lib/csrf";
+import { checkChatAllowed } from "@/lib/usage-caps";
 import { z } from "zod";
 import {
   getConfigTitle,
@@ -90,6 +91,17 @@ export async function POST(req: Request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
   const userId = session.user.userId;
+
+  // Usage caps: global AI budget (everyone) + per-user daily turns (open tier;
+  // admins exempt). Refuse before any model spend if a limit is reached.
+  const cap = await checkChatAllowed(userId, session.user.role);
+  if (!cap.allowed) {
+    return Response.json(
+      { error: cap.reason, message: cap.message },
+      { status: cap.status },
+    );
+  }
+
   const sessionId = req.headers.get("x-session-id") || "anonymous";
   const logger = createRequestLogger(userId, sessionId);
   let mcpClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
@@ -135,14 +147,35 @@ export async function POST(req: Request) {
     const quarantinedDataflowContext = dataflowContext
       ? quarantine(dataflowContext, "dataflow-context")
       : "";
-    const systemPrompt = [
-      systemPromptBase,
+
+    // System prompt is split into two system MESSAGES so the stable base
+    // (~6.4K tokens, identical across every turn and step) can carry an
+    // Anthropic cache breakpoint. Cache prefix order is tools → system →
+    // messages, so the breakpoint also caches the MCP tool definitions
+    // ahead of it. The volatile block (tier-2 knowledge, dataflow context,
+    // preview repair) changes per turn and stays uncached after it.
+    // NOTE: cache_control only works on MESSAGE-level providerOptions —
+    // a call-level anthropic.cacheControl is silently ignored by the
+    // provider (that bug lived in model-router for months).
+    const volatileSystem = [
       tier2Summary,
       quarantinedDataflowContext,
       previewRepairPrompt,
     ]
       .filter(Boolean)
       .join("\n\n");
+    const systemMessages = [
+      {
+        role: "system" as const,
+        content: systemPromptBase,
+        providerOptions: {
+          anthropic: { cacheControl: { type: "ephemeral" as const } },
+        },
+      },
+      ...(volatileSystem
+        ? [{ role: "system" as const, content: volatileSystem }]
+        : []),
+    ];
 
     let dashboardEmitted = false;
     let currentStep = 0;
@@ -152,8 +185,7 @@ export async function POST(req: Request) {
 
     const result = streamText({
       model: modelConfig.model,
-      system: systemPrompt,
-      messages: modelMessages,
+      messages: [...systemMessages, ...modelMessages],
       providerOptions: modelConfig.providerOptions || {},
       tools: {
         ...mcpTools,
@@ -195,19 +227,18 @@ export async function POST(req: Request) {
         currentStep = stepNumber;
 
         if (stepNumber >= NUDGE_AT && !dashboardEmitted) {
-          // Combine Tier 2 knowledge + nudge
-          const nudgedPrompt = tier2Summary
-            ? systemPromptBase + "\n\n" + tier2Summary + "\n\n" + NUDGE_MESSAGE
-            : systemPromptBase + "\n\n" + NUDGE_MESSAGE;
-          return { system: nudgedPrompt };
+          // The base prompt + tier-2 already live in the leading system
+          // MESSAGES; returning `system` here adds the nudge as a separate
+          // leading system block for this step only. The provider merges
+          // consecutive system blocks, so the model sees nudge + base +
+          // volatile. Cache note: the new leading block changes the prefix,
+          // so nudge steps pay full prefill — acceptable for an emergency
+          // path that fires at most a handful of times per conversation.
+          return { system: NUDGE_MESSAGE };
         }
 
-        // Inject Tier 2 on every step (knowledge might grow via in-flight tool calls,
-        // but for now the initial extraction covers the conversation history)
-        if (tier2Summary) {
-          return { system: systemPrompt };
-        }
-
+        // Base + volatile system messages are part of `messages`; nothing
+        // to override on ordinary steps.
         return {};
       },
       onStepFinish: ({ dynamicToolCalls }) => {
@@ -247,6 +278,32 @@ export async function POST(req: Request) {
           }
         }
         logger.setCostUsd(anyCost ? totalCost : null);
+        // Cache observability: read ≫ write on warm turns means the
+        // system-message cache breakpoint is working (see systemMessages).
+        const cacheDetails = (
+          totalUsage as
+            | {
+                inputTokenDetails?: {
+                  cacheReadTokens?: number;
+                  cacheWriteTokens?: number;
+                  noCacheTokens?: number;
+                };
+              }
+            | undefined
+        )?.inputTokenDetails;
+        if (cacheDetails?.cacheReadTokens || cacheDetails?.cacheWriteTokens) {
+          console.info(
+            "[api/chat] prompt cache: read=" +
+              (cacheDetails.cacheReadTokens ?? 0) +
+              " write=" +
+              (cacheDetails.cacheWriteTokens ?? 0) +
+              " uncached=" +
+              (cacheDetails.noCacheTokens ?? 0) +
+              " across " +
+              steps.length +
+              " steps",
+          );
+        }
         await logger.flush(
           totalUsage
             ? {
@@ -263,6 +320,12 @@ export async function POST(req: Request) {
       onError: async ({ error }) => {
         console.error("[api/chat] streamText error", error);
         logger.recordError(error instanceof Error ? error.message : String(error));
+        await logger.flush().catch(() => {});
+        if (mcpClient) await mcpClient.close().catch(() => {});
+      },
+      // Client disconnected mid-stream (tab closed, navigation). onFinish
+      // does not fire in that case; close the MCP session here too.
+      onAbort: async () => {
         await logger.flush().catch(() => {});
         if (mcpClient) await mcpClient.close().catch(() => {});
       },

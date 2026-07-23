@@ -49,7 +49,10 @@ describe("model-router", () => {
 
       expect(config.providerId).toBe("anthropic");
       expect(config.modelId).toBe("claude-opus-4-8");
-      expect(config.providerOptions).toBeDefined();
+      // Anthropic carries no call-level providerOptions: cache control is a
+      // message-level concern (set on the system message in the chat routes),
+      // and a call-level cacheControl would be a silent no-op.
+      expect(config.providerOptions).toBeUndefined();
     });
   });
 
@@ -65,7 +68,7 @@ describe("model-router", () => {
 
       expect(config.providerId).toBe("anthropic");
       expect(config.modelId).toBe("claude-opus-4-6");
-      expect(config.providerOptions).toHaveProperty("anthropic");
+      expect(config.providerOptions).toBeUndefined();
     });
 
     it("uses OpenAI BYOK key when available", async () => {
@@ -135,14 +138,15 @@ describe("model-router", () => {
       expect(config.model).toBeDefined();
     });
 
-    it("includes anthropic cache control for anthropic provider", async () => {
-      // Falls back to env-based anthropic
+    it("does NOT set call-level cache control for anthropic (message-level concern)", async () => {
+      // A call-level anthropic.cacheControl used to live here and was a
+      // silent no-op — @ai-sdk/anthropic only reads cacheControl from
+      // message-level providerOptions. The chat routes now set it on the
+      // system message instead. This test guards against re-adding it.
       const config = await getModelForUser("any-user");
 
       expect(config.providerId).toBe("anthropic");
-      expect(config.providerOptions).toEqual({
-        anthropic: { cacheControl: { type: "ephemeral" } },
-      });
+      expect(config.providerOptions).toBeUndefined();
     });
   });
 });

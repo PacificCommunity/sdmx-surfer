@@ -2,13 +2,10 @@
 // then importing the bundle and instantiating the Chart with each panel's config.
 import fs from "node:fs";
 
-// Map URLs to local files so the parser uses cached fixtures.
-const URL_TO_FIXTURE = {
-  "https://data-sdmx-disseminate.sbs.gov.ws/rest/data/DF_CPI/M.WS.ALLCPI.IDX._T.N":
-    "/tmp/sbs_cpi.json",
-  "https://data-sdmx-disseminate.sbs.gov.ws/rest/data/DF_CPI/M.WS.ALLCPI.IDX.ITEM_01+ITEM_02+ITEM_03+ITEM_04+ITEM_05+ITEM_06+ITEM_07+ITEM_08+ITEM_09+ITEM_10+ITEM_11+ITEM_12.N":
-    null, // chosen below by query
-};
+// Fixture mapping (documentation; actual routing is in the fetch override below):
+//   M.WS.ALLCPI.IDX._T.N                              → /tmp/sbs_cpi.json
+//   M.WS.ALLCPI.IDX.ITEM_01+...+ITEM_12.N (+lastN=1)  → /tmp/sbs_latest.json
+//   M.WS.ALLCPI.IDX.ITEM_01+...+ITEM_12.N             → /tmp/sbs_groups.json
 
 global.fetch = async (url) => {
   const u = String(url);

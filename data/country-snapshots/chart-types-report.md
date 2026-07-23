@@ -1,0 +1,801 @@
+# Chart type augmentation report
+
+Probed at 2026-06-09T04:09:27 via MCP gateway
+
+## Summary
+- line: 94
+- bar:  356
+- empty: 422
+- error: 7
+- locked entries carried over: 617
+
+## Errors (7)
+- V.1/GU
+- V.1/MP
+- V.2/TK
+- V.2/VU
+- V.2/WF
+- VIII.8/PN
+- VIII.9/MP
+
+## Bar (1-2 time points) (356)
+- I.1/AS (1 points)
+- I.1/CK (1 points)
+- I.1/FJ (1 points)
+- I.1/FM (1 points)
+- I.1/GU (1 points)
+- I.1/KI (1 points)
+- I.1/MH (1 points)
+- I.1/MP (1 points)
+- I.1/NC (1 points)
+- I.1/NR (1 points)
+- I.1/NU (1 points)
+- I.1/PF (1 points)
+- I.1/PG (1 points)
+- I.1/PN (1 points)
+- I.1/PW (1 points)
+- I.1/SB (1 points)
+- I.1/TK (1 points)
+- I.1/TO (1 points)
+- I.1/TV (1 points)
+- I.1/VU (1 points)
+- I.1/WF (1 points)
+- I.1/WS (1 points)
+- I.7/AS (1 points)
+- I.7/FM (1 points)
+- I.7/GU (1 points)
+- I.7/MH (1 points)
+- I.7/MP (1 points)
+- I.7/NC (1 points)
+- I.7/NR (1 points)
+- I.7/NU (1 points)
+- I.7/PF (1 points)
+- I.7/PW (1 points)
+- I.7/SB (1 points)
+- I.7/TO (1 points)
+- I.7/TV (1 points)
+- I.7/VU (1 points)
+- I.7/WF (1 points)
+- I.7/WS (1 points)
+- I.9/AS (1 points)
+- I.9/CK (1 points)
+- I.9/FJ (1 points)
+- I.9/FM (1 points)
+- I.9/GU (1 points)
+- I.9/KI (1 points)
+- I.9/MH (1 points)
+- I.9/MP (1 points)
+- I.9/NC (1 points)
+- I.9/NR (1 points)
+- I.9/NU (1 points)
+- I.9/PF (1 points)
+- I.9/PG (1 points)
+- I.9/PW (1 points)
+- I.9/SB (1 points)
+- I.9/TK (1 points)
+- I.9/TO (1 points)
+- I.9/TV (1 points)
+- I.9/VU (1 points)
+- I.9/WF (1 points)
+- I.9/WS (1 points)
+- I.11/AS (1 points)
+- I.11/GU (1 points)
+- I.11/KI (1 points)
+- I.11/MH (1 points)
+- I.11/MP (1 points)
+- I.11/PF (1 points)
+- I.11/PG (1 points)
+- I.11/PW (1 points)
+- I.11/SB (1 points)
+- I.11/TK (1 points)
+- I.11/TV (1 points)
+- I.11/VU (1 points)
+- I.11/WF (1 points)
+- I.11/WS (1 points)
+- I.12/AS (1 points)
+- I.12/CK (1 points)
+- I.12/FJ (1 points)
+- I.12/FM (1 points)
+- I.12/GU (1 points)
+- I.12/KI (1 points)
+- I.12/MH (1 points)
+- I.12/MP (1 points)
+- I.12/NC (1 points)
+- I.12/NU (1 points)
+- I.12/PF (1 points)
+- I.12/PG (1 points)
+- I.12/PW (1 points)
+- I.12/SB (1 points)
+- I.12/TK (1 points)
+- I.12/TO (1 points)
+- I.12/TV (1 points)
+- I.12/VU (1 points)
+- I.12/WF (1 points)
+- I.15/KI (1 points)
+- I.15/MP (1 points)
+- I.15/NC (1 points)
+- I.15/NU (1 points)
+- I.15/PF (1 points)
+- I.15/PW (1 points)
+- I.17/PW (1 points)
+- I.17/SB (1 points)
+- I.18/NC (1 points)
+- I.18/PF (1 points)
+- I.18/WS (1 points)
+- II.1/FM (1 points)
+- II.1/KI (1 points)
+- II.1/TK (2 points)
+- II.9/CK (1 points)
+- II.9/FM (2 points)
+- II.9/GU (1 points)
+- II.9/KI (1 points)
+- II.9/MH (1 points)
+- II.9/MP (1 points)
+- II.9/NC (1 points)
+- II.9/NR (1 points)
+- II.9/NU (1 points)
+- II.9/PF (1 points)
+- II.9/PG (1 points)
+- II.9/PW (1 points)
+- II.9/SB (1 points)
+- II.9/TK (1 points)
+- II.9/TV (1 points)
+- II.9/WS (1 points)
+- II.11/GU (1 points)
+- II.11/MP (1 points)
+- II.11/NC (1 points)
+- II.11/PF (1 points)
+- II.11/TK (1 points)
+- II.11/WF (1 points)
+- II.12/GU (1 points)
+- II.12/MP (1 points)
+- II.12/NC (1 points)
+- II.12/PF (1 points)
+- II.12/TK (1 points)
+- II.12/WF (1 points)
+- II.13/GU (1 points)
+- II.13/MP (1 points)
+- II.13/NC (1 points)
+- II.13/PF (1 points)
+- II.13/TK (1 points)
+- II.13/WF (1 points)
+- II.14/NR (1 points)
+- II.14/NU (1 points)
+- II.15/AS (1 points)
+- II.15/CK (1 points)
+- II.15/FJ (1 points)
+- II.15/FM (1 points)
+- II.15/GU (1 points)
+- II.15/KI (1 points)
+- II.15/MH (1 points)
+- II.15/MP (1 points)
+- II.15/NC (2 points)
+- II.15/NR (1 points)
+- II.15/NU (1 points)
+- II.15/PF (1 points)
+- II.15/PG (1 points)
+- II.15/PW (1 points)
+- II.15/SB (1 points)
+- II.15/TK (1 points)
+- II.15/TO (2 points)
+- II.15/TV (1 points)
+- II.15/VU (1 points)
+- II.15/WF (1 points)
+- II.15/WS (2 points)
+- III.1/FJ (2 points)
+- III.1/FM (2 points)
+- III.1/PW (1 points)
+- III.1/TV (1 points)
+- III.2/AS (1 points)
+- III.2/FM (2 points)
+- III.2/GU (1 points)
+- III.2/MH (1 points)
+- III.2/MP (1 points)
+- III.2/NC (1 points)
+- III.2/PF (1 points)
+- III.2/PG (1 points)
+- III.2/TK (1 points)
+- III.2/TV (2 points)
+- III.2/WF (1 points)
+- III.5/FJ (1 points)
+- III.5/FM (2 points)
+- III.5/MH (1 points)
+- III.5/NU (1 points)
+- III.7/FM (1 points)
+- III.7/GU (1 points)
+- III.7/KI (1 points)
+- III.7/MH (1 points)
+- III.7/MP (1 points)
+- III.7/NC (1 points)
+- III.7/NR (2 points)
+- III.7/PF (1 points)
+- III.7/TK (2 points)
+- III.7/TO (1 points)
+- III.7/TV (2 points)
+- III.7/VU (1 points)
+- III.7/WF (2 points)
+- III.7/WS (2 points)
+- III.10/KI (1 points)
+- III.10/MH (1 points)
+- III.10/PW (1 points)
+- III.10/TO (1 points)
+- III.10/VU (1 points)
+- III.12/FJ (2 points)
+- III.12/KI (1 points)
+- III.12/MH (1 points)
+- III.12/NR (1 points)
+- III.13/KI (1 points)
+- III.13/MH (1 points)
+- III.13/NR (1 points)
+- III.14/FJ (2 points)
+- III.14/KI (1 points)
+- III.14/MH (1 points)
+- III.14/NR (1 points)
+- IV.1/AS (1 points)
+- IV.1/GU (1 points)
+- IV.1/TK (1 points)
+- IV.1/TV (1 points)
+- IV.1/VU (1 points)
+- IV.1/WS (1 points)
+- IV.2/NU (1 points)
+- IV.4/TO (1 points)
+- IV.9/FJ (1 points)
+- IV.9/FM (2 points)
+- IV.9/KI (1 points)
+- IV.9/MH (1 points)
+- IV.9/NR (1 points)
+- IV.9/PG (2 points)
+- IV.9/SB (2 points)
+- IV.9/TV (1 points)
+- IV.9/VU (2 points)
+- IV.11/MH (1 points)
+- IV.11/PN (1 points)
+- IV.11/WF (2 points)
+- V.5/FJ (2 points)
+- V.5/KI (2 points)
+- V.5/MH (2 points)
+- V.5/PG (2 points)
+- V.5/SB (2 points)
+- V.5/TO (2 points)
+- V.5/TV (2 points)
+- V.5/VU (2 points)
+- V.5/WS (2 points)
+- V.6/TK (1 points)
+- V.8/AS (1 points)
+- V.8/CK (1 points)
+- V.8/FJ (2 points)
+- V.8/FM (2 points)
+- V.8/GU (1 points)
+- V.8/KI (1 points)
+- V.8/NR (1 points)
+- V.8/NU (2 points)
+- V.8/PW (1 points)
+- V.8/SB (1 points)
+- V.8/TK (2 points)
+- V.8/TV (2 points)
+- V.8/VU (2 points)
+- V.8/WS (1 points)
+- V.9/AS (1 points)
+- V.9/CK (2 points)
+- V.9/FJ (1 points)
+- V.9/FM (2 points)
+- V.9/GU (1 points)
+- V.9/KI (2 points)
+- V.9/NC (2 points)
+- V.9/NR (2 points)
+- V.9/PF (1 points)
+- V.9/PG (2 points)
+- V.9/TK (2 points)
+- V.9/VU (1 points)
+- V.9/WF (1 points)
+- VI.5/AS (1 points)
+- VI.5/CK (1 points)
+- VI.5/FM (2 points)
+- VI.5/GU (1 points)
+- VI.5/KI (2 points)
+- VI.5/MH (2 points)
+- VI.5/MP (1 points)
+- VI.5/NC (1 points)
+- VI.5/PF (1 points)
+- VI.5/PG (1 points)
+- VI.5/TK (2 points)
+- VI.5/TO (2 points)
+- VI.5/VU (2 points)
+- VI.5/WF (1 points)
+- VI.5/WS (2 points)
+- VI.6/AS (1 points)
+- VI.6/CK (2 points)
+- VI.6/FM (2 points)
+- VI.6/GU (1 points)
+- VI.6/MH (2 points)
+- VI.6/MP (1 points)
+- VI.6/NC (2 points)
+- VI.6/PF (1 points)
+- VI.6/PG (1 points)
+- VI.6/TK (2 points)
+- VI.6/WF (1 points)
+- VI.6/WS (2 points)
+- VIII.1/AS (1 points)
+- VIII.1/CK (1 points)
+- VIII.1/FJ (1 points)
+- VIII.1/FM (1 points)
+- VIII.1/GU (1 points)
+- VIII.1/KI (1 points)
+- VIII.1/MH (1 points)
+- VIII.1/MP (1 points)
+- VIII.1/NC (1 points)
+- VIII.1/NR (1 points)
+- VIII.1/NU (1 points)
+- VIII.1/PF (1 points)
+- VIII.1/PG (1 points)
+- VIII.1/PN (1 points)
+- VIII.1/PW (1 points)
+- VIII.1/SB (1 points)
+- VIII.1/TK (1 points)
+- VIII.1/TO (1 points)
+- VIII.1/TV (1 points)
+- VIII.1/VU (1 points)
+- VIII.1/WF (1 points)
+- VIII.1/WS (1 points)
+- XI.1/AS (1 points)
+- XI.1/CK (1 points)
+- XI.1/FM (1 points)
+- XI.1/KI (1 points)
+- XI.1/MH (1 points)
+- XI.1/MP (1 points)
+- XI.1/NU (1 points)
+- XI.1/PG (1 points)
+- XI.1/SB (2 points)
+- XI.1/TK (1 points)
+- XI.1/TV (1 points)
+- XI.1/VU (1 points)
+- XI.1/WF (1 points)
+- XI.1/WS (1 points)
+- XI.7/CK (1 points)
+- XI.7/FM (1 points)
+- XI.7/KI (2 points)
+- XI.7/MH (2 points)
+- XI.7/NR (2 points)
+- XI.7/NU (2 points)
+- XI.7/PW (2 points)
+- XI.7/SB (1 points)
+- XI.7/TK (1 points)
+- XI.7/TV (2 points)
+- XI.7/VU (1 points)
+- XI.7/WS (1 points)
+- XI.8/CK (1 points)
+- XI.8/FM (1 points)
+- XI.8/KI (2 points)
+- XI.8/MH (2 points)
+- XI.8/NR (2 points)
+- XI.8/NU (2 points)
+- XI.8/PW (2 points)
+- XI.8/SB (1 points)
+- XI.8/TK (1 points)
+- XI.8/TV (2 points)
+- XI.8/VU (1 points)
+- XI.8/WS (1 points)
+
+## Empty (422)
+- I.7/PN
+- I.9/PN
+- I.11/PN
+- I.12/PN
+- I.17/CK
+- I.17/NU
+- I.17/PN
+- I.17/TK
+- I.17/WF
+- I.18/CK
+- I.18/NU
+- I.18/PN
+- I.18/TK
+- I.18/WF
+- II.1/PN
+- II.3/PN
+- II.9/AS
+- II.9/PN
+- II.9/WF
+- II.11/AS
+- II.11/PN
+- II.12/AS
+- II.12/PN
+- II.13/AS
+- II.13/PN
+- II.14/AS
+- II.14/CK
+- II.14/GU
+- II.14/MH
+- II.14/MP
+- II.14/NC
+- II.14/PF
+- II.14/PN
+- II.14/PW
+- II.14/TK
+- II.14/TV
+- II.14/WF
+- II.15/PN
+- III.1/AS
+- III.1/GU
+- III.1/KI
+- III.1/MH
+- III.1/MP
+- III.1/NC
+- III.1/NR
+- III.1/NU
+- III.1/PF
+- III.1/PG
+- III.1/PN
+- III.1/TK
+- III.1/WF
+- III.2/PN
+- III.5/AS
+- III.5/GU
+- III.5/KI
+- III.5/MP
+- III.5/NC
+- III.5/NR
+- III.5/PF
+- III.5/PN
+- III.5/TK
+- III.5/WF
+- III.7/AS
+- III.7/PN
+- III.10/AS
+- III.10/CK
+- III.10/FJ
+- III.10/FM
+- III.10/GU
+- III.10/MP
+- III.10/NC
+- III.10/NR
+- III.10/NU
+- III.10/PF
+- III.10/PG
+- III.10/PN
+- III.10/SB
+- III.10/TK
+- III.10/TV
+- III.10/WF
+- III.10/WS
+- III.12/AS
+- III.12/CK
+- III.12/FM
+- III.12/GU
+- III.12/MP
+- III.12/NC
+- III.12/NU
+- III.12/PF
+- III.12/PN
+- III.12/SB
+- III.12/TK
+- III.12/TV
+- III.12/WF
+- III.13/AS
+- III.13/CK
+- III.13/FM
+- III.13/GU
+- III.13/MP
+- III.13/NC
+- III.13/NU
+- III.13/PF
+- III.13/PN
+- III.13/SB
+- III.13/TK
+- III.13/TV
+- III.13/WF
+- III.14/AS
+- III.14/CK
+- III.14/FM
+- III.14/GU
+- III.14/MP
+- III.14/NC
+- III.14/NU
+- III.14/PF
+- III.14/PN
+- III.14/SB
+- III.14/TK
+- III.14/TV
+- III.14/WF
+- IV.1/PN
+- IV.1/WF
+- IV.2/AS
+- IV.2/GU
+- IV.2/MP
+- IV.2/NC
+- IV.2/PF
+- IV.2/PN
+- IV.2/TK
+- IV.2/WF
+- IV.3/AS
+- IV.3/CK
+- IV.3/GU
+- IV.3/MP
+- IV.3/NR
+- IV.3/NU
+- IV.3/PN
+- IV.3/TK
+- IV.3/WF
+- IV.4/AS
+- IV.4/CK
+- IV.4/GU
+- IV.4/MP
+- IV.4/NR
+- IV.4/NU
+- IV.4/PN
+- IV.4/TK
+- IV.4/WF
+- IV.5/AS
+- IV.5/CK
+- IV.5/GU
+- IV.5/MP
+- IV.5/NR
+- IV.5/NU
+- IV.5/PN
+- IV.5/TK
+- IV.5/TV
+- IV.5/WF
+- IV.9/AS
+- IV.9/CK
+- IV.9/GU
+- IV.9/MP
+- IV.9/NC
+- IV.9/NU
+- IV.9/PF
+- IV.9/PN
+- IV.9/PW
+- IV.9/TK
+- IV.9/WF
+- IX.1/MP
+- IX.1/PN
+- IX.1/TK
+- IX.1/WF
+- IX.2/MP
+- IX.2/PN
+- IX.2/TK
+- IX.2/WF
+- IX.3/MP
+- IX.3/NC
+- IX.3/PF
+- IX.3/PN
+- IX.3/TK
+- IX.3/WF
+- IX.4/MP
+- IX.4/PN
+- IX.4/TK
+- IX.4/WF
+- IX.5/MP
+- IX.5/NC
+- IX.5/PF
+- IX.5/PN
+- IX.5/TK
+- IX.5/WF
+- IX.6/MP
+- IX.6/PN
+- IX.6/TK
+- IX.6/WF
+- IX.7/NU
+- IX.7/PN
+- IX.7/TK
+- IX.7/WF
+- V.1/AS
+- V.1/CK
+- V.1/NC
+- V.1/NU
+- V.1/PF
+- V.1/PN
+- V.1/TK
+- V.1/WF
+- V.2/AS
+- V.2/CK
+- V.2/GU
+- V.2/KI
+- V.2/NC
+- V.2/NR
+- V.2/PF
+- V.2/PN
+- V.2/PW
+- V.2/SB
+- V.2/TV
+- V.3/AS
+- V.3/CK
+- V.3/GU
+- V.3/KI
+- V.3/NC
+- V.3/NR
+- V.3/PF
+- V.3/PN
+- V.3/PW
+- V.3/SB
+- V.3/TK
+- V.3/TV
+- V.3/VU
+- V.3/WF
+- V.4/PN
+- V.4/WF
+- V.5/AS
+- V.5/CK
+- V.5/FM
+- V.5/GU
+- V.5/MP
+- V.5/NC
+- V.5/NR
+- V.5/NU
+- V.5/PF
+- V.5/PN
+- V.5/PW
+- V.5/TK
+- V.5/WF
+- V.6/AS
+- V.6/CK
+- V.6/MP
+- V.6/PN
+- V.8/MH
+- V.8/MP
+- V.8/NC
+- V.8/PF
+- V.8/PG
+- V.8/PN
+- V.8/WF
+- V.9/MP
+- V.9/PN
+- VI.4/CK
+- VI.4/MP
+- VI.4/NU
+- VI.4/PN
+- VI.4/TK
+- VI.4/WF
+- VI.5/FJ
+- VI.5/PN
+- VI.6/FJ
+- VI.6/PN
+- VII.2/AS
+- VII.2/CK
+- VII.2/FJ
+- VII.2/FM
+- VII.2/GU
+- VII.2/KI
+- VII.2/MH
+- VII.2/MP
+- VII.2/NC
+- VII.2/NR
+- VII.2/NU
+- VII.2/PF
+- VII.2/PG
+- VII.2/PN
+- VII.2/PW
+- VII.2/SB
+- VII.2/TK
+- VII.2/TO
+- VII.2/TV
+- VII.2/VU
+- VII.2/WF
+- VII.2/WS
+- VII.9/AS
+- VII.9/CK
+- VII.9/GU
+- VII.9/MH
+- VII.9/MP
+- VII.9/NR
+- VII.9/NU
+- VII.9/PN
+- VII.9/TK
+- VII.9/WF
+- VIII.8/AS
+- VIII.8/CK
+- VIII.8/FJ
+- VIII.8/FM
+- VIII.8/GU
+- VIII.8/KI
+- VIII.8/MH
+- VIII.8/MP
+- VIII.8/NC
+- VIII.8/NR
+- VIII.8/NU
+- VIII.8/PF
+- VIII.8/PG
+- VIII.8/PW
+- VIII.8/SB
+- VIII.8/TK
+- VIII.8/TO
+- VIII.8/TV
+- VIII.8/VU
+- VIII.8/WF
+- VIII.8/WS
+- VIII.9/AS
+- VIII.9/CK
+- VIII.9/FJ
+- VIII.9/FM
+- VIII.9/GU
+- VIII.9/KI
+- VIII.9/MH
+- VIII.9/NC
+- VIII.9/NR
+- VIII.9/NU
+- VIII.9/PF
+- VIII.9/PG
+- VIII.9/PN
+- VIII.9/PW
+- VIII.9/SB
+- VIII.9/TK
+- VIII.9/TO
+- VIII.9/TV
+- VIII.9/VU
+- VIII.9/WF
+- VIII.9/WS
+- XI.1/PN
+- XI.3/AS
+- XI.3/CK
+- XI.3/FM
+- XI.3/KI
+- XI.3/MH
+- XI.3/MP
+- XI.3/NR
+- XI.3/NU
+- XI.3/PN
+- XI.3/PW
+- XI.3/TK
+- XI.3/TV
+- XI.3/WF
+- XI.7/AS
+- XI.7/FJ
+- XI.7/GU
+- XI.7/MP
+- XI.7/NC
+- XI.7/PF
+- XI.7/PG
+- XI.7/PN
+- XI.7/WF
+- XI.8/AS
+- XI.8/FJ
+- XI.8/GU
+- XI.8/MP
+- XI.8/NC
+- XI.8/PF
+- XI.8/PG
+- XI.8/PN
+- XI.8/WF
+- XII.5/AS
+- XII.5/CK
+- XII.5/FJ
+- XII.5/FM
+- XII.5/GU
+- XII.5/KI
+- XII.5/MH
+- XII.5/MP
+- XII.5/NC
+- XII.5/NR
+- XII.5/NU
+- XII.5/PF
+- XII.5/PG
+- XII.5/PN
+- XII.5/PW
+- XII.5/SB
+- XII.5/TK
+- XII.5/TO
+- XII.5/TV
+- XII.5/VU
+- XII.5/WF
+- XII.5/WS
+- XII.6/AS
+- XII.6/CK
+- XII.6/FJ
+- XII.6/FM
+- XII.6/GU
+- XII.6/KI
+- XII.6/MH
+- XII.6/MP
+- XII.6/NC
+- XII.6/NR
+- XII.6/NU
+- XII.6/PF
+- XII.6/PG
+- XII.6/PN
+- XII.6/PW
+- XII.6/SB
+- XII.6/TK
+- XII.6/TO
+- XII.6/TV
+- XII.6/VU
+- XII.6/WF
+- XII.6/WS

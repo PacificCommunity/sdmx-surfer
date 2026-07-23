@@ -38,3 +38,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .vercel
+
+# Scratch dirs (local probes, codex)
+.tmp/
+.codex
