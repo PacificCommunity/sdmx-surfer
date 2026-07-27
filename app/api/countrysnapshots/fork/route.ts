@@ -53,7 +53,9 @@ async function handle(req: Request) {
   const themeSlug = url.searchParams.get("theme") ?? "";
   const codes = countryParam.split(",").map((c) => c.trim()).filter(Boolean);
 
-  if (codes.length === 0 || codes.length > 5 || !themeSlug) {
+  // Cap mirrors snapshotContextSchema's countryCodes max (30): regional pages
+  // fork with the full MFAT-15 scope, so this must comfortably exceed it.
+  if (codes.length === 0 || codes.length > 30 || !themeSlug) {
     return NextResponse.json(
       { error: "missing or invalid country/theme" },
       { status: 400 },
@@ -93,11 +95,14 @@ async function handle(req: Request) {
   // schema — seeding the raw SnapshotConfig shape crashes its preview.
   const nativeConfig = toNativeDashboardConfig(snapshotConfig);
 
-  const title =
-    countries.map((c) => c.name).join(" vs ") +
-    " — " +
-    theme.title +
-    " (forked from snapshot)";
+  // Joining 15 country names with "vs" produces an unusable title; past a
+  // handful, summarise by count instead.
+  const countryLabel =
+    countries.length <= 3
+      ? countries.map((c) => c.name).join(" vs ")
+      : countries.length + " Pacific countries";
+
+  const title = countryLabel + " — " + theme.title + " (forked from snapshot)";
 
   const omitted = snapshotConfig.items.filter(
     (i) => i.type === "text" || !i.dataUrl,
@@ -113,7 +118,12 @@ async function handle(req: Request) {
         type: "text" as const,
         text:
           "This session was forked from the Country Snapshot for **" +
-          countries.map((c) => c.name).join(", ") +
+          (countries.length <= 5
+            ? countries.map((c) => c.name).join(", ")
+            : countries.length +
+              " Pacific countries (" +
+              countries.map((c) => c.code).join(", ") +
+              ")") +
           " — " +
           theme.title +
           "**. The dashboard on the right mirrors the snapshot" +
