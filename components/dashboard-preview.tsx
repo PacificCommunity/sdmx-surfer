@@ -20,6 +20,7 @@ import {
 } from "@/lib/dashboard-text";
 import { useHighchartsViewportReflow } from "@/lib/use-highcharts-viewport-reflow";
 import type { SDMXDashboardConfig } from "@/lib/types";
+import type { VisualRenderStatus } from "sdmx-dashboard-components";
 
 const SDMXDashboard = SDMXDashboardDynamic;
 
@@ -114,6 +115,23 @@ export const DashboardPreview = memo(function DashboardPreview({
       }, 2000);
     },
     [onError, config],
+  );
+
+  // The rendering library contains per-visual failures (typed SDMXRenderError,
+  // shown as in-panel error states) instead of throwing, so the error boundary
+  // never sees them. This callback is the agent's ear: when the dashboard
+  // settles, forward each errored visual's contract message into the same
+  // reportError channel the boundary uses; the builder then auto-sends it to
+  // the model for self-correction.
+  const handleRenderComplete = useCallback(
+    (statuses: VisualRenderStatus[]) => {
+      for (const s of statuses) {
+        if (s.status === "error" && s.error) {
+          reportError("[" + s.visualId + "] " + s.error.message);
+        }
+      }
+    },
+    [reportError],
   );
 
   useEffect(() => {
@@ -475,8 +493,12 @@ export const DashboardPreview = memo(function DashboardPreview({
               <DashboardErrorBoundary
                 onError={reportError}
               >
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                <SDMXDashboard config={config as any} lang="en" />
+                <SDMXDashboard
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  config={config as any}
+                  lang="en"
+                  onRenderComplete={handleRenderComplete}
+                />
               </DashboardErrorBoundary>
             </div>
           </div>

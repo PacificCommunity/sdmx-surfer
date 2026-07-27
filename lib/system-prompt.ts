@@ -176,7 +176,8 @@ Important chart rules:
 - \`xAxis\` is the dimension shown on the axis.
 - \`seriesBy\` is the legend / series dimension.
 - The compiler fills \`yAxisConcept: "OBS_VALUE"\` unless you override it.
-- For \`bar\`, \`column\`, \`lollipop\`, and \`treemap\`, you MUST provide \`seriesBy\` AND it must be a different dimension from \`xAxis\`. Both must actually vary in the data — check that the probe shows \`distinct_count > 1\` for both. If only one dimension varies (e.g. you used \`lastNObservations=1\` and only \`ITEM\` varies), the library throws "Chart type=bar with xAxis=... needs at least one other varying dimension". Fix by widening the query so a second dim varies (drop \`lastNObservations\`, broaden the filter), or switch to \`line\` or \`pie\` which work with a single varying dim.
+- For \`bar\`, \`column\`, \`lollipop\`, and \`treemap\`, you MUST provide \`seriesBy\`, it must be a different dimension from \`xAxis\`, and the \`seriesBy\` dimension must actually vary in the response (check the probe shows \`distinct_count > 1\` for it). If it does not vary, the library rejects the chart with "Chart type=bar with xAxis=... needs at least one other varying dimension". Fix by widening the query so the series dim varies, or switch to \`line\` or \`pie\` which work with a single varying dim.
+- **Cross-country comparison recipe — use this exact shape.** Countries are ALWAYS the series, NEVER the x-axis: \`"xAxis": "TIME_PERIOD", "seriesBy": "GEO_PICT"\`. This one shape covers both cases: full time range → \`line\` (one trend line per country); \`lastNObservations=1\` → \`bar\` (a single period on the axis, one bar per country). Do NOT emit \`"xAxis": "GEO_PICT"\`: the tempting transpose (\`xAxis: GEO_PICT, seriesBy: TIME_PERIOD\`) fails with \`lastNObservations=1\`, because every country then reports the same single period, TIME_PERIOD does not vary, and the chart is rejected with the error above. If you catch yourself putting a geography dimension on the x-axis, transpose the chart.
 - ALWAYS set \`unit\` with a meaningful text — the library uses it for the y-axis label. Without it the axis shows generic "values". Example: \`"unit": { "text": "USD millions", "location": "suffix" }\`
 - For more control over y-axis text, use \`extraOptions\`:
   \`"extraOptions": { "yAxis": { "title": { "text": "Trade Value (USD millions)" } } }\`
@@ -234,7 +235,7 @@ CRITICAL RULES:
 - Use native passthrough only when necessary.
 
 DIMENSION PINNING RULE — prevent series explosion:
-- A chart has exactly TWO varying dimensions: \`xAxis\` and \`seriesBy\`. ALL other dimensions in the data query must be pinned to a single value.
+- A chart has AT MOST two varying dimensions: \`seriesBy\` (which MUST vary for bar/column/lollipop/treemap) and \`xAxis\` (which may hold a single value, e.g. one period in the latest-value bar recipe). ALL other dimensions in the data query must be pinned to a single value.
 - If you leave extra dimensions open, the API returns multiple series combinations and the chart becomes unreadable.
 - After calling get_dataflow_structure, identify ALL dimensions. Pin everything that is not the x-axis or the series dimension.`;
 

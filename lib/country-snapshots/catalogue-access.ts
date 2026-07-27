@@ -51,9 +51,13 @@ export function renderCatalogueForPrompt(
   lines.push(
     "4. When emitting a dashboard, use kpi visuals for single-value " +
       "indicators with sparse data, line charts for time series, and " +
-      "bar charts for cross-country comparisons. Avoid responding with " +
-      "handmade markdown tables of figures — emit a dashboard or link " +
-      "to the canonical snapshot page.",
+      "bar charts for cross-country comparisons. For cross-country " +
+      "charts, countries are ALWAYS the series, never the x-axis: " +
+      "xAxisConcept=TIME_PERIOD with legend.concept=<geo dimension> " +
+      "(line for trends; bar with lastNObservations=1 for latest " +
+      "values). Never put the geo dimension on the x-axis. Avoid " +
+      "responding with handmade markdown tables of figures — emit a " +
+      "dashboard or link to the canonical snapshot page.",
   );
   lines.push(
     "5. If discovery probes (probe_data_url, get_data_availability) " +
