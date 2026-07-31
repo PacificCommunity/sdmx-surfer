@@ -193,8 +193,8 @@ export async function getModelForUser(
     }
   }
 
-  // No BYOK key found — use platform Anthropic path (Sonnet 5, the default)
-  return platformAnthropic("claude-sonnet-5");
+  // No BYOK key found — use platform Anthropic path (Opus 5, the default)
+  return platformAnthropic("claude-opus-5");
 }
 
 /**

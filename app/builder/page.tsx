@@ -129,12 +129,12 @@ interface ModelOption {
 }
 
 // Fallback used until /api/settings/keys resolves on mount. Always safe:
-// anthropic/claude-sonnet-5 has a direct-SDK path even with the gateway off,
+// anthropic/claude-opus-5 has a direct-SDK path even with the gateway off,
 // and matches the server-side platform default (lib/model-router.ts).
 const FALLBACK_OPTION: ModelOption = {
   provider: "anthropic",
-  model: "claude-sonnet-5",
-  label: "Sonnet 5",
+  model: "claude-opus-5",
+  label: "Opus 5",
 };
 
 export default function BuilderPage() {

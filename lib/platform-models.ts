@@ -16,15 +16,15 @@ export interface PlatformModel {
 export const PLATFORM_MODELS: PlatformModel[] = [
   {
     providerId: "anthropic",
-    modelId: "claude-sonnet-5",
-    label: "Claude Sonnet 5",
-    description: "Anthropic — best speed + intelligence balance, 1M context (default)",
+    modelId: "claude-opus-5",
+    label: "Claude Opus 5",
+    description: "Anthropic — most capable, complex agentic reasoning, 1M context (default)",
   },
   {
     providerId: "anthropic",
-    modelId: "claude-opus-4-8",
-    label: "Claude Opus 4.8",
-    description: "Anthropic — most capable, long-horizon agentic reasoning, 1M context",
+    modelId: "claude-sonnet-5",
+    label: "Claude Sonnet 5",
+    description: "Anthropic — faster and cheaper, best speed + intelligence balance, 1M context",
   },
   {
     providerId: "google",

@@ -44,11 +44,11 @@ beforeEach(() => {
 
 describe("model-router", () => {
   describe("fallback chain", () => {
-    it("returns Anthropic Sonnet 5 free tier when user has no BYOK keys", async () => {
+    it("returns Anthropic Opus 5 free tier when user has no BYOK keys", async () => {
       const config = await getModelForUser("user-no-keys");
 
       expect(config.providerId).toBe("anthropic");
-      expect(config.modelId).toBe("claude-sonnet-5");
+      expect(config.modelId).toBe("claude-opus-5");
       // Anthropic carries no call-level providerOptions: cache control is a
       // message-level concern (set on the system message in the chat routes),
       // and a call-level cacheControl would be a silent no-op.
@@ -108,7 +108,7 @@ describe("model-router", () => {
       const config = await getModelForUser("user-with-corrupt-key");
 
       expect(config.providerId).toBe("anthropic");
-      expect(config.modelId).toBe("claude-sonnet-5");
+      expect(config.modelId).toBe("claude-opus-5");
     });
 
     it("handles DB errors gracefully and falls back to platform Anthropic", async () => {
@@ -125,7 +125,7 @@ describe("model-router", () => {
       const config = await getModelForUser("user-db-error");
 
       expect(config.providerId).toBe("anthropic");
-      expect(config.modelId).toBe("claude-sonnet-5");
+      expect(config.modelId).toBe("claude-opus-5");
     });
   });
 
