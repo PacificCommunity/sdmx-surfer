@@ -1,37 +1,47 @@
 /**
- * Reference metadata (provenance) for a dataflow.
+ * Reference metadata (provenance) for what a panel actually shows.
  *
  * The gateway's `get_reference_metadata` returns the descriptive material
  * about a dataflow — who compiled it, from what source, how it is processed
  * and revised — as opposed to its structure. This is what turns "here is a
  * chart" into "here is a chart, and here is where the numbers come from".
  *
- * COVERAGE IS PARTIAL AND UNEVENLY DISTRIBUTED. Surveyed across all 127 SPC
- * dataflows (2026-08-03): 118 carry at least one attribute, 9 carry none.
- * The empty set is not a random tail — it includes DF_BP50 and DF_SDG, two of
- * the most-cited flows in the app. So "no provenance" has to be a first-class
- * outcome with its own wording, never an empty panel or a missing control.
+ * THE QUERY KEY IS THE UNIT, NOT THE DATAFLOW. Asking about a dataflow alone
+ * answers from one channel (msd_v2) and returns only what is true of the whole
+ * dataset. Passing the panel's own key opens a second channel
+ * (dsd_attributes) carrying metadata attached to the slice, the series, or the
+ * individual observation, and that is where the most useful sourcing lives.
  *
- * Field frequency from that survey, which is what DISPLAY_ORDER is built on:
- *   DATA_SOURCE_TITLE 74, DATA_COMMENT 71, DATA_SOURCE_ORGANIZATION 63,
- *   DATA_PROCESSING 61, DATA_SOURCE_LINK 50, DATA_REVISION 36,
- *   DATA_SOURCE_DATE 34, DATA_SOURCE_COMMENT 30, DATA_SOURCE 12,
- *   DATA_SOURCE_LICENSE 9.
- * Series-level attributes (UNIT_MEASURE, OBS_COMMENT, NATURE) also appear;
- * they describe observations rather than provenance and are dropped.
+ * Measured over the 26 dataflows Country Snapshots cites (2026-08-03):
+ * unkeyed lookups answer for 16, keyed lookups answer for 23. The difference
+ * is entirely observation-level and partial-key attributes, and their values
+ * are the specific provenance a reader wants: "Report of Fiji Population
+ * Census, Fiji Bureau of Statistics", "HIES - Fiji 2003". A dataflow-level
+ * answer could never say that, because the same flow collates a different
+ * source per country and per indicator.
+ *
+ * Scope is therefore carried through to the UI rather than flattened: a reader
+ * needs to know whether "compiled by X" describes this figure or the dataset
+ * it sits in.
  */
+
+/** What a provenance field describes, from most to least specific. */
+export type ProvenanceScope = "figure" | "series" | "dataset";
 
 /** One provenance field, ready to display. */
 export interface ProvenanceField {
   id: string;
   label: string;
   text: string;
+  scope: ProvenanceScope;
   /** Set when the field is a URL, so the UI can render an anchor. */
   href?: string;
 }
 
 export interface DataflowProvenance {
   dataflowId: string;
+  /** The key the answer describes, when the lookup was scoped to one. */
+  dataKey?: string;
   /** True when at least one provenance field was found. */
   available: boolean;
   fields: ProvenanceField[];
@@ -52,7 +62,12 @@ export function cleanMetadataValue(raw: unknown): string {
   if (typeof raw !== "string") return "";
   const withoutTag = raw.replace(/^\s*[a-z]{2}(-[A-Z]{2})?\s*:\s*(?=")/, "");
   const unquoted = withoutTag.replace(/^"([\s\S]*)"$/, "$1");
-  return unquoted.trim();
+  // Providers commonly render a link as "https://x (https://x)". Keep one.
+  const deduped = unquoted.replace(
+    /(https?:\/\/[^\s()]+)\s*\(\1\)/g,
+    "$1",
+  );
+  return deduped.trim();
 }
 
 /**
@@ -71,9 +86,30 @@ const DISPLAY_ORDER: Array<{ id: string; label: string; link?: boolean }> = [
   { id: "DATA_PROCESSING", label: "How it is compiled" },
   { id: "DATA_REVISION", label: "Revision policy" },
   { id: "DATA_SOURCE_LICENSE", label: "Licence" },
+  { id: "OBS_COMMENT", label: "Note on this figure" },
   { id: "DATA_COMMENT", label: "Notes" },
   { id: "DATA_SOURCE_LINK", label: "Source link", link: true },
 ];
+
+/**
+ * Map the gateway's attachment levels onto display scope.
+ *
+ * `partial_key` means the attribute is attached to a slice of the cube rather
+ * than to one cell, which is a series statement for our purposes. Levels we do
+ * not recognise are treated as dataset-wide, the weakest claim, so an unknown
+ * level can never overstate how specific a citation is.
+ */
+function scopeOf(level: string | undefined): ProvenanceScope {
+  if (level === "observation") return "figure";
+  if (level === "series" || level === "partial_key") return "series";
+  return "dataset";
+}
+
+const SCOPE_RANK: Record<ProvenanceScope, number> = {
+  figure: 0,
+  series: 1,
+  dataset: 2,
+};
 
 interface RawAttribute {
   id?: string;
@@ -84,28 +120,28 @@ interface RawAttribute {
   level?: string;
 }
 
-/** Dataflow-level attributes describe the flow; deeper ones describe a cell. */
-function isDataflowLevel(a: RawAttribute): boolean {
-  return !a.level || a.level === "dataflow";
-}
-
 function firstUrl(text: string): string | undefined {
   return /^https?:\/\/\S+$/.test(text) ? text : /https?:\/\/\S+/.exec(text)?.[0];
 }
 
-/** Normalise a raw `get_reference_metadata` response for display. */
+/**
+ * Normalise a raw `get_reference_metadata` response for display.
+ *
+ * `dataKey` is recorded on the result, not used to filter it: the gateway has
+ * already scoped the answer to that key, and the caller needs to know which
+ * query the citation belongs to when several panels share a dataflow.
+ */
 export function normaliseReferenceMetadata(
   dataflowId: string,
   raw: unknown,
+  dataKey?: string,
 ): DataflowProvenance {
   const r = (raw ?? {}) as {
     metadata_attributes?: RawAttribute[];
     notes?: unknown;
   };
   const attrs = Array.isArray(r.metadata_attributes)
-    ? r.metadata_attributes.filter(
-        (a) => a && typeof a === "object" && isDataflowLevel(a),
-      )
+    ? r.metadata_attributes.filter((a) => a && typeof a === "object")
     : [];
 
   const fields: ProvenanceField[] = [];
@@ -125,13 +161,19 @@ export function normaliseReferenceMetadata(
       id: spec.id,
       label: hit.label || spec.label,
       text,
+      scope: scopeOf(hit.level),
       ...(href ? { href } : {}),
     });
   }
 
+  // Most specific first: a source attached to this observation outranks one
+  // describing the dataset, and is what a reader is actually citing.
+  fields.sort((a, b) => SCOPE_RANK[a.scope] - SCOPE_RANK[b.scope]);
+
   const notes = Array.isArray(r.notes) ? r.notes : [];
   return {
     dataflowId,
+    ...(dataKey ? { dataKey } : {}),
     available: fields.length > 0,
     fields,
     note:

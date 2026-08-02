@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import type { DataflowProvenance } from "@/lib/reference-metadata";
-
-type Probe = DataflowProvenance & { status?: "unknown" };
+import { useCallback, useState } from "react";
+import type {
+  DataflowProvenance,
+  ProvenanceScope,
+} from "@/lib/reference-metadata";
 
 const FAILED: DataflowProvenance = {
   dataflowId: "",
@@ -13,81 +14,69 @@ const FAILED: DataflowProvenance = {
 };
 
 /**
- * "Where these numbers come from" for one dataflow.
+ * How specific a group of fields is. Shown because the same label means
+ * different things at different scopes: "Source" against one observation is a
+ * citation for that figure, while "Source" against the dataflow describes the
+ * collection it was drawn from.
+ */
+const SCOPE_HEADING: Record<ProvenanceScope, string> = {
+  figure: "For this figure",
+  series: "For this series",
+  dataset: "For the dataset",
+};
+
+const SCOPE_ORDER: ProvenanceScope[] = ["figure", "series", "dataset"];
+
+/**
+ * "Where these numbers come from" for one panel.
  *
- * Coverage is the constraint that shapes this. Across the SPC catalogue only
- * 69 of 127 dataflows publish anything displayable, and the 58 that publish
- * nothing include every DF_SDG_*, every DF_BP50_* and every DF_NMDI_* — the
- * families the snapshots lean on hardest. An always-visible "About this data"
- * control would therefore open onto nothing on most snapshot rows, which is
- * worse than not offering it: a missing provenance block reads as unsourced
- * data, when in fact the API link beside it is the direct source.
+ * Asked against the panel's own query key, not just its dataflow. That is what
+ * makes the answer worth reading: keyed lookups resolve 23 of the 26 dataflows
+ * Country Snapshots cites against 16 unkeyed, and the extra material is the
+ * per-country sourcing ("Report of Fiji Population Census, Fiji Bureau of
+ * Statistics") that a dataflow-level answer cannot express, since one flow
+ * collates a different source per country and per indicator.
  *
- * So the control appears only where there is something behind it. On mount the
- * component probes /api/reference-metadata?probe=1, which answers from the
- * committed index without touching the gateway. Flows the index does not cover
- * (other endpoints, newly added flows) come back "unknown"; those keep the
- * control and resolve live when a user actually opens it, since a live lookup
- * costs seconds and most rows would never be opened.
+ * Nothing is fetched until a user opens the block: a lookup costs seconds, and
+ * most panels are never asked about.
  */
 export function DataflowProvenanceBlock({
   dataflowId,
+  dataKey,
   endpoint,
 }: {
   dataflowId: string;
+  dataKey?: string;
   endpoint?: string;
 }) {
-  const [probe, setProbe] = useState<Probe | null>(null);
   const [open, setOpen] = useState(false);
-  const [full, setFull] = useState<DataflowProvenance | null>(null);
+  const [data, setData] = useState<DataflowProvenance | null>(null);
   const [loading, setLoading] = useState(false);
-
-  const query = useCallback(
-    (probeOnly: boolean) => {
-      const params = new URLSearchParams({ dataflow: dataflowId });
-      if (endpoint) params.set("endpoint", endpoint);
-      if (probeOnly) params.set("probe", "1");
-      return fetch("/api/reference-metadata?" + params.toString()).then((r) =>
-        r.ok ? (r.json() as Promise<Probe>) : null,
-      );
-    },
-    [dataflowId, endpoint],
-  );
-
-  useEffect(() => {
-    if (!dataflowId) return;
-    let cancelled = false;
-    query(true)
-      .then((j) => {
-        if (!cancelled) setProbe(j);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [dataflowId, query]);
 
   const toggle = useCallback(() => {
     setOpen((wasOpen) => {
       const nowOpen = !wasOpen;
-      // The probe already carries the text whenever the index knew the answer.
-      if (nowOpen && !full && !loading) {
-        if (probe?.available) {
-          setFull(probe);
-        } else {
-          setLoading(true);
-          query(false)
-            .then((j) => setFull(j ?? { ...FAILED, dataflowId }))
-            .catch(() => setFull({ ...FAILED, dataflowId }))
-            .finally(() => setLoading(false));
-        }
+      if (nowOpen && !data && !loading) {
+        setLoading(true);
+        const params = new URLSearchParams({ dataflow: dataflowId });
+        if (dataKey) params.set("key", dataKey);
+        if (endpoint) params.set("endpoint", endpoint);
+        fetch("/api/reference-metadata?" + params.toString())
+          .then((r) => (r.ok ? (r.json() as Promise<DataflowProvenance>) : null))
+          .then((j) => setData(j ?? { ...FAILED, dataflowId }))
+          .catch(() => setData({ ...FAILED, dataflowId }))
+          .finally(() => setLoading(false));
       }
       return nowOpen;
     });
-  }, [full, loading, probe, query, dataflowId]);
+  }, [data, loading, dataflowId, dataKey, endpoint]);
 
-  // Known to publish nothing: stay out of the way entirely.
-  if (!probe || (!probe.available && probe.status !== "unknown")) return null;
+  if (!dataflowId) return null;
+
+  const groups = SCOPE_ORDER.map((scope) => ({
+    scope,
+    fields: (data?.fields ?? []).filter((f) => f.scope === scope),
+  })).filter((g) => g.fields.length > 0);
 
   return (
     <div className="mt-1">
@@ -104,37 +93,46 @@ export function DataflowProvenanceBlock({
           {loading && (
             <p className="text-on-surface-variant">Loading source details…</p>
           )}
-          {!loading && full && !full.available && (
+          {!loading && data && !data.available && (
             <p className="text-on-surface-variant">
-              {full.note} The API link opens the exact query behind this panel,
+              {data.note} The API link opens the exact query behind this panel,
               so every figure can still be checked at the source.
             </p>
           )}
-          {!loading && full?.available && (
-            <dl className="space-y-1.5">
-              {full.fields.map((f) => (
-                <div key={f.id}>
-                  <dt className="font-semibold text-on-surface-variant">
-                    {f.label}
-                  </dt>
-                  <dd className="text-on-surface">
-                    {f.href ? (
-                      <a
-                        href={f.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline underline-offset-2 hover:text-primary"
-                      >
-                        {f.text}
-                      </a>
-                    ) : (
-                      f.text
-                    )}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          )}
+          {!loading &&
+            groups.map((group) => (
+              <div key={group.scope} className="mb-2 last:mb-0">
+                {/* Only worth labelling once more than one scope answered. */}
+                {groups.length > 1 && (
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant/70">
+                    {SCOPE_HEADING[group.scope]}
+                  </p>
+                )}
+                <dl className="space-y-1.5">
+                  {group.fields.map((f) => (
+                    <div key={f.scope + "-" + f.id}>
+                      <dt className="font-semibold text-on-surface-variant">
+                        {f.label}
+                      </dt>
+                      <dd className="text-on-surface">
+                        {f.href ? (
+                          <a
+                            href={f.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline underline-offset-2 hover:text-primary"
+                          >
+                            {f.text}
+                          </a>
+                        ) : (
+                          f.text
+                        )}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            ))}
         </div>
       )}
     </div>

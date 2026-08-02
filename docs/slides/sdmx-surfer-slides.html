@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDMX Surfer — overview slides</title>
+<style>
+  /* Deliberately unthemed: system fonts, white, grayscale. Theming comes later. */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; background: #e8e8e8; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #111; }
+
+  .deck { height: 100%; }
+  .slide {
+    display: none;
+    width: min(96vw, 177.6vh);       /* 16:9 fit */
+    aspect-ratio: 16 / 9;
+    margin: max(1vh, calc((100vh - 56.25vw) / 2)) auto;
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 4.2% 5%;
+    position: relative;
+    overflow: hidden;
+  }
+  .slide.active { display: block; }
+
+  h1 { font-size: 3.2em; font-weight: 750; letter-spacing: -0.015em; }
+  h2 { font-size: 1.9em; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 0.7em; }
+  .sub { font-size: 1.35em; color: #333; margin-top: 0.6em; line-height: 1.4; }
+  .kicker { font-size: 0.78em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #666; margin-bottom: 1.2em; }
+
+  ul.points { list-style: none; }
+  ul.points li { font-size: 1.06em; line-height: 1.45; margin-bottom: 0.85em; padding-left: 1.1em; position: relative; }
+  ul.points li::before { content: "—"; position: absolute; left: 0; color: #999; }
+  ul.points b { font-weight: 680; }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 4%; align-items: start; }
+  .cols-wide-right { grid-template-columns: 46fr 54fr; }
+
+  .badges { display: flex; gap: 0.8em; margin-top: 2.2em; }
+  .badge { border: 1.5px solid #111; border-radius: 999px; padding: 0.45em 1.1em; font-size: 1.02em; font-weight: 650; }
+
+  .foot { display: none; /* embedded in larger deck */  position: absolute; left: 5%; right: 5%; bottom: 4.5%; display: flex; justify-content: space-between; font-size: 0.82em; color: #666; }
+
+  .diagram svg { width: 100%; height: auto; display: block; border: 1px solid #e2e2e2; border-radius: 8px; }
+  .caption { font-size: 0.8em; color: #777; margin-top: 0.5em; }
+
+  .provider-group { margin-bottom: 1.15em; }
+  .provider-group .label { font-size: 0.78em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #666; margin-bottom: 0.35em; }
+  .provider-group .names { font-size: 1.04em; line-height: 1.5; }
+  .provider-group .names b { font-weight: 680; }
+
+  .statusline { border-top: 1px solid #ddd; margin-top: 1.4em; padding-top: 1.1em; font-size: 0.98em; color: #333; line-height: 1.5; }
+
+  /* Navigation chrome (hidden in print) */
+  .nav { position: fixed; bottom: 12px; right: 16px; font-size: 13px; color: #555; user-select: none; }
+  .nav button { font: inherit; border: 1px solid #bbb; background: #fff; border-radius: 6px; padding: 3px 10px; cursor: pointer; margin-left: 6px; }
+
+  @media print {
+    body { background: #fff; }
+    .slide { display: block !important; width: 100%; height: 100vh; margin: 0; border: none; page-break-after: always; aspect-ratio: auto; }
+    .nav { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- ══════════ Slide 1: What it is (section opener, not a cover) ══════════ -->
+  <section class="slide active">
+    <div class="kicker">SDMX Surfer · Country Snapshots</div>
+    <h2>Dashboards you ask for, numbers you can trust</h2>
+    <div class="cols">
+      <div>
+        <ul class="points">
+          <li><b>SDMX Surfer</b> is a web app where you build dashboards on official statistics by describing them in plain language. An AI agent finds the right data in the SDMx catalogue and assembles the charts.</li>
+          <li><b>Country Snapshots</b> is the curated layer on top: ready-made statistical profiles for every Pacific country and territory, with comparison and regional views.</li>
+          <li>Both run on the same pipeline: <b>every number is fetched live from .Stat</b> at the moment you look at it, and every chart links back to its official source.</li>
+        </ul>
+      </div>
+      <div>
+        <div style="border:1px solid #e2e2e2; border-radius:8px; padding:1.4em 1.6em;">
+          <div class="label" style="font-size:0.78em; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:#666; margin-bottom:0.9em;">Three properties, by construction</div>
+          <div class="badges" style="margin-top:0; flex-direction:column; align-items:flex-start; gap:0.7em;">
+            <span class="badge">Live data — no copies, no extracts</span>
+            <span class="badge">AI-assisted — conversation, not query languages</span>
+            <span class="badge">Human-verifiable — every chart cites its source</span>
+          </div>
+          <p style="font-size:0.92em; color:#555; margin-top:1.1em; line-height:1.45;">
+            The AI cannot touch the data itself: it writes the query, .Stat serves the values straight to the chart (next slide).
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="foot">
+      <span>sdmxsurfer.net</span>
+      <span>1 / 4</span>
+    </div>
+  </section>
+
+  <!-- ══════════ Slide 2: Architecture / trust story ══════════ -->
+  <section class="slide">
+    <h2>The AI writes the question, never the numbers</h2>
+    <div class="cols cols-wide-right">
+      <div>
+        <ul class="points">
+          <li><b>Describe the dashboard in plain language.</b> The agent explores the statistical catalogue step by step (dataflows, dimensions, availability) and writes a small, human-readable dashboard spec.</li>
+          <li><b>Data never passes through the model.</b> Charts fetch values directly from the .Stat SDMx API at view time. The AI cannot corrupt, invent, or round a number: it only chooses the query and the chart type.</li>
+          <li><b>Always live, always checkable.</b> No copies or extracts; reload and you see today's data. Every panel cites its exact source query, one click from the official .Stat page, and the spec stays human-editable.</li>
+        </ul>
+      </div>
+      <div class="diagram">
+        <!-- Diagram reused from gvdallariva.net/blog/sdmx-tools-at-spc -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" role="img" aria-label="SDMX Surfer architecture">
+          <rect width="760" height="340" fill="#fafaf7"/>
+          <defs>
+            <marker id="arrow-dark" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" fill="#1f2937"/></marker>
+            <marker id="arrow-blue" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" fill="#2563eb"/></marker>
+            <marker id="arrow-amber" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" fill="#b45309"/></marker>
+            <marker id="arrow-green" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" fill="#15803d"/></marker>
+          </defs>
+          <rect x="168" y="38" width="592" height="112" fill="#dbeafe" opacity="0.45"/>
+          <rect x="168" y="150" width="592" height="88" fill="#fef3c7" opacity="0.45"/>
+          <rect x="168" y="238" width="592" height="102" fill="#dcfce7" opacity="0.45"/>
+          <text x="42" y="34" font-size="11" font-weight="700" fill="#475569">AUTHORING</text>
+          <rect x="36" y="52" width="112" height="56" rx="8" fill="#ffffff" stroke="#1f2937" stroke-width="1.4"/>
+          <text x="92" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">User</text>
+          <text x="92" y="94" text-anchor="middle" font-size="10.5" fill="#374151">dashboard goal</text>
+          <rect x="190" y="52" width="132" height="56" rx="8" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5"/>
+          <text x="256" y="75" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">LLM Agent</text>
+          <text x="256" y="93" text-anchor="middle" font-size="10.5" fill="#1f2937">query + chart</text>
+          <rect x="376" y="52" width="132" height="56" rx="8" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.5"/>
+          <text x="442" y="75" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">MCP Gateway</text>
+          <text x="442" y="93" text-anchor="middle" font-size="10.5" fill="#1f2937">SDMX discovery</text>
+          <rect x="606" y="52" width="118" height="262" rx="8" fill="#dcfce7" stroke="#15803d" stroke-width="1.5"/>
+          <text x="665" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">SDMX</text>
+          <text x="665" y="94" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">Endpoint</text>
+          <line x1="622" y1="112" x2="708" y2="112" stroke="#15803d" stroke-width="0.75" opacity="0.35"/>
+          <text x="665" y="132" text-anchor="middle" font-size="10.5" fill="#166534">metadata</text>
+          <text x="665" y="282" text-anchor="middle" font-size="10.5" fill="#166534">data values</text>
+          <path d="M 148 80 L 188 80" stroke="#1f2937" stroke-width="1.4" fill="none" marker-end="url(#arrow-dark)"/>
+          <path d="M 322 70 L 374 70" stroke="#2563eb" stroke-width="1.5" fill="none" marker-end="url(#arrow-blue)"/>
+          <path d="M 376 92 L 324 92" stroke="#2563eb" stroke-width="1.5" fill="none" marker-end="url(#arrow-blue)"/>
+          <text x="349" y="58" text-anchor="middle" font-size="9.5" fill="#1d4ed8">MCP call</text>
+          <text x="350" y="106" text-anchor="middle" font-size="9.5" fill="#1d4ed8">metadata</text>
+          <path d="M 508 70 C 548 70, 560 132, 604 132" stroke="#2563eb" stroke-width="1.5" fill="none" marker-end="url(#arrow-blue)"/>
+          <path d="M 606 152 C 562 152, 548 92, 510 92" stroke="#2563eb" stroke-width="1.5" fill="none" marker-end="url(#arrow-blue)"/>
+          <text x="42" y="164" font-size="11" font-weight="700" fill="#92400e">CONFIGURATION</text>
+          <rect x="190" y="176" width="132" height="56" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+          <text x="256" y="199" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">JSON config</text>
+          <text x="256" y="217" text-anchor="middle" font-size="10.5" fill="#374151">human-readable</text>
+          <rect x="376" y="176" width="132" height="56" rx="8" fill="#f5f5f4" stroke="#44403c" stroke-width="1.5"/>
+          <text x="442" y="199" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">Dashboard</text>
+          <text x="442" y="217" text-anchor="middle" font-size="10.5" fill="#374151">components</text>
+          <path d="M 256 108 L 256 174" stroke="#b45309" stroke-width="1.5" fill="none" marker-end="url(#arrow-amber)"/>
+          <text x="268" y="143" text-anchor="start" font-size="9.5" fill="#b45309">writes</text>
+          <path d="M 322 204 L 374 204" stroke="#b45309" stroke-width="1.5" fill="none" marker-end="url(#arrow-amber)"/>
+          <text x="42" y="252" font-size="11" font-weight="700" fill="#166534">RUNTIME</text>
+          <rect x="376" y="250" width="132" height="64" rx="8" fill="#e7e5e4" stroke="#44403c" stroke-width="1.5"/>
+          <text x="442" y="273" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">Interactive</text>
+          <text x="442" y="290" text-anchor="middle" font-size="13" font-weight="700" fill="#111827">dashboard</text>
+          <text x="442" y="306" text-anchor="middle" font-size="10.5" fill="#374151">fetches data</text>
+          <path d="M 442 232 L 442 248" stroke="#1f2937" stroke-width="1.4" fill="none" marker-end="url(#arrow-dark)"/>
+          <text x="454" y="244" text-anchor="start" font-size="9.5" fill="#374151">renders</text>
+          <path d="M 508 276 L 604 276" stroke="#15803d" stroke-width="1.8" fill="none" marker-end="url(#arrow-green)"/>
+          <path d="M 606 304 L 510 304" stroke="#15803d" stroke-width="1.8" fill="none" marker-end="url(#arrow-green)"/>
+          <text x="557" y="267" text-anchor="middle" font-size="9.5" fill="#166534">SDMX query</text>
+          <text x="558" y="320" text-anchor="middle" font-size="9.5" fill="#166534">values</text>
+        </svg>
+        <p class="caption">The model acts only in the authoring phase. At runtime the dashboard talks to the SDMx endpoint directly.</p>
+      </div>
+    </div>
+    <div class="foot"><span>SDMX Surfer</span><span>2 / 4</span></div>
+  </section>
+
+  <!-- ══════════ Slide 3: Country Snapshots ══════════ -->
+  <section class="slide">
+    <h2>Country Snapshots: the curated layer</h2>
+    <div class="cols cols-wide-right">
+      <div>
+        <ul class="points">
+          <li><b>Built for MFAT, useful to everyone.</b> Developed for the New Zealand Ministry of Foreign Affairs and Trade: one-page statistical profiles ready to brief from, with a curated catalogue of ~100 indicators across 12 themes for each of 22 Pacific countries and territories, plus side-by-side comparison and region-wide views.</li>
+          <li><b>Same trust pipeline.</b> Every indicator on the page is a live .Stat query rendered on load, with its source cited. PDF export keeps the source links clickable.</li>
+          <li><b>From reading to exploring in one click.</b> "Explore in Surfer" turns any snapshot page into an editable AI session: change countries, time ranges, or chart types by asking.</li>
+        </ul>
+      </div>
+      <div>
+        <!-- Placeholder wireframe. Swap for a real screenshot when theming:
+             <img src="snapshot-screenshot.png" style="width:100%; border:1px solid #e2e2e2; border-radius:8px;"> -->
+        <svg viewBox="0 0 640 400" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto; border:1px solid #e2e2e2; border-radius:8px; background:#fdfdfc;" role="img" aria-label="Wireframe of a Country Snapshot page">
+          <rect x="0" y="0" width="640" height="46" fill="#f2f2ef"/>
+          <rect x="22" y="15" width="150" height="15" rx="3" fill="#c9c9c4"/>
+          <rect x="470" y="14" width="70" height="18" rx="9" fill="#ddddd8"/>
+          <rect x="548" y="14" width="70" height="18" rx="9" fill="#ddddd8"/>
+          <rect x="22" y="66" width="235" height="20" rx="3" fill="#b9b9b3"/>
+          <rect x="22" y="94" width="120" height="11" rx="3" fill="#d9d9d4"/>
+          <!-- TOC rail -->
+          <rect x="22" y="122" width="108" height="240" rx="6" fill="#f5f5f2"/>
+          <rect x="34" y="138" width="80" height="9" rx="3" fill="#cfcfca"/>
+          <rect x="34" y="156" width="68" height="9" rx="3" fill="#dcdcd7"/>
+          <rect x="34" y="174" width="74" height="9" rx="3" fill="#dcdcd7"/>
+          <rect x="34" y="192" width="60" height="9" rx="3" fill="#dcdcd7"/>
+          <!-- chart cards -->
+          <g>
+            <rect x="148" y="122" width="228" height="150" rx="8" fill="#fff" stroke="#e3e3de"/>
+            <rect x="162" y="136" width="120" height="10" rx="3" fill="#cfcfca"/>
+            <polyline points="164,246 200,225 236,232 272,205 308,196 344,175" fill="none" stroke="#9a9a94" stroke-width="2.5"/>
+            <polyline points="164,252 200,246 236,238 272,236 308,222 344,214" fill="none" stroke="#c4c4be" stroke-width="2.5"/>
+            <rect x="162" y="258" width="90" height="7" rx="3" fill="#e3e3de"/>
+          </g>
+          <g>
+            <rect x="390" y="122" width="228" height="150" rx="8" fill="#fff" stroke="#e3e3de"/>
+            <rect x="404" y="136" width="120" height="10" rx="3" fill="#cfcfca"/>
+            <rect x="408" y="196" width="26" height="62" fill="#b9b9b3"/>
+            <rect x="442" y="216" width="26" height="42" fill="#c9c9c4"/>
+            <rect x="476" y="182" width="26" height="76" fill="#b9b9b3"/>
+            <rect x="510" y="228" width="26" height="30" fill="#c9c9c4"/>
+            <rect x="544" y="206" width="26" height="52" fill="#b9b9b3"/>
+            <rect x="404" y="258" width="90" height="7" rx="3" fill="#e3e3de"/>
+          </g>
+          <g>
+            <rect x="148" y="288" width="228" height="76" rx="8" fill="#fff" stroke="#e3e3de"/>
+            <rect x="162" y="302" width="100" height="9" rx="3" fill="#cfcfca"/>
+            <rect x="162" y="322" width="70" height="24" rx="3" fill="#a8a8a2"/>
+          </g>
+          <g>
+            <rect x="390" y="288" width="228" height="76" rx="8" fill="#fff" stroke="#e3e3de"/>
+            <rect x="404" y="302" width="100" height="9" rx="3" fill="#cfcfca"/>
+            <rect x="404" y="322" width="70" height="24" rx="3" fill="#a8a8a2"/>
+          </g>
+          <rect x="22" y="378" width="596" height="1" fill="#e8e8e3"/>
+        </svg>
+        <p class="caption">Snapshot page layout (wireframe; live screenshots to follow with the theme).</p>
+      </div>
+    </div>
+    <div class="foot"><span>Country Snapshots</span><span>3 / 4</span></div>
+  </section>
+
+  <!-- ══════════ Slide 4: Reach + status ══════════ -->
+  <section class="slide">
+    <h2>Built for the Pacific, connected to the world</h2>
+    <div class="cols">
+      <div>
+        <div class="provider-group">
+          <div class="label">Home</div>
+          <div class="names"><b>SPC's Pacific Data Hub (.Stat)</b>, first-class support for all 22 Pacific countries and territories, treated with regional neutrality.</div>
+        </div>
+        <div class="provider-group">
+          <div class="label">National statistics offices</div>
+          <div class="names"><b>Stats NZ</b> · <b>Australian Bureau of Statistics</b> · Fiji Bureau of Statistics · Samoa Bureau of Statistics</div>
+        </div>
+        <div class="provider-group">
+          <div class="label">International organisations</div>
+          <div class="names">OECD · Eurostat · UNICEF · ILO · IMF · ECB · BIS</div>
+        </div>
+        <p style="font-size:0.95em; color:#555; margin-top:0.4em;">One conversation can mix sources: Pacific data alongside the same indicator from any connected provider, every series still fetched live from its own endpoint.</p>
+      </div>
+      <div>
+        <ul class="points">
+          <li><b>Live today</b> at <b>sdmxsurfer.net</b> (capped pilot), moving to <b>surfer.pacificdata.org</b>.</li>
+          <li><b>Safe to open up:</b> per-user daily limits and a hard budget cap on AI usage; the data itself is public official statistics.</li>
+          <li><b>Owned by the Pacific:</b> copyright The Pacific Community (SPC), source available under a noncommercial licence; built at the Statistics for Development Division.</li>
+        </ul>
+        <div class="statusline">
+          Everything on screen is reproducible: open any chart's source link and you are on the official .Stat query that produced it.
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>SDMX Surfer · Country Snapshots</span><span>4 / 4</span></div>
+  </section>
+
+</div>
+
+<div class="nav">
+  <span id="counter">1 / 4</span>
+  <button onclick="step(-1)">‹</button>
+  <button onclick="step(1)">›</button>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll(".slide"));
+  let idx = 0;
+  function show(i) {
+    idx = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, k) => s.classList.toggle("active", k === idx));
+    document.getElementById("counter").textContent = (idx + 1) + " / " + slides.length;
+  }
+  function step(d) { show(idx + d); }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") step(1);
+    if (e.key === "ArrowLeft" || e.key === "PageUp") step(-1);
+    if (e.key === "Home") show(0);
+    if (e.key === "End") show(slides.length - 1);
+  });
+  document.addEventListener("click", (e) => {
+    if (e.target.closest(".nav")) return;
+    step(e.clientX > innerWidth / 2 ? 1 : -1);
+  });
+</script>
+</body>
+</html>

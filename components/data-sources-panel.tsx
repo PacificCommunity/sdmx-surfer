@@ -165,6 +165,7 @@ function BuilderSourceRow({ source }: { source: DataSource }) {
         {source.dataflowName}
         <DataflowProvenanceBlock
           dataflowId={source.dataflowId}
+          dataKey={source.dataKey}
           endpoint={source.endpointKey}
         />
       </td>

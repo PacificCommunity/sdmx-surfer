@@ -88,6 +88,12 @@ export interface DataSource {
   componentType: string;
   dataflowId: string;
   dataflowName: string;
+  /**
+   * The dimension key this panel queries. Reference metadata is attached per
+   * slice, series and observation as well as per dataflow, so provenance is
+   * only specific when it is asked for against this key.
+   */
+  dataKey: string;
   apiUrl: string;
   explorerUrl: string | null;
   endpointKey: string;
@@ -132,6 +138,7 @@ export function extractDataSources(config: {
           componentType: col.type,
           dataflowId: dfId,
           dataflowName: nameMap[dfId] || dfId,
+          dataKey: parsed?.key ?? "",
           apiUrl: url,
           explorerUrl: parsed && endpoint.buildExplorerUrl
             ? endpoint.buildExplorerUrl(parsed)

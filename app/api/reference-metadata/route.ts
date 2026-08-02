@@ -4,7 +4,6 @@ import {
   normaliseReferenceMetadata,
   type DataflowProvenance,
 } from "@/lib/reference-metadata";
-import { lookupProvenance } from "@/lib/provenance-index";
 
 export const maxDuration = 25;
 
@@ -13,11 +12,19 @@ export const maxDuration = 25;
 // no agent tokens — the AI chooses the query, this explains where the numbers
 // came from.
 //
-// The gateway is slow here: measured across the 127-flow SPC catalogue, p50
-// 3.6s, p90 7.5s, max 14.6s per call, each opening a fresh MCP session, and
-// only 69 of those 127 have anything to show. So requests are answered from
-// the committed sweep first (lib/provenance-index), then an in-process cache,
-// and only then live.
+// Answers are scoped to the panel's own query key, which is what makes them
+// worth showing: keyed lookups resolve 23 of the 26 dataflows Country
+// Snapshots cites, against 16 unkeyed, and the extra ones carry the specific
+// per-country sourcing rather than a statement about the whole dataset.
+//
+// This was briefly served from a committed sweep of the catalogue. That is the
+// wrong shape once the key is part of the question: the key space is unbounded,
+// so a precomputed file could only ever answer the weaker dataflow-level
+// version, and it would have to be rebuilt on a schedule to stay honest. An
+// in-process cache carries the same load with no staleness to manage.
+//
+// The gateway is slow here: p50 3.6s, p90 7.5s, max 14.6s per call, each
+// opening a fresh MCP session. So nothing is fetched until a user asks.
 
 const TTL_MS = 6 * 60 * 60 * 1000;
 const MAX_ENTRIES = 500;
@@ -51,6 +58,7 @@ async function lookup(
   key: string,
   dataflowId: string,
   endpoint: string,
+  dataKey: string,
 ): Promise<DataflowProvenance> {
   const existing = inFlight.get(key);
   if (existing) return existing;
@@ -59,10 +67,11 @@ async function lookup(
     const raw = await withMCPClient((client) =>
       callMcpTool(client, "get_reference_metadata", {
         dataflow_id: dataflowId,
+        ...(dataKey ? { key: dataKey } : {}),
         ...(endpoint ? { endpoint } : {}),
       }),
     );
-    const value = normaliseReferenceMetadata(dataflowId, raw);
+    const value = normaliseReferenceMetadata(dataflowId, raw, dataKey);
     store(key, value);
     return value;
   })();
@@ -88,18 +97,8 @@ export async function GET(req: Request) {
     return Response.json({ error: "missing dataflow" }, { status: 400 });
   }
 
-  const key = endpoint + "|" + dataflowId;
-
-  // The committed sweep answers most requests with no gateway call at all.
-  const indexed = lookupProvenance(dataflowId, endpoint);
-  if (indexed) {
-    return Response.json(indexed, {
-      headers: {
-        "cache-control": "private, max-age=3600",
-        "x-provenance-source": "index",
-      },
-    });
-  }
+  const dataKey = (url.searchParams.get("key") ?? "").trim();
+  const key = endpoint + "|" + dataflowId + "|" + dataKey;
 
   const cached = fromCache(key);
   if (cached) {
@@ -111,19 +110,8 @@ export async function GET(req: Request) {
     });
   }
 
-  // `probe` asks only what can be answered instantly. The UI uses it on mount
-  // to decide whether to offer the control at all, so it must never block on
-  // a multi-second gateway call: an unknown flow reports itself as unknown and
-  // is resolved live only if the user actually opens the panel.
-  if (url.searchParams.get("probe") === "1") {
-    return Response.json(
-      { dataflowId, available: false, fields: [], status: "unknown" },
-      { headers: { "x-provenance-source": "unknown" } },
-    );
-  }
-
   try {
-    const result = await lookup(key, dataflowId, endpoint);
+    const result = await lookup(key, dataflowId, endpoint, dataKey);
     return Response.json(result, {
       // Provenance is editorial metadata; it changes far less often than data.
       headers: {

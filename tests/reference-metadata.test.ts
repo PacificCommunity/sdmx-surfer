@@ -36,6 +36,18 @@ describe("reference metadata", () => {
     expect(cleanMetadataValue(undefined)).toBe("");
   });
 
+  it("collapses a link the provider repeated as a parenthetical", () => {
+    expect(
+      cleanMetadataValue(
+        "https://www.statsfiji.gov.fj/census-2017 (https://www.statsfiji.gov.fj/census-2017)",
+      ),
+    ).toBe("https://www.statsfiji.gov.fj/census-2017");
+    // A parenthetical that says something different is left alone.
+    expect(cleanMetadataValue("See https://a.org/x (accessed 2026)")).toBe(
+      "See https://a.org/x (accessed 2026)",
+    );
+  });
+
   it("strips an inlined language tag when the gateway sends one", () => {
     expect(cleanMetadataValue('en: "National Statistics Organisations."')).toBe(
       "National Statistics Organisations.",
@@ -64,6 +76,8 @@ describe("reference metadata", () => {
       "DATA_REVISION",
       "DATA_COMMENT",
     ]);
+    expect(p.fields.every((f) => f.scope === "dataset")).toBe(true);
+    expect(p.dataKey).toBeUndefined();
   });
 
   it("keeps the ids the catalogue actually publishes", () => {
@@ -92,15 +106,59 @@ describe("reference metadata", () => {
     expect(p.fields[0].href).toBe("https://stats.pacificdata.org/");
   });
 
-  it("drops series-level attributes, which describe cells not provenance", () => {
+  it("keeps deeper levels, which carry the most specific sourcing", () => {
+    // The whole point of asking with a key: DF_VITAL publishes nothing at
+    // dataflow level and a real citation at observation level.
+    const p = normaliseReferenceMetadata(
+      "DF_VITAL",
+      {
+        metadata_attributes: [
+          attr("UNIT_MEASURE", "YEARS", { level: "series" }),
+          attr("DATA_SOURCE", "Report of Fiji Population Census", {
+            level: "observation",
+          }),
+        ],
+      },
+      "A.FJ.LEB.M+F",
+    );
+    expect(p.available).toBe(true);
+    expect(p.fields).toHaveLength(1);
+    expect(p.fields[0]).toMatchObject({
+      id: "DATA_SOURCE",
+      scope: "figure",
+      text: "Report of Fiji Population Census",
+    });
+    // UNIT_MEASURE is structural: it describes the number, not its origin.
+    expect(p.fields.some((f) => f.id === "UNIT_MEASURE")).toBe(false);
+    expect(p.dataKey).toBe("A.FJ.LEB.M+F");
+  });
+
+  it("orders the most specific claim first", () => {
     const p = normaliseReferenceMetadata("DF_X", {
       metadata_attributes: [
-        attr("UNIT_MEASURE", "KM2", { level: "series" }),
-        attr("OBS_COMMENT", "Break in series", { level: "observation" }),
-        attr("DATA_COMMENT", "Regional aggregate."),
+        attr("DATA_PROCESSING", "Compiled from national accounts."),
+        attr("DATA_SOURCE", "HIES - Fiji 2003", { level: "observation" }),
+        attr("DATA_SOURCE_LINK", "https://example.org/x", {
+          level: "partial_key",
+        }),
       ],
     });
-    expect(p.fields.map((f) => f.id)).toEqual(["DATA_COMMENT"]);
+    expect(p.fields.map((f) => f.scope)).toEqual([
+      "figure",
+      "series",
+      "dataset",
+    ]);
+    expect(p.fields[0].id).toBe("DATA_SOURCE");
+  });
+
+  it("treats an unrecognised level as the weakest claim", () => {
+    // An unknown level must never be presented as a per-figure citation.
+    const p = normaliseReferenceMetadata("DF_X", {
+      metadata_attributes: [
+        attr("DATA_SOURCE", "Somewhere", { level: "something_new" }),
+      ],
+    });
+    expect(p.fields[0].scope).toBe("dataset");
   });
 
   it("prefers the English rendering when a field repeats per language", () => {
@@ -116,7 +174,7 @@ describe("reference metadata", () => {
   });
 
   it("states absence in words rather than returning a blank panel", () => {
-    // Nine SPC flows publish nothing, DF_BP50 and DF_SDG among them.
+    // Some flows publish nothing at any level; DF_SDG is one of them.
     const p = normaliseReferenceMetadata("DF_SDG", {
       metadata_attributes: [],
       notes: [],
