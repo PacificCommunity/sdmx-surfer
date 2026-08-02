@@ -7,6 +7,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build:provenance": "tsx scripts/build-provenance-index.mts",
     "dev": "next dev --turbopack",
     "build": "next build --webpack",
     "start": "next start",

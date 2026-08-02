@@ -216,7 +216,9 @@ To launch under any SPC umbrella, the interface needs to match institutional con
 - Visual identity: SPC and PDH header, footer, colour palette accents, fonts. Our existing Oceanic Data-Scapes design system is close in spirit but is not the official SPC palette.
 - Accessibility: WCAG 2.1 AA at minimum. We should run an audit (axe, Lighthouse) and fix anything it surfaces. Pacific users include people on assistive tech.
 - Languages: English by default. Whether we need French (for New Caledonia, French Polynesia, Wallis and Futuna) is a governance decision, not a technical one.
-- Citations and provenance: when a dashboard displays SPC or partner data, the source needs to be cited per institutional conventions, including the .Stat URL and the date the data was retrieved.
+- Citations and provenance: when a dashboard displays SPC or partner data, the source needs to be cited per institutional conventions, including the .Stat URL and the date the data was retrieved. Partly delivered: each data source row can now expand a published-provenance block (source, compiling organisation, compilation method, revision policy, licence, source link), swept from the gateway's `get_reference_metadata` into a committed index.
+
+  The gap to close is upstream rather than in the app. Measured across the whole SPC catalogue on 2026-08-03, 69 of 127 dataflows publish provenance we can display and 58 publish none, and the empty set is concentrated in the families the app leans on hardest: DF_SDG_* (0 of 18), DF_BP50_* (0 of 8) and DF_NMDI_* (0 of 8). So the block is largely absent on Country Snapshot themes and present across the wider catalogue in the explorer. Filling those families in .Stat would need no app change; the index is rebuilt with `npm run build:provenance`.
 - Footer requirements: links to SPC privacy policy, terms of use, contact, depending on where the app sits (§7.3).
 
 Effort: three to five days for visual alignment and accessibility fixes, plus design review.
