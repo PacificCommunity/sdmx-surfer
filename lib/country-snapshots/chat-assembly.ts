@@ -11,6 +11,7 @@ import {
   buildSnapshotSystemPromptParts,
   type SnapshotContext,
 } from "./system-prompt";
+import { filterMcpTools } from "@/lib/mcp-tool-policy";
 
 /**
  * Shared request assembly for the snapshot chat — used by BOTH the chat
@@ -84,7 +85,7 @@ export function buildUpdateDashboardTool() {
   return tool({
     description:
       "Send a dashboard configuration to the live preview. " +
-      "Prefer the simplified authoring schema (intent visuals like kpi, chart, map, note). " +
+      "Prefer the simplified authoring schema (intent visuals like kpi, chart, table, map, note). " +
       "Always send the complete config, not just changed parts.",
     inputSchema: z.object({ config: dashboardToolConfigSchema }),
     execute: async ({
@@ -119,9 +120,14 @@ export function buildUpdateDashboardTool() {
  * warming permanently — which is why both call this.
  */
 export function buildSnapshotTools(
-  mcpTools: Record<string, unknown>,
+  rawMcpTools: Record<string, unknown>,
   mode: SnapshotChatMode,
 ): Record<string, unknown> {
+  // Narrow to the model-facing workflow set. This MUST happen here rather than
+  // in the routes: the chat and warm routes both call this helper, and their
+  // cached prompt prefixes (tools → system → messages) have to stay
+  // byte-identical or the warm-up stops priming the chat turn's cache.
+  const mcpTools = filterMcpTools(rawMcpTools);
   if (mode === "index") {
     return {
       ...mcpTools, // index mode is allowed to mutate

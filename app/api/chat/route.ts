@@ -21,6 +21,7 @@ import {
 import { createRequestLogger } from "@/lib/logger";
 import { resolveDataflowNamesFromConfig } from "@/lib/dataflow-names";
 import { sanitizeToolInputs } from "@/lib/sanitize-messages";
+import { filterMcpTools } from "@/lib/mcp-tool-policy";
 
 // Upper bounds on user-controlled strings before they touch the model.
 // The chat turn cap is generous — well above typical long sessions — while
@@ -121,7 +122,9 @@ export async function POST(req: Request) {
     mcpClient = await createMCPClient({
       transport: mcpTransportConfig(),
     });
-    const mcpTools = await mcpClient.tools();
+    // Offer the model only the documented discovery workflow; the app calls
+    // the rest (diagram, code usage) directly in its own routes.
+    const mcpTools = filterMcpTools(await mcpClient.tools());
 
     const sanitizedMessages = sanitizeToolInputs(
       messages as Array<Record<string, unknown>>,
@@ -192,7 +195,7 @@ export async function POST(req: Request) {
         update_dashboard: tool({
           description:
             "Send a dashboard configuration to the live preview. " +
-            "Prefer the simplified authoring schema (intent visuals like kpi, chart, map, note). " +
+            "Prefer the simplified authoring schema (intent visuals like kpi, chart, table, map, note). " +
             "The app will compile it to the native dashboard config. " +
             "You may also use native passthrough when needed. " +
             "Always send the complete config, not just changed parts.",
@@ -241,24 +244,32 @@ export async function POST(req: Request) {
         // to override on ordinary steps.
         return {};
       },
-      onStepFinish: ({ dynamicToolCalls }) => {
-        // AI SDK v6 splits tool calls into static (defined inline, e.g.
-        // update_dashboard) and dynamic (MCP). update_dashboard logs itself
-        // in its execute(); here we just record the dynamic ones — every
-        // MCP SDMX call we want to surface in admin analytics.
-        if (!dynamicToolCalls) return;
-        for (const tc of dynamicToolCalls) {
-          const tcAny = tc as Record<string, unknown>;
-          logger.recordToolCall(
-            String(tcAny.toolName ?? ""),
-            (tcAny.input ?? tcAny.args ?? {}) as Record<string, unknown>,
-            (tcAny.result ?? tcAny.output) as unknown,
-            currentStep,
-          );
-        }
-      },
       onFinish: async ({ text, totalUsage, steps }) => {
         logger.setAiResponse(text);
+        // MCP tool calls are recorded here, from `steps[]`, rather than from
+        // onStepFinish's `dynamicToolCalls`: in production the latter path
+        // recorded nothing (turns with 15 steps logged only the single
+        // self-logged update_dashboard call), leaving admin analytics blind
+        // to the entire SDMX layer. `steps[]` is the same array the cost sum
+        // above relies on, so it is known to be populated. update_dashboard
+        // logs itself in execute(); skip it here to avoid double counting.
+        steps.forEach((step, stepIndex) => {
+          for (const tc of step.toolCalls ?? []) {
+            const call = tc as unknown as {
+              toolName?: string;
+              input?: unknown;
+              output?: unknown;
+            };
+            const name = String(call.toolName ?? "");
+            if (!name || name === "update_dashboard") continue;
+            logger.recordToolCall(
+              name,
+              (call.input ?? {}) as Record<string, unknown>,
+              call.output,
+              stepIndex,
+            );
+          }
+        });
         // AI SDK v6: `onFinish` extends the FINAL step's `StepResult`. The
         // `usage` and `providerMetadata` on the event refer to that final step
         // only — not the whole turn. For multi-step agent runs (every SDMX

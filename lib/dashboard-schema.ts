@@ -46,6 +46,7 @@ export const visualConfigSchema = z
       "drilldown",
       "note",
       "map",
+      "table",
     ]),
     colSize: z.number().optional(),
     title: textConfigSchema.optional(),

@@ -46,7 +46,8 @@ export type SDMXComponentType =
   | "value"
   | "drilldown"
   | "note"
-  | "map";
+  | "map"
+  | "table";
 
 export interface SDMXVisualConfig {
   id: string;

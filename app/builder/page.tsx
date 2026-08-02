@@ -642,12 +642,17 @@ export default function BuilderPage() {
       pendingPreviewErrorRef.current = null;
 
       try {
+        // Typed library errors already carry a targeted "FIX:" instruction
+        // (lib/render-error-hints.ts); only untyped failures need the blanket
+        // reminder, which would otherwise be noise on a structural error.
+        const hasTargetedFix = error.includes("FIX:");
         await sendMessageRef.current({
           text:
-            "[SYSTEM: The dashboard preview encountered an error: " +
+            "[SYSTEM: The dashboard preview reported a problem. " +
             error +
-            ". Please fix the broken component(s) and call update_dashboard again. " +
-            "Every data URL MUST come from build_data_url.]",
+            " Apply the fix and call update_dashboard again with the corrected config." +
+            (hasTargetedFix ? "" : " Every data URL MUST come from build_data_url.") +
+            "]",
         });
       } catch {
         lastForwardedPreviewErrorRef.current = null;

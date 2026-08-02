@@ -34,6 +34,60 @@ describe("dashboard authoring compiler", () => {
     );
   });
 
+  it("compiles table intent visuals into native table visuals", () => {
+    const parsed = dashboardToolConfigSchema.parse({
+      id: "demo",
+      rows: [
+        {
+          columns: [
+            {
+              kind: "table",
+              id: "trade_table",
+              title: "Trade by year",
+              dataUrl: "https://example.com/rest/data/DF_IMTS/A.FJ",
+              xAxis: "TIME_PERIOD",
+              seriesBy: "GEO_PICT",
+              unit: { text: "USD", location: "suffix" },
+              decimals: 0,
+            },
+          ],
+        },
+      ],
+    });
+
+    const compiled = compileDashboardToolConfig(parsed);
+    const visual = compiled.rows[0].columns[0];
+
+    expect(visual.type).toBe("table");
+    expect(visual.xAxisConcept).toBe("TIME_PERIOD");
+    expect(visual.legend?.concept).toBe("GEO_PICT");
+    expect(visual.data).toBe(
+      "https://example.com/rest/data/DF_IMTS/A.FJ?dimensionAtObservation=AllDimensions",
+    );
+  });
+
+  it("compiles a table without seriesBy (rows only, no legend)", () => {
+    const parsed = dashboardToolConfigSchema.parse({
+      id: "demo",
+      rows: [
+        {
+          columns: [
+            {
+              kind: "table",
+              id: "simple_table",
+              dataUrl: "https://example.com/rest/data/DF_POP/A.FJ",
+              xAxis: "TIME_PERIOD",
+            },
+          ],
+        },
+      ],
+    });
+
+    const visual = compileDashboardToolConfig(parsed).rows[0].columns[0];
+    expect(visual.type).toBe("table");
+    expect(visual.legend).toBeUndefined();
+  });
+
   it("compiles map intent visuals into native packed map syntax", () => {
     const parsed = dashboardToolConfigSchema.parse({
       id: "map-demo",

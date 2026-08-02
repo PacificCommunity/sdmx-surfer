@@ -47,6 +47,23 @@ const kpiIntentSchema = commonVisualSchema.extend({
   decimals: z.union([z.number(), z.string()]).optional(),
 });
 
+// Tabular view of a query. The library renders `xAxis` down the rows and, when
+// `seriesBy` is given, that dimension across the columns. Useful when exact
+// figures matter more than shape, or when the data is too sparse to plot.
+const tableIntentSchema = commonVisualSchema.extend({
+  kind: z.literal("table"),
+  dataUrl: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]),
+  xAxis: z.string(),
+  seriesBy: z.string().optional(),
+  decimals: z.union([z.number(), z.string()]).optional(),
+  unit: z
+    .object({
+      text: z.string(),
+      location: z.enum(["prefix", "suffix", "under"]).optional(),
+    })
+    .optional(),
+});
+
 const chartIntentSchema = commonVisualSchema.extend({
   kind: z.literal("chart"),
   chartType: z.enum([
@@ -111,6 +128,7 @@ const nativeVisualWrapperSchema = z.object({
 export const authoringVisualSchema = z.union([
   noteIntentSchema,
   kpiIntentSchema,
+  tableIntentSchema,
   chartIntentSchema,
   mapIntentSchema,
   nativeVisualWrapperSchema,
@@ -149,6 +167,7 @@ type NativeVisualConfig = z.infer<typeof visualConfigSchema>;
 type NativeDashboardConfig = z.infer<typeof dashboardConfigSchema>;
 type NoteIntent = z.infer<typeof noteIntentSchema>;
 type KpiIntent = z.infer<typeof kpiIntentSchema>;
+type TableIntent = z.infer<typeof tableIntentSchema>;
 type ChartIntent = z.infer<typeof chartIntentSchema>;
 type MapIntent = z.infer<typeof mapIntentSchema>;
 type NativeVisualWrapper = z.infer<typeof nativeVisualWrapperSchema>;
@@ -217,6 +236,29 @@ function compileKpi(intent: KpiIntent): NativeVisualConfig {
     extraOptions: intent.extraOptions,
     xAxisConcept: intent.valueConcept ?? DEFAULT_VALUE_CONCEPT,
     data: ensureAllDimensions(intent.dataUrl),
+    unit: intent.unit,
+    decimals: intent.decimals,
+  };
+}
+
+function compileTable(intent: TableIntent): NativeVisualConfig {
+  const urls = Array.isArray(intent.dataUrl) ? intent.dataUrl : [intent.dataUrl];
+  return {
+    id: intent.id,
+    type: "table",
+    colSize: intent.colSize,
+    title: toTextConfig(intent.title),
+    subtitle: toTextConfig(intent.subtitle),
+    note: toTextConfig(intent.note),
+    frame: intent.frame,
+    adaptiveTextSize: intent.adaptiveTextSize,
+    download: intent.download,
+    dataLink: intent.dataLink,
+    metadataLink: intent.metadataLink,
+    extraOptions: intent.extraOptions,
+    xAxisConcept: intent.xAxis,
+    data: urls.length === 1 ? ensureAllDimensions(urls[0]) : urls.map(ensureAllDimensions),
+    ...(intent.seriesBy ? { legend: { concept: intent.seriesBy } } : {}),
     unit: intent.unit,
     decimals: intent.decimals,
   };
@@ -333,6 +375,8 @@ function compileVisual(visual: AuthoringVisual): NativeVisualConfig {
       return compileNote(intentVisual);
     case "kpi":
       return compileKpi(intentVisual);
+    case "table":
+      return compileTable(intentVisual);
     case "chart":
       return compileChart(intentVisual);
     case "map":

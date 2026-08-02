@@ -21,6 +21,7 @@ import {
 import { useHighchartsViewportReflow } from "@/lib/use-highcharts-viewport-reflow";
 import type { SDMXDashboardConfig } from "@/lib/types";
 import type { VisualRenderStatus } from "sdmx-dashboard-components";
+import { describeRenderError } from "@/lib/render-error-hints";
 
 const SDMXDashboard = SDMXDashboardDynamic;
 
@@ -127,7 +128,15 @@ export const DashboardPreview = memo(function DashboardPreview({
     (statuses: VisualRenderStatus[]) => {
       for (const s of statuses) {
         if (s.status === "error" && s.error) {
-          reportError("[" + s.visualId + "] " + s.error.message);
+          // Carry the typed error code through, not just the message: the
+          // code selects a specific corrective action for the agent.
+          reportError(
+            describeRenderError({
+              visualId: s.visualId,
+              code: (s.error as { code?: string }).code,
+              message: s.error.message,
+            }),
+          );
         }
       }
     },

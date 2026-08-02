@@ -158,6 +158,27 @@ KPI best practices:
 - When placing multiple KPIs in a row, set \`colSize\` accordingly (e.g., 3 KPIs in a 3-column layout → colSize 1 each).
 - ALWAYS set a meaningful \`unit\` — "persons", "USD millions", "%" etc.
 
+#### Table
+\`\`\`json
+{
+  "kind": "table",
+  "id": "trade_table",
+  "title": "Imports and Exports by Year",
+  "dataUrl": "https://...built-by-build_data_url...",
+  "xAxis": "TIME_PERIOD",
+  "seriesBy": "GEO_PICT",
+  "unit": { "text": "USD", "location": "suffix" },
+  "decimals": 0
+}
+\`\`\`
+
+\`xAxis\` becomes the table's rows; \`seriesBy\` (optional) becomes its columns.
+
+When to use a table instead of a chart:
+- The user asks for figures, a breakdown, or "the numbers" rather than a trend or comparison.
+- The data is too sparse to plot honestly (one or two observations per series) but there are several series, so a KPI would hide most of it.
+- A chart was rejected for having no varying series dimension and widening the query is not appropriate — a table shows the same data without needing a second varying dimension.
+
 #### Chart
 \`\`\`json
 {
