@@ -2,7 +2,10 @@ import { auth } from "@/lib/auth";
 import { withMCPClient, callMcpTool } from "@/lib/mcp-client";
 import {
   normaliseReferenceMetadata,
+  fieldFromDrillDown,
+  withResolvedFields,
   type DataflowProvenance,
+  type ProvenanceField,
 } from "@/lib/reference-metadata";
 
 export const maxDuration = 25;
@@ -64,14 +67,43 @@ async function lookup(
   if (existing) return existing;
 
   const task = (async () => {
-    const raw = await withMCPClient((client) =>
-      callMcpTool(client, "get_reference_metadata", {
+    const value = await withMCPClient(async (client) => {
+      const raw = await callMcpTool(client, "get_reference_metadata", {
         dataflow_id: dataflowId,
         ...(dataKey ? { key: dataKey } : {}),
         ...(endpoint ? { endpoint } : {}),
-      }),
-    );
-    const value = normaliseReferenceMetadata(dataflowId, raw, dataKey);
+      });
+      const summary = normaliseReferenceMetadata(dataflowId, raw, dataKey);
+
+      // Attributes attached below the dataflow report themselves populated
+      // with no value; their text lives behind get_metadata_attribute. These
+      // are the per-observation citations, so skipping the second call would
+      // drop the most specific sourcing we have. Resolved here rather than in
+      // the browser so a panel still costs the client one request.
+      const pending = summary.pending ?? [];
+      if (pending.length === 0) return withResolvedFields(summary, []);
+
+      const resolved = await Promise.all(
+        pending.map(async (attribute): Promise<ProvenanceField | null> => {
+          try {
+            const detail = await callMcpTool(client, "get_metadata_attribute", {
+              dataflow_id: dataflowId,
+              attribute_id: attribute.id,
+              ...(dataKey ? { key: dataKey } : {}),
+              ...(endpoint ? { endpoint } : {}),
+            });
+            return fieldFromDrillDown(attribute, detail);
+          } catch {
+            // One unreadable attribute must not lose the others.
+            return null;
+          }
+        }),
+      );
+      return withResolvedFields(
+        summary,
+        resolved.filter((f): f is ProvenanceField => f !== null),
+      );
+    });
     store(key, value);
     return value;
   })();

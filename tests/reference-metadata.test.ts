@@ -1,27 +1,48 @@
 import { describe, expect, it } from "vitest";
 import {
   cleanMetadataValue,
+  fieldFromDrillDown,
   normaliseReferenceMetadata,
+  withResolvedFields,
 } from "@/lib/reference-metadata";
 
-// Attribute shapes below are copied from live SPC responses (gateway v1.26.0):
-// `value` is plain and the language sits in a sibling field.
+// Attribute shapes copied from live SPC responses on the 2026-08-03 gateway
+// contract: `status`/`scope`/`value_kind`, and a null `value` wherever the text
+// sits behind a drill-down call.
 const attr = (
   id: string,
-  value: string,
+  value: string | null,
   extra: Record<string, unknown> = {},
 ) => ({
   id,
   path: id,
   label: null,
+  status: "populated",
+  scope: "dataflow",
+  value_kind: "prose",
+  distinct_values: 1,
   value,
   language: "en",
-  level: "dataflow",
-  source: "msd",
+  sample_key_context: null,
+  drill_down: false,
   ...extra,
 });
 
-describe("reference metadata", () => {
+const blank = (id: string) => ({
+  id,
+  path: id,
+  label: null,
+  status: "declared_empty",
+  scope: null,
+  value_kind: "unknown",
+  distinct_values: 0,
+  value: null,
+  language: null,
+  sample_key_context: null,
+  drill_down: false,
+});
+
+describe("cleanMetadataValue", () => {
   it("passes plain values through untouched", () => {
     expect(cleanMetadataValue("National Statistics Offices (NSO)")).toBe(
       "National Statistics Offices (NSO)",
@@ -30,158 +51,145 @@ describe("reference metadata", () => {
     expect(cleanMetadataValue("Note: figures are provisional")).toBe(
       "Note: figures are provisional",
     );
-    expect(cleanMetadataValue("https://dsbb.imf.org/")).toBe(
-      "https://dsbb.imf.org/",
-    );
     expect(cleanMetadataValue(undefined)).toBe("");
+    expect(cleanMetadataValue(null)).toBe("");
   });
 
-  it("collapses a link the provider repeated as a parenthetical", () => {
-    expect(
-      cleanMetadataValue(
-        "https://www.statsfiji.gov.fj/census-2017 (https://www.statsfiji.gov.fj/census-2017)",
-      ),
-    ).toBe("https://www.statsfiji.gov.fj/census-2017");
-    // A parenthetical that says something different is left alone.
-    expect(cleanMetadataValue("See https://a.org/x (accessed 2026)")).toBe(
-      "See https://a.org/x (accessed 2026)",
-    );
-  });
-
-  it("strips an inlined language tag when the gateway sends one", () => {
+  it("strips the inlined language tag the MSD channel uses", () => {
     expect(cleanMetadataValue('en: "National Statistics Organisations."')).toBe(
       "National Statistics Organisations.",
     );
     expect(cleanMetadataValue('fr-FR: "Recensement"')).toBe("Recensement");
   });
 
-  it("normalises a well-documented dataflow in reading order", () => {
+  it("collapses a link the provider repeated as a parenthetical", () => {
+    expect(
+      cleanMetadataValue("https://statsfiji.gov.fj/x (https://statsfiji.gov.fj/x)"),
+    ).toBe("https://statsfiji.gov.fj/x");
+    // A parenthetical that says something different is left alone.
+    expect(cleanMetadataValue("See https://a.org/x (accessed 2026)")).toBe(
+      "See https://a.org/x (accessed 2026)",
+    );
+  });
+});
+
+describe("normaliseReferenceMetadata", () => {
+  it("reads dataflow-scoped values in reading order", () => {
     const p = normaliseReferenceMetadata("DF_CPI", {
       metadata_attributes: [
-        attr("DATA_COMMENT", "The CPI measures a representative basket."),
-        attr("DATA_SOURCE_ORGANIZATION", "National Statistics Offices (NSO)"),
-        attr("DATA_REVISION", "Revisions may not be reflected immediately."),
-        attr("DATA_SOURCE_DATE", "2026-03-01", { language: null }),
-        attr("DATA_PROCESSING", "Compiled per the CPI Manual."),
+        attr("DATA_COMMENT", 'en: "The CPI measures a representative basket."'),
+        attr("DATA_SOURCE_ORGANIZATION", 'en: "National Statistics Offices"'),
+        attr("DATA_PROCESSING", 'en: "Compiled per the CPI Manual."'),
       ],
-      notes: [],
+      coverage: { declared: 9, populated: 3, empty: 6 },
+      channels: { msd_v2: "found", dsd_attributes: "skipped" },
     });
 
     expect(p.available).toBe(true);
-    expect(p.note).toBeUndefined();
     expect(p.fields.map((f) => f.id)).toEqual([
       "DATA_SOURCE_ORGANIZATION",
-      "DATA_SOURCE_DATE",
       "DATA_PROCESSING",
-      "DATA_REVISION",
       "DATA_COMMENT",
     ]);
     expect(p.fields.every((f) => f.scope === "dataset")).toBe(true);
-    expect(p.dataKey).toBeUndefined();
+    expect(p.note).toBeUndefined();
   });
 
-  it("keeps the ids the catalogue actually publishes", () => {
-    // DATA_SOURCE_LICENSE is the provider's spelling; a DATA_LICENCE key would
-    // silently never match, which is how the licence field went missing.
+  it("does not present all_observed_rows as a dataflow-wide claim", () => {
+    // The distinction the gateway change exists to preserve: this value held
+    // on the rows the query returned, and says nothing about the rest.
     const p = normaliseReferenceMetadata("DF_X", {
       metadata_attributes: [
-        attr("DATA_SOURCE_LICENSE", "CC BY 4.0"),
-        attr("DATA_SOURCE_COMMENT", "Compiled manually from NSO websites."),
-        attr("DATA_SOURCE_TITLE", "Consumer price statistics"),
+        attr("DATA_SOURCE", "UNSD", {
+          scope: "all_observed_rows",
+          drill_down: true,
+        }),
+        attr("DATA_PROCESSING", "Compiled centrally.", { scope: "dataflow" }),
       ],
     });
-    expect(p.fields.map((f) => f.id)).toEqual([
-      "DATA_SOURCE_TITLE",
-      "DATA_SOURCE_COMMENT",
-      "DATA_SOURCE_LICENSE",
+    expect(p.fields.map((f) => [f.id, f.scope])).toEqual([
+      ["DATA_SOURCE", "query"],
+      ["DATA_PROCESSING", "dataset"],
     ]);
   });
 
-  it("exposes a source link as an href", () => {
-    const p = normaliseReferenceMetadata("DF_X", {
-      metadata_attributes: [
-        attr("DATA_SOURCE_LINK", "https://stats.pacificdata.org/"),
-      ],
-    });
-    expect(p.fields[0].href).toBe("https://stats.pacificdata.org/");
-  });
-
-  it("keeps deeper levels, which carry the most specific sourcing", () => {
-    // The whole point of asking with a key: DF_VITAL publishes nothing at
-    // dataflow level and a real citation at observation level.
+  it("defers attributes whose text needs a drill-down", () => {
+    // DF_VITAL: populated at observation scope, value withheld from the summary.
     const p = normaliseReferenceMetadata(
       "DF_VITAL",
       {
         metadata_attributes: [
-          attr("UNIT_MEASURE", "YEARS", { level: "series" }),
-          attr("DATA_SOURCE", "Report of Fiji Population Census", {
-            level: "observation",
-          }),
+          attr("UNIT_MEASURE", null, { scope: "series", drill_down: true }),
+          attr("DATA_SOURCE", null, { scope: "observation", drill_down: true }),
         ],
+        channels: { msd_v2: "inconclusive", dsd_attributes: "found" },
       },
       "A.FJ.LEB.M+F",
     );
-    expect(p.available).toBe(true);
-    expect(p.fields).toHaveLength(1);
-    expect(p.fields[0]).toMatchObject({
-      id: "DATA_SOURCE",
-      scope: "figure",
-      text: "Report of Fiji Population Census",
-    });
-    // UNIT_MEASURE is structural: it describes the number, not its origin.
-    expect(p.fields.some((f) => f.id === "UNIT_MEASURE")).toBe(false);
-    expect(p.dataKey).toBe("A.FJ.LEB.M+F");
-  });
 
-  it("orders the most specific claim first", () => {
-    const p = normaliseReferenceMetadata("DF_X", {
-      metadata_attributes: [
-        attr("DATA_PROCESSING", "Compiled from national accounts."),
-        attr("DATA_SOURCE", "HIES - Fiji 2003", { level: "observation" }),
-        attr("DATA_SOURCE_LINK", "https://example.org/x", {
-          level: "partial_key",
-        }),
-      ],
-    });
-    expect(p.fields.map((f) => f.scope)).toEqual([
-      "figure",
-      "series",
-      "dataset",
+    expect(p.pending).toEqual([
+      { id: "DATA_SOURCE", label: "Source", scope: "figure" },
     ]);
-    expect(p.fields[0].id).toBe("DATA_SOURCE");
+    expect(p.fields).toHaveLength(0);
+    // Not "no metadata": the text is pending, so no absence note is emitted.
+    expect(p.note).toBeUndefined();
+    expect(p.dataKey).toBe("A.FJ.LEB.M+F");
+    // UNIT_MEASURE is structural and never becomes a provenance field.
+    expect(p.pending?.some((f) => f.id === "UNIT_MEASURE")).toBe(false);
   });
 
-  it("treats an unrecognised level as the weakest claim", () => {
-    // An unknown level must never be presented as a per-figure citation.
+  it("keeps declared-but-blank fields apart from values", () => {
+    const p = normaliseReferenceMetadata("DF_POP_PROJ", {
+      metadata_attributes: [
+        attr("DATA_SOURCE_TITLE", 'en: "Census of Population and Housing"'),
+        blank("DATA_SOURCE_LICENSE"),
+        blank("DATA_SOURCE_DATE"),
+      ],
+      coverage: { declared: 9, populated: 3, empty: 6 },
+    });
+    expect(p.fields.map((f) => f.id)).toEqual(["DATA_SOURCE_TITLE"]);
+    // Reported in display order, so "Collected" precedes "Licence".
+    expect(p.declaredEmpty).toEqual(["Collected", "Licence"]);
+    expect(p.available).toBe(true);
+  });
+
+  it("uses value_kind rather than guessing at links", () => {
     const p = normaliseReferenceMetadata("DF_X", {
       metadata_attributes: [
-        attr("DATA_SOURCE", "Somewhere", { level: "something_new" }),
+        attr("DATA_SOURCE_LINK", "https://stats.pacificdata.org/", {
+          value_kind: "url",
+        }),
+        // A date must not be linkified even if it looks unusual.
+        attr("DATA_SOURCE_DATE", "2026-03-01", { value_kind: "date" }),
       ],
+    });
+    const link = p.fields.find((f) => f.id === "DATA_SOURCE_LINK");
+    const date = p.fields.find((f) => f.id === "DATA_SOURCE_DATE");
+    expect(link?.href).toBe("https://stats.pacificdata.org/");
+    expect(date?.href).toBeUndefined();
+  });
+
+  it("treats an unrecognised scope as the weakest claim", () => {
+    const p = normaliseReferenceMetadata("DF_X", {
+      metadata_attributes: [attr("DATA_SOURCE", "X", { scope: "something_new" })],
     });
     expect(p.fields[0].scope).toBe("dataset");
   });
 
-  it("prefers the English rendering when a field repeats per language", () => {
-    const p = normaliseReferenceMetadata("DF_X", {
-      metadata_attributes: [
-        attr("DATA_COMMENT", "Recensement de la population", {
-          language: "fr",
-        }),
-        attr("DATA_COMMENT", "Population census"),
-      ],
-    });
-    expect(p.fields[0].text).toBe("Population census");
-  });
-
-  it("states absence in words rather than returning a blank panel", () => {
-    // Some flows publish nothing at any level; DF_SDG is one of them.
-    const p = normaliseReferenceMetadata("DF_SDG", {
+  it("separates an unreadable provider from one publishing nothing", () => {
+    const unreachable = normaliseReferenceMetadata("DF_X", {
       metadata_attributes: [],
-      notes: [],
+      coverage: null,
+      channels: { msd_v2: "inconclusive", dsd_attributes: "inconclusive" },
     });
-    expect(p.available).toBe(false);
-    expect(p.fields).toHaveLength(0);
-    expect(p.note).toMatch(/does not publish reference metadata/);
+    expect(unreachable.note).toMatch(/unknown rather than absent/);
+
+    const genuinelyEmpty = normaliseReferenceMetadata("DF_X", {
+      metadata_attributes: [],
+      coverage: { declared: 0, populated: 0, empty: 0 },
+      channels: { msd_v2: "empty", dsd_attributes: "empty" },
+    });
+    expect(genuinelyEmpty.note).toMatch(/does not publish/);
   });
 
   it("prefers the gateway's own explanation when it gives one", () => {
@@ -198,5 +206,116 @@ describe("reference metadata", () => {
     expect(
       normaliseReferenceMetadata("X", { metadata_attributes: "nope" }).fields,
     ).toEqual([]);
+  });
+});
+
+describe("drill-down resolution", () => {
+  const pendingSource = {
+    id: "DATA_SOURCE",
+    label: "Source",
+    scope: "figure" as const,
+  };
+
+  it("recovers the per-observation citation", () => {
+    const f = fieldFromDrillDown(pendingSource, {
+      value_kind: "prose",
+      values: [
+        {
+          value: "Report of Fiji Population Census, Fiji Bureau of Statistics",
+          key_context: null,
+          language: null,
+        },
+      ],
+      total: 1,
+      truncated: false,
+      notes: [],
+    });
+    expect(f).toMatchObject({
+      id: "DATA_SOURCE",
+      scope: "figure",
+      text: "Report of Fiji Population Census, Fiji Bureau of Statistics",
+    });
+    expect(f?.moreValues).toBeUndefined();
+  });
+
+  it("counts distinct texts, not value/key pairs", () => {
+    // Three slices sharing one text is one answer, not three.
+    const same = fieldFromDrillDown(pendingSource, {
+      values: [
+        { value: "Census 2017" },
+        { value: "Census 2017" },
+        { value: "Census 2017" },
+      ],
+      total: 3,
+    });
+    expect(same?.moreValues).toBeUndefined();
+
+    const differing = fieldFromDrillDown(pendingSource, {
+      values: [{ value: "Census 2017" }, { value: "HIES 2003" }],
+      total: 2,
+    });
+    expect(differing?.moreValues).toBe(1);
+  });
+
+  it("refuses to render an unreadable attribute as a value", () => {
+    // The tool has no error field: an Error note is the only signal, and
+    // showing it as text would present a failure as provenance.
+    expect(
+      fieldFromDrillDown(pendingSource, {
+        values: [],
+        total: 0,
+        notes: ["Error: no such attribute. Declared ids are DATA_COMMENT."],
+      }),
+    ).toBeNull();
+  });
+
+  it("returns nothing for a declared but blank attribute", () => {
+    expect(
+      fieldFromDrillDown(pendingSource, {
+        values: [],
+        total: 0,
+        notes: ["This attribute is declared and carries no values."],
+      }),
+    ).toBeNull();
+  });
+
+  it("prefers the English value when several languages are published", () => {
+    const f = fieldFromDrillDown(pendingSource, {
+      values: [
+        { value: "Recensement", language: "fr" },
+        { value: "Census", language: "en" },
+      ],
+      total: 2,
+    });
+    expect(f?.text).toBe("Census");
+  });
+
+  it("merges resolved fields most-specific first and clears pending", () => {
+    const summary = normaliseReferenceMetadata("DF_X", {
+      metadata_attributes: [
+        attr("DATA_PROCESSING", "Compiled centrally.", { scope: "dataflow" }),
+        attr("DATA_SOURCE", null, { scope: "observation", drill_down: true }),
+      ],
+    });
+    const resolved = fieldFromDrillDown(summary.pending![0], {
+      values: [{ value: "HIES - Fiji 2003" }],
+      total: 1,
+    })!;
+
+    const merged = withResolvedFields(summary, [resolved]);
+    expect(merged.pending).toBeUndefined();
+    expect(merged.available).toBe(true);
+    expect(merged.fields.map((f) => f.scope)).toEqual(["figure", "dataset"]);
+  });
+
+  it("reports absence when every drill-down failed", () => {
+    const summary = normaliseReferenceMetadata("DF_X", {
+      metadata_attributes: [
+        attr("DATA_SOURCE", null, { scope: "observation", drill_down: true }),
+      ],
+    });
+    const merged = withResolvedFields(summary, []);
+    expect(merged.available).toBe(false);
+    expect(merged.note).toBeTruthy();
   });
 });

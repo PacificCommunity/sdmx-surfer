@@ -22,10 +22,25 @@ const FAILED: DataflowProvenance = {
 const SCOPE_HEADING: Record<ProvenanceScope, string> = {
   figure: "For this figure",
   series: "For this series",
+  // Weaker than a dataflow-wide claim: it held on the rows this panel asked
+  // for, and says nothing about the rest of the dataset.
+  query: "For the data shown here",
   dataset: "For the dataset",
 };
 
-const SCOPE_ORDER: ProvenanceScope[] = ["figure", "series", "dataset"];
+/**
+ * Some dataflows declare most of the metadata set and fill in almost none of
+ * it, so the full list runs longer than the values above it. Naming a few
+ * makes the point; the rest is a count.
+ */
+const BLANK_FIELDS_SHOWN = 4;
+
+const SCOPE_ORDER: ProvenanceScope[] = [
+  "figure",
+  "series",
+  "query",
+  "dataset",
+];
 
 /**
  * "Where these numbers come from" for one panel.
@@ -127,12 +142,37 @@ export function DataflowProvenanceBlock({
                         ) : (
                           f.text
                         )}
+                        {/* The panel may span slices the provider sources
+                            differently; saying so beats implying one answer
+                            covers everything shown. */}
+                        {f.moreValues ? (
+                          <span className="text-on-surface-variant">
+                            {" "}
+                            (and {f.moreValues} other
+                            {f.moreValues > 1 ? "s" : ""} across this panel)
+                          </span>
+                        ) : null}
                       </dd>
                     </div>
                   ))}
                 </dl>
               </div>
             ))}
+          {/* A declared field left blank is an answer in itself: it says the
+              provider has the concept and published nothing, which is what to
+              raise with them. It is kept clear of the values above. */}
+          {!loading && data?.declaredEmpty?.length ? (
+            <p className="mt-2 text-on-surface-variant/80">
+              Declared by the provider but left blank:{" "}
+              {data.declaredEmpty.slice(0, BLANK_FIELDS_SHOWN).join(", ")}
+              {data.declaredEmpty.length > BLANK_FIELDS_SHOWN
+                ? " and " +
+                  (data.declaredEmpty.length - BLANK_FIELDS_SHOWN) +
+                  " more"
+                : ""}
+              .
+            </p>
+          ) : null}
         </div>
       )}
     </div>
