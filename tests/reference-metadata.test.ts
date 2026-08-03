@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   cleanMetadataValue,
-  fieldFromDrillDown,
+  resolveDrillDown,
   normaliseReferenceMetadata,
   withResolvedFields,
 } from "@/lib/reference-metadata";
@@ -62,13 +62,25 @@ describe("cleanMetadataValue", () => {
     expect(cleanMetadataValue('fr-FR: "Recensement"')).toBe("Recensement");
   });
 
-  it("collapses a link the provider repeated as a parenthetical", () => {
+  it("unwraps the whitespace variant the gateway leaves unparsed", () => {
+    // Exact string observed on SPC/DF_HHCOUNTS/DATA_SOURCE_LINK: the gateway's
+    // localised-value pattern requires `:"` with no space, so this one falls
+    // through with language null. Drop this once that is fixed upstream.
     expect(
-      cleanMetadataValue("https://statsfiji.gov.fj/x (https://statsfiji.gov.fj/x)"),
-    ).toBe("https://statsfiji.gov.fj/x");
-    // A parenthetical that says something different is left alone.
-    expect(cleanMetadataValue("See https://a.org/x (accessed 2026)")).toBe(
-      "See https://a.org/x (accessed 2026)",
+      cleanMetadataValue('en: "https://www.statsfiji.gov.fj/index.php/census-2017"'),
+    ).toBe("https://www.statsfiji.gov.fj/index.php/census-2017");
+  });
+
+  it("leaves doubled links alone, now that the gateway collapses them", () => {
+    // No longer our job: PR #23 collapses "https://x (https://x)" upstream,
+    // verified in both link values and prose. Anything doubled that still
+    // arrives is a gateway bug to report, not one to paper over here.
+    expect(cleanMetadataValue("https://a.org/x (https://a.org/x)")).toBe(
+      "https://a.org/x (https://a.org/x)",
+    );
+    // Anchor text that genuinely differs keeps its parenthetical URL.
+    expect(cleanMetadataValue("Census 2017 (https://a.org/x)")).toBe(
+      "Census 2017 (https://a.org/x)",
     );
   });
 });
@@ -153,6 +165,19 @@ describe("normaliseReferenceMetadata", () => {
     expect(p.available).toBe(true);
   });
 
+  it("links a bare URL the gateway mistyped as prose", () => {
+    // Consequence of the unparsed wrapper: SPC's DF_HHCOUNTS source link comes
+    // back value_kind "prose". A whole-string URL is a link regardless.
+    const p = normaliseReferenceMetadata("DF_HHCOUNTS", {
+      metadata_attributes: [
+        attr("DATA_SOURCE_LINK", 'en: "https://www.statsfiji.gov.fj/x"', {
+          value_kind: "prose",
+        }),
+      ],
+    });
+    expect(p.fields[0].href).toBe("https://www.statsfiji.gov.fj/x");
+  });
+
   it("uses value_kind rather than guessing at links", () => {
     const p = normaliseReferenceMetadata("DF_X", {
       metadata_attributes: [
@@ -217,7 +242,8 @@ describe("drill-down resolution", () => {
   };
 
   it("recovers the per-observation citation", () => {
-    const f = fieldFromDrillDown(pendingSource, {
+    const o = resolveDrillDown(pendingSource, {
+      status: "values",
       value_kind: "prose",
       values: [
         {
@@ -227,67 +253,114 @@ describe("drill-down resolution", () => {
         },
       ],
       total: 1,
+      distinct_values: 1,
       truncated: false,
-      notes: [],
+      notes: ["This attribute came from the DSD-attribute channel."],
     });
-    expect(f).toMatchObject({
-      id: "DATA_SOURCE",
-      scope: "figure",
-      text: "Report of Fiji Population Census, Fiji Bureau of Statistics",
+    expect(o).toMatchObject({
+      kind: "value",
+      field: {
+        id: "DATA_SOURCE",
+        scope: "figure",
+        text: "Report of Fiji Population Census, Fiji Bureau of Statistics",
+      },
     });
-    expect(f?.moreValues).toBeUndefined();
+    expect(o.kind === "value" && o.field.moreValues).toBeUndefined();
   });
 
-  it("counts distinct texts, not value/key pairs", () => {
-    // Three slices sharing one text is one answer, not three.
-    const same = fieldFromDrillDown(pendingSource, {
-      values: [
-        { value: "Census 2017" },
-        { value: "Census 2017" },
-        { value: "Census 2017" },
-      ],
+  it("counts distinct texts from distinct_values, never from total", () => {
+    // Three slices carrying one answer. Reporting the pair count would say the
+    // three countries disagree about their source when they agree.
+    const same = resolveDrillDown(pendingSource, {
+      status: "values",
+      values: [{ value: "UNSD" }, { value: "UNSD" }, { value: "UNSD" }],
       total: 3,
+      distinct_values: 1,
     });
-    expect(same?.moreValues).toBeUndefined();
+    expect(same.kind === "value" && same.field.moreValues).toBeUndefined();
 
-    const differing = fieldFromDrillDown(pendingSource, {
+    const differing = resolveDrillDown(pendingSource, {
+      status: "values",
       values: [{ value: "Census 2017" }, { value: "HIES 2003" }],
       total: 2,
+      distinct_values: 2,
     });
-    expect(differing?.moreValues).toBe(1);
+    expect(differing.kind === "value" && differing.field.moreValues).toBe(1);
   });
 
-  it("refuses to render an unreadable attribute as a value", () => {
-    // The tool has no error field: an Error note is the only signal, and
-    // showing it as text would present a failure as provenance.
-    expect(
-      fieldFromDrillDown(pendingSource, {
-        values: [],
-        total: 0,
-        notes: ["Error: no such attribute. Declared ids are DATA_COMMENT."],
-      }),
-    ).toBeNull();
+  it("stays truthful when the value list was truncated", () => {
+    // distinct_values is computed over the full uncapped set, so it remains
+    // correct even though `values` was capped.
+    const o = resolveDrillDown(pendingSource, {
+      status: "values",
+      values: [{ value: "Source A" }, { value: "Source B" }],
+      total: 200,
+      distinct_values: 12,
+      truncated: true,
+    });
+    expect(o.kind === "value" && o.field.moreValues).toBe(11);
   });
 
-  it("returns nothing for a declared but blank attribute", () => {
+  it("separates declared_empty from unestablished", () => {
+    // The pair that matters: both carry total 0 and they mean opposite things.
+    const declared = resolveDrillDown(pendingSource, {
+      status: "declared_empty",
+      values: [],
+      total: 0,
+      distinct_values: 0,
+      notes: ["'DATA_SOURCE' is declared and the provider published no value."],
+    });
+    expect(declared).toEqual({ kind: "declared_empty", label: "Source" });
+
+    const unestablished = resolveDrillDown(pendingSource, {
+      status: "unestablished",
+      values: [],
+      total: 0,
+      distinct_values: 0,
+      notes: ["No channel resolved."],
+    });
+    expect(unestablished).toEqual({ kind: "unestablished" });
+  });
+
+  it("does not read the deprecated Error: note prefix", () => {
+    // status is the signal. A note beginning "Error:" alongside a values
+    // status must not turn a real answer into a failure, and the prefix was
+    // never guaranteed to come first.
+    const o = resolveDrillDown(pendingSource, {
+      status: "values",
+      values: [{ value: "HIES - Fiji 2003" }],
+      total: 1,
+      distinct_values: 1,
+      notes: ["Error: something legacy", "and an explanation"],
+    });
+    expect(o.kind).toBe("value");
+
+    const unknown = resolveDrillDown(pendingSource, {
+      status: "unknown_attribute",
+      values: [],
+      total: 0,
+      notes: ["Error: Unknown attribute 'DATA_SOURC' for DF_X: declared are ..."],
+    });
+    expect(unknown).toEqual({ kind: "unknown_attribute" });
+  });
+
+  it("treats a values status with nothing readable as unestablished", () => {
     expect(
-      fieldFromDrillDown(pendingSource, {
-        values: [],
-        total: 0,
-        notes: ["This attribute is declared and carries no values."],
-      }),
-    ).toBeNull();
+      resolveDrillDown(pendingSource, { status: "values", values: [], total: 0 }),
+    ).toEqual({ kind: "unestablished" });
   });
 
   it("prefers the English value when several languages are published", () => {
-    const f = fieldFromDrillDown(pendingSource, {
+    const o = resolveDrillDown(pendingSource, {
+      status: "values",
       values: [
         { value: "Recensement", language: "fr" },
         { value: "Census", language: "en" },
       ],
       total: 2,
+      distinct_values: 2,
     });
-    expect(f?.text).toBe("Census");
+    expect(o.kind === "value" && o.field.text).toBe("Census");
   });
 
   it("merges resolved fields most-specific first and clears pending", () => {
@@ -297,25 +370,44 @@ describe("drill-down resolution", () => {
         attr("DATA_SOURCE", null, { scope: "observation", drill_down: true }),
       ],
     });
-    const resolved = fieldFromDrillDown(summary.pending![0], {
+    const outcome = resolveDrillDown(summary.pending![0], {
+      status: "values",
       values: [{ value: "HIES - Fiji 2003" }],
       total: 1,
-    })!;
+      distinct_values: 1,
+    });
 
-    const merged = withResolvedFields(summary, [resolved]);
+    const merged = withResolvedFields(summary, [outcome]);
     expect(merged.pending).toBeUndefined();
     expect(merged.available).toBe(true);
     expect(merged.fields.map((f) => f.scope)).toEqual(["figure", "dataset"]);
   });
 
-  it("reports absence when every drill-down failed", () => {
+  it("folds a declared_empty drill-down into the blank list", () => {
     const summary = normaliseReferenceMetadata("DF_X", {
       metadata_attributes: [
         attr("DATA_SOURCE", null, { scope: "observation", drill_down: true }),
       ],
     });
-    const merged = withResolvedFields(summary, []);
+    const merged = withResolvedFields(summary, [
+      { kind: "declared_empty", label: "Source" },
+    ]);
+    expect(merged.declaredEmpty).toEqual(["Source"]);
     expect(merged.available).toBe(false);
-    expect(merged.note).toBeTruthy();
+    expect(merged.note).toMatch(/does not publish/);
+  });
+
+  it("never reports an unestablished drill-down as absence", () => {
+    // The failure the status field exists to prevent: saying the provider
+    // publishes nothing when we simply could not read it.
+    const summary = normaliseReferenceMetadata("DF_X", {
+      metadata_attributes: [
+        attr("DATA_SOURCE", null, { scope: "observation", drill_down: true }),
+      ],
+    });
+    const merged = withResolvedFields(summary, [{ kind: "unestablished" }]);
+    expect(merged.available).toBe(false);
+    expect(merged.note).toMatch(/unknown rather than absent/);
+    expect(merged.note).not.toMatch(/does not publish/);
   });
 });

@@ -2,10 +2,10 @@ import { auth } from "@/lib/auth";
 import { withMCPClient, callMcpTool } from "@/lib/mcp-client";
 import {
   normaliseReferenceMetadata,
-  fieldFromDrillDown,
+  resolveDrillDown,
   withResolvedFields,
   type DataflowProvenance,
-  type ProvenanceField,
+  type DrillDownOutcome,
 } from "@/lib/reference-metadata";
 
 export const maxDuration = 25;
@@ -84,7 +84,7 @@ async function lookup(
       if (pending.length === 0) return withResolvedFields(summary, []);
 
       const resolved = await Promise.all(
-        pending.map(async (attribute): Promise<ProvenanceField | null> => {
+        pending.map(async (attribute): Promise<DrillDownOutcome> => {
           try {
             const detail = await callMcpTool(client, "get_metadata_attribute", {
               dataflow_id: dataflowId,
@@ -92,17 +92,15 @@ async function lookup(
               ...(dataKey ? { key: dataKey } : {}),
               ...(endpoint ? { endpoint } : {}),
             });
-            return fieldFromDrillDown(attribute, detail);
+            return resolveDrillDown(attribute, detail);
           } catch {
-            // One unreadable attribute must not lose the others.
-            return null;
+            // One unreadable attribute must not lose the others, and a call we
+            // never completed says nothing about what the provider publishes.
+            return { kind: "unestablished" };
           }
         }),
       );
-      return withResolvedFields(
-        summary,
-        resolved.filter((f): f is ProvenanceField => f !== null),
-      );
+      return withResolvedFields(summary, resolved);
     });
     store(key, value);
     return value;
