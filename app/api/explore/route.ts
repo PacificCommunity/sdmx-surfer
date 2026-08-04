@@ -1,6 +1,11 @@
 import { withMCPClient, callMcpTool } from "@/lib/mcp-client";
 import { loadIndex, semanticSearch } from "@/lib/embeddings";
 
+// The country lookup is a multi-second gateway call (measured 3.5-4.1s) and
+// the default listing is the whole catalogue. Neither is per-user, and neither
+// moves faster than the daily index refresh.
+const REFERENCE_CACHE = { "cache-control": "private, max-age=3600" };
+
 /**
  * GET /api/explore — list all dataflows (from pre-built index, no MCP)
  * GET /api/explore?country=FJ — find dataflows with data for a country (MCP)
@@ -64,7 +69,7 @@ export async function GET(req: Request) {
           dimension_id: "GEO_PICT",
         })
       );
-      return Response.json(result);
+      return Response.json(result, { headers: REFERENCE_CACHE });
     }
 
     // Default: serve the full dataflow list from the pre-built index (instant, no MCP)
@@ -79,7 +84,7 @@ export async function GET(req: Request) {
           categories: e.categories || [],
         })),
         total: index.entries.length,
-      });
+      }, { headers: REFERENCE_CACHE });
     }
 
     // Index unavailable — fall back to MCP

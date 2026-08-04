@@ -1,0 +1,64 @@
+# Keep the dataflow index current.
+#
+# The index mixes material with very different half-lives. Availability changes
+# whenever data is loaded; left alone since March it told the explorer that
+# DF_VITAL ended in 2022 when it ran to 2026, and it was missing six dataflows
+# that had been added to the catalogue since. Embeddings change only when a
+# dataflow's name, description, dimensions or codelists change.
+#
+# So this runs daily and the build is incremental: it always refreshes
+# structure and availability, and embeds only entries whose text actually
+# changed. A day with no catalogue changes makes no embedding calls, leaves the
+# file byte-identical, and produces no commit.
+name: Refresh dataflow index
+
+on:
+  schedule:
+    # 16:10 UTC, which is early morning in Suva, so a refresh lands before the
+    # working day rather than during it.
+    - cron: "10 16 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: refresh-index
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Rebuild index
+        env:
+          MCP_GATEWAY_URL: ${{ secrets.MCP_GATEWAY_URL }}
+          MCP_AUTH_TOKEN: ${{ secrets.MCP_AUTH_TOKEN }}
+          GOOGLE_AI_API_KEY: ${{ secrets.GOOGLE_AI_API_KEY }}
+        run: npm run build-index
+
+      - name: Commit if the catalogue moved
+        run: |
+          if git diff --quiet -- models/dataflow-index.json; then
+            echo "No change to the index."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add models/dataflow-index.json
+          git commit -m "Refresh dataflow index
+
+          Automated daily refresh of structure and availability. Embeddings are
+          recomputed only for entries whose text changed."
+          git push

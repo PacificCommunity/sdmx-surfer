@@ -3,24 +3,38 @@
  * Build the semantic search index for dataflows.
  *
  * Usage:
- *   npm run build-index
+ *   npm run build-index                 incremental (what the daily job runs)
+ *   npm run build-index -- --force-embed   re-embed everything
  *
  * Requires:
- *   - MCP gateway running (locally or on Railway)
- *   - GOOGLE_AI_API_KEY set (for embedding via Gemini)
+ *   - MCP gateway reachable (MCP_GATEWAY_URL)
+ *   - GOOGLE_AI_API_KEY, only when something actually needs embedding
  *
  * This script:
  * 1. Fetches all dataflows from the MCP gateway via AI SDK's MCP client
  * 2. For each, fetches the structure (dimensions, codelists)
  * 3. Builds a rich text description for embedding
- * 4. Embeds each description with Google gemini-embedding-001
+ * 4. Embeds descriptions that are new or whose text changed, reusing the rest
  * 5. Saves the index to models/dataflow-index.json
+ *
+ * INCREMENTAL BY DESIGN, because the two halves of this index age at very
+ * different rates. Structure and availability move constantly: availability
+ * changes whenever data is loaded, and a stale index told the explorer that
+ * DF_VITAL ended in 2022 when it ran to 2026. Embeddings move only when a
+ * dataflow is added or its name, description, dimensions or codelists change,
+ * and they are the expensive part.
+ *
+ * The two are separable because `richText` is built from name, description,
+ * dimension ids and codelist names only. Availability is stored on the entry
+ * but never fed to the embedding, so refreshing it daily costs no embedding
+ * calls at all. A run that finds nothing new needs no API key and writes
+ * nothing.
  */
 
 import { config } from "dotenv";
 config({ path: ".env.local" });
 
-import { writeFileSync } from "node:fs";
+import { writeFileSync, readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { createMCPClient } from "@ai-sdk/mcp";
 
@@ -33,6 +47,24 @@ const INDEX_PATH = join(process.cwd(), "models", "dataflow-index.json");
 // provider an entry belongs to, and so a future multi-endpoint build can
 // concatenate per-endpoint runs without ambiguity.
 const INDEX_ENDPOINT = "SPC";
+const EMBED_MODEL_ID = "gemini-embedding-001";
+
+interface PreviousIndex {
+  modelId: string;
+  createdAt: string;
+  entries: Array<{ id: string; richText: string; embedding?: number[] }>;
+}
+
+/** The committed index, when there is one. Absent on a first build. */
+function loadPreviousIndex(): PreviousIndex | null {
+  if (!existsSync(INDEX_PATH)) return null;
+  try {
+    return JSON.parse(readFileSync(INDEX_PATH, "utf-8")) as PreviousIndex;
+  } catch {
+    console.warn("  Warning: existing index unreadable; rebuilding from scratch");
+    return null;
+  }
+}
 const STAT_BASE = "https://stats-nsi-stable.pacificdata.org/rest";
 
 // ── Category fetching from .Stat SDMX REST API ──
@@ -46,6 +78,13 @@ interface CategoryTag {
 /**
  * Fetch category-to-dataflow mappings from SPC .Stat category schemes.
  * Returns a map: dataflow ID → array of category tags.
+ *
+ * Reads the SDMX-JSON 2.0 structure message: `data.categorisations` links a
+ * category URN to a dataflow URN, and `data.categorySchemes[].categories`
+ * carries the names. The previous implementation read a `references` object
+ * with embedded `links[rel=dataflow]`, which the endpoint stopped returning;
+ * it failed silently, warning nothing and categorising zero dataflows, so a
+ * rebuild would have quietly stripped the categories from every entry.
  */
 async function fetchCategories(): Promise<Map<string, CategoryTag[]>> {
   const map = new Map<string, CategoryTag[]>();
@@ -54,41 +93,51 @@ async function fetchCategories(): Promise<Map<string, CategoryTag[]>> {
   for (const scheme of schemes) {
     const url = STAT_BASE + "/categoryscheme/SPC/" + scheme + "/latest?references=all";
     try {
-      const resp = await fetch(url, { headers: { Accept: "application/json", "Accept-Language": "en" } });
+      const resp = await fetch(url, {
+        headers: { Accept: "application/json", "Accept-Language": "en" },
+      });
       if (!resp.ok) {
         console.warn("  Warning: could not fetch " + scheme + " (" + String(resp.status) + ")");
         continue;
       }
-      const data = (await resp.json()) as {
-        references?: Record<string, {
-          items?: Array<{
-            id: string;
-            name: string;
-            links?: Array<{ href: string; rel: string }>;
-          }>;
-        }>;
+      const body = (await resp.json()) as {
+        data?: {
+          categorisations?: Array<{ source?: string; target?: string }>;
+          categorySchemes?: Array<{ id?: string; categories?: RawCategory[] }>;
+        };
       };
+      const data = body.data ?? {};
 
-      const refs = data.references || {};
-      for (const ref of Object.values(refs)) {
-        for (const item of ref.items || []) {
-          const dfLinks = (item.links || [])
-            .filter((l) => l.rel === "dataflow")
-            .map((l) => {
-              const m = l.href.match(/Dataflow=SPC:([^(]+)/);
-              return m ? m[1] : null;
-            })
-            .filter((id): id is string => id !== null);
+      // Category id path -> display name, following nesting.
+      const names = new Map<string, string>();
+      for (const cs of data.categorySchemes ?? []) {
+        collectCategoryNames(cs.categories ?? [], "", names);
+      }
 
-          for (const dfId of dfLinks) {
-            const existing = map.get(dfId) || [];
-            // Deduplicate within the same scheme+id
-            if (!existing.some((t) => t.scheme === scheme && t.id === item.id)) {
-              existing.push({ scheme, id: item.id, name: item.name });
-            }
-            map.set(dfId, existing);
-          }
+      let linked = 0;
+      for (const c of data.categorisations ?? []) {
+        const cat = parseCategoryUrn(c.source);
+        const dfId = parseDataflowUrn(c.target);
+        if (!cat || !dfId) continue;
+        const existing = map.get(dfId) || [];
+        if (!existing.some((t) => t.scheme === cat.scheme && t.id === cat.id)) {
+          existing.push({
+            scheme: cat.scheme,
+            id: cat.id,
+            name: names.get(cat.id) || cat.id,
+          });
         }
+        map.set(dfId, existing);
+        linked++;
+      }
+
+      // A scheme that parses to nothing is a shape change, not an empty scheme.
+      if (linked === 0) {
+        console.warn(
+          "  Warning: " + scheme + " returned " +
+          String((data.categorisations ?? []).length) +
+          " categorisations but none could be parsed. Check the response shape.",
+        );
       }
       console.log("  Fetched " + scheme + ": " + String(map.size) + " dataflows categorised so far");
     } catch (err) {
@@ -97,6 +146,75 @@ async function fetchCategories(): Promise<Map<string, CategoryTag[]>> {
   }
 
   return map;
+}
+
+/**
+ * Full names and descriptions, straight from .Stat.
+ *
+ * NOT from `list_dataflows`, which truncates descriptions to 100 characters
+ * and appends an ellipsis. Building from that would have replaced full text
+ * (up to 427 characters) with truncations in both the description the explorer
+ * displays and the richText that gets embedded, quietly degrading semantic
+ * search on 95 of 127 dataflows and forcing a re-embed of all of them.
+ */
+async function fetchDataflowText(): Promise<Map<string, { name: string; description: string }>> {
+  const out = new Map<string, { name: string; description: string }>();
+  const url = STAT_BASE + "/dataflow/SPC/all/latest";
+  try {
+    const resp = await fetch(url, {
+      headers: { Accept: "application/json", "Accept-Language": "en" },
+    });
+    if (!resp.ok) {
+      console.warn("  Warning: could not fetch dataflow text (" + String(resp.status) +
+        "); falling back to the truncated summaries");
+      return out;
+    }
+    const body = (await resp.json()) as {
+      data?: { dataflows?: Array<{ id?: string; name?: string; description?: string }> };
+    };
+    for (const df of body.data?.dataflows ?? []) {
+      if (df.id) out.set(df.id, { name: df.name || df.id, description: df.description || "" });
+    }
+    console.log("  Fetched full text for " + String(out.size) + " dataflows");
+  } catch (err) {
+    console.warn("  Warning: dataflow text fetch failed:",
+      err instanceof Error ? err.message : err);
+  }
+  return out;
+}
+
+interface RawCategory {
+  id?: string;
+  name?: string;
+  categories?: RawCategory[];
+}
+
+/** Flatten a category tree into dotted-path -> name. */
+function collectCategoryNames(
+  categories: RawCategory[],
+  prefix: string,
+  out: Map<string, string>,
+): void {
+  for (const c of categories) {
+    if (!c.id) continue;
+    const path = prefix ? prefix + "." + c.id : c.id;
+    out.set(path, c.name || c.id);
+    if (c.categories?.length) collectCategoryNames(c.categories, path, out);
+  }
+}
+
+/** urn:...Category=SPC:CAS_COM_TOPIC(1.0).ECO -> { scheme, id } */
+function parseCategoryUrn(urn: string | undefined): { scheme: string; id: string } | null {
+  if (!urn) return null;
+  const m = /Category=[^:]+:([^(]+)\([^)]*\)\.(.+)$/.exec(urn);
+  return m ? { scheme: m[1], id: m[2] } : null;
+}
+
+/** urn:...Dataflow=SPC:DF_BOP(1.1) -> DF_BOP */
+function parseDataflowUrn(urn: string | undefined): string | null {
+  if (!urn) return null;
+  const m = /Dataflow=[^:]+:([^(]+)\(/.exec(urn);
+  return m ? m[1] : null;
 }
 
 // ── Availability fetching from .Stat REST API ──
@@ -340,34 +458,8 @@ async function main() {
   console.log("\n  Found " + String(allDataflows.length) + " dataflows\n");
 
   // 1b. Enrich descriptions from .Stat REST API (list_dataflows truncates them)
-  console.log("   Fetching full descriptions from .Stat REST API...");
-  try {
-    const dfResp = await fetch(
-      STAT_BASE + "/dataflow/SPC?references=none",
-      { headers: { Accept: "application/json", "Accept-Language": "en" } },
-    );
-    if (dfResp.ok) {
-      const dfData = (await dfResp.json()) as {
-        references?: Record<string, { id: string; description?: string }>;
-      };
-      const refs = dfData.references || {};
-      let enriched = 0;
-      for (const ref of Object.values(refs)) {
-        if (ref.description) {
-          const df = allDataflows.find((d) => d.id === ref.id);
-          if (df && (!df.description || df.description.endsWith("..."))) {
-            df.description = ref.description;
-            enriched++;
-          }
-        }
-      }
-      console.log("  Enriched " + String(enriched) + " truncated descriptions\n");
-    } else {
-      console.log("  Warning: .Stat returned " + String(dfResp.status) + ", using truncated descriptions\n");
-    }
-  } catch (err) {
-    console.log("  Warning: could not fetch full descriptions:", err instanceof Error ? err.message : err, "\n");
-  }
+  // Full names and descriptions, replacing the truncated summaries.
+  const dataflowText = await fetchDataflowText();
 
   // 2. Fetch structures
   console.log("2. Fetching structures...");
@@ -434,10 +526,14 @@ async function main() {
   const entries = allDataflows.map((df) => {
     const resp = structures.get(df.id) || null;
     const struct = resp?.structure || null;
-    const parts: string[] = [df.name];
+    // Prefer .Stat's full text; the MCP summary truncates descriptions.
+    const text = dataflowText.get(df.id);
+    const name = text?.name || df.name;
+    const description = text?.description || df.description || "";
+    const parts: string[] = [name];
 
-    if (df.description) {
-      parts.push(df.description);
+    if (description) {
+      parts.push(description);
     }
 
     if (struct?.dimensions) {
@@ -458,8 +554,8 @@ async function main() {
 
     return {
       id: df.id,
-      name: df.name,
-      description: df.description || "",
+      name,
+      description,
       richText: parts.join(". "),
       categories: categoryMap.get(df.id) || [],
       structure: struct ? {
@@ -475,24 +571,76 @@ async function main() {
   });
   console.log("  Built " + String(entries.length) + " descriptions\n");
 
-  // 6. Embed
+  // 6. Embed only what changed
   console.log("6. Embedding descriptions...");
-  console.log("   (Loading model — first run may take a moment)\n");
+  const previous = loadPreviousIndex();
+  const forceEmbed = process.argv.includes("--force-embed");
 
-  const { embedBatch } = await import("../lib/embeddings.js");
-  const texts = entries.map((e) => e.richText);
-  const embeddings = await embedBatch(texts);
-  console.log("  Embedded " + String(embeddings.length) + " texts\n");
+  // Embeddings from a different model live in a different vector space, so
+  // mixing them would silently corrupt search rather than fail.
+  const modelChanged = previous !== null && previous.modelId !== EMBED_MODEL_ID;
+  if (modelChanged) {
+    console.log("  Model changed (" + previous.modelId + " -> " + EMBED_MODEL_ID +
+      "); re-embedding everything");
+  }
+  const reuse = !forceEmbed && !modelChanged;
+
+  const priorByText = new Map<string, number[]>();
+  if (reuse && previous) {
+    for (const e of previous.entries) {
+      if (e.embedding?.length) priorByText.set(e.id + "\u0000" + e.richText, e.embedding);
+    }
+  }
+
+  const needEmbedding = entries.filter(
+    (e) => !priorByText.has(e.id + "\u0000" + e.richText),
+  );
+  console.log(
+    "  " + String(entries.length - needEmbedding.length) + " reused, " +
+    String(needEmbedding.length) + " to embed",
+  );
+
+  const fresh = new Map<string, number[]>();
+  if (needEmbedding.length > 0) {
+    const { embedBatch } = await import("../lib/embeddings.js");
+    const vectors = await embedBatch(needEmbedding.map((e) => e.richText));
+    needEmbedding.forEach((e, i) => fresh.set(e.id, vectors[i]));
+    console.log("  Embedded " + String(vectors.length) + " texts");
+  }
+  const priorIds = new Set((previous?.entries ?? []).map((e) => e.id));
+  const added = entries.filter((e) => !priorIds.has(e.id)).map((e) => e.id);
+  const removed = [...priorIds].filter((id) => !entries.some((e) => e.id === id));
+  if (added.length) console.log("  Added: " + added.join(", "));
+  if (removed.length) console.log("  Removed: " + removed.join(", "));
+  console.log();
 
   // 7. Save index
   console.log("7. Saving index...");
+  const nextEntries = entries.map((e) => ({
+    ...e,
+    embedding: fresh.get(e.id) ?? priorByText.get(e.id + "\u0000" + e.richText),
+  }));
+
+  // `createdAt` marks the last CONTENT change, not the last run. A daily job
+  // that finds nothing new should leave the file byte-identical so it produces
+  // no commit and no deploy; the job's own run history records that we looked.
+  const unchanged =
+    previous !== null &&
+    JSON.stringify(previous.entries) === JSON.stringify(nextEntries);
+  if (unchanged) {
+    console.log("  No change. Index left untouched (built " +
+      previous.createdAt + ").\n");
+    // Same teardown as the success path: an open MCP client would hang the
+    // scheduled job on the very runs that are meant to be cheapest.
+    await client.close();
+    console.log("Done! Nothing to update.");
+    process.exit(0);
+  }
+
   const index = {
-    modelId: "gemini-embedding-001",
+    modelId: EMBED_MODEL_ID,
     createdAt: new Date().toISOString(),
-    entries: entries.map((e, i) => ({
-      ...e,
-      embedding: embeddings[i],
-    })),
+    entries: nextEntries,
   };
 
   writeFileSync(INDEX_PATH, JSON.stringify(index), "utf-8");
