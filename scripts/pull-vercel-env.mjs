@@ -38,8 +38,12 @@ if (!token || !projectId) {
   process.exit(1);
 }
 
+// v10 is the documented version for this endpoint. Each variable comes back
+// with a `decrypted` flag, which is the only reliable way to know the value is
+// usable: an undecrypted one is still a string, so it flows happily into a
+// config file and fails much later as something unrecognisable.
 const url =
-  "https://api.vercel.com/v9/projects/" +
+  "https://api.vercel.com/v10/projects/" +
   encodeURIComponent(projectId) +
   "/env?decrypt=true";
 
@@ -65,7 +69,39 @@ for (const e of all) {
   if (!targets.includes(target)) continue;
   if (e.gitBranch) continue;
   if (typeof e.value !== "string") continue; // sensitive vars return no value
-  chosen.set(e.key, e.value);
+  chosen.set(e.key, { value: e.value, decrypted: e.decrypted, type: e.type });
+}
+
+/**
+ * An encrypted value is a base64 envelope, `{"v":"v2","c":...}` once decoded.
+ * Checked as well as the `decrypted` flag, because writing one of these into
+ * .env.local produces a failure far from its cause: the gateway URL arrived as
+ * a 900-character blob and the build reported only "Invalid URL".
+ */
+function looksEncrypted(value) {
+  if (!/^[A-Za-z0-9+/=]{64,}$/.test(value)) return false;
+  try {
+    const decoded = Buffer.from(value, "base64").toString("utf-8");
+    return decoded.startsWith('{"v":') && decoded.includes('"c":');
+  } catch {
+    return false;
+  }
+}
+
+const undecrypted = [...chosen.entries()].filter(
+  ([, e]) => e.decrypted === false || looksEncrypted(e.value),
+);
+if (undecrypted.length) {
+  console.error(
+    "Vercel returned " + undecrypted.length + " variable(s) still encrypted: " +
+      undecrypted.map(([k, e]) => k + " (type " + e.type + ")").join(", "),
+  );
+  console.error(
+    "decrypt=true was not honoured for this token. A project-scoped token may " +
+      "not be permitted to decrypt; either widen the token's scope or set the " +
+      "required values as repository secrets instead.",
+  );
+  process.exit(1);
 }
 
 const missing = REQUIRED.filter((k) => !chosen.has(k));
@@ -79,7 +115,7 @@ if (missing.length) {
 
 const lines = [...chosen.entries()]
   .sort(([a], [b]) => a.localeCompare(b))
-  .map(([k, v]) => k + "=" + JSON.stringify(v));
+  .map(([k, e]) => k + "=" + JSON.stringify(e.value));
 writeFileSync(outPath, lines.join("\n") + "\n", "utf-8");
 
 // Names only. Values are secrets and this log is public on a public repo.
