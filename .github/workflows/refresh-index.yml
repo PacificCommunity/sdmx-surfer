@@ -52,10 +52,19 @@ jobs:
       # escaped newlines, and sourcing such a file in bash corrupts them
       # (a literal \n once turned the gateway path into /mcp/n).
       # .env.local is gitignored, so it cannot be committed by the step below.
+      # Write the link file rather than relying on VERCEL_ORG_ID and
+      # VERCEL_PROJECT_ID: a fresh checkout has no .vercel directory, and the
+      # CLI resolves project settings from that file, failing with "Could not
+      # retrieve Project Settings" when it is absent. .vercel is gitignored, so
+      # this cannot be committed by the step below.
+      - name: Link the Vercel project
+        run: |
+          mkdir -p .vercel
+          cat > .vercel/project.json <<'JSON'
+          {"projectId":"prj_0cwYIhZXKaKadgiWXZZtJwKiTzkh","orgId":"team_PAmIDtLgwBKYgmiV70LEHgfh"}
+          JSON
+
       - name: Pull environment from Vercel
-        env:
-          VERCEL_ORG_ID: team_PAmIDtLgwBKYgmiV70LEHgfh
-          VERCEL_PROJECT_ID: prj_0cwYIhZXKaKadgiWXZZtJwKiTzkh
         run: |
           npx vercel@latest env pull .env.local \
             --environment=production \
