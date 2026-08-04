@@ -64,6 +64,19 @@ jobs:
           {"projectId":"prj_0cwYIhZXKaKadgiWXZZtJwKiTzkh","orgId":"team_PAmIDtLgwBKYgmiV70LEHgfh"}
           JSON
 
+      # Temporary: pinpoint whether the token can reach the project at all.
+      # Prints HTTP status codes only, never response bodies.
+      - name: Diagnose token access
+        run: |
+          T='${{ secrets.VERCEL_TOKEN }}'
+          P=prj_0cwYIhZXKaKadgiWXZZtJwKiTzkh
+          echo "token prefix: ${T:0:4}"
+          for path in "v9/projects/$P" "v9/projects/$P/env" "v2/user" "v2/teams"; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' \
+              -H "Authorization: Bearer $T" "https://api.vercel.com/$path")
+            echo "GET /$path -> $code"
+          done
+
       - name: Pull environment from Vercel
         run: |
           npx vercel@latest env pull .env.local \
