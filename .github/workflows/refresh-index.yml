@@ -41,11 +41,28 @@ jobs:
 
       - run: npm ci
 
-      - name: Rebuild index
+      # The gateway URL, its token and the embedding key already live in
+      # Vercel. GitHub Actions cannot read those, so rather than keeping a
+      # second copy here that drifts when one is rotated, pull them at run
+      # time. That needs one secret instead of three, and Vercel stays the
+      # single source of truth.
+      #
+      # `vercel env pull` writes .env.local, which build-index already loads
+      # through dotenv. Nothing passes through the shell: these values contain
+      # escaped newlines, and sourcing such a file in bash corrupts them
+      # (a literal \n once turned the gateway path into /mcp/n).
+      # .env.local is gitignored, so it cannot be committed by the step below.
+      - name: Pull environment from Vercel
         env:
-          MCP_GATEWAY_URL: ${{ secrets.MCP_GATEWAY_URL }}
-          MCP_AUTH_TOKEN: ${{ secrets.MCP_AUTH_TOKEN }}
-          GOOGLE_AI_API_KEY: ${{ secrets.GOOGLE_AI_API_KEY }}
+          VERCEL_ORG_ID: team_PAmIDtLgwBKYgmiV70LEHgfh
+          VERCEL_PROJECT_ID: prj_0cwYIhZXKaKadgiWXZZtJwKiTzkh
+        run: |
+          npx vercel@latest env pull .env.local \
+            --environment=production \
+            --token="${{ secrets.VERCEL_TOKEN }}" \
+            --yes
+
+      - name: Rebuild index
         run: npm run build-index
 
       - name: Commit if the catalogue moved
