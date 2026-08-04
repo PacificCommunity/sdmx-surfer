@@ -52,37 +52,24 @@ jobs:
       # escaped newlines, and sourcing such a file in bash corrupts them
       # (a literal \n once turned the gateway path into /mcp/n).
       # .env.local is gitignored, so it cannot be committed by the step below.
-      # Write the link file rather than relying on VERCEL_ORG_ID and
-      # VERCEL_PROJECT_ID: a fresh checkout has no .vercel directory, and the
-      # CLI resolves project settings from that file, failing with "Could not
-      # retrieve Project Settings" when it is absent. .vercel is gitignored, so
-      # this cannot be committed by the step below.
-      - name: Link the Vercel project
-        run: |
-          mkdir -p .vercel
-          cat > .vercel/project.json <<'JSON'
-          {"projectId":"prj_0cwYIhZXKaKadgiWXZZtJwKiTzkh","orgId":"team_PAmIDtLgwBKYgmiV70LEHgfh"}
-          JSON
-
-      # Temporary: pinpoint whether the token can reach the project at all.
-      # Prints HTTP status codes only, never response bodies.
-      - name: Diagnose token access
-        run: |
-          T='${{ secrets.VERCEL_TOKEN }}'
-          P=prj_0cwYIhZXKaKadgiWXZZtJwKiTzkh
-          echo "token prefix: ${T:0:4}"
-          for path in "v9/projects/$P" "v9/projects/$P/env" "v2/user" "v2/teams"; do
-            code=$(curl -s -o /dev/null -w '%{http_code}' \
-              -H "Authorization: Bearer $T" "https://api.vercel.com/$path")
-            echo "GET /$path -> $code"
-          done
-
+      # The gateway URL, its token and the embedding key already live in
+      # Vercel. GitHub Actions cannot read those, so rather than keeping a
+      # second copy here that drifts when one is rotated, fetch them at run
+      # time. That needs one secret instead of three.
+      #
+      # Via the REST API rather than `vercel env pull`: the CLI resolves the
+      # account first, and a project-scoped token is denied user- and team-level
+      # endpoints by design, which it misreports as a project-linking failure.
+      # See scripts/pull-vercel-env.mjs.
+      #
+      # .env.local is gitignored, so the commit step cannot pick it up, and
+      # build-index reads it through dotenv, so no value passes through bash.
       - name: Pull environment from Vercel
-        run: |
-          npx vercel@latest env pull .env.local \
-            --environment=production \
-            --token="${{ secrets.VERCEL_TOKEN }}" \
-            --yes
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: prj_0cwYIhZXKaKadgiWXZZtJwKiTzkh
+          VERCEL_ENV_REQUIRED: MCP_GATEWAY_URL,MCP_AUTH_TOKEN,GOOGLE_AI_API_KEY
+        run: node scripts/pull-vercel-env.mjs
 
       - name: Rebuild index
         run: npm run build-index
