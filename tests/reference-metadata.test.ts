@@ -7,8 +7,8 @@ import {
 } from "@/lib/reference-metadata";
 
 // Attribute shapes copied from live SPC responses on the 2026-08-03 gateway
-// contract: `status`/`scope`/`value_kind`, and a null `value` wherever the text
-// sits behind a drill-down call.
+// contract: `status`/`scope`/`value_kind`, values already parsed, and a null
+// `value` wherever the text sits behind a drill-down call.
 const attr = (
   id: string,
   value: string | null,
@@ -55,29 +55,14 @@ describe("cleanMetadataValue", () => {
     expect(cleanMetadataValue(null)).toBe("");
   });
 
-  it("strips the inlined language tag the MSD channel uses", () => {
-    expect(cleanMetadataValue('en: "National Statistics Organisations."')).toBe(
-      "National Statistics Organisations.",
-    );
-    expect(cleanMetadataValue('fr-FR: "Recensement"')).toBe("Recensement");
-  });
-
-  it("unwraps the whitespace variant the gateway leaves unparsed", () => {
-    // Exact string observed on SPC/DF_HHCOUNTS/DATA_SOURCE_LINK: the gateway's
-    // localised-value pattern requires `:"` with no space, so this one falls
-    // through with language null. Drop this once that is fixed upstream.
-    expect(
-      cleanMetadataValue('en: "https://www.statsfiji.gov.fj/index.php/census-2017"'),
-    ).toBe("https://www.statsfiji.gov.fj/index.php/census-2017");
-  });
-
-  it("leaves doubled links alone, now that the gateway collapses them", () => {
-    // No longer our job: PR #23 collapses "https://x (https://x)" upstream,
-    // verified in both link values and prose. Anything doubled that still
-    // arrives is a gateway bug to report, not one to paper over here.
+  it("leaves parsing to the gateway", () => {
+    // Language wrappers, markup and doubled links are all resolved upstream.
+    // Anything of that shape arriving here is a gateway bug to report rather
+    // than one to paper over, so these pass through untouched.
     expect(cleanMetadataValue("https://a.org/x (https://a.org/x)")).toBe(
       "https://a.org/x (https://a.org/x)",
     );
+    expect(cleanMetadataValue('en: "Recensement"')).toBe('en: "Recensement"');
     // Anchor text that genuinely differs keeps its parenthetical URL.
     expect(cleanMetadataValue("Census 2017 (https://a.org/x)")).toBe(
       "Census 2017 (https://a.org/x)",
@@ -89,9 +74,9 @@ describe("normaliseReferenceMetadata", () => {
   it("reads dataflow-scoped values in reading order", () => {
     const p = normaliseReferenceMetadata("DF_CPI", {
       metadata_attributes: [
-        attr("DATA_COMMENT", 'en: "The CPI measures a representative basket."'),
-        attr("DATA_SOURCE_ORGANIZATION", 'en: "National Statistics Offices"'),
-        attr("DATA_PROCESSING", 'en: "Compiled per the CPI Manual."'),
+        attr("DATA_COMMENT", "The CPI measures a representative basket."),
+        attr("DATA_SOURCE_ORGANIZATION", "National Statistics Offices"),
+        attr("DATA_PROCESSING", "Compiled per the CPI Manual."),
       ],
       coverage: { declared: 9, populated: 3, empty: 6 },
       channels: { msd_v2: "found", dsd_attributes: "skipped" },
@@ -153,7 +138,7 @@ describe("normaliseReferenceMetadata", () => {
   it("keeps declared-but-blank fields apart from values", () => {
     const p = normaliseReferenceMetadata("DF_POP_PROJ", {
       metadata_attributes: [
-        attr("DATA_SOURCE_TITLE", 'en: "Census of Population and Housing"'),
+        attr("DATA_SOURCE_TITLE", "Census of Population and Housing"),
         blank("DATA_SOURCE_LICENSE"),
         blank("DATA_SOURCE_DATE"),
       ],
@@ -165,12 +150,10 @@ describe("normaliseReferenceMetadata", () => {
     expect(p.available).toBe(true);
   });
 
-  it("links a bare URL the gateway mistyped as prose", () => {
-    // Consequence of the unparsed wrapper: SPC's DF_HHCOUNTS source link comes
-    // back value_kind "prose". A whole-string URL is a link regardless.
+  it("links a bare URL whatever value_kind claims", () => {
     const p = normaliseReferenceMetadata("DF_HHCOUNTS", {
       metadata_attributes: [
-        attr("DATA_SOURCE_LINK", 'en: "https://www.statsfiji.gov.fj/x"', {
+        attr("DATA_SOURCE_LINK", "https://www.statsfiji.gov.fj/x", {
           value_kind: "prose",
         }),
       ],

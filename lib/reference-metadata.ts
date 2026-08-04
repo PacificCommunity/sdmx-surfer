@@ -87,22 +87,17 @@ export interface DataflowProvenance {
 }
 
 /**
- * Unwrap a value that still carries its language tag, as `en: "..."`.
+ * Trim a value for display.
  *
- * Defensive, and traceable to a specific upstream defect rather than to the
- * contract: the gateway's localised-value pattern requires `:"` with no space,
- * so a provider writing `en: "..."` falls through unparsed. Measured across the
- * 26 snapshot flows, drill-down values are 8 plain, 0 wrapped without a space,
- * 2 wrapped with one (both DF_HHCOUNTS). Remove this once the gateway pattern
- * tolerates the space. Harmless on already-plain values.
- *
- * The doubled-link workaround this used to carry is gone: PR #23 collapses
- * `https://x (https://x)` upstream, confirmed in both link values and prose.
+ * Values arrive parsed: the gateway resolves the multilingual wrapper to one
+ * language, strips markup, and collapses a link whose anchor text is its own
+ * URL. This used to strip an `en: "..."` wrapper that survived when the
+ * language tag was followed by a space; that is fixed upstream, verified
+ * across the 26 snapshot flows (10 plain, 0 wrapped), so the workaround is
+ * gone rather than kept on the chance it returns.
  */
 export function cleanMetadataValue(raw: unknown): string {
-  if (typeof raw !== "string") return "";
-  const withoutTag = raw.replace(/^\s*[a-z]{2}(-[A-Z]{2})?\s*:\s*(?=")/, "");
-  return withoutTag.replace(/^"([\s\S]*)"$/, "$1").trim();
+  return typeof raw === "string" ? raw.trim() : "";
 }
 
 /**
@@ -179,14 +174,13 @@ function firstUrl(text: string): string | undefined {
 }
 
 /**
- * `value_kind` is authoritative, with one exception.
+ * `value_kind` is authoritative, with one exception: a value whose entire text
+ * is a URL is a link whatever the server calls it.
  *
- * A value whose entire text is a URL is a link whatever the server calls it.
- * That exception earns its place today: the unparsed `en: "..."` wrapper also
- * defeats URL detection upstream, so SPC's DF_HHCOUNTS source link arrives
- * typed as prose. Trusting `value_kind` alone would render a bare URL as
- * plain text. Safe in general, since a whole-string URL cannot be a date or
- * prose.
+ * The defect that motivated that exception is fixed (the wrapper used to
+ * defeat URL detection, so DF_HHCOUNTS's source link arrived typed as prose;
+ * it now reports `url`). The rule is kept because it costs a line and cannot
+ * be wrong: a whole-string URL is not a date and is not prose.
  */
 function hrefFor(
   text: string,
