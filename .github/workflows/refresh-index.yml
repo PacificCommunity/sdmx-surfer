@@ -41,37 +41,21 @@ jobs:
 
       - run: npm ci
 
-      # The gateway URL, its token and the embedding key already live in
-      # Vercel. GitHub Actions cannot read those, so rather than keeping a
-      # second copy here that drifts when one is rotated, pull them at run
-      # time. That needs one secret instead of three, and Vercel stays the
-      # single source of truth.
+      # Read from repository secrets rather than pulling from Vercel.
+      # Pulling was tried and cannot work at the scope this job deserves: a
+      # project-scoped token can list a project's variables but not decrypt
+      # them, and the token that could decrypt would be team-wide, able to
+      # deploy and modify every project in the team. Three read-only strings
+      # in a job that only reads are the smaller credential.
       #
-      # `vercel env pull` writes .env.local, which build-index already loads
-      # through dotenv. Nothing passes through the shell: these values contain
-      # escaped newlines, and sourcing such a file in bash corrupts them
-      # (a literal \n once turned the gateway path into /mcp/n).
-      # .env.local is gitignored, so it cannot be committed by the step below.
-      # The gateway URL, its token and the embedding key already live in
-      # Vercel. GitHub Actions cannot read those, so rather than keeping a
-      # second copy here that drifts when one is rotated, fetch them at run
-      # time. That needs one secret instead of three.
-      #
-      # Via the REST API rather than `vercel env pull`: the CLI resolves the
-      # account first, and a project-scoped token is denied user- and team-level
-      # endpoints by design, which it misreports as a project-linking failure.
-      # See scripts/pull-vercel-env.mjs.
-      #
-      # .env.local is gitignored, so the commit step cannot pick it up, and
-      # build-index reads it through dotenv, so no value passes through bash.
-      - name: Pull environment from Vercel
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: prj_0cwYIhZXKaKadgiWXZZtJwKiTzkh
-          VERCEL_ENV_REQUIRED: MCP_GATEWAY_URL,MCP_AUTH_TOKEN,GOOGLE_AI_API_KEY
-        run: node scripts/pull-vercel-env.mjs
-
+      # The cost is a second copy that could drift from Vercel. That fails
+      # loudly rather than silently: a missing key stops the job, and a rotated
+      # gateway token makes the very next run fail on its first MCP call.
       - name: Rebuild index
+        env:
+          MCP_GATEWAY_URL: ${{ secrets.MCP_GATEWAY_URL }}
+          MCP_AUTH_TOKEN: ${{ secrets.MCP_AUTH_TOKEN }}
+          GOOGLE_AI_API_KEY: ${{ secrets.GOOGLE_AI_API_KEY }}
         run: npm run build-index
 
       - name: Commit if the catalogue moved
