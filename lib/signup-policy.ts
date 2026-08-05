@@ -21,12 +21,21 @@
  * email to get in".
  */
 
-/** Domains whose members may sign in, from `AUTH_ALLOWED_EMAIL_DOMAINS`. */
+/**
+ * Domains whose members may sign in, from `AUTH_ALLOWED_EMAIL_DOMAINS`.
+ *
+ * `spc.int` matches that domain and nothing else. A leading dot, `.spc.int`,
+ * also admits subdomains. Exact is the default because this list is the only
+ * thing between a stranger and an account, and admitting every subdomain of a
+ * listed domain is a wider grant than it looks: list `gov.fj` with subdomains
+ * and you have admitted every agency, including any subdomain delegated to
+ * someone you did not have in mind.
+ */
 export function allowedEmailDomains(): string[] {
   return (process.env.AUTH_ALLOWED_EMAIL_DOMAINS || "")
     .split(",")
     .map((d) => d.trim().toLowerCase().replace(/^@/, ""))
-    .filter(Boolean);
+    .filter((d) => d.length > 0 && d !== ".");
 }
 
 /** The domain part of an address, lowercased. Null if it does not have one. */
@@ -37,15 +46,21 @@ function domainOf(email: string): string | null {
 }
 
 /**
- * Does `host` fall under `pattern`?
+ * Does `host` match `pattern`?
  *
- * Matches the domain itself and any subdomain, so `spc.int` admits
- * `mail.spc.int`. The leading dot is what makes that safe: a plain
- * `endsWith("spc.int")` would also admit `notspc.int`, which anyone can
- * register, and that is a real way in rather than a theoretical one.
+ * `spc.int` matches only `spc.int`. `.spc.int` matches it and any subdomain.
+ *
+ * Either way the comparison is on the host taken from after the last `@`, and
+ * subdomains match on a dot boundary. Both details matter: a suffix test over
+ * the whole address admits `notspc.int`, which anyone can register, and that is
+ * a way in rather than a curiosity.
  */
-function underDomain(host: string, pattern: string): boolean {
-  return host === pattern || host.endsWith("." + pattern);
+function matchesDomain(host: string, pattern: string): boolean {
+  if (pattern.startsWith(".")) {
+    const apex = pattern.slice(1);
+    return host === apex || host.endsWith(pattern);
+  }
+  return host === pattern;
 }
 
 /** True when the address belongs to a listed institutional domain. */
@@ -55,7 +70,7 @@ export function isInstitutionalEmail(
 ): boolean {
   const host = domainOf(email.trim().toLowerCase());
   if (!host) return false;
-  return domains.some((d) => underDomain(host, d));
+  return domains.some((d) => matchesDomain(host, d));
 }
 
 /** Whether anyone with a working provider account may sign in. */

@@ -23,20 +23,31 @@ afterEach(() => {
 });
 
 describe("institutional domain rule", () => {
-  it("parses a list tolerantly", () => {
-    process.env.AUTH_ALLOWED_EMAIL_DOMAINS = " SPC.int, @statsfiji.gov.fj ,,un.org ";
+  it("parses a list tolerantly, keeping the subdomain marker", () => {
+    process.env.AUTH_ALLOWED_EMAIL_DOMAINS =
+      " SPC.int, @statsfiji.gov.fj ,, .un.org , . ";
     expect(allowedEmailDomains()).toEqual([
       "spc.int",
       "statsfiji.gov.fj",
-      "un.org",
+      ".un.org",
     ]);
   });
 
-  it("admits the domain and its subdomains", () => {
+  it("matches the domain exactly by default", () => {
     const d = ["spc.int"];
     expect(isInstitutionalEmail("someone@spc.int", d)).toBe(true);
-    expect(isInstitutionalEmail("someone@mail.spc.int", d)).toBe(true);
     expect(isInstitutionalEmail("SOMEONE@SPC.INT", d)).toBe(true);
+    // Subdomains are a wider grant than they look, so they are opt-in.
+    expect(isInstitutionalEmail("someone@mail.spc.int", d)).toBe(false);
+  });
+
+  it("admits subdomains only for entries marked with a leading dot", () => {
+    const d = [".spc.int"];
+    expect(isInstitutionalEmail("someone@spc.int", d)).toBe(true);
+    expect(isInstitutionalEmail("someone@mail.spc.int", d)).toBe(true);
+    expect(isInstitutionalEmail("someone@a.b.spc.int", d)).toBe(true);
+    // Still anchored on the dot: the lookalike stays out either way.
+    expect(isInstitutionalEmail("attacker@notspc.int", d)).toBe(false);
   });
 
   it("refuses a lookalike domain anyone could register", () => {
@@ -46,6 +57,10 @@ describe("institutional domain rule", () => {
     expect(isInstitutionalEmail("attacker@notspc.int", d)).toBe(false);
     expect(isInstitutionalEmail("attacker@spc.int.example.com", d)).toBe(false);
     expect(isInstitutionalEmail("attacker@xspc.int", d)).toBe(false);
+    // And with subdomains enabled, which is the looser of the two modes.
+    const sub = [".spc.int"];
+    expect(isInstitutionalEmail("attacker@notspc.int", sub)).toBe(false);
+    expect(isInstitutionalEmail("attacker@spc.int.example.com", sub)).toBe(false);
   });
 
   it("is not fooled by an address containing the domain elsewhere", () => {
