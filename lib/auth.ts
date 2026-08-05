@@ -15,7 +15,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
-import { signupBasisWithoutInviteList } from "@/lib/signup-policy";
+import { emailDomain, openSignupEnabled } from "@/lib/signup-policy";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import { authConfig } from "./auth.config";
@@ -26,6 +26,7 @@ import {
   authVerificationTokens,
   authEvents,
   allowedEmails,
+  allowedDomains,
 } from "./db/index";
 import {
   verifyPassword,
@@ -330,10 +331,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async signIn({ user }) {
       if (!user.email) return false;
 
-      const basis = signupBasisWithoutInviteList(user.email);
-      if (basis) return true;
+      if (openSignupEnabled()) return true;
 
-      const normalizedEmail = user.email.toLowerCase();
+      const normalizedEmail = user.email.trim().toLowerCase();
+
+      // Institutional domain, matched exactly against allowed_domains.
+      const host = emailDomain(normalizedEmail);
+      if (host) {
+        const byDomain = await db
+          .select({ domain: allowedDomains.domain })
+          .from(allowedDomains)
+          .where(eq(allowedDomains.domain, host))
+          .limit(1);
+        if (byDomain.length > 0) return true;
+      }
+
+      // Otherwise an individual invite, which is how personal addresses get in.
       const rows = await db
         .select({ email: allowedEmails.email })
         .from(allowedEmails)

@@ -1,96 +1,101 @@
 /**
  * Who may sign in.
  *
- * Three rules, checked cheapest first, any one of which admits a user:
+ * Three rules, any one of which admits a user:
  *
  *   1. `AUTH_OPEN_SIGNUP=true` — anyone with a working provider account.
- *   2. Their email's domain is on the institutional list below.
- *   3. Their exact address is on the invite list in the database.
+ *   2. Their email's domain is in `allowed_domains`.
+ *   3. Their exact address is in `allowed_emails`.
  *
  * The domain rule exists because the user base is institutional and invites do
- * not scale to it: a colleague at a partner statistics office should be able to
- * sign in on the strength of their work address, without someone adding them
- * one at a time. The invite list stays because it is not redundant. Plenty of
- * NSO staff in the region work from personal addresses, and a domain rule alone
- * would exclude exactly the people it is meant to include.
+ * not scale to it: someone at a partner statistics office should be able to
+ * sign in on the strength of their work address, rather than waiting for a
+ * person to add them one at a time. The invite list stays because it is not
+ * redundant. A good number of statistics staff in the region work from personal
+ * addresses, and a domain rule alone would exclude exactly the people it exists
+ * to include.
  *
- * The domains are only as trustworthy as the address behind them, which is why
- * this is safe here and would not be with an arbitrary provider: Google,
- * Microsoft and GitHub each verify the address they return. A provider that
- * merely echoed a claimed address would turn this into "type any institutional
- * email to get in".
+ * MATCHING IS EXACT. There is no subdomain form. A subdomain grant reads
+ * smaller than it is, and this list is the only thing between a stranger and an
+ * account, so a domain that needs a subdomain gets its own row and someone
+ * decides to put it there.
+ *
+ * The rule is worth exactly as much as the address behind it. It is sound with
+ * Google, Microsoft and GitHub because each verifies the address it returns. A
+ * provider that merely echoed a claimed address would reduce this to "type any
+ * institutional email to get in", so adding one means checking that first.
+ *
+ * These helpers are deliberately free of database imports so they can be tested
+ * directly; `lib/auth` does the lookups.
  */
 
-/**
- * Domains whose members may sign in, from `AUTH_ALLOWED_EMAIL_DOMAINS`.
- *
- * `spc.int` matches that domain and nothing else. A leading dot, `.spc.int`,
- * also admits subdomains. Exact is the default because this list is the only
- * thing between a stranger and an account, and admitting every subdomain of a
- * listed domain is a wider grant than it looks: list `gov.fj` with subdomains
- * and you have admitted every agency, including any subdomain delegated to
- * someone you did not have in mind.
- */
-export function allowedEmailDomains(): string[] {
-  return (process.env.AUTH_ALLOWED_EMAIL_DOMAINS || "")
-    .split(",")
-    .map((d) => d.trim().toLowerCase().replace(/^@/, ""))
-    .filter((d) => d.length > 0 && d !== ".");
+/** Normalise a domain for storage and comparison. */
+export function normaliseDomain(raw: string): string {
+  return raw.trim().toLowerCase().replace(/^@/, "").replace(/\.$/, "");
 }
 
-/** The domain part of an address, lowercased. Null if it does not have one. */
-function domainOf(email: string): string | null {
+/**
+ * The host part of an address, lowercased, or null when there isn't one.
+ *
+ * Taken from after the LAST `@`, which is the part a mail system routes on.
+ * Reading from the first would let `a@spc.int@evil.com` pass as SPC.
+ */
+export function emailDomain(email: string): string | null {
   const at = email.lastIndexOf("@");
   if (at < 1 || at === email.length - 1) return null;
-  return email.slice(at + 1).trim().toLowerCase();
+  const host = email.slice(at + 1).trim().toLowerCase();
+  return host.length > 0 && !host.includes("@") ? host : null;
 }
 
 /**
- * Does `host` match `pattern`?
+ * Does this address belong to one of the listed domains?
  *
- * `spc.int` matches only `spc.int`. `.spc.int` matches it and any subdomain.
- *
- * Either way the comparison is on the host taken from after the last `@`, and
- * subdomains match on a dot boundary. Both details matter: a suffix test over
- * the whole address admits `notspc.int`, which anyone can register, and that is
- * a way in rather than a curiosity.
+ * Exact comparison on the host. A suffix test over the whole address would
+ * admit `notspc.int`, which anyone can register for a few dollars.
  */
-function matchesDomain(host: string, pattern: string): boolean {
-  if (pattern.startsWith(".")) {
-    const apex = pattern.slice(1);
-    return host === apex || host.endsWith(pattern);
-  }
-  return host === pattern;
-}
-
-/** True when the address belongs to a listed institutional domain. */
-export function isInstitutionalEmail(
-  email: string,
-  domains: string[] = allowedEmailDomains(),
-): boolean {
-  const host = domainOf(email.trim().toLowerCase());
+export function isInstitutionalEmail(email: string, domains: string[]): boolean {
+  const host = emailDomain(email.trim().toLowerCase());
   if (!host) return false;
-  return domains.some((d) => matchesDomain(host, d));
+  const listed = new Set(domains.map(normaliseDomain));
+  return listed.has(host);
 }
 
-/** Whether anyone with a working provider account may sign in. */
+/**
+ * Whether anyone with a working provider account may sign in.
+ *
+ * Off by default, so adding a provider does not open the service as a side
+ * effect. Keeping it an environment switch means opening the door, and closing
+ * it again if that goes badly, needs neither a code change nor a deploy.
+ */
 export function openSignupEnabled(): boolean {
   return process.env.AUTH_OPEN_SIGNUP === "true";
 }
 
-/** How a user was admitted, for logging and for the admin surface. */
-export type SignupBasis = "open" | "domain" | "invite" | "denied";
+/** Addresses that must never be admitted by domain, whatever is in the table. */
+export const PERSONAL_EMAIL_DOMAINS = [
+  "gmail.com",
+  "googlemail.com",
+  "outlook.com",
+  "hotmail.com",
+  "live.com",
+  "yahoo.com",
+  "yahoo.co.uk",
+  "icloud.com",
+  "me.com",
+  "proton.me",
+  "protonmail.com",
+  "aol.com",
+  "gmx.com",
+  "mail.com",
+  "yandex.com",
+  "zoho.com",
+];
 
 /**
- * Decide on everything except the invite list, which needs a database read.
- *
- * Returns `null` when the caller still has to check the invite list, so the
- * common institutional case is settled without touching the database.
+ * Guard for the admin surface: a consumer domain admitted here would open the
+ * service to everyone while looking like an ordinary row. Personal addresses
+ * belong on the invite list, one at a time.
  */
-export function signupBasisWithoutInviteList(
-  email: string,
-): Exclude<SignupBasis, "invite" | "denied"> | null {
-  if (openSignupEnabled()) return "open";
-  if (isInstitutionalEmail(email)) return "domain";
-  return null;
+export function isPersonalEmailDomain(domain: string): boolean {
+  return PERSONAL_EMAIL_DOMAINS.includes(normaliseDomain(domain));
 }

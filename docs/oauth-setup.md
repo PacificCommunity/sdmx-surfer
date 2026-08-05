@@ -99,36 +99,51 @@ secret produces an authentication failure with no useful message.
 Three rules, any one of which admits a user:
 
 1. `AUTH_OPEN_SIGNUP=true` — anyone with a working provider account.
-2. Their email domain is listed in `AUTH_ALLOWED_EMAIL_DOMAINS`.
-3. Their exact address is on the invite list in the database.
+2. Their email domain is in the `allowed_domains` table.
+3. Their exact address is in `allowed_emails`, the invite list.
 
-The domain rule is for the institutional base: someone at a partner statistics
-office should be able to sign in on their work address without being added one
-at a time. It is comma-separated, without the `@`.
+**Matching is exact.** `spc.int` admits `someone@spc.int` and nothing else;
+`mail.spc.int` needs its own row. There is no wildcard or subdomain form, by
+decision: a subdomain grant reads smaller than it is, and this table is the only
+thing between a stranger and an account. It does not admit `notspc.int`, which
+anyone can register, nor `spc.int@gmail.com`.
 
-`spc.int` matches that domain and nothing else. Write `.spc.int` with a leading
-dot to admit subdomains as well. Exact is the default deliberately: listing a
-domain with subdomains is a wider grant than it looks, since `gov.fj` that way
-admits every agency under it, including any subdomain delegated to someone you
-did not have in mind.
+The rule is worth exactly as much as the address behind it, which is why it is
+sound with these three providers and would not be in general: Google, Microsoft
+and GitHub each verify the address they return.
 
-Either way the match is on the host after the last `@` and, for subdomains, on
-a dot boundary. It does **not** admit `notspc.int`, which anyone can register,
-nor `spc.int@gmail.com`.
+**Personal mail providers are refused** by the admin API and the seed script.
+One `gmail.com` row would admit everyone while looking like an ordinary entry,
+and both `gmail.com` and `outlook.com` already appear among real users, so it is
+a live mistake rather than a hypothetical one.
 
-This is only as good as the address behind it, which is why it is safe with
-these three providers and would not be in general: Google, Microsoft and GitHub
-each verify the address they return.
+**Keep the invite list.** It is not made redundant. A good number of statistics
+staff in the region work from personal addresses, and a domain rule alone would
+exclude exactly the people it exists to include.
 
-**Keep the invite list.** It is not made redundant by the domain rule. A good
-number of NSO staff in the region work from personal addresses, and a domain
-rule on its own would exclude the very people it is meant to include.
+### Managing the list
 
-**Build the list to cover the region, not the inbox.** Adding domains as
-requests arrive will produce a list that mirrors whoever asked first, which
-across 22 PICTs reads as favouritism whatever the intent. Better to enumerate
-the NSOs of all member countries and territories up front, add the ones that
-have a mail domain, and record which do not and why.
+Admin panel → **Domains**, or seed the initial set:
+
+```
+npx tsx scripts/seed-allowed-domains.mts            # dry run
+npx tsx scripts/seed-allowed-domains.mts --write
+```
+
+The seed carries two groups: ten domains **observed** in this deployment's own
+users and invites, and partner governments and international organisations by
+their well-known primary domain, including NZ MFAT, Australian DFAT, the Forum
+Secretariat, SPREP, ADB, the World Bank, IMF and the UN agencies.
+
+**It asserts nothing about the member NSOs it cannot confirm.** Twenty-one
+PICTs are named in the script as needing one mail domain each, deliberately left
+blank rather than guessed. A guessed domain is worse than a missing one: it
+either does nothing, or it admits a domain somebody else owns. Confirm each from
+the office's own site or from mail you have received, then add it.
+
+Enumerate rather than react. Adding domains as requests arrive produces a list
+shaped by whoever asked first, which across the membership reads as favouritism
+whatever the intent.
 
 ## Rollout
 
