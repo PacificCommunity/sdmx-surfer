@@ -1,6 +1,7 @@
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import {
   bootstrapAdminEmails,
+  githubEmailIsVerified,
   emailDomain,
   isBootstrapAdmin,
   isInstitutionalEmail,
@@ -133,5 +134,41 @@ describe("break-glass administrators", () => {
     expect(isBootstrapAdmin("me@spc.int.example.com")).toBe(false);
     expect(isBootstrapAdmin("me@notspc.int")).toBe(false);
     expect(isBootstrapAdmin("notme@spc.int")).toBe(false);
+  });
+});
+
+describe("github address verification", () => {
+  const payload = [
+    { email: "personal@gmail.com", primary: true, verified: true },
+    { email: "someone@spc.int", primary: false, verified: false },
+    { email: "real@spc.int", primary: false, verified: true },
+  ];
+
+  it("accepts an address that is verified on the account", () => {
+    expect(githubEmailIsVerified(payload, "real@spc.int")).toBe(true);
+    expect(githubEmailIsVerified(payload, "REAL@SPC.INT")).toBe(true);
+  });
+
+  it("refuses an unverified address, however it is flagged", () => {
+    // The attack this closes: claim an address at a listed institutional
+    // domain without owning it. Auth.js does not check `verified`, so an
+    // unverified entry would otherwise be admitted by the domain rule and,
+    // because accounts link on email, attach to whoever already owns it.
+    expect(githubEmailIsVerified(payload, "someone@spc.int")).toBe(false);
+  });
+
+  it("refuses an address that is not on the account at all", () => {
+    expect(githubEmailIsVerified(payload, "nobody@spc.int")).toBe(false);
+  });
+
+  it("fails closed on anything it does not understand", () => {
+    for (const bad of [null, undefined, {}, "", 42, [null], [{}]]) {
+      expect(githubEmailIsVerified(bad, "real@spc.int")).toBe(false);
+    }
+    // A truthy-but-not-true verified flag is not verification.
+    expect(
+      githubEmailIsVerified([{ email: "x@spc.int", verified: "true" }], "x@spc.int"),
+    ).toBe(false);
+    expect(githubEmailIsVerified(payload, "")).toBe(false);
   });
 });

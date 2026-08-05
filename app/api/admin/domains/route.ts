@@ -58,7 +58,9 @@ export async function POST(req: Request) {
   if ("error" in gate)
     return NextResponse.json({ error: gate.error }, { status: gate.status });
 
-  const csrf = await checkCsrf(req);
+  // strict: adding a domain admits an entire organisation, so this sits in
+  // the same tier as role and password writes and fails closed without an Origin.
+  const csrf = checkCsrf(req, { strict: true });
   if (csrf) return csrf;
 
   const body = await req.json().catch(() => null);
@@ -100,7 +102,9 @@ export async function DELETE(req: Request) {
   if ("error" in gate)
     return NextResponse.json({ error: gate.error }, { status: gate.status });
 
-  const csrf = await checkCsrf(req);
+  // strict: adding a domain admits an entire organisation, so this sits in
+  // the same tier as role and password writes and fails closed without an Origin.
+  const csrf = checkCsrf(req, { strict: true });
   if (csrf) return csrf;
 
   const domain = normaliseDomain(

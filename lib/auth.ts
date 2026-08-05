@@ -17,6 +17,7 @@ import GitHubProvider from "next-auth/providers/github";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 import {
   emailDomain,
+  githubEmailIsVerified,
   isBootstrapAdmin,
   openSignupEnabled,
 } from "@/lib/signup-policy";
@@ -200,6 +201,33 @@ const oauthProviders = [
     GitHubProvider({ allowDangerousEmailAccountLinking: true }),
 ].filter(Boolean) as NonNullable<ReturnType<typeof GoogleProvider>>[];
 
+/**
+ * Ask GitHub whether this address is verified on the signing-in account.
+ *
+ * Costs one API call per GitHub sign-in, on the `user:email` scope the provider
+ * already requests. Fails closed on any error: an address we could not confirm
+ * is treated as unverified rather than trusted.
+ */
+async function githubAddressVerified(
+  accessToken: unknown,
+  email: string,
+): Promise<boolean> {
+  if (typeof accessToken !== "string" || !accessToken) return false;
+  try {
+    const res = await fetch("https://api.github.com/user/emails", {
+      headers: {
+        Authorization: "Bearer " + accessToken,
+        Accept: "application/vnd.github+json",
+        "User-Agent": "sdmx-surfer",
+      },
+    });
+    if (!res.ok) return false;
+    return githubEmailIsVerified(await res.json(), email);
+  } catch {
+    return false;
+  }
+}
+
 // NextAuth v5 — handlers + auth() + signIn/signOut, all from one call
 // ---------------------------------------------------------------------------
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -332,10 +360,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // A provider can return no email (a GitHub account with every address
     // private). We reject that rather than admitting an identity we cannot
     // link, deduplicate, or contact.
-    async signIn({ user }) {
+    async signIn({ user, account }) {
       if (!user.email) return false;
 
       const normalizedEmail = user.email.trim().toLowerCase();
+
+      // GitHub's address is not trustworthy until we check it ourselves. Auth.js
+      // uses whatever GitHub returns without inspecting `verified`, and both the
+      // domain rule and account linking treat the address as proof of identity.
+      // Verified before any rule below, including the break-glass list, so an
+      // unverified address cannot reach any of them.
+      if (account?.provider === "github") {
+        if (!(await githubAddressVerified(account.access_token, normalizedEmail))) {
+          return false;
+        }
+      }
 
       // Break-glass first, so a locked-out administrator is never gated by a
       // list they can no longer edit.
