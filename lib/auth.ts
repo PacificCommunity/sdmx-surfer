@@ -15,7 +15,11 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
-import { emailDomain, openSignupEnabled } from "@/lib/signup-policy";
+import {
+  emailDomain,
+  isBootstrapAdmin,
+  openSignupEnabled,
+} from "@/lib/signup-policy";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import { authConfig } from "./auth.config";
@@ -331,9 +335,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async signIn({ user }) {
       if (!user.email) return false;
 
-      if (openSignupEnabled()) return true;
-
       const normalizedEmail = user.email.trim().toLowerCase();
+
+      // Break-glass first, so a locked-out administrator is never gated by a
+      // list they can no longer edit.
+      if (isBootstrapAdmin(normalizedEmail)) return true;
+      if (openSignupEnabled()) return true;
 
       // Institutional domain, matched exactly against allowed_domains.
       const host = emailDomain(normalizedEmail);
@@ -359,14 +366,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // it in the token. Runs in the Node runtime only.
     async jwt({ token, user }) {
       if (user && user.email) {
+        const email = user.email.toLowerCase();
         const rows = await db
           .select({ id: authUsers.id, role: authUsers.role })
           .from(authUsers)
-          .where(eq(authUsers.email, user.email.toLowerCase()))
+          .where(eq(authUsers.email, email))
           .limit(1);
         if (rows.length > 0) {
           token.userId = rows[0].id;
           token.role = rows[0].role;
+
+          // Restore the role on a break-glass account. This covers the case
+          // the migration is most likely to produce: a provider returning a
+          // slightly different address, so the adapter creates a fresh row
+          // with the default role and the administrator quietly becomes an
+          // ordinary user with no way back.
+          if (isBootstrapAdmin(email) && rows[0].role !== "admin") {
+            await db
+              .update(authUsers)
+              .set({ role: "admin" })
+              .where(eq(authUsers.id, rows[0].id));
+            token.role = "admin";
+          }
         }
       }
       return token;

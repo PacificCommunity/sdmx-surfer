@@ -1,17 +1,27 @@
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import {
+  bootstrapAdminEmails,
   emailDomain,
+  isBootstrapAdmin,
   isInstitutionalEmail,
   isPersonalEmailDomain,
   normaliseDomain,
   openSignupEnabled,
 } from "@/lib/signup-policy";
 
-const ORIGINAL = process.env.AUTH_OPEN_SIGNUP;
-beforeEach(() => delete process.env.AUTH_OPEN_SIGNUP);
+const KEYS = ["AUTH_OPEN_SIGNUP", "AUTH_BOOTSTRAP_ADMINS"];
+const ORIGINAL: Record<string, string | undefined> = {};
+beforeEach(() => {
+  for (const k of KEYS) {
+    ORIGINAL[k] = process.env[k];
+    delete process.env[k];
+  }
+});
 afterEach(() => {
-  if (ORIGINAL === undefined) delete process.env.AUTH_OPEN_SIGNUP;
-  else process.env.AUTH_OPEN_SIGNUP = ORIGINAL;
+  for (const k of KEYS) {
+    if (ORIGINAL[k] === undefined) delete process.env[k];
+    else process.env[k] = ORIGINAL[k];
+  }
 });
 
 describe("emailDomain", () => {
@@ -91,5 +101,37 @@ describe("open signup", () => {
       process.env.AUTH_OPEN_SIGNUP = v;
       expect(openSignupEnabled()).toBe(false);
     }
+  });
+});
+
+describe("break-glass administrators", () => {
+  it("is empty unless configured, so it grants nothing by default", () => {
+    expect(bootstrapAdminEmails()).toEqual([]);
+    expect(isBootstrapAdmin("anyone@example.com")).toBe(false);
+  });
+
+  it("matches case-insensitively and ignores surrounding space", () => {
+    process.env.AUTH_BOOTSTRAP_ADMINS = " Me@Gvdallariva.net , gi@spc.int ";
+    expect(bootstrapAdminEmails()).toEqual([
+      "me@gvdallariva.net",
+      "gi@spc.int",
+    ]);
+    expect(isBootstrapAdmin("ME@GVDALLARIVA.NET")).toBe(true);
+    expect(isBootstrapAdmin(" gi@spc.int ")).toBe(true);
+  });
+
+  it("ignores entries that are not addresses", () => {
+    // A bare domain here would read as "everyone at this organisation is an
+    // administrator", which is not what this is for.
+    process.env.AUTH_BOOTSTRAP_ADMINS = "spc.int,,   ,me@spc.int";
+    expect(bootstrapAdminEmails()).toEqual(["me@spc.int"]);
+    expect(isBootstrapAdmin("anyone@spc.int")).toBe(false);
+  });
+
+  it("does not admit a lookalike of a listed address", () => {
+    process.env.AUTH_BOOTSTRAP_ADMINS = "me@spc.int";
+    expect(isBootstrapAdmin("me@spc.int.example.com")).toBe(false);
+    expect(isBootstrapAdmin("me@notspc.int")).toBe(false);
+    expect(isBootstrapAdmin("notme@spc.int")).toBe(false);
   });
 });
