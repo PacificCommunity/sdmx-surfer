@@ -1,8 +1,6 @@
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import {
-  enabledOAuthProviders,
-  openSignupEnabled,
-} from "@/lib/oauth-providers";
+import { enabledOAuthProviders } from "@/lib/oauth-providers";
+import { openSignupEnabled } from "@/lib/signup-policy";
 
 const KEYS = [
   "AUTH_GOOGLE_ID",

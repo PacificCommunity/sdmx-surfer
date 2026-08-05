@@ -94,6 +94,34 @@ Watch for trailing whitespace when pasting. A stored `GOOGLE_AI_API_KEY` in this
 project carried a trailing newline for months, and the same mistake in a client
 secret produces an authentication failure with no useful message.
 
+## Who may sign in
+
+Three rules, any one of which admits a user:
+
+1. `AUTH_OPEN_SIGNUP=true` — anyone with a working provider account.
+2. Their email domain is listed in `AUTH_ALLOWED_EMAIL_DOMAINS`.
+3. Their exact address is on the invite list in the database.
+
+The domain rule is for the institutional base: someone at a partner statistics
+office should be able to sign in on their work address without being added one
+at a time. It is comma-separated, without the `@`, and includes subdomains, so
+`spc.int` admits `mail.spc.int`. Matching is anchored on a dot boundary, so it
+does **not** admit `notspc.int`, which anyone can register.
+
+This is only as good as the address behind it, which is why it is safe with
+these three providers and would not be in general: Google, Microsoft and GitHub
+each verify the address they return.
+
+**Keep the invite list.** It is not made redundant by the domain rule. A good
+number of NSO staff in the region work from personal addresses, and a domain
+rule on its own would exclude the very people it is meant to include.
+
+**Build the list to cover the region, not the inbox.** Adding domains as
+requests arrive will produce a list that mirrors whoever asked first, which
+across 22 PICTs reads as favouritism whatever the intent. Better to enumerate
+the NSOs of all member countries and territories up front, add the ones that
+have a mail domain, and record which do not and why.
+
 ## Rollout
 
 1. **Register one provider and set its variables on the dev environment.** The

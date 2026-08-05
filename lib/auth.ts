@@ -15,7 +15,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
-import { openSignupEnabled } from "@/lib/oauth-providers";
+import { signupBasisWithoutInviteList } from "@/lib/signup-policy";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import { authConfig } from "./auth.config";
@@ -321,14 +321,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     ...authConfig.callbacks,
 
-    // Gate sign-in on the allowlist, unless open signup is switched on.
+    // Admit on any of three grounds: open signup, an institutional domain, or
+    // an invite. See lib/signup-policy.
     //
     // A provider can return no email (a GitHub account with every address
     // private). We reject that rather than admitting an identity we cannot
     // link, deduplicate, or contact.
     async signIn({ user }) {
       if (!user.email) return false;
-      if (openSignupEnabled()) return true;
+
+      const basis = signupBasisWithoutInviteList(user.email);
+      if (basis) return true;
 
       const normalizedEmail = user.email.toLowerCase();
       const rows = await db
