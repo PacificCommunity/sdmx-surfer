@@ -147,21 +147,32 @@ whatever the intent.
 
 ## Rollout
 
+The pilot accounts do not have to survive. They were a pilot, and nothing was
+promised about them. **The administrator accounts do**, and they are the only
+thing here that cannot be recovered after the fact, because promoting an
+administrator requires an administrator to be signed in.
+
+0. **Set `AUTH_BOOTSTRAP_ADMINS`** to the administrator addresses, on both
+   environments, before anything else. Those addresses may always sign in and
+   are always given the admin role, including on a freshly created row. It is
+   safe to leave set: it grants nothing to anyone who cannot prove ownership of
+   the address through a provider that verifies it.
 1. **Register one provider and set its variables on the dev environment.** The
    button appears on the dev sign-in page and nowhere else.
-2. **Sign in as an existing invited user** and confirm you land on the same
-   account: your dashboards are there and an admin is still an admin. This is
-   the step that proves account linking works, and it is worth doing before
-   production.
+2. **Sign in as an existing user** and confirm you land on the same account
+   rather than an empty one. This is the step that proves account linking works.
 3. **Repeat for the other two**, then set all three on production.
-4. **Verify an admin can sign in through OAuth** before anything is removed.
-   Losing the last admin path is the one unrecoverable failure here.
+4. **Verify each administrator can sign in through OAuth**, one at a time,
+   before anything is removed. Check the account that is not on an institutional
+   domain first: a personal domain with no Google Workspace, Microsoft 365 or
+   verified GitHub address behind it cannot use any of these providers, and that
+   account needs either a provider identity or a decision to retire it.
 5. **Open signup** with `AUTH_OPEN_SIGNUP=true` on production. The usage caps
    are the cost control from that point: 20 turns per day per user and a hard
    USD 1,000 cumulative budget.
 6. **Only then** retire the email and password providers and the allowlist,
    with Resend, in a separate change.
 
-Steps 1 to 5 are all reversible: unset a variable and the provider disappears;
-unset `AUTH_OPEN_SIGNUP` and the door closes again. Step 6 is not, which is why
-it is last and separate.
+Steps 0 to 5 are reversible: unset a variable and the provider disappears; unset
+`AUTH_OPEN_SIGNUP` and the door closes again. Step 6 is not, which is why it is
+last, separate, and gated on step 4 rather than on step 4 having been intended.

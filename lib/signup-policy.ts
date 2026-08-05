@@ -71,6 +71,34 @@ export function openSignupEnabled(): boolean {
   return process.env.AUTH_OPEN_SIGNUP === "true";
 }
 
+/**
+ * Emails that are always admitted and always administrators.
+ *
+ * The break-glass. Everything else about this migration is recoverable: unset a
+ * provider, close signup, restore a row. Losing the last administrator is not,
+ * because promoting one requires an administrator to be signed in already.
+ *
+ * The exposure here is concrete rather than theoretical. Of the two admin
+ * accounts, one is at spc.int and should federate; the other is at a personal
+ * domain that may have no provider behind it at all, and would be stranded the
+ * moment password sign-in is retired. This makes recovery an environment
+ * variable rather than database surgery.
+ *
+ * It is safe to leave set. It grants nothing to anyone who cannot already prove
+ * ownership of the address through a provider that verifies it.
+ */
+export function bootstrapAdminEmails(): string[] {
+  return (process.env.AUTH_BOOTSTRAP_ADMINS || "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter((e) => e.includes("@"));
+}
+
+/** Is this address a break-glass administrator? */
+export function isBootstrapAdmin(email: string): boolean {
+  return bootstrapAdminEmails().includes(email.trim().toLowerCase());
+}
+
 /** Addresses that must never be admitted by domain, whatever is in the table. */
 export const PERSONAL_EMAIL_DOMAINS = [
   "gmail.com",
