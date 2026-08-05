@@ -27,16 +27,3 @@ export function enabledOAuthProviders(): OAuthProviderInfo[] {
     process.env.AUTH_GITHUB_ID ? { id: "github", name: "GitHub" } : null,
   ].filter((p): p is OAuthProviderInfo => p !== null);
 }
-
-/**
- * Whether anyone with a working provider account may sign in.
- *
- * Off by default, so adding a provider does not silently open the service. The
- * governance decision is to accept any authenticated Google, Microsoft or
- * GitHub identity, with the usage caps rather than an invite list as the cost
- * control. Keeping it an environment switch means opening the door, and closing
- * it again if that goes badly, needs neither a code change nor a deploy.
- */
-export function openSignupEnabled(): boolean {
-  return process.env.AUTH_OPEN_SIGNUP === "true";
-}
