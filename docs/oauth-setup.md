@@ -104,9 +104,17 @@ Three rules, any one of which admits a user:
 
 The domain rule is for the institutional base: someone at a partner statistics
 office should be able to sign in on their work address without being added one
-at a time. It is comma-separated, without the `@`, and includes subdomains, so
-`spc.int` admits `mail.spc.int`. Matching is anchored on a dot boundary, so it
-does **not** admit `notspc.int`, which anyone can register.
+at a time. It is comma-separated, without the `@`.
+
+`spc.int` matches that domain and nothing else. Write `.spc.int` with a leading
+dot to admit subdomains as well. Exact is the default deliberately: listing a
+domain with subdomains is a wider grant than it looks, since `gov.fj` that way
+admits every agency under it, including any subdomain delegated to someone you
+did not have in mind.
+
+Either way the match is on the host after the last `@` and, for subdomains, on
+a dot boundary. It does **not** admit `notspc.int`, which anyone can register,
+nor `spc.int@gmail.com`.
 
 This is only as good as the address behind it, which is why it is safe with
 these three providers and would not be in general: Google, Microsoft and GitHub
