@@ -99,6 +99,43 @@ export function isBootstrapAdmin(email: string): boolean {
   return bootstrapAdminEmails().includes(email.trim().toLowerCase());
 }
 
+/**
+ * Is `email` present and verified in a GitHub `/user/emails` response?
+ *
+ * Auth.js does not check this. Its GitHub provider takes
+ * `emails.find(e => e.primary) ?? emails[0]` and uses that address whatever its
+ * verification state. GitHub does require verification before an address can be
+ * made primary, so the first branch is sound in practice, but the `emails[0]`
+ * fallback carries no such guarantee and the whole thing rests on an
+ * undocumented invariant of a third party.
+ *
+ * That invariant is load-bearing here in a way it is not for most apps. An
+ * unverified address would let someone assert an address at a listed
+ * institutional domain and be admitted by the domain rule; worse, because
+ * accounts are linked on email, it would attach them to an existing account
+ * that already owns that address, including an administrator's.
+ *
+ * So this is checked explicitly, and fails closed: a malformed response, a
+ * missing address, or a match that is not verified all return false.
+ */
+export function githubEmailIsVerified(
+  emailsPayload: unknown,
+  email: string,
+): boolean {
+  if (!Array.isArray(emailsPayload)) return false;
+  const target = email.trim().toLowerCase();
+  if (!target) return false;
+  return emailsPayload.some((entry) => {
+    if (!entry || typeof entry !== "object") return false;
+    const row = entry as { email?: unknown; verified?: unknown };
+    return (
+      typeof row.email === "string" &&
+      row.email.trim().toLowerCase() === target &&
+      row.verified === true
+    );
+  });
+}
+
 /** Addresses that must never be admitted by domain, whatever is in the table. */
 export const PERSONAL_EMAIL_DOMAINS = [
   "gmail.com",
