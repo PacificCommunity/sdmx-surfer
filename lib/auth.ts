@@ -12,6 +12,10 @@
 
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
+import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
+import { openSignupEnabled } from "@/lib/oauth-providers";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import { authConfig } from "./auth.config";
@@ -165,6 +169,32 @@ const emailProvider = {
 };
 
 // ---------------------------------------------------------------------------
+/**
+ * OAuth providers, each registered only when its credentials are configured.
+ *
+ * Conditional so the app deploys and runs before any provider app exists, and
+ * so one can be added or withdrawn by changing environment variables rather
+ * than code. `enabledOAuthProviders` drives the sign-in page, which offers only
+ * what will actually work.
+ *
+ * ACCOUNT LINKING BY VERIFIED EMAIL IS DELIBERATE. Every existing account was
+ * created by email sign-in and none has an OAuth link, so without linking the
+ * first Google or Microsoft sign-in would create a second, empty account and
+ * strand that user's dashboards and role. Auth.js calls the option "dangerous"
+ * because linking on an unverified email lets someone claim an account by
+ * asserting its address; Google, Microsoft and GitHub all verify the address
+ * they return, so that path is closed here. It would not be safe for a provider
+ * that does not.
+ */
+const oauthProviders = [
+  process.env.AUTH_GOOGLE_ID &&
+    GoogleProvider({ allowDangerousEmailAccountLinking: true }),
+  process.env.AUTH_MICROSOFT_ENTRA_ID_ID &&
+    MicrosoftEntraID({ allowDangerousEmailAccountLinking: true }),
+  process.env.AUTH_GITHUB_ID &&
+    GitHubProvider({ allowDangerousEmailAccountLinking: true }),
+].filter(Boolean) as NonNullable<ReturnType<typeof GoogleProvider>>[];
+
 // NextAuth v5 — handlers + auth() + signIn/signOut, all from one call
 // ---------------------------------------------------------------------------
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -178,6 +208,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   }),
 
   providers: [
+    ...oauthProviders,
     emailProvider,
 
     // Admin-provisioned password sign-in. Users do not self-register here;
@@ -290,9 +321,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     ...authConfig.callbacks,
 
-    // Block sign-in for emails not in the allowlist
+    // Gate sign-in on the allowlist, unless open signup is switched on.
+    //
+    // A provider can return no email (a GitHub account with every address
+    // private). We reject that rather than admitting an identity we cannot
+    // link, deduplicate, or contact.
     async signIn({ user }) {
       if (!user.email) return false;
+      if (openSignupEnabled()) return true;
+
       const normalizedEmail = user.email.toLowerCase();
       const rows = await db
         .select({ email: allowedEmails.email })
