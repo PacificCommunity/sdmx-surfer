@@ -52,7 +52,12 @@ const EMBED_MODEL_ID = "gemini-embedding-001";
 interface PreviousIndex {
   modelId: string;
   createdAt: string;
-  entries: Array<{ id: string; richText: string; embedding?: number[] }>;
+  entries: Array<{
+    id: string;
+    richText: string;
+    embedding?: number[];
+    structure?: unknown;
+  }>;
 }
 
 /** The committed index, when there is one. Absent on a first build. */
@@ -408,33 +413,64 @@ interface StructureResponse {
 async function main() {
   console.log("Building dataflow semantic search index...\n");
 
-  // Connect to MCP gateway
+  // Connect to MCP gateway.
+  //
+  // The token matters: without it the gateway is reachable but the sweep does
+  // not survive 127 calls. A run that omitted it produced structures for 40
+  // dataflows and nulls for the rest, silently.
   console.log("Connecting to MCP gateway at " + MCP_URL + "...");
-  const client = await createMCPClient({
-    transport: {
-      type: "http",
-      url: MCP_URL,
-    },
-  });
+  const MCP_AUTH_TOKEN = process.env.MCP_AUTH_TOKEN;
 
-  const tools = await client.tools();
-  console.log("Connected. " + String(Object.keys(tools).length) + " tools available.\n");
+  async function connect() {
+    const c = await createMCPClient({
+      transport: {
+        type: "http",
+        url: MCP_URL,
+        ...(MCP_AUTH_TOKEN
+          ? { headers: { Authorization: "Bearer " + MCP_AUTH_TOKEN } }
+          : {}),
+      },
+    });
+    return { c, t: await c.tools() };
+  }
 
-  // Helper to call MCP tools — unwraps the MCP content envelope
+  let { c: client, t: tools } = await connect();
+  console.log(
+    "Connected. " + String(Object.keys(tools).length) + " tools available" +
+    (MCP_AUTH_TOKEN ? " (authenticated)" : " (NO TOKEN — sweeps may be cut short)") + ".\n",
+  );
+
+  /**
+   * Call an MCP tool, unwrapping the content envelope.
+   *
+   * Retries once on a fresh session. A single long-lived session gets dropped
+   * part way through a 127-dataflow sweep, and every later call then fails; the
+   * result was an index that lost two thirds of its structures without saying
+   * so.
+   */
   async function call(toolName: string, args: Record<string, unknown>): Promise<unknown> {
-    const tool = tools[toolName];
-    if (!tool?.execute) throw new Error("Tool not found: " + toolName);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const raw = await (tool.execute as any)(args, { toolCallId: "idx-" + Date.now(), messages: [] });
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const tool = tools[toolName];
+        if (!tool?.execute) throw new Error("Tool not found: " + toolName);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const raw = await (tool.execute as any)(args, { toolCallId: "idx-" + Date.now(), messages: [] });
 
-    // MCP tools return { content: [{ type: "text", text: "..." }] }
-    if (raw && typeof raw === "object" && "content" in raw) {
-      const content = (raw as { content: Array<{ type: string; text: string }> }).content;
-      if (content?.[0]?.type === "text" && content[0].text) {
-        return JSON.parse(content[0].text);
+        // MCP tools return { content: [{ type: "text", text: "..." }] }
+        if (raw && typeof raw === "object" && "content" in raw) {
+          const content = (raw as { content: Array<{ type: string; text: string }> }).content;
+          if (content?.[0]?.type === "text" && content[0].text) {
+            return JSON.parse(content[0].text);
+          }
+        }
+        return raw;
+      } catch (err) {
+        if (attempt === 1) throw err;
+        await client.close().catch(() => {});
+        ({ c: client, t: tools } = await connect());
       }
     }
-    return raw;
+    throw new Error("unreachable");
   }
 
   // 1. Fetch all dataflows
@@ -464,6 +500,7 @@ async function main() {
   // 2. Fetch structures
   console.log("2. Fetching structures...");
   const structures = new Map<string, StructureResponse | null>();
+  const structureFailures: string[] = [];
   for (let i = 0; i < allDataflows.length; i++) {
     const df = allDataflows[i];
     process.stdout.write(
@@ -482,10 +519,22 @@ async function main() {
       })) as StructureResponse;
       structures.set(df.id, s);
     } catch {
+      // Keep whatever the committed index already knows. A transient gateway
+      // failure must never be able to delete a structure, because the loss is
+      // invisible downstream: richText simply comes out shorter, everything
+      // re-embeds, and the entry quietly stops describing its own dimensions.
+      structureFailures.push(df.id);
       structures.set(df.id, null);
     }
   }
   console.log("\n");
+  if (structureFailures.length) {
+    console.warn(
+      "  " + String(structureFailures.length) + " structure fetches failed: " +
+      structureFailures.slice(0, 10).join(", ") +
+      (structureFailures.length > 10 ? ", ..." : ""),
+    );
+  }
 
   // 3. Fetch categories from .Stat REST API
   console.log("3. Fetching categories from .Stat...");
@@ -523,9 +572,16 @@ async function main() {
 
   // 5. Build rich texts + persist structure metadata
   console.log("5. Building rich text descriptions...");
+  const priorIndex = loadPreviousIndex();
+  const previousStructures = new Map<string, unknown>(
+    (priorIndex?.entries ?? []).map((e) => [e.id, (e as { structure?: unknown }).structure]),
+  );
   const entries = allDataflows.map((df) => {
     const resp = structures.get(df.id) || null;
-    const struct = resp?.structure || null;
+    // A failed fetch falls back to what the committed index already holds, so
+    // a transient outage degrades nothing.
+    const struct =
+      resp?.structure || previousStructures.get(df.id) || null;
     // Prefer .Stat's full text; the MCP summary truncates descriptions.
     const text = dataflowText.get(df.id);
     const name = text?.name || df.name;
@@ -574,6 +630,33 @@ async function main() {
   // 6. Embed only what changed
   console.log("6. Embedding descriptions...");
   const previous = loadPreviousIndex();
+
+  /**
+   * Refuse to publish an index that knows less than the one it replaces.
+   *
+   * The first scheduled run wrote 40 structures where the committed index had
+   * 127, committed it, and reported success. Nothing downstream would have
+   * complained: the explorer falls back to a live MCP call when an entry has no
+   * structure, so the damage shows up only as slower pages and worse search.
+   * An automated job that can quietly publish a worse artefact than it started
+   * with is worth stopping outright.
+   */
+  if (previous) {
+    const before = previous.entries.filter((e) => e.structure).length;
+    const after = entries.filter((e) => e.structure).length;
+    if (after < before) {
+      console.error(
+        "\nRefusing to write: structures went from " + String(before) +
+        " to " + String(after) + " of " + String(entries.length) + ".",
+      );
+      console.error(
+        "The gateway did not answer for " + String(structureFailures.length) +
+        " dataflows. Nothing was changed; re-run when it is healthy.",
+      );
+      await client.close().catch(() => {});
+      process.exit(1);
+    }
+  }
   const forceEmbed = process.argv.includes("--force-embed");
 
   // Embeddings from a different model live in a different vector space, so
