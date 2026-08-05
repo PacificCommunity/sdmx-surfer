@@ -97,6 +97,28 @@ export const allowedEmails = pgTable("allowed_emails", {
 });
 
 // ---------------------------------------------------------------------------
+// allowed_domains  (institutional domains admitted without an invite)
+// ---------------------------------------------------------------------------
+//
+// Complements allowed_emails rather than replacing it: plenty of statistics
+// staff in the region work from personal addresses, so a domain rule alone
+// would exclude the people it exists to include.
+//
+// Matching is exact. There is no subdomain form, by decision: a subdomain grant
+// reads smaller than it is, and this table is the only thing between a stranger
+// and an account. A domain that needs a subdomain gets its own row.
+export const allowedDomains = pgTable("allowed_domains", {
+  /** Lowercased, no leading "@". Exact match against the address host. */
+  domain: text("domain").primaryKey(),
+  /** Who the domain belongs to, shown in the admin list. */
+  organisation: text("organisation"),
+  /** Where it came from, so a future maintainer can judge it. */
+  note: text("note"),
+  added_by: text("added_by").references(() => authUsers.id),
+  created_at: timestamp("created_at").defaultNow(),
+});
+
+// ---------------------------------------------------------------------------
 // dashboard_sessions
 // ---------------------------------------------------------------------------
 export const dashboardSessions = pgTable(

@@ -50,6 +50,13 @@
       "when": 1776398192600,
       "tag": "0006_tiny_the_anarchist",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1785960869356,
+      "tag": "0007_worried_sheva_callister",
+      "breakpoints": true
     }
   ]
 }
