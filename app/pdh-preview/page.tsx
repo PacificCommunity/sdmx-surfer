@@ -2,12 +2,14 @@
  * PDH alignment preview.
  *
  * A scratch surface for looking at the brand pieces together before any of it
- * touches the real app: the header bar with the pattern watermark, both
- * wordmark treatments, the palette, and the domain pictograms.
+ * touches the real app: the pattern carried through header, hero and footer,
+ * the wordmark, the palette, and the domain pictograms.
  *
  * Not linked from anywhere and not intended to ship. Deleting this route
  * removes the whole experiment.
  */
+
+import { BrandField } from "@/components/brand-field";
 
 const BLUE = "#223b83";
 const TURQUOISE = "#00a6c8";
@@ -24,29 +26,17 @@ const ICONS = [
 /** The header from the guidelines p28: solid blue, pattern watermark, orange active item. */
 function HeaderBar({ wordmark }: { wordmark: string }) {
   return (
-    <div
-      className="relative overflow-hidden"
-      style={{ background: BLUE }}
-    >
-      {/* The pattern sits as a faint watermark, as on p26 and p28. It is
-          decorative, so it is a background rather than an <img>. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage: "url(/brand/patterns/pattern.svg)",
-          backgroundRepeat: "repeat",
-          backgroundSize: "auto 100%",
-          opacity: 0.22,
-        }}
-      />
-      <div className="relative flex items-center justify-between px-6 py-3">
+    <BrandField variant="header">
+      <div className="flex items-center justify-between px-6 py-3">
         <div className="flex items-center gap-4">
           <img src="/brand/logos/logo_horizontal_white_orange.svg" alt="Pacific Data Hub" className="h-9" />
           <span className="h-8 w-px" style={{ background: "rgba(255,255,255,.35)" }} />
-          {/* The descender means the wordmark box runs below the baseline, so
-              it cannot be centred on its bounding box without sitting high. */}
-          <img src={wordmark} alt="Data Surfer" className="h-7" />
+          {/* Sized larger than the PDH lockup beside it because a third of
+              this box is descender: cap height is 68% of the image height, so
+              matching box heights would leave the product name visibly
+              smaller than the parent brand. Nudged up rather than centred for
+              the same reason. */}
+          <img src={wordmark} alt="Data Surfer" className="relative -top-0.5 h-11" />
         </div>
         <nav className="flex items-center gap-1 text-sm text-white">
           {["Home", "Explore", "Dashboards", "Countries"].map((item, i) => (
@@ -60,7 +50,7 @@ function HeaderBar({ wordmark }: { wordmark: string }) {
           ))}
         </nav>
       </div>
-    </div>
+    </BrandField>
   );
 }
 
@@ -78,7 +68,7 @@ function Swatch({ hex, name, note }: { hex: string; name: string; note?: string 
 export default function PdhPreview() {
   return (
     <main className="min-h-screen bg-white pb-24 text-[#181c1e]">
-      <HeaderBar wordmark="/brand/wordmark/data-surfer-florin-white.svg" />
+      <HeaderBar wordmark="/brand/wordmark/data-surfer-white.svg" />
 
       <section className="mx-auto max-w-5xl px-6 py-10">
         <h1 className="mb-1 text-2xl font-semibold">PDH alignment preview</h1>
@@ -88,18 +78,16 @@ export default function PdhPreview() {
 
         <h2 className="mb-3 text-lg font-semibold">Wordmark</h2>
         <p className="mb-3 max-w-2xl text-sm opacity-75">
-          The florin carries the meaning and is Surfer&rsquo;s own mark. The
-          lambda restates what <span className="font-mono">PΛCIFIC DΛTΛ HUB</span>{" "}
-          already does, so the second option reads as family resemblance and the
-          first as an identity.
+          One accent, matching the sibling tools, which use one each:{" "}
+          <span className="font-mono">.STAT EXPL⊙RER</span>,{" "}
+          <span className="font-mono">PACIFIC MΛP</span>,{" "}
+          <span className="font-mono">NEXUS GE⊙NODE</span>. The florin is
+          Surfer&rsquo;s own mark and carries the meaning; a lambda in DATA would
+          only restate what <span className="font-mono">PΛCIFIC DΛTΛ HUB</span>{" "}
+          already says.
         </p>
-        <div className="mb-4 rounded-lg border border-black/10 p-5">
-          <img src="/brand/wordmark/data-surfer-florin.svg" alt="" className="h-14" />
-          <p className="mt-2 text-xs opacity-60">One accent, matching .STAT EXPL⊙RER and PACIFIC MΛP</p>
-        </div>
         <div className="mb-10 rounded-lg border border-black/10 p-5">
-          <img src="/brand/wordmark/data-surfer-lambda-florin.svg" alt="" className="h-14" />
-          <p className="mt-2 text-xs opacity-60">Three accents, closer to the parent lockup</p>
+          <img src="/brand/wordmark/data-surfer.svg" alt="" className="h-14" />
         </div>
 
         <h2 className="mb-3 text-lg font-semibold">Palette</h2>
@@ -111,13 +99,20 @@ export default function PdhPreview() {
           <Swatch hex={PATTERN_TURQUOISE} name="Pattern turquoise" note="pattern only" />
         </div>
 
-        <h2 className="mb-3 text-lg font-semibold">Gradient field</h2>
-        <div
-          className="mb-10 flex h-32 items-center justify-center rounded-lg"
-          style={{ background: `linear-gradient(110deg, ${TURQUOISE}, ${BLUE})` }}
-        >
-          <img src="/brand/logos/logo_vertical_white_orange.svg" alt="" className="h-20" />
-        </div>
+        <h2 className="mb-3 text-lg font-semibold">Hero field</h2>
+        <p className="mb-3 max-w-2xl text-sm opacity-75">
+          The pattern carried at strength, as on the guidelines&rsquo; section
+          dividers and the home page. Nothing competes with it here, so it can
+          be much louder than in chrome.
+        </p>
+        <BrandField variant="hero" className="mb-10 rounded-lg">
+          <div className="flex flex-col items-center gap-4 px-6 py-14 text-center">
+            <img src="/brand/wordmark/data-surfer-white.svg" alt="Data Surfer" className="h-12" />
+            <p className="max-w-lg text-sm text-white/85">
+              Explore Pacific statistics by asking for them.
+            </p>
+          </div>
+        </BrandField>
 
         <h2 className="mb-3 text-lg font-semibold">Domain pictograms</h2>
         <p className="mb-3 max-w-2xl text-sm opacity-75">
@@ -134,6 +129,25 @@ export default function PdhPreview() {
           ))}
         </div>
       </section>
+
+      <BrandField variant="footer" patternColour="#1ab4cf">
+        <div className="mx-auto flex max-w-5xl items-start justify-between gap-8 px-6 py-12 text-sm text-white/80">
+          <div>
+            <p className="mb-2 font-semibold text-white">INFORMATION</p>
+            <p>About</p><p>User guides</p><p>Contact</p>
+          </div>
+          <div>
+            <p className="mb-2 font-semibold text-white">PDH TOOLS</p>
+            <p>Pacific Map</p><p>.Stat Data Explorer</p><p>Microdata Library</p>
+          </div>
+          <div className="text-right">
+            <img src="/brand/logos/logo_horizontal_white_orange.svg" alt="" className="ml-auto h-9" />
+            <p className="mt-3 text-xs opacity-70">
+              Copyright Pacific Community 2026
+            </p>
+          </div>
+        </div>
+      </BrandField>
     </main>
   );
 }
