@@ -20,8 +20,16 @@ code as it stands:
 
 Accounts are linked on verified email, so signing in with Microsoft as
 `someone@spc.int` lands on the existing `someone@spc.int` account, keeping its
-dashboards and role. This is safe for these three providers because each
-verifies the address it returns; it would not be for one that does not.
+dashboards and role.
+
+That rests on the address being proof of identity, which is true of Google and
+Microsoft and **is not automatically true of GitHub**: Auth.js takes
+`emails.find(e => e.primary) ?? emails[0]` and never inspects `verified`. So the
+app checks GitHub itself on every sign-in, and refuses an address that does not
+come back verified. Without that, an unverified address at a listed domain would
+both mint an account at someone else's organisation and, through linking, attach
+to whoever already owns it. Any provider added later needs the same check before
+it can be trusted this way.
 
 ## Whose account owns the registrations
 
@@ -124,9 +132,10 @@ decision: a subdomain grant reads smaller than it is, and this table is the only
 thing between a stranger and an account. It does not admit `notspc.int`, which
 anyone can register, nor `spc.int@gmail.com`.
 
-The rule is worth exactly as much as the address behind it, which is why it is
-sound with these three providers and would not be in general: Google, Microsoft
-and GitHub each verify the address they return.
+The rule is worth exactly as much as the address behind it. Google and Microsoft
+verify what they return; GitHub is verified by the app on each sign-in, because
+Auth.js does not. A provider that merely echoed a claimed address would reduce
+this to "type any institutional email to get in".
 
 **Personal mail providers are refused** by the admin API and the seed script.
 One `gmail.com` row would admit everyone while looking like an ordinary entry,
