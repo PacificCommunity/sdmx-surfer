@@ -89,6 +89,42 @@ a cosmetic one, and it is cheap because the categorisation already exists.
 The guidelines are explicit that these "are not subject or secondary logos" and
 should not be used in a way that suggests they are (p21).
 
+## Where the pattern goes
+
+The guidelines call the pattern "a structuring and inspiring graphic element"
+that "illustrates the dissemination of information and knowledge" (p16, p24),
+and they close the same page with "always give priority to legibility". Those
+two pull against each other in a data application more than in a brochure,
+because our core screens are people reading numbers.
+
+One rule resolves it:
+
+> **Pattern density runs inversely to information density.**
+
+Where there is no data, the pattern can be strong; where there is data, it is
+absent. That is a rule someone can apply without asking, and it keeps the
+identity present without ever competing with a figure.
+
+In practice:
+
+| Surface | Pattern | Why |
+| --- | --- | --- |
+| Header bar | 18% | Chrome. Present, never read. |
+| Sign-in, welcome, hero | 40% | Nothing competes. The strongest brand moment we get. |
+| Footer | 22% | Closing frame, no data. |
+| Empty states | strong | A blank canvas is exactly where visual interest belongs, and it is the one place a user is waiting rather than reading. |
+| Section dividers | light | Structural, as the guidelines use it. |
+| **Dashboard panels, charts, tables** | **none** | Data is the content. Anything behind a number competes with it. |
+| **Chat transcript** | **none** | Long-form reading. |
+
+The empty state is the one worth calling out, because it inverts the usual
+instinct. A user with no dashboard yet is the user with the least to read and
+the most to be persuaded by, so the pattern earns its place there in a way it
+never does behind a chart.
+
+Implemented as `BrandField`, which takes a variant rather than an opacity, so
+these decisions live in one file instead of being re-argued per page.
+
 ## What this means for Oceanic Data-Scapes
 
 The current system is close in spirit and different in specifics. Oceanic runs
