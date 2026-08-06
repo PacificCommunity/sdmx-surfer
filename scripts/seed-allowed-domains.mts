@@ -19,8 +19,17 @@
  * whatever the intent. The unverified block at the bottom names the gaps so
  * they stay visible instead of being quietly absent.
  */
-import { db, allowedDomains } from "../lib/db";
+import { config } from "dotenv";
+config({ path: ".env.local" });
+
 import { isPersonalEmailDomain, normaliseDomain } from "../lib/signup-policy";
+
+// Imported dynamically, after dotenv has run. `lib/db` reads DATABASE_URL at
+// module load, and ESM evaluates every static import before any statement in
+// this file, so a static import here would initialise the client against the
+// placeholder URL and fail with a bare "fetch failed". The dry-run path never
+// touches the database, so it would keep reporting success while --write broke.
+const { db, allowedDomains } = await import("../lib/db");
 
 interface Seed {
   domain: string;
