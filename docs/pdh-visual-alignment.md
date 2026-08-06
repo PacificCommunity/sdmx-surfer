@@ -32,16 +32,24 @@ blue (p11, and used on every section divider in the document). Orange is an
 accent: it marks the active nav item (p26, p28), the bespoke letterforms in the
 wordmark, and the pictograms. It is never a large field.
 
-**Unresolved: the artwork does not match the specification.** The supplied logo
-PDFs render `#1c478e` and `#e47f25`, against the `#223b83` and `#e37b0a` printed
-on p11. Most likely a CMYK-to-RGB conversion difference on export. It matters
-because our UI colour would sit directly beside the logo and any drift is
-visible at that distance.
+**Resolved by the Web Elements assets.** The print PDFs render `#1c478e` and
+`#e47f25`, which had looked like a conflict with the `#223b83` and `#e37b0a`
+printed on p11. The official web SVGs use `#223b83` and `#e37b0a` exactly. So
+the guidelines' hex values are authoritative for web and the print artwork
+simply carries a CMYK-to-RGB export difference. Nothing to ask PDH about.
 
-Taking the guidelines' stated hex values as authoritative, since they are the
-written specification and are given in RGB explicitly. The supplied artwork is
-left untouched: altering brand files is PDH's call, not ours. **Worth asking
-the PDH team which is canonical** before this is locked in.
+Two accents in the supplied assets are **not** the brand values, and this is
+worth knowing before anyone "corrects" them:
+
+| Asset | Colour | Brand equivalent |
+| --- | --- | --- |
+| Pictograms | `#f47216` | brand orange is `#e37b0a` |
+| Pattern | `#1ab4cf` | brand turquoise is `#00a6c8` |
+
+Both are brighter than the brand colour they correspond to, which reads as
+deliberate: the pictograms and pattern sit on dark blue fields where the brand
+values would go muddy. Treat them as the intended values for those assets rather
+than as drift to be normalised.
 
 ## Chrome
 
@@ -97,10 +105,23 @@ colours for chrome and a separate accessible categorical scale for data, tuned
 to sit beside the brand rather than inside it, but that is a decision to take
 deliberately.
 
-## Still missing
+## Web Elements
 
-The SharePoint download reported that a folder named **`0. Web Elements`** did
-not transfer. For web alignment that is likely the most directly relevant folder
-in the package, and everything above is reconstructed from the guidelines PDF
-and the logo artwork instead. Worth re-fetching before treating this document as
-complete.
+Retrieved on the second attempt, by downloading from inside the folder: OneDrive
+raised a `SerializationException` packaging it whole. It contains web-ready SVGs
+and supersedes the vector-PDF conversions made before it arrived.
+
+- `logos/` — horizontal and vertical, coloured and white-with-orange
+- `icons/` — the fifteen domain pictograms, one SVG each
+- `patterns/` — the Pacific pattern at three densities, plus a picture variant
+- `favicon/` — a full favicon set with `site.webmanifest`
+
+Copied to `public/brand/{logos,icons,patterns}`, about 1.1 MB. The pattern files
+dominate that; if they end up on a hot path they should be checked for whether a
+tiled fragment does the job of the full artwork.
+
+**The favicon set is deliberately not adopted.** It is the PDH mark, and using
+it would make Surfer's browser tab claim to be Pacific Data Hub rather than a
+tool within it. Whether Surfer takes PDH's favicon, keeps its own, or gets a
+sibling mark is a naming and identity decision, not a file copy. It is the same
+question as the per-tool header on p28.

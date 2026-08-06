@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="17.473083mm"
+   height="17.472731mm"
+   viewBox="0 0 17.473083 17.472731"
+   version="1.1"
+   id="svg30155"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   sodipodi:docname="icon_health.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview30157"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.914906"
+     inkscape:cx="1022.5094"
+     inkscape:cy="348.6697"
+     inkscape:window-width="3440"
+     inkscape:window-height="1374"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs30152" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(165.18932,-56.331797)">
+    <g
+       id="g21308"
+       transform="matrix(0.35277777,0,0,-0.35277777,-158.35583,71.061327)">
+      <path
+         d="M 0,0 H 10.789 V 11.595 H 22.383 V 22.383 H 10.789 V 33.977 H 0 V 22.383 H -11.595 V 11.595 H 0 Z M 13.442,-2.653 H -2.654 V 8.94 H -14.249 V 25.036 H -2.654 V 36.631 H 13.442 V 25.036 H 25.037 V 8.94 H 13.442 Z"
+         style="fill:#f47216;fill-opacity:1;fill-rule:nonzero;stroke:none"
+         id="path21310" />
+    </g>
+    <g
+       id="g21312"
+       transform="matrix(0.35277777,0,0,-0.35277777,-160.16294,72.868255)">
+      <path
+         d="M 0,0 H 21.033 V 11.595 H 32.628 V 32.628 H 21.033 V 44.222 H 0 V 32.628 H -11.594 V 11.595 H 0 Z M 23.687,-2.654 H -2.654 V 8.94 H -14.248 V 35.281 H -2.654 V 46.875 H 23.687 V 35.281 H 35.282 V 8.94 H 23.687 Z"
+         style="fill:#f47216;fill-opacity:1;fill-rule:nonzero;stroke:none"
+         id="path21314" />
+    </g>
+  </g>
+</svg>
