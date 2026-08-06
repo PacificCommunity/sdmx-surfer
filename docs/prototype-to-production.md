@@ -4,19 +4,34 @@ Giulio Valentino Dalla Riva · SDD - SPC · 10 June 2026
 
 ## Status
 
-Updated 2026-07-23.
+Updated 2026-08-07.
 
-**The dev line is now in production.** After a verification pass (typecheck,
-213 tests, production build, live dev-environment checks, and a usage-log
-review showing zero errors across the deployed usage since June), the full
-`country-snapshots` line was merged to `main` and deployed to `sdmxsurfer.net`
-on 2026-07-23. Production now runs: the Country Snapshots module (behind its
-shared password, now set in the production environment), Auth.js v5 (existing
-sessions get a one-time re-login), the usage caps (defaults: 20 turns/day, 5
-dashboards, USD 1,000 global budget), the improved vendored libraries (parser
-0.3.2 / components 0.4.7, patch machinery removed), and Opus 4.8 as the
-default model. `main` and `country-snapshots` are content-identical as of this
-merge; development continues on `country-snapshots`.
+**Production is current and healthy.** `main` carries everything through the
+daily index refresh. Since the 2026-07-23 promotion, production has also gained:
+the platform default moving to Opus 5, the 2026-08-03 reference-metadata
+contract, per-panel provenance, a model-facing MCP tool allowlist, the table
+visual, typed render-error hints, MCP tool-call logging that actually records
+what the agent did, and a daily GitHub Action that refreshes the dataflow index.
+
+**The dataflow index is no longer a one-off.** It had been built once, on
+30 March, and nothing rebuilt it since: by August it was missing six dataflows
+that had been added to the catalogue, and reported DF_VITAL as ending in 2022
+against a live 2026. It now refreshes daily, structure and availability every
+run, embeddings only when a dataflow's text actually changes, so an ordinary day
+costs no embedding calls and produces no commit.
+
+**The OAuth migration is built but not live.** It sits on `country-snapshots`,
+inert by design: providers register only when their credentials exist, so the
+code can ship to production before any provider app is created. What it adds is
+Google, Microsoft and GitHub sign-in; a three-rule admission policy (an
+`AUTH_OPEN_SIGNUP` switch, an `allowed_domains` table matched exactly, and the
+existing invite list); a break-glass `AUTH_BOOTSTRAP_ADMINS` list so the
+administrator accounts cannot be stranded; and explicit verification of GitHub
+addresses, which Auth.js does not check and which both the domain rule and
+account linking would otherwise trust. It is **blocked on two things**: the
+provider registrations, which need IT for Google and Microsoft (§4.3), and
+migration `0007` being applied to the production database before the code
+deploys.
 
 **Governance decisions made 2026-06-26 (see §4.3, §6.1, §7.2, §7.3):**
 
@@ -28,6 +43,11 @@ merge; development continues on `country-snapshots`.
 
 **Done since 2026-06-12:**
 
+- OAuth sign-in built on `country-snapshots`, awaiting provider registrations (§4.3). (2026-08-07)
+- Institutional domain admission (`allowed_domains`), matched exactly, with an admin screen. (2026-08-06)
+- Daily dataflow-index refresh with incremental embeddings; fixed two silent SDMX-JSON 2.0 readers that had been dropping categories and truncating descriptions. (2026-08-05)
+- Per-panel provenance, asked at the query key rather than the dataflow, and migrated to the 2026-08-03 gateway contract. (2026-08-04)
+- Default platform model moved to Opus 5. (2026-08-03)
 - Licence and Opus 4.8 default pushed to `main` and deployed to production. (2026-06-26)
 - Improved `sdmx-json-parser` (0.3.2) and `sdmx-dashboard-components` (0.4.7)
   built, vendored, and deployed to the dev environment; fixes the cross-provider
@@ -46,7 +66,7 @@ merge; development continues on `country-snapshots`.
 - Library-debt spec drafted (`docs/sdmx-dashboard-components-improvements.md`): the rendering and parser fixes SDMX Surfer carries as runtime patches, written up for upstreaming to `sdmx-dashboard-components` and `sdmx-json-parser`. A working parser fix with tests is ready on a local branch. Retires the build-fragility risk the binary patches carry. (2026-06-12)
 - `next-auth 4 → 5` (Auth.js v5) migration landed and `nodemailer` removed entirely, closing the largest residual cluster of moderate advisories (`SECURITY_AUDIT.md` §3.1/§3.2). No environment variables renamed (`AUTH_SECRET ?? NEXTAUTH_SECRET` fallback); one-time forced re-login on deploy. (2026-06-16)
 
-**Next in the decision-independent queue (§10):** merge to `main` + production deploy + prod env config (the integration step above), OAuth migration (Google + Microsoft + GitHub; remove allowlist/Resend), usage-cap enforcement (per-user daily/dashboard limits + global USD 1,000 budget, with tunable limits), point the product at `surfer.pacificdata.org`, operations floor (error tracking, uptime probe, runbook), model-drift regression suite, secrets inventory and rotation procedure, accessibility pass.
+**Next in the decision-independent queue (§10):** finish the OAuth migration (provider registrations, then apply migration `0007` to production **before** the code deploys), align the interface with PDH web standards and complete the accessibility pass (§4.5), point the product at `surfer.pacificdata.org`, operations floor (error tracking, uptime probe, runbook), upstream the two vendored library forks, model-drift regression suite, secrets inventory and rotation procedure.
 
 **Waiting on management:** the only remaining **beta** blocker is the named owner / on-call (§7.1, §5). Launch blockers still open: accessibility sign-off, moderation process, KPIs, and the hosting-jurisdiction/compliance question (the URL is now under SPC, but Vercel/Railway/Neon are non-Pacific).
 
@@ -184,11 +204,38 @@ Effort: two to four days, depending on how much of the linking logic we want fro
 
 **Decided 2026-06-26: OAuth-only sign-in on the existing Auth.js (NextAuth v5) stack, with Google, Microsoft, and GitHub.** Rationale: Google plus Microsoft covers nearly all institutional and personal users (Microsoft, not GitHub, is the real coverage gap for a government audience; GitHub is added for the developer-leaning subset). Keeping the providers on our own Auth.js stack leaves identities in our Neon database rather than a third-party identity SaaS, which fits the hosting-jurisdiction posture (§4.1, §7.3) and avoids discarding the recently completed v4 to v5 migration. Consequences: the email allowlist and the Resend magic-link/password flows are removed (sign-up is open to anyone who can authenticate with a supported provider; password reset is owned by the OAuth provider, so no transactional email service is needed). The Okta/Keycloak SSO is dropped from scope and can be re-added later if an institutional partner requires it. Country Snapshots stays behind its own shared password, independent of this change.
 
+#### Who owns the provider registrations
+
+**Position taken 2026-08-07: institutional ownership for production, personal
+registrations only as scaffolding for testing.** This needs IT for two of the
+three, so it is the long-lead item in the whole migration.
+
+| Provider | Testing | Production | Why |
+| --- | --- | --- | --- |
+| Google | any project you can create | SPC-owned Cloud project, External, **Published** | The consent screen is the first thing a stranger from an NSO sees. It carries the app name, publisher and support email; a government-facing service whose sign-in screen names a personal account undermines the trust the product needs. The consent screen's authorised domains must also be verified by the owning account, and `surfer.pacificdata.org` is SPC's. |
+| Microsoft | any tenant | **SPC Entra tenant, via IT** | Registered inside SPC's tenant, SPC staff sign in without an admin-consent prompt. Registered in a tenant we own, every other organisation's users fall under their own admin-consent policy, which is where partner NSOs get silently blocked. |
+| GitHub | `PacificCommunity` organisation | same | Organisation-owned from the start. No IT involvement needed, and it outlives any individual. |
+
+Two mechanics worth knowing before the conversation with IT:
+
+- A Google External app left in **Testing** is capped at 100 users. Moving it to
+  **Published** is self-service for plain email/profile scopes and needs no
+  Google review, but it is forgotten until sign-ups start failing at exactly the
+  wrong moment.
+- Microsoft client secrets **expire**. An expired one takes sign-in down for
+  everyone using that provider, so the renewal date belongs in a calendar, not
+  in someone's memory.
+
+Starting on personal registrations is safe rather than a trap: because accounts
+are linked on verified email rather than on the provider's account identifier,
+re-registering under SPC later is an environment-variable change. Users see a
+different consent screen once and land on the same account.
+
 #### Open questions
 
 1. ~~Okta vs Keycloak? Which providers for the open tier?~~ *Decided 2026-06-26: OAuth-only on Auth.js with Google + Microsoft + GitHub; no Okta/Keycloak; allowlist and Resend removed.*
-2. Who at SPC owns the OAuth app registrations (Google Cloud, Azure/Entra, GitHub) and approves the callback URLs and scopes?
-3. Do we restrict any email domains (block free email, allow only `.gov` and named partner domains, etc.), or accept any authenticated identity in the open tier?
+2. Who at SPC owns the OAuth app registrations, and can they create a Google Cloud project and an Entra app registration for this service? *Position recorded above; needs an IT conversation, not a decision from us.*
+3. ~~Do we restrict any email domains?~~ *Decided 2026-08-06: three rules, any of which admits a user. An `AUTH_OPEN_SIGNUP` switch (off by default), an `allowed_domains` table of institutional domains matched **exactly**, and the existing per-address invite list. Personal mail providers are refused from the domain table by both the admin API and the seed script, since one `gmail.com` row would admit everyone while looking like an ordinary entry. The invite list is kept deliberately: many statistics staff in the region work from personal addresses, and a domain rule alone would exclude the people it exists to include.*
 
 ### 4.4 Model drift monitoring
 

@@ -23,6 +23,22 @@ Accounts are linked on verified email, so signing in with Microsoft as
 dashboards and role. This is safe for these three providers because each
 verifies the address it returns; it would not be for one that does not.
 
+## Whose account owns the registrations
+
+**Institutional for production; personal registrations only as scaffolding.**
+Full reasoning and the IT conversation are in `prototype-to-production.md` §4.3.
+In short:
+
+| Provider | Testing | Production |
+| --- | --- | --- |
+| Google | any project you can create | SPC-owned Cloud project, External, **Published** (Testing caps at 100 users) |
+| Microsoft | any tenant | SPC Entra tenant, via IT, or partner organisations hit their own admin-consent policies |
+| GitHub | `PacificCommunity` organisation | same; no IT needed |
+
+Swapping credentials later does not disturb existing accounts, because sign-in
+links on verified email rather than on the provider's account identifier. Users
+see a different consent screen once and land on the same account.
+
 ## Callback URLs
 
 Every provider needs the redirect URI registered exactly. Auth.js derives it
