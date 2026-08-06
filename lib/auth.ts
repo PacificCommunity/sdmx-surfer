@@ -382,14 +382,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (openSignupEnabled()) return true;
 
       // Institutional domain, matched exactly against allowed_domains.
+      //
+      // Degrades to the invite list if that table cannot be read, rather than
+      // taking sign-in down with it. This is a real ordering hazard, not a
+      // hypothetical one: the code queries this table on every sign-in, so
+      // shipping it ahead of its migration would lock every user out at once.
+      // Failing this way only ever removes a way in, never adds one.
       const host = emailDomain(normalizedEmail);
       if (host) {
-        const byDomain = await db
-          .select({ domain: allowedDomains.domain })
-          .from(allowedDomains)
-          .where(eq(allowedDomains.domain, host))
-          .limit(1);
-        if (byDomain.length > 0) return true;
+        try {
+          const byDomain = await db
+            .select({ domain: allowedDomains.domain })
+            .from(allowedDomains)
+            .where(eq(allowedDomains.domain, host))
+            .limit(1);
+          if (byDomain.length > 0) return true;
+        } catch (err) {
+          console.error(
+            "[auth] allowed_domains unreadable, falling back to the invite " +
+              "list. Has migration 0007 been applied?",
+            err,
+          );
+        }
       }
 
       // Otherwise an individual invite, which is how personal addresses get in.
