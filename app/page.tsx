@@ -10,6 +10,7 @@ import { signOut } from "next-auth/react";
 import { AppFooter } from "@/components/app-footer";
 import { AppHeader } from "@/components/app-header";
 import { BrandField } from "@/components/brand-field";
+import { Florin } from "@/components/florin";
 
 export default function WelcomePage() {
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
@@ -90,13 +91,11 @@ export default function WelcomePage() {
               </span>
               <h2 className="font-[family-name:var(--font-display)] text-4xl font-extrabold leading-tight tracking-tight lg:text-5xl">
                 Sur
-                {/* The wordmark's florin, in running type. Inter carries U+0192
-                    so the headline stays in one typeface; the wordmark itself is
-                    Trade Gothic and is outlined SVG, which is the guidelines'
-                    own split: Trade Gothic is the logotype face, Inter is the
-                    website face. Lightened orange because the brand value is
-                    under AA on this field. */}
-                <span style={{ color: "var(--color-accent-on-dark)" }}>ƒ</span>
+                {/* The same florin as the wordmark, not Inter's. In running
+                    text this is the mark being quoted rather than a letter, so
+                    two different drawings of it in one view stop reading as one
+                    identity. */}
+                <Florin className="text-[var(--color-accent-on-dark)]" />
                 {" the "}
                 <span className="bg-gradient-to-r from-accent-light to-secondary-fixed-dim bg-clip-text text-transparent">
                   Data
