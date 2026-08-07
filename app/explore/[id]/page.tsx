@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BRAND_THEME } from "@/lib/brand-theme";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 
@@ -664,15 +665,22 @@ function MermaidDiagram({ code }: { code: string }) {
         mermaid.initialize({
           startOnLoad: false,
           theme: "base",
+          // Mermaid cannot read CSS variables, so this is the one place that
+          // needs literal values. They come from BRAND_THEME rather than being
+          // typed in again, so the diagram follows the palette instead of
+          // drifting from it: the previous theme mixed Oceanic blues with
+          // Material green and orange and matched neither.
           themeVariables: {
-            primaryColor: "#e3f2fd",
-            primaryTextColor: "#004467",
-            primaryBorderColor: "#1565c0",
-            secondaryColor: "#e8f5e9",
-            secondaryTextColor: "#006970",
-            secondaryBorderColor: "#2e7d32",
-            tertiaryColor: "#fff3e0",
-            tertiaryTextColor: "#181c1e",
+            primaryColor: BRAND_THEME.colors.secondaryContainer,
+            primaryTextColor: BRAND_THEME.colors.primary,
+            primaryBorderColor: BRAND_THEME.colors.primary,
+            secondaryColor: BRAND_THEME.colors.surfaceHigh,
+            secondaryTextColor: BRAND_THEME.colors.onSecondaryContainer,
+            secondaryBorderColor: BRAND_THEME.colors.secondary,
+            tertiaryColor: BRAND_THEME.colors.tertiaryContainer,
+            tertiaryTextColor: BRAND_THEME.colors.onSurface,
+            tertiaryBorderColor: BRAND_THEME.colors.tertiary,
+            lineColor: BRAND_THEME.colors.onSurfaceVariant,
             fontFamily: "Inter, system-ui, sans-serif",
             fontSize: "12px",
           },

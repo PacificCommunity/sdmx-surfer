@@ -63,7 +63,7 @@ function Swatch({ hex, name, note }: { hex: string; name: string; note?: string 
 
 export default function PdhPreview() {
   return (
-    <main className="min-h-screen bg-white pb-24 text-[#181c1e]">
+    <main className="min-h-screen bg-white pb-24 text-on-surface">
       <HeaderBar wordmark="/brand/wordmark/data-surfer-white.svg" />
 
       <section className="mx-auto max-w-5xl px-6 py-10">

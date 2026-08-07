@@ -11,5 +11,5 @@ export default function CountrySnapshotsLayout({
   children: React.ReactNode;
 }) {
   if (!countrySnapshotsEnabled) notFound();
-  return <div className="min-h-screen bg-[#f7fafc]">{children}</div>;
+  return <div className="min-h-screen bg-surface">{children}</div>;
 }

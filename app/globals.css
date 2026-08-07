@@ -9,6 +9,9 @@
 
   /* ── Primary (SPC Navy) ── */
   --color-primary: #223b83;
+  /* Pressed and hover state on primary surfaces. The container is lighter
+     than primary, so it cannot serve as a darkening hover. */
+  --color-primary-dark: #1c316d;
   --color-primary-container: #355a92;
   --color-primary-fixed-dim: #a8bcdd;
   --color-on-primary: #ffffff;
