@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { BRAND_THEME } from "@/lib/brand-theme";
+import { primaryCategoryIcon } from "@/lib/category-icons";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 
@@ -196,7 +197,18 @@ export default function DataflowDetailPage() {
         {/* Title + description + categories */}
         <div className="mb-8">
           {categories.length > 0 && (
-            <div className="mb-3 flex flex-wrap gap-1.5">
+            <div className="mb-3 flex flex-wrap items-center gap-1.5">
+              {/* The PDH pictogram for this domain, where one means it. Larger
+                  here than on the catalogue cards because this page has one
+                  dataflow rather than a grid of them. */}
+              {primaryCategoryIcon(categories) && (
+                <img
+                  src={primaryCategoryIcon(categories)!.src}
+                  alt=""
+                  aria-hidden
+                  className="mr-1 h-9 w-9 shrink-0"
+                />
+              )}
               {categories.map((c) => (
                 <CategoryBadge key={c.scheme + ":" + c.id} category={c} />
               ))}
