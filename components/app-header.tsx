@@ -19,12 +19,20 @@ export function AppHeader({
     { href: "/explore", label: "Explore" },
     { href: "/dashboard", label: "Dashboards" },
   ],
+  actions,
+  sticky = false,
 }: {
   active?: string;
   items?: Array<{ href: string; label: string }>;
+  /** Page-specific controls, rendered after the nav. Style for a dark bar. */
+  actions?: React.ReactNode;
+  sticky?: boolean;
 }) {
   return (
-    <BrandField variant="header">
+    <BrandField
+      variant="header"
+      className={sticky ? "sticky top-0 z-50" : undefined}
+    >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-3">
         <Link href="/" className="flex items-center gap-4">
           <img
@@ -37,17 +45,18 @@ export function AppHeader({
             className="h-8 w-px"
             style={{ background: "rgba(255,255,255,.35)" }}
           />
-          {/* Larger than the lockup beside it on purpose: a third of this image
-              is the florin's descender, so matching heights would leave the
-              product name looking smaller than the parent brand. Nudged up for
-              the same reason rather than optically centred. */}
+          {/* The box is padded so its centre is the CAP centre, not the
+              bounding-box centre, which the florin's descender would otherwise
+              pull off. So items-center is correct here and no nudge is needed.
+              Caps are 49% of the image height, hence the larger h. */}
           <img
             src="/brand/wordmark/data-surfer-white.svg"
             alt="Data Surfer"
-            className="relative -top-0.5 h-11 w-auto"
+            className="h-14 w-auto"
           />
         </Link>
 
+        <div className="flex items-center gap-3">
         <nav className="flex items-center gap-1 text-sm">
           {items.map((item) => {
             const isActive = active === item.href;
@@ -68,6 +77,8 @@ export function AppHeader({
             );
           })}
         </nav>
+        {actions}
+        </div>
       </div>
     </BrandField>
   );

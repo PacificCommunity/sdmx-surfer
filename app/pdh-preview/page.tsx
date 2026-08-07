@@ -31,12 +31,8 @@ function HeaderBar({ wordmark }: { wordmark: string }) {
         <div className="flex items-center gap-4">
           <img src="/brand/logos/logo_horizontal_white_orange.svg" alt="Pacific Data Hub" className="h-9" />
           <span className="h-8 w-px" style={{ background: "rgba(255,255,255,.35)" }} />
-          {/* Sized larger than the PDH lockup beside it because a third of
-              this box is descender: cap height is 68% of the image height, so
-              matching box heights would leave the product name visibly
-              smaller than the parent brand. Nudged up rather than centred for
-              the same reason. */}
-          <img src={wordmark} alt="Data Surfer" className="relative -top-0.5 h-11" />
+          {/* Self-centring on its caps, so items-center needs no nudge. */}
+          <img src={wordmark} alt="Data Surfer" className="h-14" />
         </div>
         <nav className="flex items-center gap-1 text-sm text-white">
           {["Home", "Explore", "Dashboards", "Countries"].map((item, i) => (
