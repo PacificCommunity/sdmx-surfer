@@ -34,9 +34,13 @@ export type PatternArea = "full" | "frame" | "right" | "sides";
 const SURFACES: Record<BrandFieldVariant, string> = {
   // Solid dark blue bar, as the website headers on p28.
   header: "#223b83",
-  // The signature gradient, turquoise into dark blue, as every section
-  // divider in the guidelines and the home page hero on p26.
-  hero: "linear-gradient(115deg, #00a6c8 0%, #223b83 100%)",
+  // The signature gradient. Dark blue FIRST, which is the opposite of the
+  // guidelines' section dividers and deliberate: their dividers carry a short
+  // centred title, ours carries a headline and a paragraph in the top-left.
+  // White on the turquoise end is 2.9:1, below AA for body text; on the dark
+  // end it is 10.4:1. So the copy sits on the dark end and the turquoise runs
+  // out to the right, behind the stat cards, which have their own surfaces.
+  hero: "linear-gradient(115deg, #223b83 0%, #1b4a94 45%, #00a6c8 140%)",
   // Near-black, as the website footer on p27.
   footer: "#111417",
 };

@@ -46,7 +46,7 @@ export default function WelcomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen">
       <AppHeader
         sticky
         items={[]}
@@ -89,7 +89,15 @@ export default function WelcomePage() {
                 Built in the Pacific
               </span>
               <h2 className="font-[family-name:var(--font-display)] text-4xl font-extrabold leading-tight tracking-tight lg:text-5xl">
-                Surf the{" "}
+                Sur
+                {/* The wordmark's florin, in running type. Inter carries U+0192
+                    so the headline stays in one typeface; the wordmark itself is
+                    Trade Gothic and is outlined SVG, which is the guidelines'
+                    own split: Trade Gothic is the logotype face, Inter is the
+                    website face. Lightened orange because the brand value is
+                    under AA on this field. */}
+                <span style={{ color: "var(--color-accent-on-dark)" }}>ƒ</span>
+                {" the "}
                 <span className="bg-gradient-to-r from-accent-light to-secondary-fixed-dim bg-clip-text text-transparent">
                   Data
                 </span>

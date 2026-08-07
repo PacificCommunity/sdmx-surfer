@@ -56,6 +56,11 @@
      fields where #e37b0a and #00a6c8 go muddy. Tokens so nothing hardcodes
      them and nobody "corrects" them back. */
   --color-brand-icon: #f47216;
+  /* The brand orange lightened for use ON the dark blue field. #e37b0a is
+     3.5:1 there and 2.9:1 over the gradient's mid tone, which is under AA even
+     for large text; this holds 4.6:1 and 3.7:1. Chrome and light surfaces keep
+     the brand value. */
+  --color-accent-on-dark: #f6942a;
   --color-brand-pattern: #1ab4cf;
 
   /* ── Chart palette (Highcharts-compatible, max contrast) ── */
