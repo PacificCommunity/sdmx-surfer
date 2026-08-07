@@ -93,37 +93,39 @@ should not be used in a way that suggests they are (p21).
 
 The guidelines call the pattern "a structuring and inspiring graphic element"
 that "illustrates the dissemination of information and knowledge" (p16, p24),
-and they close the same page with "always give priority to legibility". Those
-two pull against each other in a data application more than in a brochure,
-because our core screens are people reading numbers.
+and close the same page with "always give priority to legibility". In a data
+application those pull against each other harder than in a brochure.
 
-One rule resolves it:
+The rule:
 
-> **Pattern density runs inversely to information density.**
+> **The pattern goes around content, never under it.**
 
-Where there is no data, the pattern can be strong; where there is data, it is
-absent. That is a rule someone can apply without asking, and it keeps the
-identity present without ever competing with a figure.
+An earlier version of this said "pattern density runs inversely to information
+density", which sounds similar and is not. It permitted a strong pattern
+wherever there was no *data*, so the home page hero got the pattern full-bleed
+behind its headline and body copy, and the contrast dropped far enough to be
+genuinely hard to read. "No data" is not "no text".
 
-In practice:
+The rule above is also what the guidelines themselves do: every section divider
+puts the pattern in the top-right and bottom-right with the title in clear
+space, and the home page on p26 keeps it to the edges.
 
-| Surface | Pattern | Why |
+| Surface | Pattern | Where |
 | --- | --- | --- |
-| Header bar | 18% | Chrome. Present, never read. |
-| Sign-in, welcome, hero | 40% | Nothing competes. The strongest brand moment we get. |
-| Footer | 22% | Closing frame, no data. |
-| Empty states | strong | A blank canvas is exactly where visual interest belongs, and it is the one place a user is waiting rather than reading. |
-| Section dividers | light | Structural, as the guidelines use it. |
-| **Dashboard panels, charts, tables** | **none** | Data is the content. Anything behind a number competes with it. |
-| **Chat transcript** | **none** | Long-form reading. |
+| Header ribbon | 18% | Full width. The deliberate exception: a thin bar with large type, which PDH's own headers do the same way. |
+| Hero | 50% | Framed. Clear in the middle, present in the outer band. |
+| Footer | 24% | Side bands. |
+| Section dividers | light | Full, since they carry no body text. |
+| **Panels, charts, tables, chat** | **none** | Content is the point. |
 
-The empty state is the one worth calling out, because it inverts the usual
-instinct. A user with no dashboard yet is the user with the least to read and
-the most to be persuaded by, so the pattern earns its place there in a way it
-never does behind a chart.
+The hero is the instructive case. It looks like a large empty field, but both of
+its columns carry text, and below `lg` the text column goes full width, so any
+vertical band would sit under copy at some breakpoint. A frame stays in the
+padding at every size without the component needing to know the layout.
 
-Implemented as `BrandField`, which takes a variant rather than an opacity, so
-these decisions live in one file instead of being re-argued per page.
+Implemented as `BrandField`, which takes a variant and a `patternArea` rather
+than raw opacities, so this is enforced in one file rather than remembered at
+each call site.
 
 ## What this means for Oceanic Data-Scapes
 
