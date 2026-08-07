@@ -142,7 +142,7 @@ export default function WelcomePage() {
                 if ("href" in stat && stat.href) {
                   return (
                     <a key={stat.label} href={stat.href} className={cls + " transition-transform hover:scale-105 hover:border-white/30"}>
-                      <span className="font-[family-name:var(--font-display)] text-3xl font-black">
+                      <span className="font-[family-name:var(--font-display)] text-3xl font-extrabold">
                         {stat.value}
                       </span>
                       <span className="type-label-md mt-1 text-white/60">
@@ -153,7 +153,7 @@ export default function WelcomePage() {
                 }
                 return (
                   <div key={stat.label} className={cls}>
-                    <span className="font-[family-name:var(--font-display)] text-3xl font-black">
+                    <span className="font-[family-name:var(--font-display)] text-3xl font-extrabold">
                       {stat.value}
                     </span>
                     <span className="type-label-md mt-1 text-white/60">

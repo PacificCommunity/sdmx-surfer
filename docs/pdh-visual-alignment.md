@@ -17,6 +17,36 @@ font licensing problem and no typeface migration.
 
 What remains is colour, chrome, and iconography.
 
+## Typefaces
+
+**Inter for everything on screen. Trade Gothic only as outlines in the
+wordmark.** This was questioned, and the evidence supports it twice over.
+
+PDH's own guidelines say it, on p26 and p27: "the website uses the Inter font
+family". And the live site agrees: `pacificdata.org` serves Inter, Roboto Flex
+and a Glyphicons icon font, with **no occurrence of Trade Gothic anywhere** in
+the page or any of its stylesheets. So the split is PDH's stated and
+implemented position rather than a limitation of ours.
+
+There is also a licensing distinction worth keeping separate from the design
+one, because it is the part most likely to bite. Desktop and webfont licences
+are sold separately. A desktop licence covers installing the family and
+producing artwork, which includes outlining the wordmark as we do. It does not
+cover `@font-face`, which is usually priced by traffic. "We already paid for
+Trade Gothic" can be true and still not extend to serving it.
+
+If a webfont licence covering `pacificdata.org` and its subdomains is ever
+confirmed, serving it is about half an hour: convert the needed weights to
+woff2, add `@font-face`, point `--font-display` at it, and the wordmark could
+become live text instead of SVG. Two reasons not to rush there even then: it
+would make Surfer an outlier among its siblings, and Trade Gothic Bold Extended
+is a display face that would serve the dense UI and data labels poorly. Inter is
+doing real work in those places.
+
+Weights loaded are 400, 500, 600, 700 and 800. Nothing should reach for 900:
+the previous Montserrat request only went to 800 as well, so `font-black` was
+being faux-bolded by the browser wherever it appeared.
+
 ## Colour
 
 From p11, with Pantone references:
