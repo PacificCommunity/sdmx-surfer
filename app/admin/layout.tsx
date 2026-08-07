@@ -45,7 +45,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen">
       <header className="glass-panel shadow-ambient sticky top-0 z-50">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-4">
           <Link

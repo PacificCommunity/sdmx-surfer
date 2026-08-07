@@ -285,7 +285,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen">
       {/* Glass header */}
       <header className="glass-panel shadow-ambient sticky top-0 z-50 px-6 py-4">
         <div className="mx-auto flex max-w-3xl items-center gap-4">

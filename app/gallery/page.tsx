@@ -34,7 +34,7 @@ export default function GalleryPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen">
       <header className="glass-panel shadow-ambient sticky top-0 z-50 px-6 py-3">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <div className="flex items-center gap-3">

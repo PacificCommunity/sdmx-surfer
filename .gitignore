@@ -49,3 +49,7 @@ next-env.d.ts
 # assets under public/brand/ belong in the repository.
 /web_assets/
 /brand/
+
+# Local dev logs from this worktree.
+.tmp-dev.log
+.npm-install.log

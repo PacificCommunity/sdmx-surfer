@@ -147,7 +147,7 @@ export default function DataflowDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface">
+      <div className="min-h-screen">
         <Header dataflowId={dataflowId} />
         <main className="mx-auto max-w-4xl px-6 py-8">
           <div className="space-y-6">
@@ -167,7 +167,7 @@ export default function DataflowDetailPage() {
 
   if (error || !structure) {
     return (
-      <div className="min-h-screen bg-surface">
+      <div className="min-h-screen">
         <Header dataflowId={dataflowId} />
         <main className="mx-auto max-w-4xl px-6 py-8">
           <div className="submerged-overlay rounded-[var(--radius-2xl)] bg-surface-low p-12 text-center">
@@ -188,7 +188,7 @@ export default function DataflowDetailPage() {
   );
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen">
       <Header dataflowId={dataflowId} name={structure.dataflow.name} />
 
       <main className="mx-auto max-w-4xl px-6 py-8">
