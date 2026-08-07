@@ -102,7 +102,7 @@ function SourceLinks({ source, withTooltips }: { source: DataSource; withTooltip
           href={source.explorerUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-secondary hover:underline"
+          className="inline-flex items-center gap-1 text-on-secondary-container hover:underline"
           title={withTooltips ? "Open in Pacific Data Explorer" : undefined}
         >
           <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

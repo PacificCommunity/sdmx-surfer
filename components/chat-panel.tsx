@@ -157,7 +157,7 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
           placeholder={hasDashboard ? "Keep exploring — refine, compare, or dig deeper..." : "What data do you want to explore?"}
           rows={2}
           className={
-            "focus-architectural ghost-border w-full resize-none rounded-[var(--radius-xl)] px-4 py-3 text-sm text-on-surface shadow-ambient transition-colors duration-500 placeholder:text-on-surface-variant/50 " +
+            "focus-architectural ghost-border w-full resize-none rounded-[var(--radius-xl)] px-4 py-3 text-sm text-on-surface shadow-ambient transition-colors duration-500 placeholder:text-on-surface-variant/80 " +
             (isStreaming ? "bg-surface-high/50" : "bg-surface-card")
           }
           disabled={isStreaming}

@@ -40,7 +40,7 @@
   /* ── Text / on-surface ── */
   --color-on-surface: #1a1d2e;
   --color-on-surface-variant: #4c4c4c;
-  --color-text-muted: #6f6f6f;
+  --color-text-muted: #5f5f5f;  /* 5.3:1 on surface-high, 6.4:1 on white; #6f6f6f was 4.2:1 on surface-high */
 
   /* ── Outline ── */
   --color-outline: #c4c4c4;
@@ -112,6 +112,16 @@ body {
 @media (prefers-reduced-motion: reduce) {
   /* Fixed attachment can shimmer against scrolling content. */
   body { background-attachment: scroll; }
+
+  /* The app uses 26 animate-* utilities: pulses on loading states, spinners,
+     shimmer placeholders. Someone who has asked for reduced motion should get
+     the end state rather than the movement, not a page that merely moves less. */
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 html {
@@ -204,6 +214,18 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ── Focus state: architectural bottom-border ── */
+
+/* Keyboard focus.
+   Nothing in the app defined a focus-visible style, and six components apply
+   outline-none, so some controls had no visible indicator at all for keyboard
+   users. This is a floor: a ring on anything focusable, only when focus came
+   from the keyboard, so it never appears on mouse click. Components are free
+   to style focus more specifically; they are not free to remove it. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
 
 .focus-architectural:focus {
   outline: none;

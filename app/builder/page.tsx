@@ -870,7 +870,7 @@ export default function BuilderPage() {
                             <div className="text-xs font-medium text-on-surface">
                               {s.title}
                               {s.sessionId === sessionId && (
-                                <span className="ml-1.5 text-[10px] text-secondary">current</span>
+                                <span className="ml-1.5 text-[10px] text-on-secondary-container">current</span>
                               )}
                             </div>
                             <div className="text-[10px] text-on-surface-variant">

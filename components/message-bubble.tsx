@@ -268,7 +268,7 @@ export function MessageBubble({ message }: { message: UIMessage }) {
               <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5z" />
             </svg>
           </div>
-          <span className="type-label-md text-secondary">SDMX Surfer</span>
+          <span className="type-label-md text-on-secondary-container">SDMX Surfer</span>
         </div>
 
         {/* Bubble */}
@@ -320,7 +320,7 @@ export function MessageBubble({ message }: { message: UIMessage }) {
                   </span>
                   {isDone && (
                     <svg
-                      className="ml-auto h-3.5 w-3.5 text-secondary"
+                      className="ml-auto h-3.5 w-3.5 text-on-secondary-container"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"

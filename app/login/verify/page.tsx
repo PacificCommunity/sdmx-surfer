@@ -70,7 +70,7 @@ function VerifyContent() {
     <div className="rounded-[var(--radius-xl)] bg-surface-card shadow-ambient ghost-border p-8 text-center">
       <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10">
         <svg
-          className="h-6 w-6 text-secondary"
+          className="h-6 w-6 text-on-secondary-container"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

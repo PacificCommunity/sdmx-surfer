@@ -596,7 +596,7 @@ export default function DataflowDetailPage() {
                     <span className="text-xs font-semibold text-on-surface">
                       {structure.structure.measure}
                     </span>
-                    <span className="ml-2 rounded-full bg-tertiary-fixed px-2 py-0.5 text-[10px] font-semibold text-tertiary-container">
+                    <span className="ml-2 rounded-full bg-tertiary-fixed px-2 py-0.5 text-[10px] font-semibold text-on-tertiary-fixed-variant">
                       Measure
                     </span>
                   </div>

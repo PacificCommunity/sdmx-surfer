@@ -92,7 +92,7 @@ function LoginForm() {
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10">
             <svg
-              className="h-6 w-6 text-secondary"
+              className="h-6 w-6 text-on-secondary-container"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -121,7 +121,7 @@ function LoginForm() {
               setSent(false);
               setError(null);
             }}
-            className="mt-2 text-sm text-secondary hover:underline"
+            className="mt-2 text-sm text-on-secondary-container hover:underline"
           >
             Use a different email
           </button>

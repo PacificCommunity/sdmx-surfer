@@ -379,7 +379,7 @@ export default function ExplorePage() {
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               placeholder="Search dataflows by name, ID, or description..."
-              className="focus-architectural ghost-border w-full rounded-[var(--radius-xl)] bg-surface-card px-4 py-3 text-sm text-on-surface shadow-ambient placeholder:text-on-surface-variant/50"
+              className="focus-architectural ghost-border w-full rounded-[var(--radius-xl)] bg-surface-card px-4 py-3 text-sm text-on-surface shadow-ambient placeholder:text-on-surface-variant/80"
             />
           </div>
 
