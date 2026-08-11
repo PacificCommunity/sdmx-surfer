@@ -135,7 +135,7 @@ export default function DashboardViewPage() {
       <main className="mx-auto max-w-7xl px-6 py-8">
         <div className="mb-6">
           <span className="type-label-md rounded-full bg-secondary-container px-2.5 py-0.5 text-on-secondary-container">
-            Live SDMX Dashboard
+            Live SDMx Dashboard
           </span>
           <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-extrabold tracking-tight text-on-surface">
             {title}

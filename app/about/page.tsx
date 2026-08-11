@@ -3,8 +3,8 @@ import { SurferLogo } from "@/components/surfer-logo";
 import { AppFooter } from "@/components/app-footer";
 
 export const metadata = {
-  title: "About · SDMX Surfer",
-  description: "About SDMX Surfer and the people who built it.",
+  title: "About · Data Surfer",
+  description: "About Data Surfer and the people who built it.",
 };
 
 export default function AboutPage() {
@@ -24,7 +24,7 @@ export default function AboutPage() {
                 About
               </h1>
               <p className="type-label-md text-on-tertiary-fixed-variant">
-                SDMX Surfer
+                Data Surfer
               </p>
             </div>
           </div>
@@ -35,10 +35,10 @@ export default function AboutPage() {
         <section className="rounded-[var(--radius-2xl)] bg-gradient-to-br from-primary via-primary-container to-primary px-8 py-10 text-white">
           <p className="type-label-md text-white/70">About</p>
           <h2 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-extrabold tracking-tight">
-            SDMX Surfer
+            Data Surfer
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/80">
-            A conversational companion for SDMX statistical platforms.
+            A conversational companion for SDMx statistical platforms.
             Built at the Pacific Community (SPC), open source, currently in alpha.
           </p>
         </section>
@@ -57,7 +57,7 @@ export default function AboutPage() {
                 Giulio Valentino Dalla Riva
               </dt>
               <dd className="mt-1 text-on-surface-variant">
-                SDMX Surfer application, and the SDMX MCP gateway behind it
+                Data Surfer application, and the SDMx MCP gateway behind it
               </dd>
             </div>
             <div>

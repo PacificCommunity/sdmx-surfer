@@ -7,9 +7,9 @@ import { SdmxProxyBoot } from "./sdmx-proxy-boot";
 import { DevHostBanner } from "@/components/dev-host-banner";
 
 export const metadata: Metadata = {
-  title: "SDMX Surfer",
+  title: "Data Surfer",
   description:
-    "Surf Pacific data — explore SDMX statistics through conversation",
+    "Surf Pacific data — explore SDMx statistics through conversation",
 };
 
 export default function RootLayout({

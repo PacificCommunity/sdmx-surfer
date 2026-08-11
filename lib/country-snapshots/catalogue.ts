@@ -25,7 +25,7 @@ export type Indicator = {
   apiUrlTemplate?: string;  // contains exactly one [TAG_GEO]
   visUrl?: string;
   notes?: string;
-  // For consolidated indicators: the SDMX dimension that varies as the
+  // For consolidated indicators: the SDMx dimension that varies as the
   // chart's series (e.g. "SEX" produces M/F/Total series). Lets the
   // renderer set legend.concept so bar/lollipop work even on single-
   // country pages.

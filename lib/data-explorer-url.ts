@@ -5,11 +5,11 @@ import {
 } from "./endpoints-registry";
 
 /**
- * Convert an SDMX REST API data URL into a Data Explorer URL, when the
+ * Convert an SDMx REST API data URL into a Data Explorer URL, when the
  * endpoint has a known deep-linkable viewer. Returns null otherwise; callers
  * should fall back to showing only the API link.
  *
- * API URL format (generic SDMX):
+ * API URL format (generic SDMx):
  *   {host}/{rest-prefix}/data/[AGENCY,]DF_ID[,VERSION]/KEY?params
  */
 
@@ -61,7 +61,7 @@ function parseApiUrl(
 
 /**
  * Map components encode data as "{apiUrl}, {DIM} | {geoJsonUrl}, {projection}, {joinProp}".
- * Strip the geo suffix to recover the SDMX API URL.
+ * Strip the geo suffix to recover the SDMx API URL.
  */
 function extractSdmxUrl(raw: string): string {
   const pipeIdx = raw.indexOf(" | ");

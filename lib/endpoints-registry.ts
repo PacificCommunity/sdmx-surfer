@@ -1,5 +1,5 @@
 /**
- * Registry of SDMX endpoints supported by the MCP gateway, with:
+ * Registry of SDMx endpoints supported by the MCP gateway, with:
  *   - display names for the Data Sources table
  *   - API host(s) for detecting which endpoint an API URL belongs to
  *   - an optional Data Explorer URL builder (null when the endpoint has no
@@ -23,7 +23,7 @@ export interface EndpointInfo {
   name: string;
   shortName: string;
   apiHosts: string[];
-  // Canonical SDMX agency id for this provider. Used as the fallback agency
+  // Canonical SDMx agency id for this provider. Used as the fallback agency
   // when a data URL is in bare-flow form (/data/FLOW/KEY) rather than the
   // comma form (/data/AGENCY,FLOW,VERSION/KEY). The gateway's build_data_url
   // currently emits bare-flow for most providers, so without this fallback
@@ -45,7 +45,7 @@ function buildDotStatUrl(
   datasourceId: string,
   p: ParsedApiUrl,
   // Deployments differ on the id of the time dimension: most use TIME_PERIOD
-  // (SDMX convention); Stats NZ's Aotearoa Data Explorer uses plain TIME.
+  // (SDMx convention); Stats NZ's Aotearoa Data Explorer uses plain TIME.
   timeDimensionId: string = "TIME_PERIOD",
 ): string {
   const params = new URLSearchParams();

@@ -205,7 +205,7 @@ export default function PublicDashboardPage() {
           config={config}
           trailing={
             <>
-              Built with <Link href="/" className="text-primary hover:underline">SDMX Surfer</Link>
+              Built with <Link href="/" className="text-primary hover:underline">Data Surfer</Link>
             </>
           }
         />

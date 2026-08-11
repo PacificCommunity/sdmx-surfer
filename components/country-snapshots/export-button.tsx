@@ -121,7 +121,7 @@ export function ExportButton({ filenameStem }: { filenameStem: string }) {
         pdf.setPage(page + 1);
         pdf.setFontSize(8);
         pdf.text(
-          `SDMX Surfer — Country Snapshot — ${filenameStem.replace(/_/g, " ")} — ${stamp}`,
+          `Data Surfer — Country Snapshot — ${filenameStem.replace(/_/g, " ")} — ${stamp}`,
           margin,
           14,
         );

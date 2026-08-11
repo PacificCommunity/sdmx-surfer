@@ -708,7 +708,7 @@ export default function BuilderPage() {
             </Link>
             <div>
               <h1 className="font-[family-name:var(--font-display)] text-base font-bold tracking-tight text-primary">
-                SDMX Surfer
+                Data Surfer
               </h1>
               <p className="type-label-md text-on-tertiary-fixed-variant">
                 Pacific Data Hub

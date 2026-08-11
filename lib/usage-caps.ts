@@ -141,7 +141,7 @@ export async function checkChatAllowed(
       status: 503,
       reason: "global_budget",
       message:
-        "SDMX Surfer has reached its AI usage budget for now, so new requests are paused while it is topped up. Your saved dashboards are still available.",
+        "Data Surfer has reached its AI usage budget for now, so new requests are paused while it is topped up. Your saved dashboards are still available.",
     };
   }
 

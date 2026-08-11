@@ -61,7 +61,7 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
       {/* Header — tonal shift instead of border */}
       <div className="shrink-0 bg-surface-low px-5 pb-3 pt-4">
         <h2 className="font-[family-name:var(--font-display)] text-lg font-bold tracking-tight text-primary">
-          SDMX Surfer
+          Data Surfer
         </h2>
         <p className="type-label-md mt-0.5 text-on-tertiary-fixed-variant">
           Surf the data — tell me what you want to explore

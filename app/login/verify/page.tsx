@@ -87,7 +87,7 @@ function VerifyContent() {
         Confirm sign in
       </h2>
       <p className="mt-2 text-sm text-on-surface-variant">
-        Click the button below to complete your sign in to SDMX Surfer.
+        Click the button below to complete your sign in to Data Surfer.
       </p>
       {error && (
         <p className="mt-4 rounded-[var(--radius-sm)] bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
@@ -118,7 +118,7 @@ export default function VerifyPage() {
             <SurferLogo className="h-8 w-8 text-white" />
           </div>
           <h1 className="type-headline-sm text-on-surface">
-            SDMX Surfer
+            Data Surfer
           </h1>
         </div>
 

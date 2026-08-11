@@ -3,13 +3,13 @@ import dimensionsRaw from "@/data/country-snapshots/dataflow-dimensions.json";
 const DIMENSIONS: Record<string, string[]> =
   dimensionsRaw as Record<string, string[]>;
 
-// SDMX has no single canonical name for "the country/area dimension". SPC
+// SDMx has no single canonical name for "the country/area dimension". SPC
 // flows use GEO_PICT, the SDG family uses REF_AREA, other providers may
 // differ again. This list is the set we recognise.
 const GEO_DIM_NAMES = ["GEO_PICT", "REF_AREA", "COUNTRY"];
 
 /**
- * Resolve the SDMX dimension name to use as the country series concept on
+ * Resolve the SDMx dimension name to use as the country series concept on
  * legend.concept when rendering a chart for the given dataflow. Looks up
  * `data/country-snapshots/dataflow-dimensions.json` and returns the first
  * known geo dimension name present in that dataflow's structure.

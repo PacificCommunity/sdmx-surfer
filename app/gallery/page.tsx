@@ -67,10 +67,10 @@ export default function GalleryPage() {
         <section className="mb-8 rounded-[var(--radius-2xl)] bg-gradient-to-br from-primary via-primary-container to-primary px-8 py-10 text-white">
           <p className="type-label-md text-white/70">Gallery</p>
           <h2 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-extrabold tracking-tight">
-            Explore published SDMX dashboards
+            Explore published SDMx dashboards
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/80">
-            Browse dashboards shared from SDMX Surfer. Open any dashboard to
+            Browse dashboards shared from Data Surfer. Open any dashboard to
             inspect the charts, export it, or continue the exploration in the builder.
           </p>
         </section>

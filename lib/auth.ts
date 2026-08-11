@@ -53,9 +53,9 @@ function extractIp(request: Request | undefined): string | null {
 function buildMagicLinkBody(verifyUrl: string): { html: string; text: string } {
   const html =
     "<p>Hi,</p>" +
-    "<p>You requested access to <strong>SDMX Surfer</strong>, " +
+    "<p>You requested access to <strong>Data Surfer</strong>, " +
     "an early-alpha tool built at the Pacific Community (SPC) for exploring " +
-    "SDMX data through conversation.</p>" +
+    "SDMx data through conversation.</p>" +
     '<p><a href="' + verifyUrl + '">Click here to sign in</a></p>' +
     "<p>This link expires in 15 minutes and can only be used once. " +
     "If you did not request this, you can safely ignore this email.</p>" +
@@ -63,8 +63,8 @@ function buildMagicLinkBody(verifyUrl: string): { html: string; text: string } {
 
   const text =
     "Hi,\n\n" +
-    "You requested access to SDMX Surfer, an early-alpha tool built at the " +
-    "Pacific Community (SPC) for exploring SDMX data through conversation.\n\n" +
+    "You requested access to Data Surfer, an early-alpha tool built at the " +
+    "Pacific Community (SPC) for exploring SDMx data through conversation.\n\n" +
     "Sign in: " + verifyUrl + "\n\n" +
     "This link expires in 15 minutes and can only be used once. " +
     "If you did not request this, you can safely ignore this email.\n\n" +
@@ -122,7 +122,7 @@ async function sendMagicLink(params: {
     const { error } = await resend.emails.send({
       from,
       to: identifier,
-      subject: "Get ready to surf SDMX data",
+      subject: "Get ready to surf SDMx data",
       html,
       text,
     });
@@ -137,7 +137,7 @@ async function sendMagicLink(params: {
   const { error } = await resend.emails.send({
     from,
     to: identifier,
-    subject: "Get ready to surf SDMX data",
+    subject: "Get ready to surf SDMx data",
     html,
     text,
   });

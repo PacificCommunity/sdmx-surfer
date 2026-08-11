@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { PROXIED_HOST_NAMES } from "@/lib/proxied-hosts";
 
-// Client-side fetch wrapper: rewrites fetches to SDMX hosts that either need
+// Client-side fetch wrapper: rewrites fetches to SDMx hosts that either need
 // a subscription key or block CORS so they go through /api/sdmx-proxy, where
 // keys are injected server-side and same-origin responses bypass CORS.
 // Mounted once in app/layout.tsx so the builder, /p/[id], gallery, and any
