@@ -26,7 +26,7 @@
  * technology.
  */
 
-export type BrandFieldVariant = "header" | "hero" | "footer";
+export type BrandFieldVariant = "header" | "hero" | "footer" | "panel";
 
 /** Where the pattern is allowed to appear. */
 export type PatternArea = "full" | "frame" | "right" | "sides";
@@ -43,6 +43,11 @@ const SURFACES: Record<BrandFieldVariant, string> = {
   hero: "linear-gradient(115deg, #223b83 0%, #1b4a94 45%, #00a6c8 140%)",
   // Near-black, as the website footer on p27.
   footer: "#111417",
+  // A light surface, for empty states. The rule says the pattern belongs
+  // where there is nothing to read, and an empty state is the clearest case
+  // of that: the user is waiting rather than reading, and it is the one
+  // moment a working screen can carry the identity without being in the way.
+  panel: "var(--color-surface-low)",
 };
 
 const PATTERN_OPACITY: Record<BrandFieldVariant, number> = {
@@ -51,6 +56,8 @@ const PATTERN_OPACITY: Record<BrandFieldVariant, number> = {
   // precisely because it is no longer competing with anything.
   hero: 0.5,
   footer: 0.24,
+  // Quiet: this sits inside a working surface, not a brand moment.
+  panel: 0.1,
 };
 
 /** Pattern height relative to the field. Larger reads calmer. */
@@ -58,6 +65,7 @@ const PATTERN_SCALE: Record<BrandFieldVariant, string> = {
   header: "auto 340%",
   hero: "auto 118%",
   footer: "auto 150%",
+  panel: "auto 190%",
 };
 
 /** The header is a ribbon and does the full width, as PDH's own headers do. */
@@ -68,6 +76,7 @@ const DEFAULT_AREA: Record<BrandFieldVariant, PatternArea> = {
   // breakpoint. A frame stays in the padding at every size.
   hero: "frame",
   footer: "sides",
+  panel: "frame",
 };
 
 /**
@@ -94,19 +103,21 @@ const AREA_MASK: Record<PatternArea, string | undefined> = {
 
 export function BrandField({
   variant = "header",
-  patternColour = "#ffffff",
+  patternColour,
   patternArea,
   className = "",
   children,
 }: {
   variant?: BrandFieldVariant;
-  /** Colour of the pattern itself. White on blue, turquoise on near-black. */
+  /** Pattern colour. Defaults to white on dark fields, brand blue on light. */
   patternColour?: string;
   patternArea?: PatternArea;
   className?: string;
   children?: React.ReactNode;
 }) {
   const area = patternArea ?? DEFAULT_AREA[variant];
+  const colour =
+    patternColour ?? (variant === "panel" ? "var(--color-primary)" : "#ffffff");
   const areaMask = AREA_MASK[area];
   const patternMask = "url(/brand/patterns/pattern.svg)";
 
@@ -114,7 +125,7 @@ export function BrandField({
     <div
       className="absolute inset-0"
       style={{
-        background: patternColour,
+        background: colour,
         opacity: PATTERN_OPACITY[variant],
         maskImage: patternMask,
         WebkitMaskImage: patternMask,

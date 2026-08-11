@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
+import { BrandField } from "@/components/brand-field";
 import type { UIMessage, ChatStatus } from "ai";
 import { MessageBubble } from "./message-bubble";
 
@@ -75,7 +76,13 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
       >
         <div className="flex flex-col gap-4">
           {messages.length === 0 ? (
-            <div className="submerged-overlay flex flex-col gap-3 rounded-[var(--radius-xl)] bg-surface-low px-5 py-8">
+            // The one place on this screen the pattern belongs: nothing is
+            // being read, and it disappears the moment a conversation starts.
+            <BrandField
+              variant="panel"
+              className="submerged-overlay rounded-[var(--radius-xl)]"
+            >
+            <div className="flex flex-col gap-3 px-5 py-8">
               <p className="text-center text-sm text-on-surface-variant">
                 What Pacific data do you want to explore?
               </p>
@@ -90,6 +97,7 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
                 </button>
               ))}
             </div>
+            </BrandField>
           ) : (
             messages.map((m) => <MessageBubble key={m.id} message={m} />)
           )}

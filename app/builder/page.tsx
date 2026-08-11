@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useChat } from "@ai-sdk/react";
-import { SurferLogo } from "@/components/surfer-logo";
 import type { UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
 import { ChatPanel } from "@/components/chat-panel";
@@ -699,21 +698,28 @@ export default function BuilderPage() {
       <header className="glass-panel shadow-ambient z-50 shrink-0 px-6 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="brand-gradient flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] transition-transform hover:scale-105"
-              title="Back to home"
-            >
-              <SurferLogo className="h-5 w-5 text-white" />
+            {/* The real marks rather than a coloured square and two lines of
+                text. Recognisable, and it costs no vertical space on a screen
+                where every pixel comes off the transcript. Coloured versions,
+                since this bar is a light glass panel rather than the dark
+                PDH header. */}
+            <Link href="/" className="flex items-center gap-3" title="Back to home">
+              <img
+                src="/brand/logos/logo_horizontal_coloured.svg"
+                alt="Pacific Data Hub"
+                className="h-7 w-auto"
+              />
+              <span
+                aria-hidden
+                className="h-6 w-px bg-outline-variant"
+              />
+              {/* Self-centring on its caps, so no nudge is needed. */}
+              <img
+                src="/brand/wordmark/data-surfer.svg"
+                alt="Data Surfer"
+                className="h-9 w-auto"
+              />
             </Link>
-            <div>
-              <h1 className="font-[family-name:var(--font-display)] text-base font-bold tracking-tight text-primary">
-                Data Surfer
-              </h1>
-              <p className="type-label-md text-on-tertiary-fixed-variant">
-                Pacific Data Hub
-              </p>
-            </div>
           </div>
 
           <div className="flex items-center gap-3">
