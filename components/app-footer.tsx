@@ -14,10 +14,14 @@ import { BrandField } from "@/components/brand-field";
 export function AppFooter({
   className,
   compact = false,
+  product = "data-surfer",
 }: {
   className?: string;
   compact?: boolean;
+  /** Which sibling this footer belongs to. See AppHeader. */
+  product?: "data-surfer" | "country-snapshots";
 }) {
+  const name = product === "country-snapshots" ? "Country Snapshots" : "Data Surfer";
   if (compact) {
     return (
       <footer
@@ -26,7 +30,7 @@ export function AppFooter({
           (className ?? "mt-16 pb-8")
         }
       >
-        Data Surfer · Built at the Pacific Community ·{" "}
+        {name} · Built at the Pacific Community ·{" "}
         <Link href="/about" className="hover:underline">
           About
         </Link>
@@ -48,7 +52,7 @@ export function AppFooter({
             className="mb-3 h-8 w-auto"
           />
           <p className="text-xs">
-            Data Surfer · Built at the Pacific Community
+            {name} · Built at the Pacific Community
           </p>
         </div>
 

@@ -28,7 +28,7 @@ export default function CountrySnapshotsLayout({
         items={[]}
       />
       <div className="flex-1">{children}</div>
-      <AppFooter />
+      <AppFooter product="country-snapshots" />
     </div>
   );
 }
