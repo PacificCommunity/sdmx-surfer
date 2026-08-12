@@ -12,7 +12,7 @@ export default async function AdminLayout({
 
   if (!isAdmin) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="ghost-border shadow-ambient rounded-[var(--radius-xl)] bg-surface-card p-10 text-center">
           <div className="brand-gradient mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full opacity-60">
             <svg

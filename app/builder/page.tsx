@@ -693,7 +693,7 @@ export default function BuilderPage() {
     (configHistory.current ? getDashboardTitle(configHistory.current) : "Untitled dashboard");
 
   return (
-    <div className="flex h-screen flex-col bg-surface">
+    <div className="flex h-screen flex-col">
       {/* App bar */}
       <header className="glass-panel shadow-ambient z-50 shrink-0 px-6 py-3">
         <div className="flex items-center justify-between">

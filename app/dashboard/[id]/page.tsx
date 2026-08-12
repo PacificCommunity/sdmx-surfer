@@ -47,7 +47,7 @@ export default function DashboardViewPage() {
 
   if (notFound) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface p-8">
+      <div className="flex min-h-screen items-center justify-center p-8">
         <div className="submerged-overlay max-w-md rounded-[var(--radius-2xl)] bg-surface-low p-12 text-center">
           <h2 className="type-headline-sm text-on-surface">
             Dashboard not found
@@ -69,7 +69,7 @@ export default function DashboardViewPage() {
 
   if (!config) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="flex gap-1">
           <span className="h-2 w-2 animate-bounce rounded-full bg-secondary [animation-delay:0ms]" />
           <span className="h-2 w-2 animate-bounce rounded-full bg-secondary [animation-delay:150ms]" />

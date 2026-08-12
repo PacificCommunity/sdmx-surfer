@@ -72,7 +72,7 @@ export default function PublicDashboardPage() {
 
   if (notFound) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface p-8">
+      <div className="flex min-h-screen items-center justify-center p-8">
         <div className="submerged-overlay max-w-md rounded-[var(--radius-2xl)] bg-surface-low p-12 text-center">
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-[var(--radius-xl)] bg-surface-high">
             <SurferLogo className="h-8 w-8 text-accent-muted" />
@@ -96,7 +96,7 @@ export default function PublicDashboardPage() {
 
   if (!config) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="flex gap-1">
           <span className="h-2 w-2 animate-bounce rounded-full bg-secondary [animation-delay:0ms]" />
           <span className="h-2 w-2 animate-bounce rounded-full bg-secondary [animation-delay:150ms]" />
