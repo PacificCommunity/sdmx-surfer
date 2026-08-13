@@ -43,7 +43,7 @@ merge; development continues on `country-snapshots`.
 - Production domain live: `sdmxsurfer.net` (apex canonical, TLS, `www` redirects). Registered as an interim choice; §7.3 can still place the service under an SPC URL, with a redirect preserving existing links. (2026-06-11)
 - Resend sender moved to `surfer@sdmxsurfer.net` on the verified production domain. (2026-06-11)
 - Standing development environment: `sdmx-surfer.vercel.app` serves the active development branch against an isolated database branch, with a banner pointing visitors to the stable domain. Closes the "verify environment variable hygiene" item in §4.1 as a side effect. (2026-06-11)
-- Library-debt spec drafted (`docs/sdmx-dashboard-components-improvements.md`): the rendering and parser fixes SDMX Surfer carries as runtime patches, written up for upstreaming to `sdmx-dashboard-components` and `sdmx-json-parser`. A working parser fix with tests is ready on a local branch. Retires the build-fragility risk the binary patches carry. (2026-06-12)
+- Library-debt spec drafted (`docs/sdmx-dashboard-components-improvements.md`): the rendering and parser fixes Data Surfer carries as runtime patches, written up for upstreaming to `sdmx-dashboard-components` and `sdmx-json-parser`. A working parser fix with tests is ready on a local branch. Retires the build-fragility risk the binary patches carry. (2026-06-12)
 - `next-auth 4 → 5` (Auth.js v5) migration landed and `nodemailer` removed entirely, closing the largest residual cluster of moderate advisories (`SECURITY_AUDIT.md` §3.1/§3.2). No environment variables renamed (`AUTH_SECRET ?? NEXTAUTH_SECRET` fallback); one-time forced re-login on deploy. (2026-06-16)
 
 **Next in the decision-independent queue (§10):** merge to `main` + production deploy + prod env config (the integration step above), OAuth migration (Google + Microsoft + GitHub; remove allowlist/Resend), usage-cap enforcement (per-user daily/dashboard limits + global USD 1,000 budget, with tunable limits), point the product at `surfer.pacificdata.org`, operations floor (error tracking, uptime probe, runbook), model-drift regression suite, secrets inventory and rotation procedure, accessibility pass.
@@ -52,7 +52,7 @@ merge; development continues on `country-snapshots`.
 
 ## Executive summary
 
-SDMX Surfer's invite-only alpha is wrapping up with roughly 50 users across Pacific governments and partner organisations, and positive feedback. This document proposes the path to a public service: a time-boxed public beta in Q3 2026 on the current infrastructure, followed by a public launch in Q4 under a tiered access model with usage caps. The remaining technical work is modest and well understood: public sign-in providers plus institutional SSO, per-tier usage caps, model-drift monitoring, interface alignment with SPC conventions, and the operational basics of a public service (error tracking, dashboards, an uptime probe, a runbook, an on-call contact). What gates the timeline is a short list of governance decisions only management can make: who owns the product, which budget line carries the costs, where the service lives, and how published dashboards are moderated. Section 8 consolidates these into beta blockers, needing answers by early Q3, and launch blockers, needed by late Q3; everything else can be resolved during or after launch. Each section below closes with the open questions it depends on; they are written so that a decision can be made by reading that section alone.
+Data Surfer's invite-only alpha is wrapping up with roughly 50 users across Pacific governments and partner organisations, and positive feedback. This document proposes the path to a public service: a time-boxed public beta in Q3 2026 on the current infrastructure, followed by a public launch in Q4 under a tiered access model with usage caps. The remaining technical work is modest and well understood: public sign-in providers plus institutional SSO, per-tier usage caps, model-drift monitoring, interface alignment with SPC conventions, and the operational basics of a public service (error tracking, dashboards, an uptime probe, a runbook, an on-call contact). What gates the timeline is a short list of governance decisions only management can make: who owns the product, which budget line carries the costs, where the service lives, and how published dashboards are moderated. Section 8 consolidates these into beta blockers, needing answers by early Q3, and launch blockers, needed by late Q3; everything else can be resolved during or after launch. Each section below closes with the open questions it depends on; they are written so that a decision can be made by reading that section alone.
 
 ---
 
@@ -69,7 +69,7 @@ The alpha is closing. Roughly 50 users across Pacific governments and partner or
 - A standing development environment (dedicated dev URL and isolated database branch), so changes are exercised at a public URL before they reach the stable domain
 - A dependency security audit refreshed on 2026-06-08 in `SECURITY_AUDIT.md`. Zero high-severity advisories. Eleven moderate items remain, each individually classified: every one is either dev-tooling (drizzle-kit's bundled esbuild), build-time (next's nested postcss), or part of the planned `next-auth 4 → 5` migration backlog (nodemailer and uuid chains). None has a production runtime exposure path. The audit narrowed from 16 to 11 advisories via patch bumps to `resend`, `next`, `next-auth`, and one autofix.
 
-The recurring operational pain point is global SDMX endpoint instability, which is outside our control and which we already mitigate partially through retries and structure caching.
+The recurring operational pain point is global SDMx endpoint instability, which is outside our control and which we already mitigate partially through retries and structure caching.
 
 Sources of truth this document builds on: `docs/current-architecture.md`, `SECURITY_AUDIT.md`, `dashboard-architecture.md`.
 
@@ -111,7 +111,7 @@ What we do:
 - Point a production domain at the existing Vercel deployment. *Done 2026-06-11: `sdmxsurfer.net`.*
 - Change the Resend sender domain to the production address. *Done 2026-06-11: `surfer@sdmxsurfer.net`.*
 - Verify environment variable hygiene in Vercel and Railway. *Done 2026-06-11, as part of standing up the development environment.*
-- Add an internal status page that surfaces per-endpoint SDMX health.
+- Add an internal status page that surfaces per-endpoint SDMx health.
 
 What we get: launch in weeks, not months. Vercel handles TLS, autoscaling, previews. Railway handles the gateway. Neon handles Postgres backups. Predictable behaviour, with vendor support if something fails.
 
@@ -192,7 +192,7 @@ Effort: two to four days, depending on how much of the linking logic we want fro
 
 ### 4.4 Model drift monitoring
 
-Models change. Names get deprecated, pricing shifts, quality regresses. We need a small set of regression tests we run on a schedule that exercises the agent end-to-end against representative SDMX requests, asserts that the produced configs are valid and visually plausible, and records the cost and latency.
+Models change. Names get deprecated, pricing shifts, quality regresses. We need a small set of regression tests we run on a schedule that exercises the agent end-to-end against representative SDMx requests, asserts that the produced configs are valid and visually plausible, and records the cost and latency.
 
 What this looks like in practice:
 
@@ -243,9 +243,9 @@ This was not in the original brief but it cannot be left implicit at this scale.
 For beta we need:
 
 - Error tracking for both Next.js and the MCP gateway (Sentry or equivalent).
-- A small set of dashboards: per-day active users, per-day cost, agent success rate, per-endpoint SDMX probe success.
+- A small set of dashboards: per-day active users, per-day cost, agent success rate, per-endpoint SDMx probe success.
 - An external uptime probe on the chat endpoint.
-- A documented runbook for the three most likely incidents: SDMX endpoint outage, LLM provider outage, runaway cost.
+- A documented runbook for the three most likely incidents: SDMx endpoint outage, LLM provider outage, runaway cost.
 - A single on-call email or chat that reaches a real person within a defined window.
 
 For launch we add:
@@ -438,7 +438,7 @@ VIP tier and per-partner auto-VIP are deferred (build later). Everything else ca
 
 Stated plainly:
 
-1. **SDMX endpoint instability.** Outside our control. We mitigate but cannot eliminate. Communicate honestly to users.
+1. **SDMx endpoint instability.** Outside our control. We mitigate but cannot eliminate. Communicate honestly to users.
 2. **Cost overruns.** Soft and hard caps in place, but a single viral moment could spike spend faster than we react.
 3. **Content liability.** Published dashboards that misrepresent data, even unintentionally, could be attributed to SPC. Moderation matters.
 4. **Model deprecations.** Providers retire models with weeks of notice. The regression suite buys us time but not infinity.

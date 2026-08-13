@@ -1,13 +1,13 @@
-# Keyed SDMX Providers (Stats NZ) — Proxy Design
+# Keyed SDMx Providers (Stats NZ) — Proxy Design
 
 Status: implemented 2026-04-21. See `app/api/sdmx-proxy/route.ts`,
 `app/sdmx-proxy-boot.tsx`, `lib/keyed-hosts.ts`.
 
 ## Context
 
-The dashboarder uses `sdmx-dashboard-components` to render dashboards. That library delegates SDMX data fetches to `sdmx-json-parser` (both live in `node_modules`), which issues the HTTP request from the browser. There is no existing server-side SDMX proxy (the root `proxy.ts` is `next-auth` middleware, not a data proxy).
+The dashboarder uses `sdmx-dashboard-components` to render dashboards. That library delegates SDMx data fetches to `sdmx-json-parser` (both live in `node_modules`), which issues the HTTP request from the browser. There is no existing server-side SDMx proxy (the root `proxy.ts` is `next-auth` middleware, not a data proxy).
 
-Published dashboards at `/p/[id]` and the gallery at `/gallery` are served to unauthenticated viewers, whose browsers call the SDMX URL directly.
+Published dashboards at `/p/[id]` and the gallery at `/gallery` are served to unauthenticated viewers, whose browsers call the SDMx URL directly.
 
 Stats NZ (Aotearoa Data Explorer) requires a subscription key on every request. The required header is `Ocp-Apim-Subscription-Key`; without it the API returns 401. The subscription is generous, so quota is not a concern, but the key cannot be shipped to the browser or embedded in dashboard configs:
 

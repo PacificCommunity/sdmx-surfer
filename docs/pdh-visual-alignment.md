@@ -8,7 +8,7 @@ assets under `public/brand/` are committed.
 
 ## The headline: we are already most of the way there
 
-**The PDH website uses Inter** (stated on p26 and p27). SDMX Surfer already uses
+**The PDH website uses Inter** (stated on p26 and p27). Data Surfer already uses
 Inter for interface and data. Trade Gothic, which the guidelines otherwise
 specify (p12, p25), is for the logotype and print collateral, and is a licensed
 Linotype face that we could not have served as a webfont anyway. That removes

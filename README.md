@@ -1,9 +1,9 @@
-# SPC Conversational Dashboard Builder
+# Data Surfer
 
-A web app where users describe dashboards in natural language and an AI agent produces live SDMX data visualizations for Pacific Island Countries and Territories.
+A web app where users describe dashboards in natural language and an AI agent produces live SDMx data visualizations for Pacific Island Countries and Territories.
 
 Built on three existing components:
-- **sdmx-mcp-gateway** — Python MCP server for progressive SDMX data discovery
+- **sdmx-mcp-gateway** — Python MCP server for progressive SDMx data discovery
 - **sdmx-dashboard-components** — React library rendering dashboards from JSON configs via Highcharts
 - **AI SDK v6** — connects a chat interface to the AI, which orchestrates discovery and produces dashboard configs
 
@@ -76,7 +76,7 @@ dashboarder/
 │   ├── builder/
 │   │   └── page.tsx                # Main split-pane view (chat + preview)
 │   ├── explore/
-│   │   ├── page.tsx                # SDMX data catalogue with semantic search
+│   │   ├── page.tsx                # SDMx data catalogue with semantic search
 │   │   └── [id]/page.tsx           # Dataflow detail + dimension explorer
 │   ├── dashboard/
 │   │   └── [id]/page.tsx           # Private presentation view for an authenticated session
@@ -195,7 +195,7 @@ flowchart TB
 
   subgraph Gateway["MCP Gateway — Railway"]
     MCP["sdmx-mcp-gateway\n:8000/mcp"]
-    Tools["SDMX Tools\nlist_dataflows\nget_structure\nget_codes\nprobe_data_url\nbuild_data_url\n..."]
+    Tools["SDMx Tools\nlist_dataflows\nget_structure\nget_codes\nprobe_data_url\nbuild_data_url\n..."]
   end
 
   STAT[(".Stat API\nstats-sdmx-disseminate\n.pacificdata.org")]
@@ -271,7 +271,7 @@ flowchart TB
 - Model router: BYOK takes priority, falls back to free tier, then to env-level Anthropic key
 
 ### Conversational dashboard building
-- Natural language requests produce live SDMX dashboards
+- Natural language requests produce live SDMx dashboards
 - AI proposes structure for complex requests, builds panel-by-panel
 - Multi-turn conversation to refine charts, add panels, change data
 
@@ -282,7 +282,7 @@ flowchart TB
 - Zod schema validates tool input before compilation
 
 ### Probe workflow
-- `probe_data_url` MCP tool validates a candidate SDMX data URL before dashboard emission
+- `probe_data_url` MCP tool validates a candidate SDMx data URL before dashboard emission
 - Catches empty results, malformed keys, and missing dimensions early in the agent loop
 - Reduces the feedback-loop round-trips caused by bad URLs reaching the live preview
 
@@ -314,7 +314,7 @@ flowchart TB
 - Keys encrypted server-side before storage; never logged
 
 ### Semantic search in `/explore`
-- Data catalogue browser listing all SDMX dataflows on Pacific Data Hub
+- Data catalogue browser listing all SDMx dataflows on Pacific Data Hub
 - Short queries use keyword filtering; three or more words trigger semantic search
 - Semantic search powered by `ibm-granite/granite-embedding-small-english-r2` (47M params, 384 dims, ONNX quantized), running server-side on CPU — no external API call
 - Country filter shows which dataflows have data for a selected Pacific territory
@@ -489,7 +489,7 @@ The data URL is malformed or returned no data. The error is auto-sent to the AI 
 The index has not been built. Run `npm run build-index` with the MCP gateway running. Check that `models/granite-embedding-small-r2/` exists (ONNX model files must be downloaded separately — see `lib/embeddings.ts` for the model ID).
 
 ### Dashboard shows "Loading..." forever
-Check the browser Network tab — SDMX REST requests to `stats-sdmx-disseminate.pacificdata.org` may be failing (CORS or network).
+Check the browser Network tab — SDMx REST requests to `stats-sdmx-disseminate.pacificdata.org` may be failing (CORS or network).
 
 ### Hydration mismatch after code changes
 ```bash
