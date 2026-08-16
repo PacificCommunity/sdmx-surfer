@@ -47,7 +47,7 @@ export default function DashboardViewPage() {
 
   if (notFound) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface p-8">
+      <div className="flex min-h-screen items-center justify-center p-8">
         <div className="submerged-overlay max-w-md rounded-[var(--radius-2xl)] bg-surface-low p-12 text-center">
           <h2 className="type-headline-sm text-on-surface">
             Dashboard not found
@@ -69,7 +69,7 @@ export default function DashboardViewPage() {
 
   if (!config) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="flex gap-1">
           <span className="h-2 w-2 animate-bounce rounded-full bg-secondary [animation-delay:0ms]" />
           <span className="h-2 w-2 animate-bounce rounded-full bg-secondary [animation-delay:150ms]" />
@@ -83,7 +83,7 @@ export default function DashboardViewPage() {
   const subtitle = getDashboardSubtitle(config);
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen">
       <header className="glass-panel shadow-ambient sticky top-0 z-50 px-6 py-3">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-3">
@@ -135,7 +135,7 @@ export default function DashboardViewPage() {
       <main className="mx-auto max-w-7xl px-6 py-8">
         <div className="mb-6">
           <span className="type-label-md rounded-full bg-secondary-container px-2.5 py-0.5 text-on-secondary-container">
-            Live SDMX Dashboard
+            Live SDMx Dashboard
           </span>
           <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-extrabold tracking-tight text-on-surface">
             {title}

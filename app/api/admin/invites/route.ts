@@ -206,14 +206,14 @@ export async function POST(req: Request) {
         await resend.emails.send({
           from,
           to: email,
-          subject: "You're invited to SDMX Surfer",
+          subject: "You're invited to Data Surfer",
           html:
             '<div style="font-family: Inter, system-ui, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 16px; color: #181c1e;">' +
             '<h2 style="color: #004467; margin: 0 0 16px;">You\'ve been invited!</h2>' +
             '<p style="line-height: 1.6; margin: 0 0 16px;">Hi,</p>' +
             '<p style="line-height: 1.6; margin: 0 0 24px;">' +
-            "You've been invited to <strong>SDMX Surfer</strong>, an early-alpha tool built at the " +
-            "<strong>Pacific Community (SPC)</strong> for exploring SDMX data through conversation. " +
+            "You've been invited to <strong>Data Surfer</strong>, an early-alpha tool built at the " +
+            "<strong>Pacific Community (SPC)</strong> for exploring SDMx data through conversation. " +
             "Describe what you want to know, and an AI agent will find the data and build visualisations with you." +
             "</p>" +
             '<a href="' + loginUrl + '" style="display: inline-block; background: #004467; color: #fff; ' +
@@ -224,8 +224,8 @@ export async function POST(req: Request) {
             "</div>",
           text:
             "Hi,\n\n" +
-            "You've been invited to SDMX Surfer, an early-alpha tool built at the Pacific Community (SPC) " +
-            "for exploring SDMX data through conversation. Describe what you want to know, and an AI agent " +
+            "You've been invited to Data Surfer, an early-alpha tool built at the Pacific Community (SPC) " +
+            "for exploring SDMx data through conversation. Describe what you want to know, and an AI agent " +
             "will find the data and build visualisations with you.\n\n" +
             "Sign in: " + loginUrl + "\n" +
             "Use this email address to sign in: " + email + "\n\n" +

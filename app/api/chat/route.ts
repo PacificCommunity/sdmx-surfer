@@ -250,7 +250,7 @@ export async function POST(req: Request) {
         // onStepFinish's `dynamicToolCalls`: in production the latter path
         // recorded nothing (turns with 15 steps logged only the single
         // self-logged update_dashboard call), leaving admin analytics blind
-        // to the entire SDMX layer. `steps[]` is the same array the cost sum
+        // to the entire SDMx layer. `steps[]` is the same array the cost sum
         // above relies on, so it is known to be populated. update_dashboard
         // logs itself in execute(); skip it here to avoid double counting.
         steps.forEach((step, stepIndex) => {
@@ -272,7 +272,7 @@ export async function POST(req: Request) {
         });
         // AI SDK v6: `onFinish` extends the FINAL step's `StepResult`. The
         // `usage` and `providerMetadata` on the event refer to that final step
-        // only — not the whole turn. For multi-step agent runs (every SDMX
+        // only — not the whole turn. For multi-step agent runs (every SDMx
         // Surfer turn is 8-20 steps) summing per-step costs from `steps[]` is
         // the only way to get the real total. Use `totalUsage` for tokens.
         let totalCost = 0;

@@ -3,8 +3,8 @@
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { SurferLogo } from "@/components/surfer-logo";
 import { AppFooter } from "@/components/app-footer";
+import { BrandField } from "@/components/brand-field";
 
 function getSafeCallbackUrl(rawCallbackUrl: string | null): string {
   if (!rawCallbackUrl) return "/";
@@ -92,7 +92,7 @@ function LoginForm() {
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10">
             <svg
-              className="h-6 w-6 text-secondary"
+              className="h-6 w-6 text-on-secondary-container"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -121,7 +121,7 @@ function LoginForm() {
               setSent(false);
               setError(null);
             }}
-            className="mt-2 text-sm text-secondary hover:underline"
+            className="mt-2 text-sm text-on-secondary-container hover:underline"
           >
             Use a different email
           </button>
@@ -296,34 +296,55 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface px-4">
-      <div className="w-full max-w-sm">
-        {/* Logo + title */}
-        <div className="mb-8 flex flex-col items-center gap-4 text-center">
-          <div className="brand-gradient flex h-14 w-14 items-center justify-center rounded-[var(--radius-lg)] shadow-ambient">
-            <SurferLogo className="h-8 w-8 text-white" />
-          </div>
-          <div>
-            <h1 className="type-headline-sm text-on-surface">
-              SDMX Surfer
-            </h1>
-            <p className="mt-1 text-sm text-on-surface-variant">
-              Pacific Community — Surf the data
-            </p>
-          </div>
+    // A split field: the brand carries the left, the form sits on a plain
+    // surface at the right. The pattern runs at full strength on the brand
+    // side because nothing is read over it, which is the rule the rest of the
+    // app follows; the form never sits on pattern at any width.
+    <div className="flex min-h-screen flex-col lg:flex-row">
+      <BrandField
+        variant="hero"
+        patternArea="full"
+        className="flex items-center justify-center px-8 py-12 lg:w-[46%] lg:py-0"
+      >
+        {/* A translucent card, because this panel runs the pattern at full
+            strength and the text sits on it. Measured: on a pattern line the
+            tagline was 2.37:1 against the field, which is the "never under
+            text" rule broken by the page that most invites the exception.
+            black/35 brings it to 5.7:1 while staying subtle enough that the
+            pattern still reads through. Dark rather than white, so the white
+            wordmark above it keeps its contrast. */}
+        <div className="flex max-w-sm flex-col items-start gap-6 rounded-[var(--radius-xl)] bg-black/35 p-8 backdrop-blur-[2px]">
+          <img
+            src="/brand/logos/logo_horizontal_white_orange.svg"
+            alt="Pacific Data Hub"
+            className="h-10 w-auto"
+          />
+          <img
+            src="/brand/wordmark/data-surfer-white.svg"
+            alt="Data Surfer"
+            className="h-16 w-auto"
+          />
+          <p className="text-base leading-relaxed text-white/90">
+            Explore Pacific statistics by asking for them. Every figure traces
+            back to the source it came from.
+          </p>
         </div>
+      </BrandField>
 
-        <Suspense
-          fallback={
-            <div className="rounded-[var(--radius-xl)] bg-surface-card shadow-ambient ghost-border p-8">
-              <div className="shimmer h-48 rounded-[var(--radius-md)]" />
-            </div>
-          }
-        >
-          <LoginForm />
-        </Suspense>
+      <div className="flex flex-1 items-center justify-center bg-surface px-4 py-12">
+        <div className="w-full max-w-sm">
+          <Suspense
+            fallback={
+              <div className="rounded-[var(--radius-xl)] bg-surface-card shadow-ambient ghost-border p-8">
+                <div className="shimmer h-48 rounded-[var(--radius-md)]" />
+              </div>
+            }
+          >
+            <LoginForm />
+          </Suspense>
 
-        <AppFooter className="mt-6" />
+          <AppFooter className="mt-6" compact />
+        </div>
       </div>
     </div>
   );

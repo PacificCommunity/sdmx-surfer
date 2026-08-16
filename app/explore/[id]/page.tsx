@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BRAND_THEME } from "@/lib/brand-theme";
+import { primaryCategoryIcon } from "@/lib/category-icons";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 
@@ -147,7 +149,7 @@ export default function DataflowDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface">
+      <div className="min-h-screen">
         <Header dataflowId={dataflowId} />
         <main className="mx-auto max-w-4xl px-6 py-8">
           <div className="space-y-6">
@@ -167,7 +169,7 @@ export default function DataflowDetailPage() {
 
   if (error || !structure) {
     return (
-      <div className="min-h-screen bg-surface">
+      <div className="min-h-screen">
         <Header dataflowId={dataflowId} />
         <main className="mx-auto max-w-4xl px-6 py-8">
           <div className="submerged-overlay rounded-[var(--radius-2xl)] bg-surface-low p-12 text-center">
@@ -188,14 +190,25 @@ export default function DataflowDetailPage() {
   );
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen">
       <Header dataflowId={dataflowId} name={structure.dataflow.name} />
 
       <main className="mx-auto max-w-4xl px-6 py-8">
         {/* Title + description + categories */}
         <div className="mb-8">
           {categories.length > 0 && (
-            <div className="mb-3 flex flex-wrap gap-1.5">
+            <div className="mb-3 flex flex-wrap items-center gap-1.5">
+              {/* The PDH pictogram for this domain, where one means it. Larger
+                  here than on the catalogue cards because this page has one
+                  dataflow rather than a grid of them. */}
+              {primaryCategoryIcon(categories) && (
+                <img
+                  src={primaryCategoryIcon(categories)!.src}
+                  alt=""
+                  aria-hidden
+                  className="mr-1 h-9 w-9 shrink-0"
+                />
+              )}
               {categories.map((c) => (
                 <CategoryBadge key={c.scheme + ":" + c.id} category={c} />
               ))}
@@ -583,7 +596,7 @@ export default function DataflowDetailPage() {
                     <span className="text-xs font-semibold text-on-surface">
                       {structure.structure.measure}
                     </span>
-                    <span className="ml-2 rounded-full bg-tertiary-fixed px-2 py-0.5 text-[10px] font-semibold text-tertiary-container">
+                    <span className="ml-2 rounded-full bg-tertiary-fixed px-2 py-0.5 text-[10px] font-semibold text-on-tertiary-fixed-variant">
                       Measure
                     </span>
                   </div>
@@ -664,15 +677,22 @@ function MermaidDiagram({ code }: { code: string }) {
         mermaid.initialize({
           startOnLoad: false,
           theme: "base",
+          // Mermaid cannot read CSS variables, so this is the one place that
+          // needs literal values. They come from BRAND_THEME rather than being
+          // typed in again, so the diagram follows the palette instead of
+          // drifting from it: the previous theme mixed Oceanic blues with
+          // Material green and orange and matched neither.
           themeVariables: {
-            primaryColor: "#e3f2fd",
-            primaryTextColor: "#004467",
-            primaryBorderColor: "#1565c0",
-            secondaryColor: "#e8f5e9",
-            secondaryTextColor: "#006970",
-            secondaryBorderColor: "#2e7d32",
-            tertiaryColor: "#fff3e0",
-            tertiaryTextColor: "#181c1e",
+            primaryColor: BRAND_THEME.colors.secondaryContainer,
+            primaryTextColor: BRAND_THEME.colors.primary,
+            primaryBorderColor: BRAND_THEME.colors.primary,
+            secondaryColor: BRAND_THEME.colors.surfaceHigh,
+            secondaryTextColor: BRAND_THEME.colors.onSecondaryContainer,
+            secondaryBorderColor: BRAND_THEME.colors.secondary,
+            tertiaryColor: BRAND_THEME.colors.tertiaryContainer,
+            tertiaryTextColor: BRAND_THEME.colors.onSurface,
+            tertiaryBorderColor: BRAND_THEME.colors.tertiary,
+            lineColor: BRAND_THEME.colors.onSurfaceVariant,
             fontFamily: "Inter, system-ui, sans-serif",
             fontSize: "12px",
           },

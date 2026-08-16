@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { PROXIED_HOSTS } from "@/lib/proxied-hosts";
 
 // ---------------------------------------------------------------------------
-// GET /api/sdmx-proxy?url=… — forward SDMX fetches for hosts that either need
+// GET /api/sdmx-proxy?url=… — forward SDMx fetches for hosts that either need
 // a subscription key or block CORS. Key-bearing hosts have the key injected
 // server-side; CORS-blocked hosts are simply relayed so the browser sees a
 // same-origin response.

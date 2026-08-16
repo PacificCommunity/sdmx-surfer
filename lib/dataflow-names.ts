@@ -80,7 +80,7 @@ export function resolveDataflowNamesFromConfig(config: {
 }
 
 /**
- * Extract a dataflow ID from an SDMX REST data URL.
+ * Extract a dataflow ID from an SDMx REST data URL.
  * Handles: /rest/data/AGENCY,DF_ID,VERSION/KEY and /rest/data/DF_ID/KEY
  */
 function extractDataflowId(url: string): string | null {

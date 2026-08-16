@@ -121,7 +121,7 @@ export function ExportButton({ filenameStem }: { filenameStem: string }) {
         pdf.setPage(page + 1);
         pdf.setFontSize(8);
         pdf.text(
-          `SDMX Surfer — Country Snapshot — ${filenameStem.replace(/_/g, " ")} — ${stamp}`,
+          `Data Surfer — Country Snapshot — ${filenameStem.replace(/_/g, " ")} — ${stamp}`,
           margin,
           14,
         );
@@ -167,7 +167,7 @@ export function ExportButton({ filenameStem }: { filenameStem: string }) {
         type="button"
         onClick={exportPdf}
         disabled={busy || waiting}
-        className="rounded-md bg-[#006970] px-3 py-1.5 text-xs text-white shadow-sm disabled:opacity-60"
+        className="rounded-md bg-on-secondary-container px-3 py-1.5 text-xs text-white shadow-sm disabled:opacity-60"
         title={
           waiting
             ? "Waiting for all charts to finish loading"

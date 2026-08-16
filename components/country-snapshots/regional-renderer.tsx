@@ -26,7 +26,7 @@ function canCombine(item: DashboardItem): boolean {
 
 function ItemErrorFallback({ item }: { item: DashboardItem }) {
   return (
-    <div className="rounded-md bg-[#f1f4f6] p-4 text-sm">
+    <div className="rounded-md bg-surface-low p-4 text-sm">
       <p className="font-medium">Couldn&apos;t load this indicator.</p>
       <p className="mt-1 text-neutral-600">
         {item.title}.
@@ -61,7 +61,7 @@ function NotCombinable({
   // Show a few representative country links so the user can drill in.
   const sampleLinks = countryCodes.slice(0, 6);
   return (
-    <div className="rounded-md bg-[#f7fafc] p-4 text-sm">
+    <div className="rounded-md bg-surface p-4 text-sm">
       <p className="text-xs text-neutral-500">
         Regional combined view isn&apos;t available for this indicator
         {item.seriesConcept
@@ -78,7 +78,7 @@ function NotCombinable({
           <Link
             key={c}
             href={`/countrysnapshots/${c}/${themeSlug}#${item.id}`}
-            className="rounded-full bg-[#f1f4f6] px-2 py-0.5 font-mono text-xs hover:bg-[#e5e9eb]"
+            className="rounded-full bg-surface-low px-2 py-0.5 font-mono text-xs hover:bg-surface-high"
           >
             {c}
           </Link>

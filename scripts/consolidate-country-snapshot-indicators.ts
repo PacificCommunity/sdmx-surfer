@@ -9,7 +9,7 @@
  *   - URL: differing position's values joined with "+" so the query returns
  *     all sub-series at once (e.g. SEX=M+F+_T).
  *   - title: longest common prefix of the source titles, trimmed.
- *   - seriesConcept: the SDMX dimension name at the differing position,
+ *   - seriesConcept: the SDMx dimension name at the differing position,
  *     looked up from data/country-snapshots/dataflow-dimensions.json.
  *   - consolidatedFromIds: the source indicator ids, kept for diff review.
  *

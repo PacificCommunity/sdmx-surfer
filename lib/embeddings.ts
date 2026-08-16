@@ -1,5 +1,5 @@
 /**
- * Semantic search for SDMX dataflows using Google Gemini embeddings.
+ * Semantic search for SDMx dataflows using Google Gemini embeddings.
  *
  * Model: gemini-embedding-001 via @ai-sdk/google (API-based, no local ONNX)
  * Index stored at models/dataflow-index.json (pre-built via scripts/build-index.ts)

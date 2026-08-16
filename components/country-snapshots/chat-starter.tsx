@@ -158,7 +158,7 @@ export function ChatStarter() {
           className="overflow-x-auto rounded-md bg-white p-4 shadow-sm"
         >
           <div className="mb-3 flex items-baseline justify-between">
-            <h2 className="text-sm font-semibold text-[#181c1e]">
+            <h2 className="text-sm font-semibold text-on-surface">
               Live preview
             </h2>
             <span className="text-xs text-neutral-400">
@@ -176,7 +176,7 @@ export function ChatStarter() {
 
       <div className="rounded-md bg-white p-4 shadow-sm">
         <div className="flex items-baseline justify-between">
-          <h2 className="text-sm font-semibold text-[#181c1e]">
+          <h2 className="text-sm font-semibold text-on-surface">
             Build with the assistant
           </h2>
           {messages.length > 0 ? (
@@ -219,7 +219,7 @@ export function ChatStarter() {
           />
           <button
             type="submit"
-            className="rounded-md bg-[#004467] px-4 py-2 text-sm text-white hover:bg-[#003355] disabled:opacity-60"
+            className="rounded-md bg-primary px-4 py-2 text-sm text-white hover:bg-primary-dark disabled:opacity-60"
             disabled={busy}
           >
             Ask
@@ -238,14 +238,14 @@ export function ChatStarter() {
                   void sendMessage({ text: p });
                 }}
                 disabled={busy}
-                className="rounded-full bg-[#f1f4f6] px-3 py-1 text-xs hover:bg-[#e5e9eb] disabled:opacity-60"
+                className="rounded-full bg-surface-low px-3 py-1 text-xs hover:bg-surface-high disabled:opacity-60"
               >
                 {p}
               </button>
             ))}
           </div>
         ) : (
-          <div className="mt-4 max-h-[40vh] overflow-y-auto rounded-md bg-[#f7fafc] p-3 text-sm">
+          <div className="mt-4 max-h-[40vh] overflow-y-auto rounded-md bg-surface p-3 text-sm">
             {messages.map((m) => {
               const text =
                 m.parts

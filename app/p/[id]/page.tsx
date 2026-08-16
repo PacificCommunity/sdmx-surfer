@@ -72,7 +72,7 @@ export default function PublicDashboardPage() {
 
   if (notFound) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface p-8">
+      <div className="flex min-h-screen items-center justify-center p-8">
         <div className="submerged-overlay max-w-md rounded-[var(--radius-2xl)] bg-surface-low p-12 text-center">
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-[var(--radius-xl)] bg-surface-high">
             <SurferLogo className="h-8 w-8 text-accent-muted" />
@@ -96,7 +96,7 @@ export default function PublicDashboardPage() {
 
   if (!config) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="flex gap-1">
           <span className="h-2 w-2 animate-bounce rounded-full bg-secondary [animation-delay:0ms]" />
           <span className="h-2 w-2 animate-bounce rounded-full bg-secondary [animation-delay:150ms]" />
@@ -110,7 +110,7 @@ export default function PublicDashboardPage() {
   const subtitle = getDashboardSubtitle(config);
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen">
       <header className="glass-panel shadow-ambient sticky top-0 z-50 px-6 py-3">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-3">
@@ -205,7 +205,7 @@ export default function PublicDashboardPage() {
           config={config}
           trailing={
             <>
-              Built with <Link href="/" className="text-primary hover:underline">SDMX Surfer</Link>
+              Built with <Link href="/" className="text-primary hover:underline">Data Surfer</Link>
             </>
           }
         />

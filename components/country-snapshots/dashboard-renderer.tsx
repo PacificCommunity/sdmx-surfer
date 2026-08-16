@@ -11,7 +11,7 @@ import { SourceCitation } from "./source-citation";
 
 function ItemErrorFallback({ item }: { item: DashboardItem }) {
   return (
-    <div className="rounded-md bg-[#f1f4f6] p-4 text-sm">
+    <div className="rounded-md bg-surface-low p-4 text-sm">
       <p className="font-medium">Couldn&apos;t load this indicator right now.</p>
       <p className="mt-1 text-neutral-600">
         Try refreshing the page.
@@ -63,7 +63,7 @@ function isRenderable(
 export function UnavailableStrip({ items }: { items: DashboardItem[] }) {
   if (items.length === 0) return null;
   return (
-    <section className="rounded-md bg-[#f1f4f6] p-4">
+    <section className="rounded-md bg-surface-low p-4">
       <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
         Not currently available ({items.length})
       </h2>

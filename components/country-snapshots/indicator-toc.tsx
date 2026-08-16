@@ -53,8 +53,8 @@ export function IndicatorToc({ entries }: { entries: TocEntry[] }) {
                 className={
                   "block truncate rounded px-2 py-1 text-xs transition-colors " +
                   (active === e.id
-                    ? "bg-[#e5f2f3] font-medium text-[#006970]"
-                    : "text-neutral-600 hover:bg-[#f1f4f6]")
+                    ? "bg-secondary-container font-medium text-on-secondary-container"
+                    : "text-neutral-600 hover:bg-surface-low")
                 }
                 title={e.title}
               >

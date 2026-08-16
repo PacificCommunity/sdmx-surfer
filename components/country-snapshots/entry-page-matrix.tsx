@@ -25,7 +25,7 @@ export function EntryPageMatrix({
     <section className="mt-8">
       <div className="mb-3 rounded-md bg-white p-3 shadow-sm">
         <div className="mb-2 flex items-baseline justify-between gap-2">
-          <h2 className="text-sm font-semibold text-[#181c1e]">
+          <h2 className="text-sm font-semibold text-on-surface">
             Regional summaries
           </h2>
           <span className="text-xs text-neutral-500">
@@ -37,7 +37,7 @@ export function EntryPageMatrix({
             <Link
               key={t.id}
               href={`/countrysnapshots/regional/${t.slug}`}
-              className="rounded-full bg-[#004467] px-3 py-1 text-xs text-white hover:bg-[#003355]"
+              className="rounded-full bg-primary px-3 py-1 text-xs text-white hover:bg-primary-dark"
             >
               <span className="mr-1">{themeEmoji(t.id)}</span>
               {t.title}
@@ -53,7 +53,7 @@ export function EntryPageMatrix({
           onClick={() =>
             setPivot(pivot === "by-country" ? "by-theme" : "by-country")
           }
-          className="text-xs text-[#006970] underline"
+          className="text-xs text-on-secondary-container underline"
         >
           {pivot === "by-country" ? "View by theme" : "View by country"}
         </button>
@@ -73,7 +73,7 @@ export function EntryPageMatrix({
                 <Link
                   key={t.id}
                   href={`/countrysnapshots/${c.code}/${t.slug}`}
-                  className="rounded-full bg-[#f1f4f6] px-2 py-0.5 text-xs hover:bg-[#e5e9eb]"
+                  className="rounded-full bg-surface-low px-2 py-0.5 text-xs hover:bg-surface-high"
                 >
                   <span className="mr-1">{themeEmoji(t.id)}</span>
                   {t.title}
@@ -95,7 +95,7 @@ export function EntryPageMatrix({
               </span>
               <Link
                 href={`/countrysnapshots/regional/${t.slug}`}
-                className="rounded-full bg-[#004467] px-2 py-0.5 text-xs text-white hover:bg-[#003355]"
+                className="rounded-full bg-primary px-2 py-0.5 text-xs text-white hover:bg-primary-dark"
                 title={`Regional summary for ${t.title}`}
               >
                 regional
@@ -104,7 +104,7 @@ export function EntryPageMatrix({
                 <Link
                   key={c.code}
                   href={`/countrysnapshots/${c.code}/${t.slug}`}
-                  className="rounded-full bg-[#f1f4f6] px-2 py-0.5 text-xs hover:bg-[#e5e9eb]"
+                  className="rounded-full bg-surface-low px-2 py-0.5 text-xs hover:bg-surface-high"
                 >
                   {c.name}
                 </Link>

@@ -70,7 +70,7 @@ function VerifyContent() {
     <div className="rounded-[var(--radius-xl)] bg-surface-card shadow-ambient ghost-border p-8 text-center">
       <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10">
         <svg
-          className="h-6 w-6 text-secondary"
+          className="h-6 w-6 text-on-secondary-container"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -87,7 +87,7 @@ function VerifyContent() {
         Confirm sign in
       </h2>
       <p className="mt-2 text-sm text-on-surface-variant">
-        Click the button below to complete your sign in to SDMX Surfer.
+        Click the button below to complete your sign in to Data Surfer.
       </p>
       {error && (
         <p className="mt-4 rounded-[var(--radius-sm)] bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
@@ -111,14 +111,14 @@ function VerifyContent() {
 
 export default function VerifyPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface px-4">
+    <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
           <div className="brand-gradient flex h-14 w-14 items-center justify-center rounded-[var(--radius-lg)] shadow-ambient">
             <SurferLogo className="h-8 w-8 text-white" />
           </div>
           <h1 className="type-headline-sm text-on-surface">
-            SDMX Surfer
+            Data Surfer
           </h1>
         </div>
 

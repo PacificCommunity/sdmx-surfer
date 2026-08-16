@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { primaryCategoryIcon } from "@/lib/category-icons";
 import Link from "next/link";
 import { AppFooter } from "@/components/app-footer";
 
@@ -94,15 +95,28 @@ function CategoryBadge({ category }: { category: Category }) {
 function DataflowCard({ df }: { df: Dataflow }) {
   const topics = (df.categories || []).filter((c) => c.scheme === "CAS_COM_TOPIC");
   const devFrameworks = (df.categories || []).filter((c) => c.scheme === "CAS_COM_DEV");
+  const icon = primaryCategoryIcon(df.categories);
 
   return (
     <Link
       href={"/explore/" + df.id}
       className="group flex flex-col rounded-[var(--radius-xl)] bg-surface-card p-5 shadow-ambient transition-all hover:shadow-lg hover:shadow-primary/5"
     >
-      {/* Category badges */}
+      {/* Category badges, with the Pacific Data Hub pictogram for the domain
+          where one exists. Only five of the ten categories have a pictogram
+          that honestly means them, so this is absent more often than not; see
+          lib/category-icons. The badges stay because the pictograms cover
+          subjects only, not the SDG/BP50/NMDI frameworks. */}
       {(topics.length > 0 || devFrameworks.length > 0) && (
-        <div className="mb-2.5 flex flex-wrap gap-1">
+        <div className="mb-2.5 flex flex-wrap items-center gap-1">
+          {icon && (
+            <img
+              src={icon.src}
+              alt=""
+              aria-hidden
+              className="mr-0.5 h-6 w-6 shrink-0"
+            />
+          )}
           {topics.map((c) => (
             <CategoryBadge key={c.scheme + ":" + c.id} category={c} />
           ))}
@@ -313,7 +327,7 @@ export default function ExplorePage() {
   const showGrouped = !searchText.trim() && !semanticResults;
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen">
       {/* Header */}
       <header className="glass-panel shadow-ambient sticky top-0 z-50 px-6 py-3">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
@@ -365,7 +379,7 @@ export default function ExplorePage() {
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               placeholder="Search dataflows by name, ID, or description..."
-              className="focus-architectural ghost-border w-full rounded-[var(--radius-xl)] bg-surface-card px-4 py-3 text-sm text-on-surface shadow-ambient placeholder:text-on-surface-variant/50"
+              className="focus-architectural ghost-border w-full rounded-[var(--radius-xl)] bg-surface-card px-4 py-3 text-sm text-on-surface shadow-ambient placeholder:text-on-surface-variant/80"
             />
           </div>
 
