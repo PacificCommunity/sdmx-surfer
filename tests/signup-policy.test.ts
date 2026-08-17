@@ -3,6 +3,7 @@ import {
   bootstrapAdminEmails,
   githubEmailIsVerified,
   emailDomain,
+  entraEmailIsVerified,
   isBootstrapAdmin,
   isInstitutionalEmail,
   isPersonalEmailDomain,
@@ -91,6 +92,45 @@ describe("personal domain guard", () => {
     for (const d of ["spc.int", "stats.govt.nz", "mfat.govt.nz"]) {
       expect(isPersonalEmailDomain(d)).toBe(false);
     }
+  });
+});
+
+describe("Microsoft email verification", () => {
+  const CONSUMER = "9188040d-6c67-4c5b-b112-36a304b66dad";
+
+  it("accepts a tenant that has proved it owns the domain", () => {
+    expect(entraEmailIsVerified({ xms_edov: true, tid: "some-tenant" })).toBe(
+      true,
+    );
+    // Entra has emitted the claim as a string as well as a boolean.
+    expect(entraEmailIsVerified({ xms_edov: "true", tid: "some-tenant" })).toBe(
+      true,
+    );
+  });
+
+  it("refuses a tenant asserting a domain it has not proved", () => {
+    // nOAuth: a free tenant sets a user's mail to an address it does not own.
+    // Refused before any rule, so it can neither link to an existing account
+    // nor pass the allowed_domains check on the strength of that address.
+    expect(entraEmailIsVerified({ tid: "attacker-tenant" })).toBe(false);
+    expect(
+      entraEmailIsVerified({ xms_edov: false, tid: "attacker-tenant" }),
+    ).toBe(false);
+    // A string that is not "true" is not a yes.
+    expect(entraEmailIsVerified({ xms_edov: "false" })).toBe(false);
+    expect(entraEmailIsVerified({ xms_edov: "" })).toBe(false);
+  });
+
+  it("accepts personal accounts, whose addresses Microsoft verifies", () => {
+    expect(entraEmailIsVerified({ tid: CONSUMER })).toBe(true);
+  });
+
+  it("fails closed when the claim was never configured", () => {
+    // The likely misconfiguration: xms_edov not enabled on the registration.
+    // Microsoft sign-in stops rather than trusting whatever arrives.
+    expect(entraEmailIsVerified({})).toBe(false);
+    expect(entraEmailIsVerified(null)).toBe(false);
+    expect(entraEmailIsVerified(undefined)).toBe(false);
   });
 });
 

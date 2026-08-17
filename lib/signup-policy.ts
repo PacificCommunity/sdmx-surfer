@@ -68,6 +68,47 @@ export function isInstitutionalEmail(email: string, domains: string[]): boolean 
 }
 
 /**
+ * Microsoft's tenant for personal accounts, a fixed well-known id.
+ *
+ * A consumer account's address is its sign-in name, which Microsoft verifies by
+ * sending a code to it before the account exists. That is a real check, so
+ * these addresses are trustworthy without the claim below.
+ */
+export const MICROSOFT_CONSUMER_TENANT = "9188040d-6c67-4c5b-b112-36a304b66dad";
+
+/**
+ * Does this Microsoft token prove the address belongs to the tenant issuing it?
+ *
+ * NOT THE SAME QUESTION AS "DID MICROSOFT AUTHENTICATE SOMEONE". A work or
+ * school account's `email` claim is filled from the `mail` attribute in its own
+ * directory, which that directory's administrator sets to any string at all,
+ * with nothing checking that the tenant owns the domain. Against a multi-tenant
+ * app, anyone can create a free tenant, set a user's mail to an address they do
+ * not own, and be handed that identity. Published as nOAuth.
+ *
+ * Two things make an address trustworthy. `xms_edov` is Microsoft's own answer:
+ * an optional claim, enabled on the app registration, saying the email's domain
+ * is verified as owned by the issuing tenant. Failing that, a consumer tenant,
+ * where the address was verified at account creation.
+ *
+ * Everything else is refused. A tenant that has not proved it owns a domain has
+ * told us nothing we can use to link an account or match a domain rule.
+ *
+ * Fails closed on an absent claim, so an app registration missing `xms_edov`
+ * turns Microsoft sign-in off rather than trusting whatever arrives.
+ */
+export function entraEmailIsVerified(
+  claims: Record<string, unknown> | null | undefined,
+): boolean {
+  if (!claims) return false;
+  // Entra has emitted this as a boolean and as a string, depending on how the
+  // claim was configured; both mean the same thing.
+  const verified = claims.xms_edov;
+  if (verified === true || verified === "true") return true;
+  return claims.tid === MICROSOFT_CONSUMER_TENANT;
+}
+
+/**
  * The only providers that may ever be opened to the public.
  *
  * A hard list rather than a validation nicety. It is what stops

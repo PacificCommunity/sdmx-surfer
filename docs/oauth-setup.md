@@ -86,10 +86,33 @@ well. Keep the old ones registered until the redirect is retired.
    personal Microsoft accounts**. Anything narrower excludes the partner
    organisations in the user base.
 3. Redirect URI: platform **Web**, the URIs above.
-4. **Certificates & secrets** → **New client secret**. Note the expiry: Entra
+4. **Token configuration**: add the **`xms_edov`** optional claim to the **ID
+   token**. If the picker does not offer it by name, it goes in the app
+   manifest under `optionalClaims.idToken`. **Sign-in refuses every Microsoft
+   user without this**, by design; see below.
+5. **Certificates & secrets** → **New client secret**. Note the expiry: Entra
    secrets expire, and an expired one takes sign-in down for everyone using
    that provider. Record the renewal date.
-5. Copy the application (client) ID and the secret **value**, not its ID.
+6. Copy the application (client) ID and the secret **value**, not its ID.
+
+**Why step 4 is not optional for us.** Step 2 registers the app multi-tenant,
+which is what lets partner organisations sign in at all. In that mode a work
+account's `email` claim comes from the `mail` attribute in its own directory,
+which that directory's administrator sets to any string, with nothing checking
+that the tenant owns the domain. Anyone can create a free tenant, set a user's
+mail to an address they do not own, and be handed that identity: published as
+nOAuth. Since accounts here link on verified email, that would be an account
+takeover rather than only a bogus signup.
+
+`xms_edov` is Microsoft's answer to it, saying whether the address's domain is
+verified as belonging to the issuing tenant. `lib/auth.ts` requires it before
+any admission rule runs, and refuses the sign-in otherwise, so a registration
+without the claim fails closed and logs one line naming the cause. Personal
+Microsoft accounts are accepted on their tenant id instead, their addresses
+having been verified when the account was created.
+
+Confirm on the first real sign-in that the claim arrives, rather than assuming
+it. The failure looks identical to a wrong client secret from the outside.
 
 ### GitHub
 

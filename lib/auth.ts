@@ -19,6 +19,7 @@ import {
   emailDomain,
   githubEmailIsVerified,
   isBootstrapAdmin,
+  entraEmailIsVerified,
   signupIsOpenFor,
 } from "@/lib/signup-policy";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
@@ -188,9 +189,10 @@ const emailProvider = {
  * first Google or Microsoft sign-in would create a second, empty account and
  * strand that user's dashboards and role. Auth.js calls the option "dangerous"
  * because linking on an unverified email lets someone claim an account by
- * asserting its address; Google, Microsoft and GitHub all verify the address
- * they return, so that path is closed here. It would not be safe for a provider
- * that does not.
+ * asserting its address. Google verifies the address it returns. Microsoft and
+ * GitHub do not, so the `signIn` callback checks both itself before any rule
+ * runs, and linking rests on that check rather than on the provider's good
+ * name. Adding a provider here means answering the same question for it first.
  */
 const oauthProviders = [
   process.env.AUTH_GOOGLE_ID &&
@@ -200,6 +202,53 @@ const oauthProviders = [
   process.env.AUTH_GITHUB_ID &&
     GitHubProvider({ allowDangerousEmailAccountLinking: true }),
 ].filter(Boolean) as NonNullable<ReturnType<typeof GoogleProvider>>[];
+
+/**
+ * Read the claims of an id token we have already had verified.
+ *
+ * Auth.js validates the token's signature and issuer during the OIDC exchange,
+ * so by the time a callback sees it the contents are Microsoft's word rather
+ * than the caller's. This only reaches into an object that has already been
+ * authenticated, which is why it does no verification of its own.
+ *
+ * Needed because the provider's own `profile()` keeps id, name, email and
+ * image, and drops `xms_edov` and `tid` on the way through.
+ */
+function idTokenClaims(token: unknown): Record<string, unknown> | null {
+  if (typeof token !== "string") return null;
+  const payload = token.split(".")[1];
+  if (!payload) return null;
+  try {
+    const json = Buffer.from(
+      payload.replace(/-/g, "+").replace(/_/g, "/"),
+      "base64",
+    ).toString("utf8");
+    const parsed: unknown = JSON.parse(json);
+    return parsed && typeof parsed === "object"
+      ? (parsed as Record<string, unknown>)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The claims a Microsoft sign-in should be judged on.
+ *
+ * Prefers the raw profile, which Auth.js passes through untouched, and falls
+ * back to the id token when the shape is not what we expect. Either source is
+ * Microsoft's, and neither is the browser's.
+ */
+function entraClaims(
+  profile: unknown,
+  idToken: unknown,
+): Record<string, unknown> | null {
+  if (profile && typeof profile === "object") {
+    const claims = profile as Record<string, unknown>;
+    if ("xms_edov" in claims || "tid" in claims) return claims;
+  }
+  return idTokenClaims(idToken);
+}
 
 /**
  * Ask GitHub whether this address is verified on the signing-in account.
@@ -360,7 +409,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // A provider can return no email (a GitHub account with every address
     // private). We reject that rather than admitting an identity we cannot
     // link, deduplicate, or contact.
-    async signIn({ user, account }) {
+    async signIn({ user, account, profile }) {
       if (!user.email) return false;
 
       const normalizedEmail = user.email.trim().toLowerCase();
@@ -372,6 +421,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // unverified address cannot reach any of them.
       if (account?.provider === "github") {
         if (!(await githubAddressVerified(account.access_token, normalizedEmail))) {
+          return false;
+        }
+      }
+
+      // Microsoft's address is not trustworthy either, for a different reason.
+      // The app is registered multi-tenant so that partner organisations can
+      // sign in at all, and in that mode a work account's address is whatever
+      // its own directory says it is. Checked here, ahead of every rule, so an
+      // unproved address can neither link to an existing account nor satisfy
+      // the domain rule.
+      if (account?.provider === "microsoft-entra-id") {
+        if (!entraEmailIsVerified(entraClaims(profile, account.id_token))) {
+          console.error(
+            "[auth] refused a Microsoft sign-in: the token does not show the " +
+              "email domain as verified by its tenant. If this is every " +
+              "Microsoft user rather than one, the xms_edov optional claim is " +
+              "missing from the app registration. See docs/oauth-setup.md.",
+          );
           return false;
         }
       }
