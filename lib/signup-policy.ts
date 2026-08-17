@@ -3,9 +3,16 @@
  *
  * Three rules, any one of which admits a user:
  *
- *   1. `AUTH_OPEN_SIGNUP=true` — anyone with a working provider account.
+ *   1. They arrived through a provider named in `AUTH_OPEN_SIGNUP_PROVIDERS`.
  *   2. Their email's domain is in `allowed_domains`.
  *   3. Their exact address is in `allowed_emails`.
+ *
+ * RULE 1 IS PER PROVIDER, NOT GLOBAL. The service is meant to be open to the
+ * public through Google and Microsoft, while the paths that do not go through a
+ * provider stay on the lists. A single boolean cannot express that: switched on
+ * it also opens the magic link, so anyone with any working address gets an
+ * account and rules 2 and 3 stop governing anything; switched off it closes the
+ * public sign-in it exists to allow.
  *
  * The domain rule exists because the user base is institutional and invites do
  * not scale to it: someone at a partner statistics office should be able to
@@ -61,14 +68,56 @@ export function isInstitutionalEmail(email: string, domains: string[]): boolean 
 }
 
 /**
- * Whether anyone with a working provider account may sign in.
+ * The only providers that may ever be opened to the public.
  *
- * Off by default, so adding a provider does not open the service as a side
- * effect. Keeping it an environment switch means opening the door, and closing
- * it again if that goes badly, needs neither a code change nor a deploy.
+ * A hard list rather than a validation nicety. It is what stops
+ * `AUTH_OPEN_SIGNUP_PROVIDERS=email` from opening the magic link to the world,
+ * which would admit anyone with any working address and quietly retire both
+ * lists. A typo in this variable can therefore fail to open something, and can
+ * never open something that was not meant to be openable.
+ *
+ * Each of these is an identity provider that authenticates the person and
+ * returns an address it stands behind. `email` and `credentials` are our own
+ * paths into our own account table, and belong to the lists.
  */
-export function openSignupEnabled(): boolean {
-  return process.env.AUTH_OPEN_SIGNUP === "true";
+const OPENABLE_PROVIDERS = new Set(["google", "microsoft-entra-id", "github"]);
+
+/**
+ * Providers whose users may sign in without appearing on any list.
+ *
+ * Empty by default, so adding a provider does not open the service as a side
+ * effect: a provider must be both configured and named here. Keeping it an
+ * environment variable means opening a door, and closing it again if that goes
+ * badly, needs neither a code change nor a deploy. It is a list rather than a
+ * boolean so the providers can be opened one at a time, which is how this is
+ * meant to roll out: Google and Microsoft first, GitHub later or not at all.
+ */
+export function openSignupProviders(): Set<string> {
+  const open = new Set<string>();
+  for (const entry of (process.env.AUTH_OPEN_SIGNUP_PROVIDERS || "").split(",")) {
+    const id = entry.trim().toLowerCase();
+    if (!id) continue;
+    if (!OPENABLE_PROVIDERS.has(id)) {
+      console.warn(
+        "[auth] ignoring unknown provider in AUTH_OPEN_SIGNUP_PROVIDERS: " + id,
+      );
+      continue;
+    }
+    open.add(id);
+  }
+  return open;
+}
+
+/**
+ * Is public signup open for the provider this sign-in came through?
+ *
+ * A missing provider is closed. Auth.js supplies `account` on every path we
+ * register, so an absent one means something unrecognised, and the lists are
+ * the right place for it to land.
+ */
+export function signupIsOpenFor(provider: string | null | undefined): boolean {
+  if (!provider) return false;
+  return openSignupProviders().has(provider);
 }
 
 /**

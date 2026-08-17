@@ -24,8 +24,8 @@ costs no embedding calls and produces no commit.
 inert by design: providers register only when their credentials exist, so the
 code can ship to production before any provider app is created. What it adds is
 Google, Microsoft and GitHub sign-in; a three-rule admission policy (an
-`AUTH_OPEN_SIGNUP` switch, an `allowed_domains` table matched exactly, and the
-existing invite list); a break-glass `AUTH_BOOTSTRAP_ADMINS` list so the
+`AUTH_OPEN_SIGNUP_PROVIDERS` list, an `allowed_domains` table matched exactly,
+and the existing invite list); a break-glass `AUTH_BOOTSTRAP_ADMINS` list so the
 administrator accounts cannot be stranded; and explicit verification of GitHub
 addresses, which Auth.js does not check and which both the domain rule and
 account linking would otherwise trust. It is **blocked on two things**: the
@@ -236,6 +236,8 @@ different consent screen once and land on the same account.
 1. ~~Okta vs Keycloak? Which providers for the open tier?~~ *Decided 2026-06-26: OAuth-only on Auth.js with Google + Microsoft + GitHub; no Okta/Keycloak; allowlist and Resend removed.*
 2. Who at SPC owns the OAuth app registrations, and can they create a Google Cloud project and an Entra app registration for this service? *Position recorded above; needs an IT conversation, not a decision from us.*
 3. ~~Do we restrict any email domains?~~ *Decided 2026-08-06: three rules, any of which admits a user. An `AUTH_OPEN_SIGNUP` switch (off by default), an `allowed_domains` table of institutional domains matched **exactly**, and the existing per-address invite list. Personal mail providers are refused from the domain table by both the admin API and the seed script, since one `gmail.com` row would admit everyone while looking like an ordinary entry. The invite list is kept deliberately: many statistics staff in the region work from personal addresses, and a domain rule alone would exclude the people it exists to include.*
+
+   *Amended 2026-08-18: rule 1 is per provider, not global. The service is open to the public through Google and Microsoft; the magic link and password paths stay on rules 2 and 3. The switch became `AUTH_OPEN_SIGNUP_PROVIDERS`, a list of provider ids, because a single boolean could only choose between opening every route (which admits anyone with any working address and retires rules 2 and 3 in practice) and closing the public sign-in the providers exist to allow. This also makes `allowed_domains` and the magic link permanent rather than transitional: they are the route in for institutions with no Google or Microsoft account behind their work addresses.*
 
 ### 4.4 Model drift monitoring
 

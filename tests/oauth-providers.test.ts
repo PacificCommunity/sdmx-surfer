@@ -1,12 +1,12 @@
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import { enabledOAuthProviders } from "@/lib/oauth-providers";
-import { openSignupEnabled } from "@/lib/signup-policy";
+import { signupIsOpenFor } from "@/lib/signup-policy";
 
 const KEYS = [
   "AUTH_GOOGLE_ID",
   "AUTH_MICROSOFT_ENTRA_ID_ID",
   "AUTH_GITHUB_ID",
-  "AUTH_OPEN_SIGNUP",
+  "AUTH_OPEN_SIGNUP_PROVIDERS",
 ];
 const ORIGINAL: Record<string, string | undefined> = {};
 
@@ -54,21 +54,37 @@ describe("oauth provider configuration", () => {
     ]);
   });
 
-  it("keeps signup closed unless explicitly opened", () => {
-    expect(openSignupEnabled()).toBe(false);
-    process.env.AUTH_OPEN_SIGNUP = "false";
-    expect(openSignupEnabled()).toBe(false);
-    // Adding a provider must not open the service as a side effect.
-    process.env.AUTH_GOOGLE_ID = "x";
-    expect(openSignupEnabled()).toBe(false);
+  it("matches the ids Auth.js itself registers", async () => {
+    // The open-signup list is keyed on account.provider, which Auth.js sets
+    // from these. A rename upstream (azure-ad became microsoft-entra-id once
+    // already) would silently stop matching, and the failure is invisible:
+    // sign-in keeps working for everyone on a list, and only new public users
+    // are turned away.
+    const [google, microsoft, github] = await Promise.all([
+      import("next-auth/providers/google"),
+      import("next-auth/providers/microsoft-entra-id"),
+      import("next-auth/providers/github"),
+    ]);
+    expect(google.default({}).id).toBe("google");
+    expect(microsoft.default({}).id).toBe("microsoft-entra-id");
+    expect(github.default({}).id).toBe("github");
   });
 
-  it("opens signup only on the exact value", () => {
-    process.env.AUTH_OPEN_SIGNUP = "true";
-    expect(openSignupEnabled()).toBe(true);
-    for (const v of ["TRUE", "1", "yes", ""]) {
-      process.env.AUTH_OPEN_SIGNUP = v;
-      expect(openSignupEnabled()).toBe(false);
-    }
+  it("can open every provider it offers", () => {
+    // Anything offered on the sign-in page must be nameable in
+    // AUTH_OPEN_SIGNUP_PROVIDERS, or it could never be opened at all.
+    process.env.AUTH_GOOGLE_ID = "x";
+    process.env.AUTH_MICROSOFT_ENTRA_ID_ID = "y";
+    process.env.AUTH_GITHUB_ID = "z";
+    const offered = enabledOAuthProviders().map((p) => p.id);
+    process.env.AUTH_OPEN_SIGNUP_PROVIDERS = offered.join(",");
+    for (const id of offered) expect(signupIsOpenFor(id)).toBe(true);
+  });
+
+  it("keeps signup closed unless explicitly opened", () => {
+    expect(signupIsOpenFor("google")).toBe(false);
+    // Configuring a provider must not open the service as a side effect.
+    process.env.AUTH_GOOGLE_ID = "x";
+    expect(signupIsOpenFor("google")).toBe(false);
   });
 });

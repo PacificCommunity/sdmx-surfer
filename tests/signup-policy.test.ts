@@ -7,10 +7,11 @@ import {
   isInstitutionalEmail,
   isPersonalEmailDomain,
   normaliseDomain,
-  openSignupEnabled,
+  openSignupProviders,
+  signupIsOpenFor,
 } from "@/lib/signup-policy";
 
-const KEYS = ["AUTH_OPEN_SIGNUP", "AUTH_BOOTSTRAP_ADMINS"];
+const KEYS = ["AUTH_OPEN_SIGNUP_PROVIDERS", "AUTH_BOOTSTRAP_ADMINS"];
 const ORIGINAL: Record<string, string | undefined> = {};
 beforeEach(() => {
   for (const k of KEYS) {
@@ -94,14 +95,47 @@ describe("personal domain guard", () => {
 });
 
 describe("open signup", () => {
-  it("is closed by default and opens only on the exact value", () => {
-    expect(openSignupEnabled()).toBe(false);
-    process.env.AUTH_OPEN_SIGNUP = "true";
-    expect(openSignupEnabled()).toBe(true);
-    for (const v of ["TRUE", "1", "yes", ""]) {
-      process.env.AUTH_OPEN_SIGNUP = v;
-      expect(openSignupEnabled()).toBe(false);
+  it("is closed for every provider by default", () => {
+    expect(openSignupProviders()).toEqual(new Set());
+    for (const p of ["google", "microsoft-entra-id", "github", "email"]) {
+      expect(signupIsOpenFor(p)).toBe(false);
     }
+  });
+
+  it("opens only the providers it names", () => {
+    // The intended rollout: the two institutional providers open, GitHub not.
+    process.env.AUTH_OPEN_SIGNUP_PROVIDERS = "google,microsoft-entra-id";
+    expect(signupIsOpenFor("google")).toBe(true);
+    expect(signupIsOpenFor("microsoft-entra-id")).toBe(true);
+    expect(signupIsOpenFor("github")).toBe(false);
+  });
+
+  it("never opens the paths into our own account table", () => {
+    // The point of scoping this per provider. Opening the magic link would
+    // admit anyone with any working address, which is what allowed_domains and
+    // the invite list exist to prevent.
+    process.env.AUTH_OPEN_SIGNUP_PROVIDERS = "email,credentials,google";
+    expect(signupIsOpenFor("email")).toBe(false);
+    expect(signupIsOpenFor("credentials")).toBe(false);
+    // The recognised entry alongside them still takes effect.
+    expect(signupIsOpenFor("google")).toBe(true);
+  });
+
+  it("ignores an unrecognised entry rather than guessing at it", () => {
+    process.env.AUTH_OPEN_SIGNUP_PROVIDERS = "gogle,azure-ad";
+    expect(openSignupProviders()).toEqual(new Set());
+  });
+
+  it("tolerates spacing and case but not a missing provider", () => {
+    process.env.AUTH_OPEN_SIGNUP_PROVIDERS = " Google , , MICROSOFT-ENTRA-ID ";
+    expect(openSignupProviders()).toEqual(
+      new Set(["google", "microsoft-entra-id"]),
+    );
+    // Auth.js supplies `account` on every path we register, so an absent
+    // provider is something unrecognised and belongs on the lists.
+    expect(signupIsOpenFor(undefined)).toBe(false);
+    expect(signupIsOpenFor(null)).toBe(false);
+    expect(signupIsOpenFor("")).toBe(false);
   });
 });
 

@@ -13,10 +13,12 @@ code as it stands:
 - **Providers appear only when configured.** A provider with no credentials is
   not registered and its button is not rendered. The app runs unchanged until
   you register something.
-- **Signup stays closed until you open it.** `AUTH_OPEN_SIGNUP` defaults to
-  off, so adding a provider does not open the service to the public as a side
-  effect. Existing invited users can sign in via OAuth immediately; strangers
-  cannot until the switch is flipped.
+- **Signup stays closed until you open it, one provider at a time.**
+  `AUTH_OPEN_SIGNUP_PROVIDERS` is empty by default, so adding a provider does
+  not open the service to the public as a side effect. Existing invited users
+  can sign in via OAuth immediately; strangers cannot until their provider is
+  named there. Google and Microsoft are the intended pair; GitHub can be added
+  later or left closed.
 
 Accounts are linked on verified email, so signing in with Microsoft as
 `someone@spc.int` lands on the existing `someone@spc.int` account, keeping its
@@ -122,9 +124,18 @@ secret produces an authentication failure with no useful message.
 
 Three rules, any one of which admits a user:
 
-1. `AUTH_OPEN_SIGNUP=true` — anyone with a working provider account.
+1. They arrived through a provider named in `AUTH_OPEN_SIGNUP_PROVIDERS`.
 2. Their email domain is in the `allowed_domains` table.
 3. Their exact address is in `allowed_emails`, the invite list.
+
+**Rule 1 is per provider, and that is the whole design.** The service is open to
+the public through Google and Microsoft, while the magic link and the password
+path stay on rules 2 and 3. A single on/off switch cannot express that: on, it
+also opens the magic link, so anyone with any working address gets an account
+and the two lists govern nothing; off, it closes the public sign-in that the
+providers exist to allow. Only `google`, `microsoft-entra-id` and `github` can
+be named; `email` and `credentials` are refused, so a typo can fail to open
+something and can never open the door to our own account table.
 
 **Matching is exact.** `spc.int` admits `someone@spc.int` and nothing else;
 `mail.spc.int` needs its own row. There is no wildcard or subdomain form, by
@@ -192,12 +203,21 @@ administrator requires an administrator to be signed in.
    domain first: a personal domain with no Google Workspace, Microsoft 365 or
    verified GitHub address behind it cannot use any of these providers, and that
    account needs either a provider identity or a decision to retire it.
-5. **Open signup** with `AUTH_OPEN_SIGNUP=true` on production. The usage caps
-   are the cost control from that point: 20 turns per day per user and a hard
-   USD 1,000 cumulative budget.
-6. **Only then** retire the email and password providers and the allowlist,
-   with Resend, in a separate change.
+5. **Open signup** with `AUTH_OPEN_SIGNUP_PROVIDERS=google,microsoft-entra-id`
+   on production. The usage caps are the cost control from that point: 20 turns
+   per day per user and a hard USD 1,000 cumulative budget. Add `github` later
+   if it is wanted; it is second tier and nothing waits on it.
+6. **Retire the password provider** once every administrator has a working
+   provider identity (step 4), in a separate change.
 
-Steps 0 to 5 are reversible: unset a variable and the provider disappears; unset
-`AUTH_OPEN_SIGNUP` and the door closes again. Step 6 is not, which is why it is
-last, separate, and gated on step 4 rather than on step 4 having been intended.
+**The magic link and `allowed_domains` are not transitional.** An earlier
+version of this plan retired them along with the password path. That was wrong:
+they are the second route in, for the institutions whose staff have no Google or
+Microsoft account behind their work address, and for the regional statistics
+staff who work from personal addresses. Public signup through the two providers
+and an allowlisted route that skips them are both permanent.
+
+Steps 0 to 5 are reversible: unset a variable and the provider disappears;
+remove a provider from `AUTH_OPEN_SIGNUP_PROVIDERS` and that door closes again
+without touching the others. Step 6 is not, which is why it is last, separate,
+and gated on step 4 rather than on step 4 having been intended.

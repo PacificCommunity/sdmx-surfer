@@ -19,7 +19,7 @@ import {
   emailDomain,
   githubEmailIsVerified,
   isBootstrapAdmin,
-  openSignupEnabled,
+  signupIsOpenFor,
 } from "@/lib/signup-policy";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
@@ -379,7 +379,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // Break-glass first, so a locked-out administrator is never gated by a
       // list they can no longer edit.
       if (isBootstrapAdmin(normalizedEmail)) return true;
-      if (openSignupEnabled()) return true;
+
+      // Public signup, for the providers it has been opened for. Scoped to the
+      // provider rather than global: Google and Microsoft are meant to be open
+      // to anyone, while the magic link and password paths stay on the lists
+      // below. Opening those too would admit anyone with any working address
+      // and leave both lists governing nothing.
+      //
+      // This runs before the lists rather than after because it is cheaper: it
+      // reads an environment variable, where the rules below each cost a query.
+      if (signupIsOpenFor(account?.provider)) return true;
 
       // Institutional domain, matched exactly against allowed_domains.
       //
