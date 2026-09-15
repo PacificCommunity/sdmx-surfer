@@ -111,7 +111,7 @@ export function JsonEditor({
             </button>
           )}
           {dirty && (
-            <span className="type-label-md text-secondary">Modified</span>
+            <span className="type-label-md text-on-secondary-container">Modified</span>
           )}
           {parseError && (
             <span className="text-xs text-red-600">
@@ -124,7 +124,7 @@ export function JsonEditor({
             <button
               type="button"
               onClick={handleFormat}
-              className="rounded-full bg-surface-card px-3 py-1 text-xs font-medium text-secondary transition-transform hover:scale-105 active:scale-95"
+              className="rounded-full bg-surface-card px-3 py-1 text-xs font-medium text-on-secondary-container transition-transform hover:scale-105 active:scale-95"
             >
               Format
             </button>

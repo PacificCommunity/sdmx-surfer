@@ -280,7 +280,7 @@ function renderDataSourcesPage(
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(8);
   pdf.setTextColor(BRAND_THEME.colors.textMuted);
-  pdf.text("SDMX data queries used in this dashboard. Links open the originating source's Data Explorer when available.", margin, y);
+  pdf.text("SDMx data queries used in this dashboard. Links open the originating source's Data Explorer when available.", margin, y);
   y += lineH * 1.5;
 
   // Table column layout
@@ -366,7 +366,7 @@ function renderDataSourcesPage(
   const uniqueSourceNames = Array.from(
     new Set(sources.map((s) => s.endpointName)),
   );
-  const footerText = "Exported from SDMX Surfer on " +
+  const footerText = "Exported from Data Surfer on " +
     new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }) +
     "  ·  Data from " + uniqueSourceNames.join(", ");
   pdf.text(footerText, margin, y);
@@ -398,7 +398,7 @@ export function exportToHtml(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapeHtml(title)} — SDMX Surfer</title>
+  <title>${escapeHtml(title)} — Data Surfer</title>
   <style>
     ${EXPORT_THEME_CSS}
     ${EXPORT_LAYOUT_CSS}
@@ -450,7 +450,7 @@ export function exportToHtml(
   </div>
 
   <div class="footer">
-    Exported from SDMX Surfer on ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+    Exported from Data Surfer on ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
     &middot; Data from <a href="https://stats.pacificdata.org">Pacific Data Hub</a>
     <br>
     <span class="config-toggle" onclick="var b=document.getElementById('config-json');b.style.display=b.style.display==='block'?'none':'block'">
@@ -486,7 +486,7 @@ export function exportToHtmlLive(config: SDMXDashboardConfig) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapeHtml(title)} — SDMX Surfer</title>
+  <title>${escapeHtml(title)} — Data Surfer</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap-grid.min.css">
   <link rel="stylesheet" href="https://esm.sh/sdmx-dashboard-components@0.4.6/dist/index.css">
   <style>
@@ -518,7 +518,7 @@ export function exportToHtmlLive(config: SDMXDashboardConfig) {
   <div id="root"><div class="loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
 
   <div class="footer">
-    Exported from SDMX Surfer on ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+    Exported from Data Surfer on ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
     &middot; Data from <a href="https://stats.pacificdata.org">Pacific Data Hub</a>
     &middot; <em>Interactive — fetches live data. Must be served over HTTP.</em>
   </div>

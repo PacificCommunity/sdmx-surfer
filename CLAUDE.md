@@ -4,52 +4,83 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This repository contains the **scoping and architecture documents** for SPC's Conversational Dashboard Builder — a web product that lets users create SDMX data dashboards through natural-language conversation with an AI agent. No code has been implemented yet; the repo holds architecture specs, UI mockups, and design system assets.
+This repository is **Data Surfer**, a deployed Next.js application that lets people build dashboards on official SDMx statistics by describing them in conversation. An agent loop discovers the data through an MCP gateway, emits a dashboard config, and the app renders it live. It also carries **Country Snapshots**, a curated sibling under `/countrysnapshots` with ready-made statistical profiles per Pacific country and territory, plus comparison and regional views.
 
-The product integrates three existing repositories (none of which live here):
-- **sdmx-mcp-gateway** (Python, Baffelan/sdmx-mcp-gateway) — MCP server for progressive SDMX discovery on SPC's .Stat platform
-- **sdmx-dashboard-components** (TypeScript/React, PacificCommunity/sdmx-dashboard-components) — npm library (v0.4.5) rendering dashboards from JSON configs via Highcharts
-- **sdmx-dashboard-demo** (TypeScript/Next.js, PacificCommunity/sdmx-dashboard-demo) — existing Next.js app that loads and renders dashboard JSON configs
+The app runs an invite-only alpha in production. Treat everything here as live code.
 
-The **new deliverable** is the AI agent loop: a server-side process that connects a chat interface to the MCP gateway, produces valid dashboard JSON configs through conversation, and pushes them to the existing SDMXDashboard component for live preview.
+Two of its three original dependencies are still external: **sdmx-mcp-gateway** (Python, Baffelan/sdmx-mcp-gateway) provides the SDMx discovery tools, and **sdmx-dashboard-components** renders the configs. The third, sdmx-dashboard-demo, was the app this one grew out of and is no longer involved.
+
+## Where the current truth lives
+
+Documentation staleness has bitten this repo before, so the split is explicit.
+
+**Current, safe to rely on:**
+
+- `docs/current-architecture.md`: source of truth for implemented behaviour, covering routes, access rights, the session and persistence model, public/private boundaries, publication and gallery.
+- `docs/technical-reference.md`: lower-level internals.
+- `docs/pdh-visual-alignment.md`: the visual identity, with page references into the PDH guidelines.
+- `docs/prototype-to-production.md`: the path from alpha to a public service, including the governance questions that gate it.
+- `docs/sdmx-dashboard-components-improvements.md`: the library debt we carry as patches, written up for upstreaming.
+- `vendor/README.md`: why two dependencies are local tarballs.
+- `README.md`: setup and running.
+
+**Dated records. Read them as history, not as instructions:**
+
+- `dashboard-architecture.md`: the original scoping and target-state document (Version 0.2, March 2026). Much of it is now either built or superseded.
+- `stitch_assets/`: early UI mockups and the "Oceanic Data-Scapes" design system, both superseded by the PDH identity below.
+- `docs/superpowers/plans/` and `docs/superpowers/specs/`: dated design records from individual pieces of work.
+
+**Known gap:** `docs/current-architecture.md` does not cover Country Snapshots. Its design and implementation plan are the dated records in `docs/superpowers/`, and the code is under `app/countrysnapshots/` and `lib/country-snapshots/`.
 
 ## Repository Structure
 
-- `dashboard-architecture.md` — primary architecture document (Version 0.2, March 2026). Covers all components, the agent loop spec, context/prompt caching strategy, technology choices, persistence model, and phased delivery plan.
-- `stitch_assets/dashboard_architecture.md` — earlier version of the same architecture document.
-- `stitch_assets/stitch/` — UI mockup screens (HTML + PNG) for: welcome page, conversational builder, dimension explorer, dashboard preview, multi-dataflow dashboards. Desktop and mobile variants.
-- `stitch_assets/stitch/oceanic_logic/DESIGN.md` — "Oceanic Data-Scapes" design system: color palette, typography (Manrope + Inter), elevation/depth rules, component styling, Highcharts-compatible chart palette.
+- `app/`: App Router routes. Main app at `/`, `/builder`, `/explore`, `/gallery`, `/dashboard/[id]`, `/p/[id]`, `/settings`, `/admin/*`; Country Snapshots under `/countrysnapshots`; API routes under `app/api/`, including the agent loop at `app/api/chat/route.ts`.
+- `components/`: UI, including `brand-field.tsx`, `app-header.tsx` and `app-footer.tsx`, which carry the PDH chrome.
+- `lib/`: shared types, prompt text, the dashboard schema and its server-side compiler, database schema and client, and the Country Snapshots catalogue.
+- `drizzle/`: SQL migrations, generated by drizzle-kit.
+- `models/dataflow-index.json`: the pre-built catalogue index (embeddings, categories, structure, availability). Rebuild with `npm run build-index`; a daily GitHub Action in `.github/workflows/refresh-index.yml` refreshes it.
+- `public/brand/`: the committed PDH web assets (logos, wordmarks, domain pictograms, pattern).
+- `scripts/`: index building, data imports, audits.
+- `tests/`: vitest suites.
+- `vendor/`: local tarballs of the two forked SDMx libraries.
+- `brand/` and `web_assets/`: gitignored local working material. The full PDH package (~300 MB of `.ai`, `.pdf`, `.idml` and licensed fonts) lives in SharePoint and is deliberately not committed.
 
-## Key Architecture Decisions
+## Stack and Commands
 
-- **Agent produces dashboard specs, not code.** Preferred output is the app-level authoring schema (`kpi`, `chart`, `map`, `note` intent visuals), which is compiled server-side into the native sdmx-dashboard-components config. Native passthrough remains available for advanced cases.
-- **Recommended stack:** AI SDK v6 (TypeScript) with the agent loop as a Next.js API route inside sdmx-dashboard-demo. Alternative: LangGraph + FastAPI (Python) as a separate backend service.
-- **MCP transport:** stdio subprocess for Phase 1 PoC; HTTP transport (planned in gateway roadmap) for Phase 2+.
-- **`update_dashboard` synthetic tool** — intercepted by the agent loop (not forwarded to MCP), accepts either authoring specs or native config passthrough and compiles authoring specs before preview.
-- **Three-tier context architecture:** Tier 1 (cached system prompt: library docs, SDMX conventions, dataflow catalogue, example configs ~10-15K tokens), Tier 2 (session-level: discovered dataflow summaries), Tier 3 (per-turn: fresh MCP calls).
-- **Dashboard-agent communication:** `onRenderComplete` and `onUserInteraction` callbacks feed structured state back to the agent loop.
+Next.js 16 (App Router) with React 19 and TypeScript, Tailwind v4, AI SDK v6 for the agent loop, Auth.js v5 for sign-in, Drizzle over Postgres (Neon) for persistence, Highcharts through `sdmx-dashboard-components` for rendering.
 
-## Development Phases
+```
+npm run dev          # Turbopack
+npm run build        # webpack
+npm test             # vitest
+npm run lint
+npm run build-index  # rebuild models/dataflow-index.json
+```
 
-- **Phase 1 (PoC):** Chat + live preview, agent loop with MCP via stdio, `update_dashboard` (full config only), basic render state feedback. No auth, no persistence.
-- **Phase 2:** HTTP transport for MCP, JSON Patch support, full state reporting, user interaction forwarding, session persistence, export (CSV/Excel/PDF), undo/redo.
-- **Phase 3:** Auth (SPC SSO/OAuth), per-session MCP state, rate limiting, public gallery, institutional curation, monitoring.
+`dev` and `build` use different bundlers on purpose, so a change that works in dev can still fail the build. Run the build before claiming a branch is ready.
 
-## SDMX MCP Tools Available
+## Conventions
+
+- **The two SDMx libraries in `vendor/` are local forks.** Fixes made there are debt; they belong upstream, and `docs/sdmx-dashboard-components-improvements.md` is where they are written up.
+- **`lib/brand-theme.ts` mirrors the CSS tokens** for contexts that cannot read them (the dashboard component theme, PDF and image export). Change one and change the other.
+- **Naming.** The standard is styled **SDMx** in prose. Identifiers keep the old spelling because they are names rather than prose: `SDMXDashboard` and its config types belong to `sdmx-dashboard-components`, `SDMX_ENDPOINT` and `SDMX_STATSNZ_KEY` are environment variables, and `SDMX-JSON` is a format name published under the old styling. The repository, the package and the domains are still `sdmx-surfer` / `sdmxsurfer.net`; only the product is Data Surfer.
+
+## SDMx MCP Tools Available
 
 This project has an active MCP connection to sdmx-mcp-gateway. The progressive discovery workflow is: `list_dataflows` → `get_dataflow_structure` → `get_dimension_codes` → `check_time_availability` / `get_data_availability` → `build_data_url` → `probe_data_url` → `suggest_nonempty_queries` (only if the probe is empty) → `update_dashboard`. Additional tools: `get_codelist`, `validate_query`, `compare_structures`, `find_code_usage_across_dataflows`.
 
 Most endpoint-scoped tools (`list_dataflows`, `get_dataflow_structure`, `get_codelist`, `get_dimension_codes`, `get_code_usage`, `check_time_availability`, `find_code_usage_across_dataflows`, `get_data_availability`, `validate_query`, `build_key`, `build_data_url`, `probe_data_url`, `suggest_nonempty_queries`, `get_structure_diagram`, `compare_structures`, plus `compare_dataflow_dimensions` via `endpoint_a`/`endpoint_b`) accept an optional `endpoint=<KEY>` argument. Per-call `endpoint=` is the only way to target a specific provider (the old `switch_endpoint` / `switch_endpoint_interactive` tools were removed upstream on 2026-04-22). The session's default endpoint is set once at gateway startup via the `SDMX_ENDPOINT` env var and is immutable at runtime. Probe statuses are exactly `nonempty`, `empty`, `error`; empty-recovery delegates to `suggest_nonempty_queries` rather than guessing relaxations.
 
-Most of those tools also accept an optional `agency_id=<ID>` argument for flows owned by an agency different from the endpoint's default. OECD sub-agency flows are the main case: a dataflow id containing `@` (e.g., `DSD_RDS_GERD@DF_GERD_SOF`) is owned by a sub-agency like `OECD.STI.STP`. The `agency` field on each `list_dataflows` summary entry carries it when known; carry that value forward as `agency_id` on `build_data_url`, `probe_data_url`, and any other downstream call so all of them describe the same flow. As of gateway v1.26.0 that field can be empty (observed on OECD `@`-flows) and `get_dataflow_structure` no longer returns an agency at all, so when it is not handed to you, omit `agency_id` and rely on the wildcard retry below rather than hunting for it. For OECD `@`-flows where `agency_id` is omitted, the gateway auto-retries once with the `agency="all"` wildcard on 404 and recovers the sub-agency from the response — initial discovery is tolerant, but passing `agency_id` when you already know it saves a round-trip. For non-OECD providers, omitting `agency_id` falls back to the endpoint's default agency, which is correct.
+Most of those tools also accept an optional `agency_id=<ID>` argument for flows owned by an agency different from the endpoint's default. OECD sub-agency flows are the main case: a dataflow id containing `@` (e.g., `DSD_RDS_GERD@DF_GERD_SOF`) is owned by a sub-agency like `OECD.STI.STP`. The `agency` field on each `list_dataflows` summary entry carries it when known; carry that value forward as `agency_id` on `build_data_url`, `probe_data_url`, and any other downstream call so all of them describe the same flow. As of gateway v1.26.0 that field can be empty (observed on OECD `@`-flows) and `get_dataflow_structure` no longer returns an agency at all, so when it is not handed to you, omit `agency_id` and rely on the wildcard retry below rather than hunting for it. For OECD `@`-flows where `agency_id` is omitted, the gateway auto-retries once with the `agency="all"` wildcard on 404 and recovers the sub-agency from the response, so initial discovery is tolerant, but passing `agency_id` when you already know it saves a round-trip. For non-OECD providers, omitting `agency_id` falls back to the endpoint's default agency, which is correct.
 
 ## Design System Quick Reference
 
-"Oceanic Data-Scapes" / "The Modern Navigator" theme:
-- **No 1px borders.** Separate regions via tonal surface shifts.
-- **Surface hierarchy:** base `#f7fafc` → container_low `#f1f4f6` → white cards `#ffffff` → high `#e5e9eb`
-- **Primary palette:** Deep Sea `#004467`, Reef Teal `#006970`, Lagoon `#6fd6df`, Kelp `#244445`, Soft Mist `#abcdcd`
-- **Typography:** Manrope (display/headlines), Inter (interface/data)
-- **Corners:** minimum 0.5rem radius everywhere
-- **Text color:** `#181c1e` (never pure black)
-- **Glassmorphism:** 85% opacity surface + 20px backdrop-blur for floating panels
+The **Pacific Data Hub visual identity** (guidelines V1.0, 2025). This replaced the "Oceanic Data-Scapes" theme; that older system survives only in `stitch_assets/` and should not be followed. Tokens live in `app/globals.css` and are mirrored in `lib/brand-theme.ts`.
+
+- **Palette:** Dark blue `#223b83` (primary, Pantone Dark Blue C), Turquoise `#00a6c8` (secondary, Pantone 312 C), Deep orange `#e37b0a` (tertiary, Pantone 138 C, accent only).
+- **Reserved variants:** `--color-accent-on-dark: #f6942a` for orange on dark fields, `--color-brand-icon: #f47216` for pictograms, `--color-brand-pattern: #1ab4cf` for the pattern. Each exists because the base colour fails contrast or looks wrong in that one place.
+- **Surfaces:** base `#f9fafb` → low `#f2f3f5` → white cards `#ffffff` → high `#e8eaed`.
+- **Text:** `#1a1d2e`, never pure black. Muted text `#4c4c4c`.
+- **Typography:** Inter for everything on screen, display included, because that is what the PDH website uses. Weights 400 to 800 are loaded; nothing should reach for 900, it will be faux-bolded. Trade Gothic is the logotype and print face, is licensed for desktop only, and ships here as outlined SVG in `public/brand/wordmark/`.
+- **Corners:** minimum 0.5rem radius everywhere; `--radius-md` is 0.75rem.
+- **The pattern goes around content, never under it.** This is how the guidelines use it, and running it behind body text drops contrast below AA. `components/brand-field.tsx` enforces it through `patternArea` rather than leaving it to be remembered.

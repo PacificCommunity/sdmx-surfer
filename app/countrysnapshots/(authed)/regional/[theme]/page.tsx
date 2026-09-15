@@ -75,7 +75,7 @@ export default async function RegionalPage({
           </span>
           <Link
             href={`/countrysnapshots/regional/${theme.slug}?scope=${otherScope}`}
-            className="text-xs text-[#006970] underline"
+            className="text-xs text-on-secondary-container underline"
           >
             Switch to {otherScopeLabel}
           </Link>

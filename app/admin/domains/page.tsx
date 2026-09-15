@@ -82,7 +82,7 @@ export default function AdminDomainsPage() {
             onChange={(e) => setDomain(e.target.value)}
             placeholder="stats.gov.example"
             required
-            className="rounded-[var(--radius-md)] bg-surface-high px-3 py-2 text-sm text-on-surface"
+            className="rounded-[var(--radius-md)] bg-surface-high px-3 py-2 text-sm text-on-surface placeholder:text-text-muted"
           />
         </div>
         <div>
@@ -93,7 +93,7 @@ export default function AdminDomainsPage() {
             value={organisation}
             onChange={(e) => setOrganisation(e.target.value)}
             placeholder="National Statistics Office"
-            className="w-72 rounded-[var(--radius-md)] bg-surface-high px-3 py-2 text-sm text-on-surface"
+            className="w-72 rounded-[var(--radius-md)] bg-surface-high px-3 py-2 text-sm text-on-surface placeholder:text-text-muted"
           />
         </div>
         <button

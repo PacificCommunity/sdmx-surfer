@@ -4,7 +4,7 @@ Giulio Valentino Dalla Riva · SDD - SPC · 12 June 2026
 
 **Audience:** the sdmx-dashboard-components maintainers, and anyone preparing PRs against `PacificCommunity/sdmx-dashboard-components` or `PacificCommunity/sdmx-json-parser`.
 
-**Purpose:** specify the interface gaps that SDMX Surfer currently works around with binary patches and engine reach-arounds, so they can be closed in the library itself. Each item states the problem, the evidence from production use, a proposed API, and acceptance criteria. Items are independent; any subset can be picked up.
+**Purpose:** specify the interface gaps that Data Surfer currently works around with binary patches and engine reach-arounds, so they can be closed in the library itself. Each item states the problem, the evidence from production use, a proposed API, and acceptance criteria. Items are independent; any subset can be picked up.
 
 **Status of each item:** `P1` blocks removing a production workaround today. `P2` removes a class of consumer-side complexity. `P3` is hygiene and future-proofing, valuable to batch into a planned major version.
 
@@ -12,7 +12,7 @@ Giulio Valentino Dalla Riva · SDD - SPC · 12 June 2026
 
 ## Context: the library now has a machine as a consumer
 
-SDMX Surfer drives this library from an AI agent loop: the agent emits dashboard configs, the library renders them, and the agent needs to know what happened so it can self-correct. This adds two requirements that a human-only consumer never exercised:
+Data Surfer drives this library from an AI agent loop: the agent emits dashboard configs, the library renders them, and the agent needs to know what happened so it can self-correct. This adds two requirements that a human-only consumer never exercised:
 
 1. **Failures must be observable and descriptive.** A blank panel is acceptable to a patient human; to an agent it is indistinguishable from success. Error messages are read by the model and become the correction prompt, so their wording has direct product value.
 2. **Render state must be reported, not inferred.** Surfer currently detects render completion by polling the DOM for engine-specific class names. That breaks the moment the internal charting engine changes.
@@ -26,7 +26,7 @@ Both consumers of the library at SPC (the Surfer builder and the Country Snapsho
 | Global Highcharts `displayError` handler installed at import time | `components/sdmx-dashboard-dynamic.tsx`, `components/country-snapshots/snapshot-chart.tsx` | no error contract (§2) |
 | DOM polling for `.highcharts-container` to detect render completion | `components/dashboard-preview.tsx` | no render lifecycle API (§3) |
 | Direct `highcharts` import to call `chart.reflow()` on container resize | `lib/use-highcharts-viewport-reflow.ts` | no resize handling (§4) |
-| Global `window.fetch` wrapper rewriting SDMX hosts to a server-side proxy | `app/sdmx-proxy-boot.tsx` | no fetch injection (§9) |
+| Global `window.fetch` wrapper rewriting SDMx hosts to a server-side proxy | `app/sdmx-proxy-boot.tsx` | no fetch injection (§9) |
 | Every component wrapped in `dynamic(ssr: false)` | `components/sdmx-dashboard-dynamic.tsx`, `components/country-snapshots/snapshot-chart.tsx` | browser globals touched at import time (§12) |
 
 Binary patches anchor on exact strings in the minified bundle. Every upstream release invalidates them and breaks the consumer's build until the patch is re-derived. The point of this document is to delete that table.
@@ -166,11 +166,11 @@ Targets `PacificCommunity/sdmx-json-parser`, the parsing dependency.
 
 ### Problem
 
-The parser appends `format=jsondata` to every data URL it fetches and sends no SDMX Accept header. On the current .Stat NSI stack that query parameter selects SDMX-JSON v1.0 and takes precedence over any Accept header, which follows SDMX REST precedence rules. Verified on 2026-06-12 against both the SPC endpoint (`stats-sdmx-disseminate.pacificdata.org`) and the SBS endpoint (`data-sdmx-disseminate.sbs.gov.ws`): with `format=jsondata` both return the v1.0 shape (`data.structure`, singular) regardless of Accept; with a clean URL and `Accept: application/vnd.sdmx.data+json;version=2.0.0` both return v2.0 (`data.structures`, array).
+The parser appends `format=jsondata` to every data URL it fetches and sends no SDMx Accept header. On the current .Stat NSI stack that query parameter selects SDMX-JSON v1.0 and takes precedence over any Accept header, which follows SDMx REST precedence rules. Verified on 2026-06-12 against both the SPC endpoint (`stats-sdmx-disseminate.pacificdata.org`) and the SBS endpoint (`data-sdmx-disseminate.sbs.gov.ws`): with `format=jsondata` both return the v1.0 shape (`data.structure`, singular) regardless of Accept; with a clean URL and `Accept: application/vnd.sdmx.data+json;version=2.0.0` both return v2.0 (`data.structures`, array).
 
-The parser's reading code expects the v2.0 shape. The parser therefore requests, on every fetch, a format it cannot parse, and every up-to-date .Stat instance obliges. SDMX Surfer ships a dist-bundle patch normalising v1.0 responses into the v2.0 shape on read; without it the primary SPC endpoint fails. This was originally diagnosed as an SBS-side misbehaviour; the live verification shows the behaviour is uniform .Stat semantics and the request itself is the bug.
+The parser's reading code expects the v2.0 shape. The parser therefore requests, on every fetch, a format it cannot parse, and every up-to-date .Stat instance obliges. Data Surfer ships a dist-bundle patch normalising v1.0 responses into the v2.0 shape on read; without it the primary SPC endpoint fails. This was originally diagnosed as an SBS-side misbehaviour; the live verification shows the behaviour is uniform .Stat semantics and the request itself is the bug.
 
-A survey across all twelve providers configured in SDMX Surfer (2026-06-12, `scripts/survey-sdmx-json-versions.mjs` in the sdmx-surfer repo) widens the blast radius:
+A survey across all twelve providers configured in Data Surfer (2026-06-12, `scripts/survey-sdmx-json-versions.mjs` in the sdmx-surfer repo) widens the blast radius:
 
 | Provider(s) | Response to `format=jsondata` |
 |---|---|
@@ -265,7 +265,7 @@ type VisualInteraction = {
 <SDMXDashboard onUserInteraction={(e: VisualInteraction) => void} ... />
 ```
 
-The `concepts` map is the payload that matters: it is enough to reconstruct the SDMX query for the clicked slice without any engine knowledge on the consumer side.
+The `concepts` map is the payload that matters: it is enough to reconstruct the SDMx query for the clicked slice without any engine knowledge on the consumer side.
 
 ### Acceptance criteria
 
@@ -311,7 +311,7 @@ Collected small items, each breaking on its own, cheap to batch:
 
 ### Problem
 
-The components fetch their `data` URLs directly with the global `fetch`. Consumers have no way to add authentication (subscription keys for endpoints like Stats NZ), route around CORS restrictions, or apply caching. Surfer's workaround replaces `window.fetch` for the whole page with a wrapper that rewrites SDMX hosts to a server-side proxy (`app/sdmx-proxy-boot.tsx`). It works, and it is the riskiest pattern in the integration: any other script taking the same liberty, or a future library moving off `fetch`, breaks it silently.
+The components fetch their `data` URLs directly with the global `fetch`. Consumers have no way to add authentication (subscription keys for endpoints like Stats NZ), route around CORS restrictions, or apply caching. Surfer's workaround replaces `window.fetch` for the whole page with a wrapper that rewrites SDMx hosts to a server-side proxy (`app/sdmx-proxy-boot.tsx`). It works, and it is the riskiest pattern in the integration: any other script taking the same liberty, or a future library moving off `fetch`, breaks it silently.
 
 ### Proposal
 
@@ -334,7 +334,7 @@ Every data and structure request inside the library goes through the provided `f
 
 ### Problem
 
-SDMX endpoint instability is the dominant operational pain in the region. The library amplifies it in two ways: visuals on the same page fetch identical or overlapping URLs with no sharing (a comparison dashboard with ten indicators can issue dozens of requests where a handful would do), and a single transient 5xx fails the visual outright with no second attempt.
+SDMx endpoint instability is the dominant operational pain in the region. The library amplifies it in two ways: visuals on the same page fetch identical or overlapping URLs with no sharing (a comparison dashboard with ten indicators can issue dozens of requests where a handful would do), and a single transient 5xx fails the visual outright with no second attempt.
 
 ### Proposal
 
@@ -392,7 +392,7 @@ Make module scope side-effect-free: no `window`, `document`, or engine access un
 
 ### Problem
 
-Consumers operating a service want to know how the SDMX endpoints behave under real traffic: which hosts are slow, which fail, how often retries save a render. Today that information dies inside the library. Surfer's production plan includes a per-endpoint SDMX health surface that would otherwise need synthetic probing.
+Consumers operating a service want to know how the SDMx endpoints behave under real traffic: which hosts are slow, which fail, how often retries save a render. Today that information dies inside the library. Surfer's production plan includes a per-endpoint SDMx health surface that would otherwise need synthetic probing.
 
 ### Proposal
 
@@ -468,7 +468,7 @@ Per-visual `colorPalette` keeps precedence over the theme. The theme is the engi
 
 ---
 
-## What SDMX Surfer commits to once items land
+## What Data Surfer commits to once items land
 
 For each landed item, Surfer deletes the corresponding workaround within one release cycle: both entries in `scripts/apply-patches.mjs` (and eventually the patch infrastructure), the two global error handlers, the DOM-polling render detection, the reflow hook, the `window.fetch` proxy wrapper, the `dynamic(ssr: false)` wrapper components, and the CSS overrides targeting engine class names. Surfer also offers fixtures from production use: the SBS v1.0 response captures, the golden configs that exercise every chart type, and the catalogue of error situations its agent has hit.
 

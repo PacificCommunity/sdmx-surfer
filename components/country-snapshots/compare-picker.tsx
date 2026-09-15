@@ -59,8 +59,8 @@ export function ComparePicker({
               className={
                 "rounded-full px-3 py-1 text-xs transition-colors " +
                 (on
-                  ? "bg-[#004467] text-white"
-                  : "bg-[#f1f4f6] text-neutral-700 hover:bg-[#e5e9eb]")
+                  ? "bg-primary text-white"
+                  : "bg-surface-low text-neutral-700 hover:bg-surface-high")
               }
             >
               {c.name}

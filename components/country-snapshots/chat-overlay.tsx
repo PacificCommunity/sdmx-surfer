@@ -79,7 +79,7 @@ export function ChatOverlay({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-6 right-6 z-40 rounded-full bg-[#004467] px-4 py-2 text-sm text-white shadow-lg hover:bg-[#003355]"
+        className="fixed bottom-6 right-6 z-40 rounded-full bg-primary px-4 py-2 text-sm text-white shadow-lg hover:bg-primary-dark"
       >
         {open ? "Close chat" : "Ask the assistant"}
       </button>
@@ -159,7 +159,7 @@ export function ChatOverlay({
           </form>
 
           <div className="border-t border-neutral-200 px-3 py-2 text-xs">
-            <a href={forkHref} className="text-[#006970] underline">
+            <a href={forkHref} className="text-on-secondary-container underline">
               Explore in Surfer (sign in required)
             </a>
           </div>

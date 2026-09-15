@@ -57,7 +57,7 @@ function getKeyTone(key: string): string {
   }
 
   if (DATA_KEYS.has(key)) {
-    return "bg-secondary/10 text-secondary";
+    return "bg-secondary/10 text-on-secondary-container";
   }
 
   if (CONTENT_KEYS.has(key)) {
@@ -121,7 +121,7 @@ function InspectorPrimitive({
         className={
           "inline-flex rounded-full px-2 py-0.5 font-mono text-xs font-semibold " +
           (value
-            ? "bg-secondary/12 text-secondary"
+            ? "bg-secondary/12 text-on-secondary-container"
             : "bg-surface-high text-on-surface-variant")
         }
       >
@@ -132,7 +132,7 @@ function InspectorPrimitive({
 
   if (typeof value === "number") {
     return (
-      <span className="font-mono text-xs font-semibold text-secondary">
+      <span className="font-mono text-xs font-semibold text-on-secondary-container">
         {String(value)}
       </span>
     );
@@ -154,7 +154,7 @@ function InspectorPrimitive({
     /^[A-Z0-9_]+$/.test(value)
   ) {
     return (
-      <span className="inline-flex rounded-full bg-secondary/10 px-2 py-0.5 font-mono text-xs font-semibold text-secondary">
+      <span className="inline-flex rounded-full bg-secondary/10 px-2 py-0.5 font-mono text-xs font-semibold text-on-secondary-container">
         {value}
       </span>
     );
@@ -297,7 +297,7 @@ function VisualCard({
             <span className="type-label-md text-on-surface-variant">
               Plot {index + 1}
             </span>
-            <span className="inline-flex rounded-full bg-surface-card px-2.5 py-0.5 font-mono text-xs font-semibold text-secondary shadow-sm">
+            <span className="inline-flex rounded-full bg-surface-card px-2.5 py-0.5 font-mono text-xs font-semibold text-on-secondary-container shadow-sm">
               {visual.type}
             </span>
           </div>
@@ -342,7 +342,7 @@ function RowCard({ row, index }: { row: SDMXDashboardRow; index: number }) {
             {row.columns.length} panel{row.columns.length === 1 ? "" : "s"}
           </h3>
         </div>
-        <span className="inline-flex rounded-full bg-surface-card px-2.5 py-1 font-mono text-xs text-secondary shadow-sm">
+        <span className="inline-flex rounded-full bg-surface-card px-2.5 py-1 font-mono text-xs text-on-secondary-container shadow-sm">
           columns[{row.columns.length}]
         </span>
       </div>

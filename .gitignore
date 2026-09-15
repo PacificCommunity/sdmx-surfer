@@ -42,3 +42,14 @@ next-env.d.ts
 # Scratch dirs (local probes, codex)
 .tmp/
 .codex
+
+# Brand source package from PDH (SharePoint). ~300 MB of .ai/.pdf/.idml
+# production art and licensed fonts. Kept out of git deliberately: the
+# authoritative copy lives in SharePoint, and only the small curated web
+# assets under public/brand/ belong in the repository.
+/web_assets/
+/brand/
+
+# Local dev logs from this worktree.
+.tmp-dev.log
+.npm-install.log

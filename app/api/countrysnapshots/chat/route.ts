@@ -37,7 +37,7 @@ export async function POST(req: Request) {
       {
         error: "global_budget",
         message:
-          "SDMX Surfer has reached its AI usage budget for now, so new requests are paused while it is topped up. The snapshot pages themselves are still available.",
+          "Data Surfer has reached its AI usage budget for now, so new requests are paused while it is topped up. The snapshot pages themselves are still available.",
       },
       { status: 503 },
     );

@@ -1,8 +1,14 @@
-"""Build the 4-slide SDMX Surfer deck as native, unthemed PowerPoint shapes.
+"""Build the 4-slide Data Surfer deck as native, unthemed PowerPoint shapes.
 
 Everything is editable: the architecture diagram and the snapshot wireframe are
 rebuilt from shapes (no baked images), so a later theming pass can restyle all
 of it. 16:9, default fonts, grayscale except the diagram's own light hues.
+
+DO NOT RUN THIS TO REFRESH THE COMMITTED DECK. `data-surfer-slides.pptx` was
+edited by hand after it was last generated (2026-07-27): it carries two
+embedded screenshots this script does not produce, and later copy on slides 3
+and 4. Running this overwrites all of that, dropping the deck from 977 KB to
+37 KB. Edit the .pptx directly, or port the hand edits back here first.
 """
 
 from pptx import Presentation
@@ -146,10 +152,10 @@ def heading(slide, text, kicker=None):
 # ════════════════════════════════════ Slide 1 — What it is
 s = prs.slides.add_slide(BLANK)
 heading(s, "Dashboards you ask for, numbers you can trust",
-        kicker="SDMX Surfer · Country Snapshots")
+        kicker="Data Surfer · Country Snapshots")
 
 add_bullets(s, Inches(0.65), Inches(1.75), Inches(6.4), Inches(4.6), [
-    ("SDMX Surfer", "is a web app where you build dashboards on official "
+    ("Data Surfer", "is a web app where you build dashboards on official "
      "statistics by describing them in plain language. An AI agent finds the "
      "right data in the SDMx catalogue and assembles the charts."),
     ("Country Snapshots", "is the curated layer on top: ready-made "
@@ -218,12 +224,12 @@ box_label(b_user, "User", "dashboard goal")
 b_agent = box(s, dx(1.55), dy(0.30), Inches(1.30), Inches(0.62), BLUE_F, BLUE_S)
 box_label(b_agent, "LLM Agent", "query + chart")
 b_mcp = box(s, dx(3.30), dy(0.30), Inches(1.35), Inches(0.62), VIOLET_F, VIOLET_S)
-box_label(b_mcp, "MCP Gateway", "SDMX discovery")
+box_label(b_mcp, "MCP Gateway", "SDMx discovery")
 # endpoint spans all rows
 b_ep = box(s, dx(5.35), dy(0.30), Inches(1.30), Inches(2.75), GREEN_F, GREEN_S)
 tf = b_ep.text_frame; tf.vertical_anchor = MSO_ANCHOR.TOP
 p = tf.paragraphs[0]; p.alignment = PP_ALIGN.CENTER
-r = p.add_run(); r.text = "SDMX\nEndpoint"; r.font.size = Pt(12); r.font.bold = True; r.font.color.rgb = INK
+r = p.add_run(); r.text = "SDMx\nEndpoint"; r.font.size = Pt(12); r.font.bold = True; r.font.color.rgb = INK
 p2 = tf.add_paragraph(); p2.alignment = PP_ALIGN.CENTER
 r2 = p2.add_run(); r2.text = "\nmetadata"; r2.font.size = Pt(9.5); r2.font.color.rgb = GREEN_TXT
 p3 = tf.add_paragraph(); p3.alignment = PP_ALIGN.CENTER
@@ -254,7 +260,7 @@ arrow(s, dx(5.35), dy(2.85), dx(4.65), dy(2.85), GREEN_S, 2.0)             # val
 # small arrow labels
 add_text(s, dx(2.30), dy(0.98), Inches(0.75), Inches(0.22), "writes", size=8.5, color=AMBER_TXT)
 add_text(s, dx(4.05), dy(1.95), Inches(0.75), Inches(0.22), "renders", size=8.5, color=GRAY)
-add_text(s, dx(4.62), dy(2.24), Inches(0.85), Inches(0.2), "SDMX query", size=8, color=GREEN_TXT)
+add_text(s, dx(4.62), dy(2.24), Inches(0.85), Inches(0.2), "SDMx query", size=8, color=GREEN_TXT)
 add_text(s, dx(4.72), dy(2.90), Inches(0.7), Inches(0.2), "values", size=8, color=GREEN_TXT)
 add_text(s, dx(2.86), dy(0.24), Inches(0.75), Inches(0.2), "MCP call", size=8, color=BLUE_TXT)
 
@@ -262,7 +268,7 @@ add_text(s, DX, dy(3.35), Inches(6.7), Inches(0.55),
          "The model acts only in the authoring phase. At runtime the "
          "dashboard talks to the SDMx endpoint directly.",
          size=10, color=GRAY)
-footer(s, "SDMX Surfer", "2 / 4")
+footer(s, "Data Surfer", "2 / 4")
 
 # ════════════════════════════════════ Slide 3 — Country Snapshots
 s = prs.slides.add_slide(BLANK)
@@ -364,8 +370,8 @@ add_text(s, Inches(7.1), Inches(5.55), Inches(5.6), Inches(1.0),
          "Everything on screen is reproducible: open any chart's source link "
          "and you are on the official .Stat query that produced it.",
          size=11.5, color=INK)
-footer(s, "SDMX Surfer · Country Snapshots", "4 / 4")
+footer(s, "Data Surfer · Country Snapshots", "4 / 4")
 
-out = "sdmx-surfer-slides.pptx"
+out = "data-surfer-slides.pptx"
 prs.save(out)
 print("wrote", out)

@@ -6,7 +6,7 @@
 
 ## 1. What This App Is
 
-SDMX Surfer is a Next.js App Router application for building SDMX dashboards through chat.
+Data Surfer is a Next.js App Router application for building SDMx dashboards through chat.
 
 At a high level, the app combines:
 
@@ -43,7 +43,7 @@ This repository contains the production app, not only a prototype shell. Some ol
 
 ### External dependencies
 
-- MCP gateway for SDMX discovery/query tooling
+- MCP gateway for SDMx discovery/query tooling
 - `sdmx-dashboard-components` for dashboard rendering
 - NextAuth with email magic links for authentication
 - Postgres via Drizzle for persistence

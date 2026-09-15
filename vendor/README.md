@@ -1,6 +1,6 @@
 # Vendored dependency tarballs (temporary)
 
-These are locally built `npm pack` tarballs of the **improved** SDMX libraries,
+These are locally built `npm pack` tarballs of the **improved** SDMx libraries,
 vendored so the preview/dev deployment can exercise them before the upstream
 PRs land. They replace the registry versions in `package.json`
 (`"sdmx-json-parser": "file:vendor/..."`, same for `sdmx-dashboard-components`).

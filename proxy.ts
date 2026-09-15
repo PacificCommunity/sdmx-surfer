@@ -10,6 +10,6 @@ export default NextAuth(authConfig).auth;
 
 export const config = {
   matcher: [
-    "/((?!api/auth|api/public|api/sdmx-proxy|api/countrysnapshots|countrysnapshots|_next/static|_next/image|favicon.ico|models/|login|gallery(?:/|$)|p(?:/|$)).*)",
+    "/((?!api/auth|api/public|api/sdmx-proxy|api/countrysnapshots|countrysnapshots|_next/static|_next/image|favicon.ico|models/|brand/|login|gallery(?:/|$)|p(?:/|$)).*)",
   ],
 };

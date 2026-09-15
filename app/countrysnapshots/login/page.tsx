@@ -30,7 +30,7 @@ export default async function LoginPage({
         />
         <button
           type="submit"
-          className="w-full rounded-md bg-[#004467] px-3 py-2 text-white"
+          className="w-full rounded-md bg-primary px-3 py-2 text-white"
         >
           Enter
         </button>

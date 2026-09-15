@@ -16,7 +16,7 @@ export const SnapshotValue = dynamic(
 
 function ValueSkeleton() {
   return (
-    <div className="h-24 w-full animate-pulse rounded-md bg-[#f1f4f6]" />
+    <div className="h-24 w-full animate-pulse rounded-md bg-surface-low" />
   );
 }
 
@@ -58,6 +58,6 @@ export const SnapshotChart = dynamic(
 
 function ChartSkeleton() {
   return (
-    <div className="h-72 w-full animate-pulse rounded-md bg-[#f1f4f6]" />
+    <div className="h-72 w-full animate-pulse rounded-md bg-surface-low" />
   );
 }
