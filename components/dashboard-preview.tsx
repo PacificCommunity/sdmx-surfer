@@ -21,7 +21,10 @@ import {
 import { useHighchartsViewportReflow } from "@/lib/use-highcharts-viewport-reflow";
 import type { SDMXDashboardConfig } from "@/lib/types";
 import type { VisualRenderStatus } from "sdmx-dashboard-components";
-import { describeRenderError } from "@/lib/render-error-hints";
+import {
+  describeRenderError,
+  findStackedTreemaps,
+} from "@/lib/render-error-hints";
 
 const SDMXDashboard = SDMXDashboardDynamic;
 
@@ -123,7 +126,8 @@ export const DashboardPreview = memo(function DashboardPreview({
   // never sees them. This callback is the agent's ear: when the dashboard
   // settles, forward each errored visual's contract message into the same
   // reportError channel the boundary uses; the builder then auto-sends it to
-  // the model for self-correction.
+  // the model for self-correction. Stacked treemaps go the same way: the
+  // library counts them as rendered, but they draw an artefact.
   const handleRenderComplete = useCallback(
     (statuses: VisualRenderStatus[]) => {
       for (const s of statuses) {
@@ -139,8 +143,13 @@ export const DashboardPreview = memo(function DashboardPreview({
           );
         }
       }
+      if (config) {
+        for (const stacked of findStackedTreemaps(statuses, config)) {
+          reportError(describeRenderError(stacked));
+        }
+      }
     },
-    [reportError],
+    [reportError, config],
   );
 
   useEffect(() => {

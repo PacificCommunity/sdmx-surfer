@@ -11,7 +11,14 @@
  * "something broke, try again".
  */
 
-/** Mirrors SDMXRenderErrorCode from sdmx-dashboard-components. */
+import type { VisualRenderStatus } from "sdmx-dashboard-components";
+import type { SDMXDashboardConfig } from "@/lib/types";
+
+/**
+ * Mirrors SDMXRenderErrorCode from sdmx-dashboard-components, plus
+ * ERR_TREEMAP_STACKED: an app-level code for a visual the library reports as
+ * rendered but that draws an artefact instead of the data.
+ */
 export type RenderErrorCode =
   | "ERR_FETCH"
   | "ERR_PARSE"
@@ -19,7 +26,8 @@ export type RenderErrorCode =
   | "ERR_NO_SERIES_DIMENSION"
   | "ERR_AMBIGUOUS_SERIES"
   | "ERR_CONCEPT_NOT_FOUND"
-  | "ERR_ENGINE";
+  | "ERR_ENGINE"
+  | "ERR_TREEMAP_STACKED";
 
 const HINTS: Record<RenderErrorCode, string> = {
   ERR_FETCH:
@@ -29,14 +37,47 @@ const HINTS: Record<RenderErrorCode, string> = {
   ERR_EMPTY:
     "The query returned no observations. Widen it: drop lastNObservations, broaden the time range, or remove a dimension filter. Use suggest_nonempty_queries to find a filter combination that has data, then probe before resending.",
   ERR_NO_SERIES_DIMENSION:
-    "A bar/column/lollipop/treemap chart needs a series dimension that actually varies. Either set seriesBy to a dimension with more than one value in this query, or switch chartType to line or pie. For cross-country comparisons use xAxis=TIME_PERIOD with seriesBy=<geo dimension>; never put the geo dimension on the x-axis.",
+    "A bar/column/lollipop chart needs a series dimension that actually varies. Either set seriesBy to a dimension with more than one value in this query, or switch chartType to line or pie. For cross-country comparisons use xAxis=TIME_PERIOD with seriesBy=<geo dimension>; never put the geo dimension on the x-axis.",
   ERR_AMBIGUOUS_SERIES:
     "Two or more dimensions vary in this query, so the chart cannot tell which is the series. Pin every dimension except xAxis and seriesBy to a single value in the data URL (rebuild it with build_data_url), or set seriesBy explicitly.",
   ERR_CONCEPT_NOT_FOUND:
     "A concept named in the config does not exist in this dataflow. Call get_dataflow_structure for the dataflow and use the exact dimension ids it lists (geography is GEO_PICT on SPC flows, REF_AREA on many others) for xAxis, seriesBy and legend.concept.",
   ERR_ENGINE:
     "The charting engine rejected the data, usually because values are not plottable for this chart type. Try a different chartType, or check that the query returns numeric observations.",
+  ERR_TREEMAP_STACKED:
+    'A treemap divides one whole into tiles, so it must be a single series. Pin the seriesBy dimension to a single value in the data URL (rebuild it with build_data_url) and keep the parts on xAxis. To compare composition across several countries, switch chartType to bar with xAxis = the geo dimension, seriesBy = the category dimension, and "extraOptions": { "plotOptions": { "series": { "stacking": "normal" } } }.',
 };
+
+/**
+ * Treemaps that rendered as more than one series. The library draws one
+ * treemap per legend value and every treemap series fills the whole panel, so
+ * they land on top of each other: the panel shows one flat block, with labels
+ * from the hidden layers showing through. The library reports this as a
+ * successful render, so without this check the agent never hears about it.
+ */
+export function findStackedTreemaps(
+  statuses: VisualRenderStatus[],
+  config: SDMXDashboardConfig,
+): { visualId: string; code: RenderErrorCode; message: string }[] {
+  const visuals = new Map(
+    config.rows.flatMap((row) => row.columns).map((c) => [c.id, c]),
+  );
+  return statuses.flatMap((s) => {
+    const visual = visuals.get(s.visualId);
+    const seriesCount = s.stats?.seriesCount ?? 0;
+    if (s.status !== "rendered" || visual?.type !== "treemap" || seriesCount < 2) {
+      return [];
+    }
+    const concept = visual.legend?.concept ?? "its series dimension";
+    return [
+      {
+        visualId: s.visualId,
+        code: "ERR_TREEMAP_STACKED" as const,
+        message: `the treemap was split by ${concept} into ${seriesCount} series, and each treemap series fills the whole panel, so ${seriesCount} treemaps were drawn on top of each other.`,
+      },
+    ];
+  });
+}
 
 /**
  * Build the agent-facing description of a failed visual: the library's own

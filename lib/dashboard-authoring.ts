@@ -264,6 +264,23 @@ function compileTable(intent: TableIntent): NativeVisualConfig {
   };
 }
 
+// Highcharts paints a treemap series in one colour, leaving tiles told apart
+// only by hairline borders, and its default slice-and-dice layout cuts long
+// slivers. Colour by tile and squarify instead; the intent's own options win.
+function withTreemapDefaults(
+  extraOptions: Record<string, unknown> | undefined,
+): Record<string, unknown> {
+  const plotOptions = (extraOptions?.plotOptions ?? {}) as Record<string, unknown>;
+  const treemap = (plotOptions.treemap ?? {}) as Record<string, unknown>;
+  return {
+    ...extraOptions,
+    plotOptions: {
+      ...plotOptions,
+      treemap: { colorByPoint: true, layoutAlgorithm: "squarified", ...treemap },
+    },
+  };
+}
+
 function compileChart(intent: ChartIntent): NativeVisualConfig {
   if (
     ["bar", "column", "lollipop", "treemap"].includes(intent.chartType) &&
@@ -294,7 +311,10 @@ function compileChart(intent: ChartIntent): NativeVisualConfig {
     download: intent.download,
     dataLink: intent.dataLink,
     metadataLink: intent.metadataLink,
-    extraOptions: intent.extraOptions,
+    extraOptions:
+      intent.chartType === "treemap"
+        ? withTreemapDefaults(intent.extraOptions)
+        : intent.extraOptions,
     xAxisConcept: intent.xAxis,
     yAxisConcept: intent.yAxis ?? DEFAULT_VALUE_CONCEPT,
     data,
