@@ -13,7 +13,7 @@
  *   - 0 time points       → "empty"  (render placeholder)
  *   - 1..2 time points    → "bar"    (sparse data, comparable as bars)
  *   - >= 3 time points    → "line"   (enough for a time series)
- *   - >= LOCK_THRESHOLD   → "line", locked (never re-probed; SDMX data is
+ *   - >= LOCK_THRESHOLD   → "line", locked (never re-probed; SDMx data is
  *                            additive, indicators that have hit the threshold
  *                            once will not regress)
  *

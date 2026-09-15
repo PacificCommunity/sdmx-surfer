@@ -72,7 +72,7 @@ function loadPreviousIndex(): PreviousIndex | null {
 }
 const STAT_BASE = "https://stats-nsi-stable.pacificdata.org/rest";
 
-// ── Category fetching from .Stat SDMX REST API ──
+// ── Category fetching from .Stat SDMx REST API ──
 
 interface CategoryTag {
   scheme: string;
@@ -84,7 +84,7 @@ interface CategoryTag {
  * Fetch category-to-dataflow mappings from SPC .Stat category schemes.
  * Returns a map: dataflow ID → array of category tags.
  *
- * Reads the SDMX-JSON 2.0 structure message: `data.categorisations` links a
+ * Reads the SDMx-JSON 2.0 structure message: `data.categorisations` links a
  * category URN to a dataflow URN, and `data.categorySchemes[].categories`
  * carries the names. The previous implementation read a `references` object
  * with embedded `links[rel=dataflow]`, which the endpoint stopped returning;

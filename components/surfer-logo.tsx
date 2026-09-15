@@ -1,5 +1,5 @@
 /**
- * Windsurfing icon — the SDMX Surfer logo.
+ * Windsurfing icon — the Data Surfer logo.
  * Source: SVG Repo (windsurfing-windsurf-svgrepo-com.svg)
  */
 export function SurferLogo({ className }: { className?: string }) {

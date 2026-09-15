@@ -114,6 +114,6 @@ The STATSNZ integration (added in the same branch) requires a per-call subscript
 1. Update system prompt(s) to teach the agent the per-call `endpoint=` pattern.
 2. Update error-handling to parse mismatch hints and auto-retry on the suggested endpoint.
 3. Remove any "you must call `switch_endpoint` before …" language from cached prompts.
-4. Update `CLAUDE.md` § *SDMX MCP Tools Available* to list `endpoint=` as a parameter on each endpoint-scoped tool.
+4. Update `CLAUDE.md` § *SDMx MCP Tools Available* to list `endpoint=` as a parameter on each endpoint-scoped tool.
 5. Re-measure agent step count on cross-provider tasks; consider raising the NUDGE threshold if you had compensated for the old stateful churn.
 6. If serving multiple concurrent users: read the multi-user audit doc before Phase 3.

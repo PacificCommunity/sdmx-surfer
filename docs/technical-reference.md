@@ -1,4 +1,4 @@
-# Technical Reference — SPC Conversational Dashboard Builder
+# Technical Reference — Data Surfer
 
 **Version:** 0.2.1 (Pilot Deployment)
 **Last updated:** April 2026
@@ -34,11 +34,11 @@
 
 ## 1. System Overview
 
-The SPC Conversational Dashboard Builder is a web application that lets users create SDMX statistical dashboards through natural-language conversation with an AI agent.
+Data Surfer is a web application that lets users create SDMx statistical dashboards through natural-language conversation with an AI agent.
 
 The system connects three existing components:
 
-- **sdmx-mcp-gateway** — a Python MCP (Model Context Protocol) server providing 18+ tools for progressive SDMX data discovery on SPC's .Stat platform
+- **sdmx-mcp-gateway** — a Python MCP (Model Context Protocol) server providing 18+ tools for progressive SDMx data discovery on SPC's .Stat platform
 - **sdmx-dashboard-components** — an npm library (currently `^0.4.6` in this repo) that renders dashboards from JSON configs using Highcharts, OpenLayers, and React
 - **AI SDK v6** — Vercel's TypeScript framework for building AI applications, providing the streaming chat interface and tool orchestration
 
@@ -174,7 +174,7 @@ The largest client component (~800+ lines). Manages:
 3. **Config schema documentation** — JSON structure with critical rules; documents the authoring schema (intent visuals) as the preferred output format
 4. **Probe workflow** — agent must call `probe_data_url` before emitting a dashboard; probe shape drives viz type guidance (e.g., single-observation → KPI, time-series → line chart, cross-section → bar/column)
 5. **Progressive discovery workflow** — list → structure → codes → build URL → probe → recover-if-empty (suggest_nonempty_queries) → update
-6. **SDMX conventions** — base URL, common dimensions, key syntax
+6. **SDMx conventions** — base URL, common dimensions, key syntax
 7. **Example configs** — three working dashboards (few-shot)
 8. **Tool instructions** — always use `update_dashboard`, handle errors
 
@@ -315,13 +315,13 @@ Unauthenticated read-only endpoints serving the gallery and the public presentat
 
 Admin-only (require `session.user.role === "admin"`) endpoints backing `/admin`: invite allowlist management, user list with usage stats, and moderation view over published dashboards (including the ability to unpublish on behalf of a user).
 
-### `lib/endpoints-registry.ts` — SDMX Endpoint Registry
+### `lib/endpoints-registry.ts` — SDMx Endpoint Registry
 
-Single source of truth mapping each supported SDMX endpoint (SPC, OECD, UNICEF, IMF, ECB, ESTAT, ILO, ABS, BIS, FBOS, SBS) to a display name, API host(s), and an optional Data Explorer deep-link builder. Exports `detectEndpoint(apiUrl)` used by the data-source table and PDF export to resolve which endpoint served each component's data. Endpoints without a Data Explorer (UNICEF, IMF, ECB) are API-only.
+Single source of truth mapping each supported SDMx endpoint (SPC, OECD, UNICEF, IMF, ECB, ESTAT, ILO, ABS, BIS, FBOS, SBS) to a display name, API host(s), and an optional Data Explorer deep-link builder. Exports `detectEndpoint(apiUrl)` used by the data-source table and PDF export to resolve which endpoint served each component's data. Endpoints without a Data Explorer (UNICEF, IMF, ECB) are API-only.
 
 ### `lib/data-explorer-url.ts` — Data Source Extraction
 
-Walks a dashboard config and produces a flat `DataSource[]` list with per-component metadata: component id and title, dataflow name, endpoint key / name / short name, API URL, and an optional Data Explorer URL. Handles the compound data string used by map components (`{apiUrl}, {GEO_PICT} | {geoJsonUrl}, ...`) via `extractSdmxUrl()`, so the map's GeoJSON reference is never mistaken for an SDMX URL.
+Walks a dashboard config and produces a flat `DataSource[]` list with per-component metadata: component id and title, dataflow name, endpoint key / name / short name, API URL, and an optional Data Explorer URL. Handles the compound data string used by map components (`{apiUrl}, {GEO_PICT} | {geoJsonUrl}, ...`) via `extractSdmxUrl()`, so the map's GeoJSON reference is never mistaken for an SDMx URL.
 
 ### `lib/dashboard-text.ts` — Dashboard Text Helpers
 
@@ -431,7 +431,7 @@ Static content loaded once and cached via Anthropic's ephemeral prompt caching (
 - Dashboard config schema documentation (authoring schema + native schema)
 - Probe workflow instructions
 - Progressive discovery workflow instructions
-- SDMX conventions for SPC .Stat
+- SDMx conventions for SPC .Stat
 - Three example dashboard configs
 - Conversation strategy rules
 - Tool usage guidelines
@@ -478,9 +478,9 @@ The `update_dashboard` tool accepts either the **authoring schema** (preferred, 
       type: "line" | "bar" | "column" | "pie" | "value" | "note" | "map" | ...;
       colSize?: number;           // Grid span
       title?: { text: string };
-      xAxisConcept: string;       // SDMX dimension ID
+      xAxisConcept: string;       // SDMx dimension ID
       yAxisConcept?: string;      // Usually "OBS_VALUE"
-      data: string | string[];    // SDMX REST URL(s)
+      data: string | string[];    // SDMx REST URL(s)
       legend?: { concept: string; location: "top" | "bottom" | ... };
       labels?: boolean;
       download?: boolean;
@@ -834,7 +834,7 @@ The `/admin` page aggregates usage data per user (request count, total tokens, s
 4. Run `html2canvas` on the container element
 5. Create `jsPDF` document sized to the canvas
 6. Restore original SVG elements
-7. If the config references SDMX data sources, append a **Data Sources page** rendered natively with jsPDF (not via html2canvas)
+7. If the config references SDMx data sources, append a **Data Sources page** rendered natively with jsPDF (not via html2canvas)
 
 The SVG-to-canvas step is necessary because `html2canvas` cannot rasterize SVG directly.
 
@@ -873,9 +873,9 @@ The endpoint registry that powers the Source column and Data Explorer link gener
 
 Highcharts fires a `displayError` event before throwing. We install a global listener that calls `event.preventDefault()` to suppress the throw, converting errors into console warnings. This prevents error #14 (string data in numeric chart) and similar issues from crashing the app.
 
-### SDMX fetch errors
+### SDMx fetch errors
 
-`sdmx-json-parser` throws "Series not found and observations empty" in a Promise chain that the dashboard component doesn't catch. We listen for `unhandledrejection` on the window, filter for SDMX/Highcharts-related error messages, call `event.preventDefault()` to suppress the dev overlay, and forward to the error reporter.
+`sdmx-json-parser` throws "Series not found and observations empty" in a Promise chain that the dashboard component doesn't catch. We listen for `unhandledrejection` on the window, filter for SDMx/Highcharts-related error messages, call `event.preventDefault()` to suppress the dev overlay, and forward to the error reporter.
 
 ### Error feedback loop
 
@@ -968,7 +968,7 @@ Based on the **Oceanic Data-Scapes** spec (`stitch_assets/stitch/oceanic_logic/D
 
 ### `dimensionAtObservation=AllDimensions`
 
-**Issue:** Without this query parameter, the SDMX API returns data in series format. The library's `getActiveDimensions()` in `sdmx-json-parser` doesn't correctly identify active dimensions in series format, leading to crashes.
+**Issue:** Without this query parameter, the SDMx API returns data in series format. The library's `getActiveDimensions()` in `sdmx-json-parser` doesn't correctly identify active dimensions in series format, leading to crashes.
 **Fix:** The authoring compiler's `ensureAllDimensions()` appends this parameter automatically to every data URL. The MCP gateway's `build_data_url` also includes it by default. The system prompt instructs the AI to always use `build_data_url` rather than constructing URLs manually.
 
 ---
@@ -1020,7 +1020,7 @@ user_api_keys         — BYOK keys (encrypted_key, provider, model_preference, 
 - **Rate limiting** — per-user token budgets and request throttling (currently no per-user limits)
 - **Institutional curation** — the public gallery exists; editorial review / featured-dashboard workflow does not
 - **Per-user MCP state** — the MCP gateway already supports per-session state; wiring this to user auth context is a future step
-- **Query whitelisting** — restricting which SDMX dataflows each user can access
+- **Query whitelisting** — restricting which SDMx dataflows each user can access
 
 Public dashboards and the public gallery itself are no longer Phase 3 items — they are implemented and documented in `docs/current-architecture.md` (publication flow and gallery model).
 

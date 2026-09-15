@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
+import { BrandField } from "@/components/brand-field";
 import type { UIMessage, ChatStatus } from "ai";
 import { MessageBubble } from "./message-bubble";
 
@@ -61,7 +62,7 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
       {/* Header — tonal shift instead of border */}
       <div className="shrink-0 bg-surface-low px-5 pb-3 pt-4">
         <h2 className="font-[family-name:var(--font-display)] text-lg font-bold tracking-tight text-primary">
-          SDMX Surfer
+          Data Surfer
         </h2>
         <p className="type-label-md mt-0.5 text-on-tertiary-fixed-variant">
           Surf the data — tell me what you want to explore
@@ -75,7 +76,13 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
       >
         <div className="flex flex-col gap-4">
           {messages.length === 0 ? (
-            <div className="submerged-overlay flex flex-col gap-3 rounded-[var(--radius-xl)] bg-surface-low px-5 py-8">
+            // The one place on this screen the pattern belongs: nothing is
+            // being read, and it disappears the moment a conversation starts.
+            <BrandField
+              variant="panel"
+              className="submerged-overlay rounded-[var(--radius-xl)]"
+            >
+            <div className="flex flex-col gap-3 px-5 py-8">
               <p className="text-center text-sm text-on-surface-variant">
                 What Pacific data do you want to explore?
               </p>
@@ -90,6 +97,7 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
                 </button>
               ))}
             </div>
+            </BrandField>
           ) : (
             messages.map((m) => <MessageBubble key={m.id} message={m} />)
           )}
@@ -157,7 +165,7 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
           placeholder={hasDashboard ? "Keep exploring — refine, compare, or dig deeper..." : "What data do you want to explore?"}
           rows={2}
           className={
-            "focus-architectural ghost-border w-full resize-none rounded-[var(--radius-xl)] px-4 py-3 text-sm text-on-surface shadow-ambient transition-colors duration-500 placeholder:text-on-surface-variant/50 " +
+            "focus-architectural ghost-border w-full resize-none rounded-[var(--radius-xl)] px-4 py-3 text-sm text-on-surface shadow-ambient transition-colors duration-500 placeholder:text-on-surface-variant/80 " +
             (isStreaming ? "bg-surface-high/50" : "bg-surface-card")
           }
           disabled={isStreaming}

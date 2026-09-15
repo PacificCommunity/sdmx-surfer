@@ -45,11 +45,11 @@ export function SnapshotTable({
   if (err) throw new Error(err); // surfaces in the parent ErrorBoundary
 
   if (rows === null) {
-    return <div className="h-32 w-full animate-pulse rounded-md bg-[#f1f4f6]" />;
+    return <div className="h-32 w-full animate-pulse rounded-md bg-surface-low" />;
   }
   if (rows.length === 0) {
     return (
-      <p className="rounded-md bg-[#f7fafc] p-4 text-sm italic text-neutral-500">
+      <p className="rounded-md bg-surface p-4 text-sm italic text-neutral-500">
         No observations available.
       </p>
     );
@@ -89,7 +89,7 @@ export function SnapshotTable({
   return (
     <div className="overflow-x-auto rounded-md border border-neutral-200 bg-white">
       <table className="w-full text-sm">
-        <thead className="bg-[#f7fafc] text-xs uppercase tracking-wide text-neutral-600">
+        <thead className="bg-surface text-xs uppercase tracking-wide text-neutral-600">
           <tr>
             <th className="px-3 py-2 text-left font-medium">Year</th>
             {cols.map((c) => (
@@ -103,7 +103,7 @@ export function SnapshotTable({
           {periods.map((p, idx) => (
             <tr
               key={p}
-              className={idx % 2 ? "bg-[#fafbfc]" : ""}
+              className={idx % 2 ? "bg-surface" : ""}
             >
               <td className="px-3 py-1.5 font-medium text-neutral-700">{p}</td>
               {cols.map((c) => (

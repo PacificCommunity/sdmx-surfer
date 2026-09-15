@@ -62,7 +62,7 @@ function buildDynamicContext(ctx: SnapshotContext): string {
         "update_dashboard to build the user a live dashboard in the " +
         "preview pane next to the chat. Use the indicators in this " +
         "catalogue first (they're curated and known to work); fall back " +
-        "to broader SDMX discovery only when the user's question " +
+        "to broader SDMx discovery only when the user's question " +
         "genuinely needs something outside the catalogue.",
     );
     parts.push(

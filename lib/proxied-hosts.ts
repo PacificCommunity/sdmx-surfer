@@ -1,5 +1,5 @@
 /**
- * Hosts whose SDMX endpoints must be fetched server-side instead of direct from
+ * Hosts whose SDMx endpoints must be fetched server-side instead of direct from
  * the browser. Two reasons show up:
  *
  *   - "key": the host requires a subscription key on every request. The proxy
@@ -29,7 +29,7 @@ export interface ProxiedHostConfig {
   };
 }
 
-// Regex building blocks for SDMX REST resource paths.
+// Regex building blocks for SDMx REST resource paths.
 // Keep these narrow — we're deciding what the shared proxy will forward.
 const SDMX_RESOURCES =
   "data|dataflow|datastructure|codelist|conceptscheme|availableconstraint|contentconstraint|categoryscheme";
@@ -56,7 +56,7 @@ export const PROXIED_HOSTS: Record<string, ProxiedHostConfig> = {
     ),
   },
 
-  // OECD SDMX (.Stat Suite at sdmx.oecd.org) — CORS-blocked for browsers.
+  // OECD SDMx (.Stat Suite at sdmx.oecd.org) — CORS-blocked for browsers.
   "sdmx.oecd.org": {
     reason: "cors",
     allowedPathPattern: new RegExp("^/public/rest/(" + SDMX_RESOURCES + ")/"),
