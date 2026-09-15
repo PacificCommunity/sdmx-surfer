@@ -12,6 +12,16 @@
 
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
+import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
+import {
+  emailDomain,
+  githubEmailIsVerified,
+  isBootstrapAdmin,
+  entraEmailIsVerified,
+  signupIsOpenFor,
+} from "@/lib/signup-policy";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import { authConfig } from "./auth.config";
@@ -22,6 +32,7 @@ import {
   authVerificationTokens,
   authEvents,
   allowedEmails,
+  allowedDomains,
 } from "./db/index";
 import {
   verifyPassword,
@@ -165,6 +176,107 @@ const emailProvider = {
 };
 
 // ---------------------------------------------------------------------------
+/**
+ * OAuth providers, each registered only when its credentials are configured.
+ *
+ * Conditional so the app deploys and runs before any provider app exists, and
+ * so one can be added or withdrawn by changing environment variables rather
+ * than code. `enabledOAuthProviders` drives the sign-in page, which offers only
+ * what will actually work.
+ *
+ * ACCOUNT LINKING BY VERIFIED EMAIL IS DELIBERATE. Every existing account was
+ * created by email sign-in and none has an OAuth link, so without linking the
+ * first Google or Microsoft sign-in would create a second, empty account and
+ * strand that user's dashboards and role. Auth.js calls the option "dangerous"
+ * because linking on an unverified email lets someone claim an account by
+ * asserting its address. Google verifies the address it returns. Microsoft and
+ * GitHub do not, so the `signIn` callback checks both itself before any rule
+ * runs, and linking rests on that check rather than on the provider's good
+ * name. Adding a provider here means answering the same question for it first.
+ */
+const oauthProviders = [
+  process.env.AUTH_GOOGLE_ID &&
+    GoogleProvider({ allowDangerousEmailAccountLinking: true }),
+  process.env.AUTH_MICROSOFT_ENTRA_ID_ID &&
+    MicrosoftEntraID({ allowDangerousEmailAccountLinking: true }),
+  process.env.AUTH_GITHUB_ID &&
+    GitHubProvider({ allowDangerousEmailAccountLinking: true }),
+].filter(Boolean) as NonNullable<ReturnType<typeof GoogleProvider>>[];
+
+/**
+ * Read the claims of an id token we have already had verified.
+ *
+ * Auth.js validates the token's signature and issuer during the OIDC exchange,
+ * so by the time a callback sees it the contents are Microsoft's word rather
+ * than the caller's. This only reaches into an object that has already been
+ * authenticated, which is why it does no verification of its own.
+ *
+ * Needed because the provider's own `profile()` keeps id, name, email and
+ * image, and drops `xms_edov` and `tid` on the way through.
+ */
+function idTokenClaims(token: unknown): Record<string, unknown> | null {
+  if (typeof token !== "string") return null;
+  const payload = token.split(".")[1];
+  if (!payload) return null;
+  try {
+    const json = Buffer.from(
+      payload.replace(/-/g, "+").replace(/_/g, "/"),
+      "base64",
+    ).toString("utf8");
+    const parsed: unknown = JSON.parse(json);
+    return parsed && typeof parsed === "object"
+      ? (parsed as Record<string, unknown>)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The claims a Microsoft sign-in should be judged on.
+ *
+ * Prefers the raw profile, which Auth.js passes through untouched, and falls
+ * back to the id token when the shape is not what we expect. Either source is
+ * Microsoft's, and neither is the browser's.
+ */
+function entraClaims(
+  profile: unknown,
+  idToken: unknown,
+): Record<string, unknown> | null {
+  if (profile && typeof profile === "object") {
+    const claims = profile as Record<string, unknown>;
+    if ("xms_edov" in claims || "tid" in claims) return claims;
+  }
+  return idTokenClaims(idToken);
+}
+
+/**
+ * Ask GitHub whether this address is verified on the signing-in account.
+ *
+ * Costs one API call per GitHub sign-in, on the `user:email` scope the provider
+ * already requests. Fails closed on any error: an address we could not confirm
+ * is treated as unverified rather than trusted.
+ */
+async function githubAddressVerified(
+  accessToken: unknown,
+  email: string,
+): Promise<boolean> {
+  if (typeof accessToken !== "string" || !accessToken) return false;
+  try {
+    const res = await fetch("https://api.github.com/user/emails", {
+      headers: {
+        Authorization: "Bearer " + accessToken,
+        Accept: "application/vnd.github+json",
+        "User-Agent": "sdmx-surfer",
+      },
+    });
+    if (!res.ok) return false;
+    return githubEmailIsVerified(await res.json(), email);
+  } catch {
+    return false;
+  }
+}
+
 // NextAuth v5 — handlers + auth() + signIn/signOut, all from one call
 // ---------------------------------------------------------------------------
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -178,6 +290,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   }),
 
   providers: [
+    ...oauthProviders,
     emailProvider,
 
     // Admin-provisioned password sign-in. Users do not self-register here;
@@ -290,10 +403,86 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     ...authConfig.callbacks,
 
-    // Block sign-in for emails not in the allowlist
-    async signIn({ user }) {
+    // Admit on any of three grounds: open signup, an institutional domain, or
+    // an invite. See lib/signup-policy.
+    //
+    // A provider can return no email (a GitHub account with every address
+    // private). We reject that rather than admitting an identity we cannot
+    // link, deduplicate, or contact.
+    async signIn({ user, account, profile }) {
       if (!user.email) return false;
-      const normalizedEmail = user.email.toLowerCase();
+
+      const normalizedEmail = user.email.trim().toLowerCase();
+
+      // GitHub's address is not trustworthy until we check it ourselves. Auth.js
+      // uses whatever GitHub returns without inspecting `verified`, and both the
+      // domain rule and account linking treat the address as proof of identity.
+      // Verified before any rule below, including the break-glass list, so an
+      // unverified address cannot reach any of them.
+      if (account?.provider === "github") {
+        if (!(await githubAddressVerified(account.access_token, normalizedEmail))) {
+          return false;
+        }
+      }
+
+      // Microsoft's address is not trustworthy either, for a different reason.
+      // The app is registered multi-tenant so that partner organisations can
+      // sign in at all, and in that mode a work account's address is whatever
+      // its own directory says it is. Checked here, ahead of every rule, so an
+      // unproved address can neither link to an existing account nor satisfy
+      // the domain rule.
+      if (account?.provider === "microsoft-entra-id") {
+        if (!entraEmailIsVerified(entraClaims(profile, account.id_token))) {
+          console.error(
+            "[auth] refused a Microsoft sign-in: the token does not show the " +
+              "email domain as verified by its tenant. If this is every " +
+              "Microsoft user rather than one, the xms_edov optional claim is " +
+              "missing from the app registration. See docs/oauth-setup.md.",
+          );
+          return false;
+        }
+      }
+
+      // Break-glass first, so a locked-out administrator is never gated by a
+      // list they can no longer edit.
+      if (isBootstrapAdmin(normalizedEmail)) return true;
+
+      // Public signup, for the providers it has been opened for. Scoped to the
+      // provider rather than global: Google and Microsoft are meant to be open
+      // to anyone, while the magic link and password paths stay on the lists
+      // below. Opening those too would admit anyone with any working address
+      // and leave both lists governing nothing.
+      //
+      // This runs before the lists rather than after because it is cheaper: it
+      // reads an environment variable, where the rules below each cost a query.
+      if (signupIsOpenFor(account?.provider)) return true;
+
+      // Institutional domain, matched exactly against allowed_domains.
+      //
+      // Degrades to the invite list if that table cannot be read, rather than
+      // taking sign-in down with it. This is a real ordering hazard, not a
+      // hypothetical one: the code queries this table on every sign-in, so
+      // shipping it ahead of its migration would lock every user out at once.
+      // Failing this way only ever removes a way in, never adds one.
+      const host = emailDomain(normalizedEmail);
+      if (host) {
+        try {
+          const byDomain = await db
+            .select({ domain: allowedDomains.domain })
+            .from(allowedDomains)
+            .where(eq(allowedDomains.domain, host))
+            .limit(1);
+          if (byDomain.length > 0) return true;
+        } catch (err) {
+          console.error(
+            "[auth] allowed_domains unreadable, falling back to the invite " +
+              "list. Has migration 0007 been applied?",
+            err,
+          );
+        }
+      }
+
+      // Otherwise an individual invite, which is how personal addresses get in.
       const rows = await db
         .select({ email: allowedEmails.email })
         .from(allowedEmails)
@@ -306,14 +495,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // it in the token. Runs in the Node runtime only.
     async jwt({ token, user }) {
       if (user && user.email) {
+        const email = user.email.toLowerCase();
         const rows = await db
           .select({ id: authUsers.id, role: authUsers.role })
           .from(authUsers)
-          .where(eq(authUsers.email, user.email.toLowerCase()))
+          .where(eq(authUsers.email, email))
           .limit(1);
         if (rows.length > 0) {
           token.userId = rows[0].id;
           token.role = rows[0].role;
+
+          // Restore the role on a break-glass account. This covers the case
+          // the migration is most likely to produce: a provider returning a
+          // slightly different address, so the adapter creates a fresh row
+          // with the default role and the administrator quietly becomes an
+          // ordinary user with no way back.
+          if (isBootstrapAdmin(email) && rows[0].role !== "admin") {
+            await db
+              .update(authUsers)
+              .set({ role: "admin" })
+              .where(eq(authUsers.id, rows[0].id));
+            token.role = "admin";
+          }
         }
       }
       return token;
