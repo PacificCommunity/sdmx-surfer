@@ -167,4 +167,49 @@ describe("dashboard authoring compiler", () => {
       /requires `seriesBy`/,
     );
   });
+
+  function compileTreemap(extraOptions?: Record<string, unknown>) {
+    const parsed = dashboardToolConfigSchema.parse({
+      id: "composition",
+      rows: [
+        {
+          columns: [
+            {
+              kind: "chart",
+              id: "mix",
+              chartType: "treemap",
+              title: "Revenue mix",
+              dataUrl: "https://example.com/rest/data/DF_X/A.MH.X.1000+2000",
+              xAxis: "TRANSACTION",
+              seriesBy: "GEO_PICT",
+              ...(extraOptions ? { extraOptions } : {}),
+            },
+          ],
+        },
+      ],
+    });
+    return compileDashboardToolConfig(parsed).rows[0].columns[0];
+  }
+
+  it("colours treemap tiles by point and squarifies them by default", () => {
+    expect(compileTreemap().extraOptions).toEqual({
+      plotOptions: {
+        treemap: { colorByPoint: true, layoutAlgorithm: "squarified" },
+      },
+    });
+  });
+
+  it("lets a treemap's own options override the defaults", () => {
+    const compiled = compileTreemap({
+      tooltip: { valueDecimals: 1 },
+      plotOptions: { treemap: { layoutAlgorithm: "sliceAndDice" } },
+    });
+
+    expect(compiled.extraOptions).toEqual({
+      tooltip: { valueDecimals: 1 },
+      plotOptions: {
+        treemap: { colorByPoint: true, layoutAlgorithm: "sliceAndDice" },
+      },
+    });
+  });
 });
