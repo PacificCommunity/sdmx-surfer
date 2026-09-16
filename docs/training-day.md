@@ -6,7 +6,7 @@ without invites, inboxes or a shared login.
 ## How it works
 
 `/training` asks for one shared code. `POST /api/training/claim` checks it,
-takes a free slot from a pool of 120, and creates
+takes a free slot from a pool of 200, and creates
 `trainee-NN@training.sdmxsurfer.net` with a generated passphrase. The page shows
 the credentials, keeps them in localStorage so a reload does not spend a second
 slot, and signs the participant in to `/builder`.
