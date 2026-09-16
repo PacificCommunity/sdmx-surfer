@@ -24,7 +24,7 @@ export const TRAINEE_EMAIL_DOMAIN = "training.sdmxsurfer.net";
  * most the remainder of the pool rather than an unbounded number of accounts,
  * each of which can spend model budget.
  */
-export const MAX_TRAINEES = 120;
+export const MAX_TRAINEES = 200;
 
 const TRAINEE_ADDRESS = new RegExp(
   "^trainee-(\\d{2,3})@" + TRAINEE_EMAIL_DOMAIN.replace(/\./g, "\\.") + "$",
