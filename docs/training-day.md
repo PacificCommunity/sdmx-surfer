@@ -34,7 +34,20 @@ one person from taking the whole budget.
 
 ## Switching it off
 
-1. Set `TRAINING_MODE` to `0` and redeploy. The door is now shut.
-2. `npx tsx scripts/clear-training-accounts.ts` lists the accounts.
-3. `npx tsx scripts/clear-training-accounts.ts --yes` deletes them and their
-   dashboards. It only matches the trainee subdomain, so real accounts are safe.
+1. Set `TRAINING_MODE` to `0` and redeploy. No new accounts can be claimed.
+2. `npx tsx scripts/training-accounts.ts` reports what exists.
+3. Then pick an ending:
+   - `--park` revokes sign-in and keeps every dashboard. The accounts remain as
+     the owners of what they built, so published dashboards stay in the gallery.
+   - `--delete` removes the accounts and everything they made.
+
+Both only match the trainee subdomain, so real accounts are safe.
+
+Parking does not end sessions already open in a browser: nothing re-checks the
+allowlist after sign-in, so a tab left open keeps working until its cookie
+expires. Rotate `NEXTAUTH_SECRET` on the dev environment to cut those too,
+which signs out everyone on dev, yourself included.
+
+Put `AI_BUDGET_CAP_USD` back to its usual value as well. The cap is cumulative
+rather than daily, so a low training-day ceiling left in place will eventually
+stop dev for unrelated reasons.
