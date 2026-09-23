@@ -23,6 +23,7 @@ Both consumers of the library at SPC (the Surfer builder and the Country Snapsho
 |---|---|---|
 | Binary patch on the dist bundle: throw a descriptive error when a bar/column chart has no second varying dimension | `scripts/apply-patches.mjs`, patch 2 | silent blank panel (§1) |
 | Binary patch on sdmx-json-parser dist: reshape SDMX-JSON v1.0 responses into v2.0 | `scripts/apply-patches.mjs`, patch 1 | parser requests v1.0 (`format=jsondata`) yet reads v2.0 (§5) |
+| Hand-patched repack of the vendored dist bundle: emit a Highcharts time unit only for frequencies that have one | `vendor/sdmx-dashboard-components-0.4.8.tgz` | epoch-millisecond x axis on daily series (§16) |
 | Global Highcharts `displayError` handler installed at import time | `components/sdmx-dashboard-dynamic.tsx`, `components/country-snapshots/snapshot-chart.tsx` | no error contract (§2) |
 | DOM polling for `.highcharts-container` to detect render completion | `components/dashboard-preview.tsx` | no render lifecycle API (§3) |
 | Direct `highcharts` import to call `chart.reflow()` on container resize | `lib/use-highcharts-viewport-reflow.ts` | no resize handling (§4) |
@@ -465,6 +466,60 @@ Per-visual `colorPalette` keeps precedence over the theme. The theme is the engi
 ### Acceptance criteria
 
 - One theme object applied at the dashboard level restyles every visual with no per-visual config and no CSS targeting internal class names.
+
+---
+
+## 16. Frequency-to-axis-unit mapping for time series (P1)
+
+### Problem
+
+When a line chart puts `TIME_PERIOD` on the x axis, the chart component reads the `FREQ` dimension and derives a Highcharts time unit and a label format from it. Three frequency codes are mapped: `A` becomes `year`, `Q` and `M` become `month`. Every other code, including the daily `D` and business-daily `B` that ECB, BIS and most financial providers publish, leaves both values as empty strings, and the component emits them anyway:
+
+```js
+xAxis = { type: "datetime", units: [["", []]], labels: { format: "" } }
+```
+
+Highcharts resolves `units[0][0]` against its table of time units. The empty name has no entry, so `normalizeTimeTickInterval` returns `{ unitRange: undefined, count: null, unitName: "" }`, `getTimeTicks` produces `[<min>, NaN]`, and no `dateTimeLabelFormat` can be resolved for the unit name `""`. The label formatter falls through to its numeric branch and prints the epoch milliseconds.
+
+Observed in production on two ECB dataflows:
+
+| Dataflow | `FREQ` | x axis labels rendered |
+|---|---|---|
+| `ECB:FM`, key interest rates, `D.U2.EUR.4F.KR.DFR+MRR_FR+MLFR.LEV` | `D` | `1 384 518 528k`, `0` |
+| `ECB:EST`, euro short-term rate, `B.EU000A2X2A25.WT` | `B` | `1 567 686 528k`, `0` |
+
+Two ticks, the second of them a `NaN` position rendered as `0`. The series are plotted correctly; only the axis is wrong, so the panel looks finished and reads as nonsense.
+
+The same expression also fails on any dataflow that has no `FREQ` dimension. `dimensions.find((dimension: any) => dimension.id === "FREQ")` returns `undefined`, `.values[0]` throws, and the whole panel is replaced by `ERR_PARSE: Cannot read properties of undefined (reading 'values')`.
+
+### Proposal
+
+Emit `units` and `labels.format` only for frequencies that map to a Highcharts time unit, and let Highcharts auto-scale otherwise. In `lib/components/chart/index.tsx`:
+
+```ts
+const freqDimension = dimensions.find((dimension: any) => dimension.id === "FREQ");
+const freqId = freqDimension?.values?.[0]?.id;
+let unit = '';
+let xAxisLabelformat = '';
+if (freqId === "A") {
+    unit = "year";
+    xAxisLabelformat = "{value:%Y}";
+} else if (freqId === "Q" || freqId === "M") {
+    unit = "month";
+    xAxisLabelformat = "{value:%b %Y}";
+}
+hcExtraOptions["xAxis"] = unit
+    ? { type: "datetime", units: [[unit, []]], labels: { format: xAxisLabelformat } }
+    : { type: "datetime" };
+```
+
+Auto-scaling beats extending the map with `D`, `B`, `W` and `H` under a forced unit. A daily series may span a fortnight or twenty years, and a fixed unit with empty multiples gives tick counts such as 318 days or 11.4 months. Highcharts picks the unit from the visible range and formats it with its default `dateTimeLabelFormats`, which is what the `A`, `Q` and `M` cases approximate by hand.
+
+### Acceptance criteria
+
+- A daily (`D`) or business-daily (`B`) series spanning several years shows year labels on the x axis.
+- Annual and monthly series keep the tick positions and labels they have today, unchanged.
+- A dataflow with no `FREQ` dimension renders on an auto-scaled datetime axis instead of failing the panel.
 
 ---
 

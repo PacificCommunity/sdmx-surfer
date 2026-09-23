@@ -8,9 +8,9 @@ PRs land. They replace the registry versions in `package.json`
 | Tarball | Source repo | Branch @ sha | Replaces registry |
 |---|---|---|---|
 | `sdmx-json-parser-0.3.2.tgz` | PacificCommunity/sdmx-json-parser | `extend-json-dialects` @ 48cc79f | `^0.3.1` |
-| `sdmx-dashboard-components-0.4.7.tgz` | PacificCommunity/sdmx-dashboard-components | `stable-config-effect-key` @ 5f8c1d1 | `^0.4.6` |
+| `sdmx-dashboard-components-0.4.8.tgz` | PacificCommunity/sdmx-dashboard-components | `stable-config-effect-key` @ 5f8c1d1, plus the axis patch below | `^0.4.6` |
 
-> **Versions are bumped on purpose (0.3.2 / 0.4.7), not just the source SHAs.**
+> **Versions are bumped on purpose (0.3.2 / 0.4.8), not just the source SHAs.**
 > npm serves `file:` tarballs from its content-addressable cache keyed by the
 > lockfile integrity, so a rebuilt tarball under an UNCHANGED version
 > (`0.3.1`/`0.4.6`) is silently replaced by the cached pre-fix copy on the next
@@ -22,6 +22,28 @@ Both improved builds carry, **natively**, the fixes that
 `scripts/apply-patches.mjs` used to inject as binary patches. That script now
 detects the native markers (`normalizeSdmxJson`, `ERR_AMBIGUOUS`) and skips the
 patches automatically, so nothing is double-applied.
+
+## 0.4.8 was patched in the bundle, not in the fork
+
+`stable-config-effect-key` is not on `origin` and the commit `5f8c1d1` is not in
+any checkout on this machine, so 0.4.8 was produced by unpacking 0.4.7, editing
+`dist/sdmx-dashboard-components.js` in place, bumping the version and running
+`npm pack`. One expression changed, in the line-chart branch that derives a
+Highcharts time unit from `FREQ`:
+
+- frequencies with no mapped time unit (`D`, `B`, `W`, `H`, anything outside
+  `A`/`Q`/`M`) used to emit `units: [["", []]]` and `labels: { format: "" }`,
+  which made Highcharts print epoch milliseconds on the x axis. They now emit
+  `{ type: "datetime" }` and let Highcharts auto-scale.
+- the `FREQ` lookup is guarded, so a dataflow without a `FREQ` dimension renders
+  instead of failing the panel with `ERR_PARSE`.
+
+`A`, `Q` and `M` keep the units and label formats they had.
+
+The source-level version of this change is written out in
+`docs/sdmx-dashboard-components-improvements.md` §16, against
+`lib/components/chart/index.tsx`. **Apply it to the fork before rebuilding this
+tarball from source, or the fix is lost.**
 
 ## How to revert to the published registry versions
 
