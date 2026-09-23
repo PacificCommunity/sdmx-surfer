@@ -123,9 +123,76 @@ describe("apiUrlToExplorerUrl", () => {
   });
 
   it("returns null for endpoints without a DE builder", () => {
-    expect(apiUrlToExplorerUrl(GATEWAY_URLS.ECB)).toBeNull();
     expect(apiUrlToExplorerUrl(GATEWAY_URLS.UNICEF)).toBeNull();
     expect(apiUrlToExplorerUrl(GATEWAY_URLS.IMF)).toBeNull();
+  });
+
+  // The ECB data portal has no .Stat Data Explorer. Its own conversion rule
+  // (from the ECB, 2026-09-23) keys off how specific the series key is:
+  //   one exact series   -> /data/datasets/{FLOW}/{FLOW}.{KEY}
+  //   several series     -> /search-results?searchTerm={FLOW}.{KEY1} {FLOW}.{KEY2}
+  //   anything vaguer    -> the dataset landing page /data/datasets/{FLOW}
+  describe("ECB", () => {
+    const ecb = (key: string) =>
+      apiUrlToExplorerUrl(
+        "https://data-api.ecb.europa.eu/service/data/FM/" +
+          key +
+          "?dimensionAtObservation=AllDimensions",
+      );
+
+    it("links an exact series key to its dataset series page", () => {
+      expect(ecb("D.U2.EUR.4F.KR.DFR.LEV")).toBe(
+        "https://data.ecb.europa.eu/data/datasets/FM/FM.D.U2.EUR.4F.KR.DFR.LEV",
+      );
+    });
+
+    it("expands a multi-code key into a search over every series", () => {
+      expect(ecb("D.U2.EUR.4F.KR.DFR+MRR_FR+MLFR.LEV")).toBe(
+        "https://data.ecb.europa.eu/search-results?searchTerm=" +
+          "FM.D.U2.EUR.4F.KR.DFR.LEV%20" +
+          "FM.D.U2.EUR.4F.KR.MRR_FR.LEV%20" +
+          "FM.D.U2.EUR.4F.KR.MLFR.LEV",
+      );
+    });
+
+    it("expands alternatives in more than one position, outer position first", () => {
+      expect(ecb("D+M.U2.EUR.4F.KR.DFR+MLFR.LEV")).toBe(
+        "https://data.ecb.europa.eu/search-results?searchTerm=" +
+          "FM.D.U2.EUR.4F.KR.DFR.LEV%20" +
+          "FM.D.U2.EUR.4F.KR.MLFR.LEV%20" +
+          "FM.M.U2.EUR.4F.KR.DFR.LEV%20" +
+          "FM.M.U2.EUR.4F.KR.MLFR.LEV",
+      );
+    });
+
+    it("falls back to the dataset page for the gateway's default `all` key", () => {
+      expect(apiUrlToExplorerUrl(GATEWAY_URLS.ECB)).toBe(
+        "https://data.ecb.europa.eu/data/datasets/AME",
+      );
+    });
+
+    it("falls back to the dataset page for a wildcard position", () => {
+      expect(ecb("D..EUR...LEV")).toBe(
+        "https://data.ecb.europa.eu/data/datasets/FM",
+      );
+    });
+
+    it("falls back to the dataset page when the expansion exceeds the cap", () => {
+      // 3 x 7 = 21 series, one over the 20-series cap.
+      const key =
+        "D+M+A.U2.EUR.4F.KR." +
+        ["C1", "C2", "C3", "C4", "C5", "C6", "C7"].join("+") +
+        ".LEV";
+      expect(ecb(key)).toBe("https://data.ecb.europa.eu/data/datasets/FM");
+    });
+
+    it("keeps an expansion that sits exactly on the cap", () => {
+      // 2 x 10 = 20 series.
+      const codes = ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10"];
+      const url = ecb("D+M.U2.EUR.4F.KR." + codes.join("+") + ".LEV");
+      expect(url).toContain("/search-results?searchTerm=");
+      expect(url!.split("%20")).toHaveLength(20);
+    });
   });
 
   it("strips the map compound-data suffix before parsing", () => {
@@ -178,6 +245,7 @@ describe("extractDataSources", () => {
             { id: "statsnz", type: "line", data: GATEWAY_URLS.STATSNZ },
             { id: "estat", type: "line", data: GATEWAY_URLS.ESTAT },
             { id: "spc", type: "line", data: GATEWAY_URLS.SPC },
+            { id: "ecb", type: "line", data: GATEWAY_URLS.ECB },
           ],
         },
       ],
@@ -188,12 +256,11 @@ describe("extractDataSources", () => {
     }
   });
 
-  it("produces a null explorerUrl for endpoints without a DE builder (ECB/UNICEF/IMF)", () => {
+  it("produces a null explorerUrl for endpoints without a DE builder (UNICEF/IMF)", () => {
     const config = {
       rows: [
         {
           columns: [
-            { id: "ecb", type: "line", data: GATEWAY_URLS.ECB },
             { id: "unicef", type: "line", data: GATEWAY_URLS.UNICEF },
             { id: "imf", type: "line", data: GATEWAY_URLS.IMF },
           ],

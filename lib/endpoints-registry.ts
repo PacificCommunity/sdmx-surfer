@@ -95,6 +95,55 @@ const BIS_FLOW_TO_TOPIC: Record<string, string> = {
   WS_CPMI_PARTICIP: "CPMI_FMI",
 };
 
+const ECB_PORTAL = "https://data.ecb.europa.eu";
+
+// Above this many series the search page stops being a useful landing spot, so
+// the link falls back to the dataset page.
+const ECB_MAX_SERIES = 20;
+
+/**
+ * Build an ECB data portal URL. The portal is not a .Stat Data Explorer; it
+ * addresses data by series key, per the conversion rule the ECB gave us
+ * (2026-09-23):
+ *
+ *   one exact series  -> /data/datasets/{FLOW}/{FLOW}.{KEY}
+ *   several series    -> /search-results?searchTerm={FLOW}.{KEY1} {FLOW}.{KEY2}
+ *
+ * A key that names no specific series, meaning the gateway's default `all` or a
+ * wildcard position such as `D..EUR...LEV`, only resolves to the dataset
+ * landing page. A wrong series key 404s on the portal, so anything short of an
+ * enumerable key lands there instead.
+ */
+function buildEcbUrl(p: ParsedApiUrl): string {
+  const datasetPage = ECB_PORTAL + "/data/datasets/" + p.dataflowId;
+  const key = p.key.trim();
+  if (!key || key.toLowerCase() === "all") return datasetPage;
+
+  const positions = key.split(".");
+  if (positions.some((position) => position === "")) return datasetPage;
+
+  const alternatives = positions.map((position) => position.split("+"));
+  const seriesCount = alternatives.reduce(
+    (count, codes) => count * codes.length,
+    1,
+  );
+  if (seriesCount > ECB_MAX_SERIES) return datasetPage;
+
+  // Cartesian product across positions, first position varying slowest, so the
+  // expansion reads in the same order as the key.
+  let series: string[] = [""];
+  for (const codes of alternatives) {
+    series = series.flatMap((prefix) =>
+      codes.map((code) => (prefix === "" ? code : prefix + "." + code)),
+    );
+  }
+
+  if (series.length === 1) return datasetPage + "/" + p.dataflowId + "." + series[0];
+
+  const terms = series.map((s) => encodeURIComponent(p.dataflowId + "." + s));
+  return ECB_PORTAL + "/search-results?searchTerm=" + terms.join("%20");
+}
+
 export const ENDPOINTS: EndpointInfo[] = [
   {
     key: "SPC",
@@ -172,6 +221,7 @@ export const ENDPOINTS: EndpointInfo[] = [
     shortName: "ECB",
     apiHosts: ["data-api.ecb.europa.eu"],
     agency: "ECB",
+    buildExplorerUrl: buildEcbUrl,
   },
   {
     key: "ILO",

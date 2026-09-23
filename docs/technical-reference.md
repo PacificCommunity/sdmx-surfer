@@ -317,7 +317,7 @@ Admin-only (require `session.user.role === "admin"`) endpoints backing `/admin`:
 
 ### `lib/endpoints-registry.ts` — SDMx Endpoint Registry
 
-Single source of truth mapping each supported SDMx endpoint (SPC, OECD, UNICEF, IMF, ECB, ESTAT, ILO, ABS, BIS, FBOS, SBS) to a display name, API host(s), and an optional Data Explorer deep-link builder. Exports `detectEndpoint(apiUrl)` used by the data-source table and PDF export to resolve which endpoint served each component's data. Endpoints without a Data Explorer (UNICEF, IMF, ECB) are API-only.
+Single source of truth mapping each supported SDMx endpoint (SPC, OECD, UNICEF, IMF, ECB, ESTAT, ILO, ABS, BIS, FBOS, SBS) to a display name, API host(s), and an optional Data Explorer deep-link builder. Exports `detectEndpoint(apiUrl)` used by the data-source table and PDF export to resolve which endpoint served each component's data. Endpoints without a Data Explorer (UNICEF, IMF) are API-only. ECB has no .Stat Data Explorer, so `buildEcbUrl` targets the ECB data portal instead, following the conversion rule the ECB gave us (2026-09-23): an exact series key reaches `/data/datasets/{FLOW}/{FLOW}.{KEY}`, a key with `+` alternatives expands to a `/search-results` query over every series it names, and a key that enumerates nothing (the gateway's default `all`, a wildcard position, or an expansion above 20 series) falls back to the dataset landing page.
 
 ### `lib/data-explorer-url.ts` — Data Source Extraction
 
