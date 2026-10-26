@@ -15,6 +15,7 @@ const PRICING: Record<string, ModelPrice> = {
   // Standard rate; intro pricing ($2/$10 through 2026-08-31) bills lower via
   // the gateway — this table is only the fallback when gateway cost is null.
   "claude-sonnet-5": { input: 3.0, output: 15.0 },
+  "claude-sonnet-5-5": { input: 2.0, output: 10.0 },
   "claude-opus-4-6": { input: 5.0, output: 25.0 },
   "claude-opus-4-8": { input: 5.0, output: 25.0 },
   "claude-opus-5": { input: 5.0, output: 25.0 },
@@ -22,6 +23,7 @@ const PRICING: Record<string, ModelPrice> = {
   "gpt-4.1-nano": { input: 0.05, output: 0.20 },
   "gpt-4.1-mini": { input: 0.20, output: 0.80 },
   "gpt-5.4": { input: 2.50, output: 15.0 },
+  "gpt-6.1-terra": { input: 1.0, output: 5.0 },
   // Google
   "gemini-2.5-flash": { input: 0.30, output: 2.50 },
   "gemini-3-flash-preview": { input: 0.50, output: 3.0 },

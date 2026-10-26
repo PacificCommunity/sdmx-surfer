@@ -677,7 +677,7 @@ New users can only sign in if their email is in the `allowed_emails` table. Admi
 
 | Provider | Default model |
 |----------|--------------|
-| `anthropic` | `claude-sonnet-4-6` |
+| `anthropic` | `claude-sonnet-5-5` |
 | `openai` | `gpt-4.1-mini` |
 | `google` | `gemini-3-flash-preview` |
 

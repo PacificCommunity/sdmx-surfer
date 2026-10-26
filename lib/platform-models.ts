@@ -15,16 +15,22 @@ export interface PlatformModel {
 
 export const PLATFORM_MODELS: PlatformModel[] = [
   {
-    providerId: "anthropic",
-    modelId: "claude-opus-5",
-    label: "Claude Opus 5",
-    description: "Anthropic — most capable, complex agentic reasoning, 1M context (default)",
+    providerId: "openai",
+    modelId: "gpt-6.1-terra",
+    label: "GPT-6.1 Terra",
+    description: "OpenAI — mid tier, low cost, 1M context (default)",
   },
   {
     providerId: "anthropic",
-    modelId: "claude-sonnet-5",
-    label: "Claude Sonnet 5",
-    description: "Anthropic — faster and cheaper, best speed + intelligence balance, 1M context",
+    modelId: "claude-sonnet-5-5",
+    label: "Claude Sonnet 5.5",
+    description: "Anthropic — best speed + intelligence balance, 1M context",
+  },
+  {
+    providerId: "anthropic",
+    modelId: "claude-opus-5",
+    label: "Claude Opus 5",
+    description: "Anthropic — most capable, complex agentic reasoning, 1M context",
   },
   {
     providerId: "google",

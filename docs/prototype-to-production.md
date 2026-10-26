@@ -43,6 +43,7 @@ deploys.
 
 **Done since 2026-06-12:**
 
+- Default platform model moved to GPT-6.1 Terra (via the AI Gateway; Sonnet 5.5 when the gateway is off); Opus 5 and Sonnet 5.5 stay selectable. (2026-10-27)
 - OAuth sign-in built on `country-snapshots`, awaiting provider registrations (§4.3). (2026-08-07)
 - Institutional domain admission (`allowed_domains`), matched exactly, with an admin screen. (2026-08-06)
 - Daily dataflow-index refresh with incremental embeddings; fixed two silent SDMX-JSON 2.0 readers that had been dropping categories and truncating descriptions. (2026-08-05)

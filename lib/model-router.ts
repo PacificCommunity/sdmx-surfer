@@ -87,8 +87,8 @@ function platformAnthropic(modelId: string): ModelConfig {
 }
 
 const DEFAULT_MODELS: Record<string, string> = {
-  // Same standard price as Sonnet 4.6, newer generation — cost-neutral for BYOK.
-  anthropic: "claude-sonnet-5",
+  // Cheaper than Sonnet 4.6 ($2/$10 vs $3/$15) and a newer generation.
+  anthropic: "claude-sonnet-5-5",
   openai: "gpt-4.1-mini",
   google: "gemini-3-flash-preview",
   mistral: "mistral-large-latest",
@@ -193,8 +193,10 @@ export async function getModelForUser(
     }
   }
 
-  // No BYOK key found — use platform Anthropic path (Opus 5, the default)
-  return platformAnthropic("claude-opus-5");
+  // No BYOK key found — platform default. GPT-6.1 Terra is gateway-only;
+  // without the gateway, fall back to the direct Anthropic SDK path.
+  if (useGateway()) return platformViaGateway("openai", "gpt-6.1-terra");
+  return platformAnthropic("claude-sonnet-5-5");
 }
 
 /**

@@ -40,19 +40,31 @@ beforeEach(() => {
   vi.clearAllMocks();
   process.env.ANTHROPIC_API_KEY = "test-anthropic-key";
   process.env.ENCRYPTION_SECRET = "test-secret-at-least-16-chars-long";
+  delete process.env.USE_AI_GATEWAY;
+  delete process.env.AI_GATEWAY_API_KEY;
 });
 
 describe("model-router", () => {
   describe("fallback chain", () => {
-    it("returns Anthropic Opus 5 free tier when user has no BYOK keys", async () => {
+    it("returns direct Anthropic Sonnet 5.5 free tier when the gateway is off", async () => {
       const config = await getModelForUser("user-no-keys");
 
       expect(config.providerId).toBe("anthropic");
-      expect(config.modelId).toBe("claude-opus-5");
+      expect(config.modelId).toBe("claude-sonnet-5-5");
       // Anthropic carries no call-level providerOptions: cache control is a
       // message-level concern (set on the system message in the chat routes),
       // and a call-level cacheControl would be a silent no-op.
       expect(config.providerOptions).toBeUndefined();
+    });
+
+    it("returns GPT-6.1 Terra via the gateway when the gateway is on", async () => {
+      process.env.USE_AI_GATEWAY = "1";
+      process.env.AI_GATEWAY_API_KEY = "test-gateway-key";
+      const config = await getModelForUser("user-no-keys");
+
+      expect(config.providerId).toBe("openai");
+      expect(config.modelId).toBe("gpt-6.1-terra");
+      expect(config.keySource).toBe("platform-gateway");
     });
   });
 
@@ -108,7 +120,7 @@ describe("model-router", () => {
       const config = await getModelForUser("user-with-corrupt-key");
 
       expect(config.providerId).toBe("anthropic");
-      expect(config.modelId).toBe("claude-opus-5");
+      expect(config.modelId).toBe("claude-sonnet-5-5");
     });
 
     it("handles DB errors gracefully and falls back to platform Anthropic", async () => {
@@ -125,7 +137,7 @@ describe("model-router", () => {
       const config = await getModelForUser("user-db-error");
 
       expect(config.providerId).toBe("anthropic");
-      expect(config.modelId).toBe("claude-opus-5");
+      expect(config.modelId).toBe("claude-sonnet-5-5");
     });
   });
 

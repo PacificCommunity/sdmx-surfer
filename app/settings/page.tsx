@@ -319,7 +319,7 @@ export default function SettingsPage() {
               </div>
             </div>
             <p className="text-sm text-on-surface-variant">
-              <span className="font-semibold text-on-surface">Free tier uses Claude Sonnet 4.6.</span>
+              <span className="font-semibold text-on-surface">Free tier uses GPT-6.1 Terra.</span>
               {" "}Add your own API key for alternative models or higher rate limits.
             </p>
           </div>
