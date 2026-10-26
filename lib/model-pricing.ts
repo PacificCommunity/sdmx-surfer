@@ -19,6 +19,7 @@ const PRICING: Record<string, ModelPrice> = {
   "claude-opus-4-6": { input: 5.0, output: 25.0 },
   "claude-opus-4-8": { input: 5.0, output: 25.0 },
   "claude-opus-5": { input: 5.0, output: 25.0 },
+  "claude-opus-5-5": { input: 4.0, output: 20.0 },
   // OpenAI
   "gpt-4.1-nano": { input: 0.05, output: 0.20 },
   "gpt-4.1-mini": { input: 0.20, output: 0.80 },
@@ -28,6 +29,10 @@ const PRICING: Record<string, ModelPrice> = {
   "gemini-2.5-flash": { input: 0.30, output: 2.50 },
   "gemini-3-flash-preview": { input: 0.50, output: 3.0 },
   "gemini-3.1-pro-preview": { input: 2.0, output: 12.0 },
+  "gemini-3.8-flash": { input: 0.75, output: 3.75 },
+  "gemini-4-argon": { input: 2.0, output: 10.0 },
+  // Mistral
+  "mistral-large-4": { input: 1.36, output: 4.18 },
 };
 
 /**

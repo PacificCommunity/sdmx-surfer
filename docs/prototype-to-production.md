@@ -43,6 +43,7 @@ deploys.
 
 **Done since 2026-06-12:**
 
+- Platform model picker refreshed: Opus 5 → Opus 5.5, Gemini 3.1 Pro → Gemini 4 Argon plus Gemini 3.8 Flash, Mistral Large 3 → Mistral Large 4. BYOK lists unchanged. (2026-10-27)
 - Default platform model moved to GPT-6.1 Terra (via the AI Gateway; Sonnet 5.5 when the gateway is off); Opus 5 and Sonnet 5.5 stay selectable. (2026-10-27)
 - OAuth sign-in built on `country-snapshots`, awaiting provider registrations (§4.3). (2026-08-07)
 - Institutional domain admission (`allowed_domains`), matched exactly, with an admin screen. (2026-08-06)

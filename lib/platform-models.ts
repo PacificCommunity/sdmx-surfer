@@ -28,21 +28,27 @@ export const PLATFORM_MODELS: PlatformModel[] = [
   },
   {
     providerId: "anthropic",
-    modelId: "claude-opus-5",
-    label: "Claude Opus 5",
+    modelId: "claude-opus-5-5",
+    label: "Claude Opus 5.5",
     description: "Anthropic — most capable, complex agentic reasoning, 1M context",
   },
   {
     providerId: "google",
-    modelId: "gemini-3.1-pro-preview",
-    label: "Gemini 3.1 Pro",
-    description: "Google — reasoning + tool use, 1M context",
+    modelId: "gemini-4-argon",
+    label: "Gemini 4 Argon",
+    description: "Google — flagship reasoning + tool use, 1M context",
+  },
+  {
+    providerId: "google",
+    modelId: "gemini-3.8-flash",
+    label: "Gemini 3.8 Flash",
+    description: "Google — fast and low cost, 1M context",
   },
   {
     providerId: "mistral",
-    modelId: "mistral-large-3",
-    label: "Mistral Large 3",
-    description: "Mistral — EU-hosted, 256K context",
+    modelId: "mistral-large-4",
+    label: "Mistral Large 4",
+    description: "Mistral — EU-hosted, 512K context",
   },
 ];
 

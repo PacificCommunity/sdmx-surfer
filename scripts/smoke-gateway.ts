@@ -407,10 +407,10 @@ async function runMistralDiagnostics() {
     "Reply with only the final integer from the last tool result.";
 
   const candidates: Array<{ slug: string; label: string; forceSequential?: boolean }> = [
-    { slug: "mistral/mistral-large-3", label: "mistral-large-3 (default)" },
+    { slug: "mistral/mistral-large-4", label: "mistral-large-4 (default)" },
     {
-      slug: "mistral/mistral-large-3",
-      label: "mistral-large-3 (parallelToolCalls:false)",
+      slug: "mistral/mistral-large-4",
+      label: "mistral-large-4 (parallelToolCalls:false)",
       forceSequential: true,
     },
     { slug: "mistral/mistral-medium", label: "mistral-medium (default)" },
