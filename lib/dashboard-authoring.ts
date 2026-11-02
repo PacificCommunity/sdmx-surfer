@@ -85,12 +85,12 @@ const chartIntentSchema = commonVisualSchema.extend({
   labels: z.boolean().optional(),
   sortByValue: z.enum(["asc", "desc"]).optional(),
   colorScheme: z.string().optional(),
-  colorPalette: z
-    .record(
-      z.string(),
-      z.record(z.string(), z.union([z.string(), z.number()])),
-    )
-    .optional(),
+  colorPalette: z.record(z.string(), z.record(z.string(), z.string())).optional(),
+  // Value-axis title; the library puts it on the horizontal axis for `bar`.
+  axisTitle: authoringTextSchema.optional(),
+  categoryAxisTitle: authoringTextSchema.optional(),
+  // One stack per category, every series in it.
+  stacked: z.boolean().optional(),
   unit: z
     .object({
       text: z.string(),
@@ -264,23 +264,6 @@ function compileTable(intent: TableIntent): NativeVisualConfig {
   };
 }
 
-// Highcharts paints a treemap series in one colour, leaving tiles told apart
-// only by hairline borders, and its default slice-and-dice layout cuts long
-// slivers. Colour by tile and squarify instead; the intent's own options win.
-function withTreemapDefaults(
-  extraOptions: Record<string, unknown> | undefined,
-): Record<string, unknown> {
-  const plotOptions = (extraOptions?.plotOptions ?? {}) as Record<string, unknown>;
-  const treemap = (plotOptions.treemap ?? {}) as Record<string, unknown>;
-  return {
-    ...extraOptions,
-    plotOptions: {
-      ...plotOptions,
-      treemap: { colorByPoint: true, layoutAlgorithm: "squarified", ...treemap },
-    },
-  };
-}
-
 function compileChart(intent: ChartIntent): NativeVisualConfig {
   if (
     ["bar", "column", "lollipop", "treemap"].includes(intent.chartType) &&
@@ -294,6 +277,20 @@ function compileChart(intent: ChartIntent): NativeVisualConfig {
         " visuals.",
     );
   }
+
+  // The library merges an object `series` into every series.
+  const ownSeries = intent.extraOptions?.series;
+  const extraOptions = intent.stacked
+    ? {
+        ...intent.extraOptions,
+        series: {
+          ...(typeof ownSeries === "object" && ownSeries !== null && !Array.isArray(ownSeries)
+            ? ownSeries
+            : {}),
+          stack: "total",
+        },
+      }
+    : intent.extraOptions;
 
   const data = Array.isArray(intent.dataUrl)
     ? intent.dataUrl.map(ensureAllDimensions)
@@ -311,10 +308,9 @@ function compileChart(intent: ChartIntent): NativeVisualConfig {
     download: intent.download,
     dataLink: intent.dataLink,
     metadataLink: intent.metadataLink,
-    extraOptions:
-      intent.chartType === "treemap"
-        ? withTreemapDefaults(intent.extraOptions)
-        : intent.extraOptions,
+    extraOptions,
+    xAxisTitle: toTextConfig(intent.categoryAxisTitle),
+    yAxisTitle: toTextConfig(intent.axisTitle),
     xAxisConcept: intent.xAxis,
     yAxisConcept: intent.yAxis ?? DEFAULT_VALUE_CONCEPT,
     data,

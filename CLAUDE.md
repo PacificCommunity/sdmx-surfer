@@ -47,7 +47,7 @@ Documentation staleness has bitten this repo before, so the split is explicit.
 
 ## Stack and Commands
 
-Next.js 16 (App Router) with React 19 and TypeScript, Tailwind v4, AI SDK v6 for the agent loop, Auth.js v5 for sign-in, Drizzle over Postgres (Neon) for persistence, Highcharts through `sdmx-dashboard-components` for rendering.
+Next.js 16 (App Router) with React 19 and TypeScript, Tailwind v4, AI SDK v6 for the agent loop, Auth.js v5 for sign-in, Drizzle over Postgres (Neon) for persistence, ECharts through `sdmx-dashboard-components` for rendering.
 
 ```
 npm run dev          # Turbopack

@@ -1,5 +1,6 @@
 /**
- * TypeScript types matching sdmx-dashboard-components v0.4.6.
+ * TypeScript types matching sdmx-dashboard-components 1.0, at the surfer
+ * boundary (`extraOptions` stays an untyped record of ECharts options).
  * NOTE: The library's type definitions use "colums" but the runtime uses "columns".
  */
 
@@ -75,7 +76,10 @@ export interface SDMXVisualConfig {
     concept?: string;
     location?: "top" | "bottom" | "left" | "right" | "none";
   };
-  colorPalette?: Record<string, Record<string, string | number>>;
+  /** Dimension concept → code → hex colour. */
+  colorPalette?: Record<string, Record<string, string>>;
+  xAxisTitle?: SDMXTextConfig;
+  yAxisTitle?: SDMXTextConfig;
   colorScheme?: string;
   extraOptions?: Record<string, unknown>;
   drilldown?: {

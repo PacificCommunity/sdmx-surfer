@@ -1,7 +1,7 @@
 /**
  * Corrective hints for the rendering library's typed error contract.
  *
- * sdmx-dashboard-components (0.4.7+) reports per-visual failures as
+ * sdmx-dashboard-components (1.0, as 0.4.7+ did) reports per-visual failures as
  * SDMXRenderError with a stable `code`. The library's own message explains
  * WHAT went wrong; these hints tell the agent WHAT TO DO about it, in the
  * vocabulary of our authoring schema and MCP workflow.
@@ -45,15 +45,15 @@ const HINTS: Record<RenderErrorCode, string> = {
   ERR_ENGINE:
     "The charting engine rejected the data, usually because values are not plottable for this chart type. Try a different chartType, or check that the query returns numeric observations.",
   ERR_TREEMAP_STACKED:
-    'A treemap divides one whole into tiles, so it must be a single series. Pin the seriesBy dimension to a single value in the data URL (rebuild it with build_data_url) and keep the parts on xAxis. To compare composition across several countries, switch chartType to bar with xAxis = the geo dimension, seriesBy = the category dimension, and "extraOptions": { "plotOptions": { "series": { "stacking": "normal" } } }.',
+    'A treemap divides one whole into tiles, so it must be a single series. Pin the seriesBy dimension to a single value in the data URL (rebuild it with build_data_url) and keep the parts on xAxis. To compare composition across several countries, switch chartType to bar with xAxis = the geo dimension, seriesBy = the category dimension, and "stacked": true.',
 };
 
 /**
- * Treemaps that rendered as more than one series. The library draws one
- * treemap per legend value and every treemap series fills the whole panel, so
- * they land on top of each other: the panel shows one flat block, with labels
- * from the hidden layers showing through. The library reports this as a
- * successful render, so without this check the agent never hears about it.
+ * Treemaps that rendered as more than one series. The library puts every
+ * series into one treemap, so each part appears once per legend value as tiles
+ * with repeated names, and the panel no longer shows one whole divided into
+ * parts. The library reports this as a successful render, so without this
+ * check the agent never hears about it.
  */
 export function findStackedTreemaps(
   statuses: VisualRenderStatus[],
@@ -73,7 +73,7 @@ export function findStackedTreemaps(
       {
         visualId: s.visualId,
         code: "ERR_TREEMAP_STACKED" as const,
-        message: `the treemap was split by ${concept} into ${seriesCount} series, and each treemap series fills the whole panel, so ${seriesCount} treemaps were drawn on top of each other.`,
+        message: `the treemap was split by ${concept} into ${seriesCount} series, and every series went into the same treemap, so each part appears ${seriesCount} times as tiles with the same name instead of once.`,
       },
     ];
   });

@@ -39,7 +39,7 @@ Data Surfer is a web application that lets users create SDMx statistical dashboa
 The system connects three existing components:
 
 - **sdmx-mcp-gateway** — a Python MCP (Model Context Protocol) server providing 18+ tools for progressive SDMx data discovery on SPC's .Stat platform
-- **sdmx-dashboard-components** — an npm library (currently `^0.4.6` in this repo) that renders dashboards from JSON configs using Highcharts, OpenLayers, and React
+- **sdmx-dashboard-components** — an npm library (1.0 in this repo) that renders dashboards from JSON configs using ECharts, OpenLayers, and React
 - **AI SDK v6** — Vercel's TypeScript framework for building AI applications, providing the streaming chat interface and tool orchestration
 
 The **new piece** built in this repository is the agent loop + chat UI + live preview that connects these three, plus a full pilot deployment stack: authentication, database persistence, multi-model support, and an admin interface.
@@ -61,8 +61,8 @@ The AI agent produces **JSON configs, not code**. The preferred output is the si
 | LLM (default) | Gemini 3 Flash (free tier) | gemini-3-flash-preview |
 | LLM (BYOK) | Anthropic, OpenAI, Google | user-configurable |
 | MCP | HTTP transport to gateway | configurable via `MCP_GATEWAY_URL` |
-| Dashboard | sdmx-dashboard-components | ^0.4.6 |
-| Charts | Highcharts | 11.4.8 |
+| Dashboard | sdmx-dashboard-components | ^1.0.0 |
+| Charts | ECharts | ^6.1.0 |
 | Auth | NextAuth v4 with Resend magic links | 4.24.13 |
 | Database | Vercel Postgres (Neon) + Drizzle ORM | 0.10.0 / 0.45.1 |
 | Styling | Tailwind CSS v4 + custom CSS properties | 4.2.2 |
@@ -142,8 +142,8 @@ The largest client component (~800+ lines). Manages:
 - `highlightJson()` — tokenizer producing colored spans for keys, strings, numbers, booleans
 
 **Error handling:**
-- Highcharts `displayError` interceptor prevents error #14 (string data) from throwing
-- `unhandledrejection` listener catches async fetch failures from `sdmx-json-parser`
+- The library reports each visual's status (`onVisualRender`, `onRenderComplete`) with a typed `SDMXRenderError` code on failure; `lib/render-error-hints.ts` adds the repair hint
+- `unhandledrejection` listener remains as a safety net for async failures the library does not catch
 - Errors deduplicated and debounced (2s) before reporting to parent
 
 **Export dropdown:** PDF, HTML (static), HTML (live), JSON — each with descriptive label and icon.
@@ -180,12 +180,18 @@ The largest client component (~800+ lines). Manages:
 
 ### `lib/types.ts` — TypeScript Types
 
-Interfaces matching the `sdmx-dashboard-components` contract currently used by this app (`^0.4.6` dependency, with a local compatibility patch):
+Interfaces matching the `sdmx-dashboard-components` 1.0 contract at the app boundary:
 - `SDMXTextConfig` — text with optional styling
 - `SDMXDashboardConfig` — root config
 - `SDMXDashboardRow` — container for columns (note: uses `columns`, not `colums` from the library's buggy type defs)
-- `SDMXVisualConfig` — chart/map/value with all Highcharts options
+- `SDMXVisualConfig` — chart/map/value/table/note config, including `xAxisTitle`/`yAxisTitle`; `extraOptions` holds ECharts options merged last by the library
 - `SDMXComponentType` — union of 10 chart types
+
+### `lib/extra-options.ts` — Saved extraOptions Translation
+
+Dashboards saved under the 0.4.x library carry Highcharts-era `extraOptions`, which 1.0 (ECharts) ignores or, for arrays, appends as stray axes. `translateExtraOptions(extraOptions, type)` maps each key to its ECharts equivalent (axis keys move to the other axis for horizontal `bar`), keeps keys that are already ECharts, and drops and reports the rest; it never passes an array through except the colour list, and is idempotent. `translateDashboardExtraOptions(config)` applies it to every visual; `translateStoredSession(history, messages)` to every `config_history` entry and every `update_dashboard` tool output.
+
+It runs wherever a stored config enters the app: `rowToSessionData()` in `lib/session.ts` (builder and `/dashboard/[id]`), `GET /api/public/dashboards/[id]` (`/p/[id]` and forks), and the JSON editor's Apply. Dropped keys are logged with `console.warn`. `scripts/migrate-extra-options.mts` (`--inventory`, `--dry-run`, `--apply` with a backup table) rewrites the stored rows once.
 
 ### `lib/session.ts` — Session Client
 
@@ -271,8 +277,8 @@ All URLs include `dimensionAtObservation=AllDimensions`.
 ### `lib/export-dashboard.ts` — Export Functions
 
 Four export modes:
-- `exportToPdf()` — SVG→canvas conversion, html2canvas at 2x, jsPDF
-- `exportToHtml()` — captures live DOM innerHTML + inlined CSS from stylesheets
+- `exportToPdf()` — chart and map image swap, html2canvas at 2x, jsPDF
+- `exportToHtml()` — captures live DOM innerHTML (charts and maps swapped for images) + inlined CSS from stylesheets
 - `exportToHtmlLive()` — esm.sh import maps for interactive re-rendering
 - `exportToJson()` — raw config download
 
@@ -326,10 +332,6 @@ Walks a dashboard config and produces a flat `DataSource[]` list with per-compon
 ### `lib/dashboard-text.ts` — Dashboard Text Helpers
 
 Shared helpers that extract the current title and subtitle from either an authoring or native dashboard config, used by the private view, public view, and builder header to keep header text consistent across surfaces.
-
-### `lib/use-highcharts-viewport-reflow.ts` — Highcharts Reflow Hook
-
-Custom React hook that observes the layout-driving container via `ResizeObserver` (the parent scroll shell when present, otherwise the root itself), plus `window.resize` and `window.visualViewport.resize`, and calls `chart.reflow()` on every live Highcharts instance after a debounced measure change. Used by all three rendering surfaces (`/builder` preview, `/dashboard/[id]`, `/p/[id]`) so charts track window resize and browser zoom.
 
 ### `lib/brand-theme.ts` — Design Tokens
 
@@ -534,6 +536,8 @@ The authoring schema is a simplified, intent-based layer that the agent uses to 
 ```
 Supported `chartType` values: `line`, `bar`, `column`, `pie`, `lollipop`, `treemap`, `drilldown`. For `bar`, `column`, `lollipop`, and `treemap`, `seriesBy` is required.
 
+Chart options the compiler turns into native config: `axisTitle` (string or localised text) → `yAxisTitle`, the value axis (the library swaps it to the horizontal axis for `bar`); `categoryAxisTitle` → `xAxisTitle`; `stacked: true` → `extraOptions.series.stack = "total"`, merged with the intent's own `extraOptions`. `colorPalette` maps dimension codes to hex colours. `extraOptions` takes ECharts option names, objects only.
+
 **`map`** — choropleth map with Pacific EEZ preset:
 ```json
 {
@@ -557,7 +561,7 @@ Before emitting a dashboard, the agent calls `probe_data_url` on each data URL. 
 ### Compiler behavior
 
 - `ensureAllDimensions(url)` — appends `?dimensionAtObservation=AllDimensions` if not already present
-- `compileChart()` — validates `seriesBy` presence for bar-family charts; maps `xAxis`/`seriesBy` to `xAxisConcept`/`legend.concept`
+- `compileChart()` — validates `seriesBy` presence for bar-family charts; maps `xAxis`/`seriesBy` to `xAxisConcept`/`legend.concept`, `axisTitle`/`categoryAxisTitle` to `yAxisTitle`/`xAxisTitle`, and `stacked` to a shared series stack
 - `compileMap()` — defaults to Pacific EEZ GeoJSON and EPSG:3832 projection; constructs the library's map data string format
 - `isNativeDashboardConfig()` — detects whether the config uses native or authoring format (by checking for `type` fields in columns)
 
@@ -828,15 +832,13 @@ The `/admin` page aggregates usage data per user (request count, total tokens, s
 
 ### PDF Export
 
-1. Find all `<svg>` elements in the dashboard DOM (Highcharts charts)
-2. For each SVG: serialize via `XMLSerializer`, draw onto a 2x canvas via `Image.onload`
-3. Replace SVG elements with canvas elements in the DOM
-4. Run `html2canvas` on the container element
-5. Create `jsPDF` document sized to the canvas
-6. Restore original SVG elements
-7. If the config references SDMx data sources, append a **Data Sources page** rendered natively with jsPDF (not via html2canvas)
+1. Swap each chart for a static image of itself: for every element carrying ECharts' `_echarts_instance_` attribute, `getInstanceByDom(el).getDataURL({ pixelRatio: 2, backgroundColor: "#fff", excludeComponents: ["toolbox"] })`, inserted as an `<img>` of the container's size; maps likewise from the library's `toImage()`
+2. Run `html2canvas` on the container element
+3. Create `jsPDF` document sized to the canvas
+4. Restore the original chart and map elements
+5. If the config references SDMx data sources, append a **Data Sources page** rendered natively with jsPDF (not via html2canvas)
 
-The SVG-to-canvas step is necessary because `html2canvas` cannot rasterize SVG directly.
+The image swap keeps the save-as-image toolbox icon out of the capture and avoids tainted map canvases.
 
 #### Data Sources page
 
@@ -851,7 +853,7 @@ The endpoint registry that powers the Source column and Data Explorer link gener
 
 ### Static HTML Export
 
-1. Capture `element.innerHTML` (includes rendered Highcharts SVGs)
+1. Swap each chart and map for an image (as for PDF), then capture `element.innerHTML`; a bare `<canvas>` would be blank
 2. Walk all loaded `CSSStyleSheet`s, collecting rules that match elements in the dashboard
 3. Combine into a self-contained HTML document with inlined CSS
 4. Include Google Fonts links (online) with system font fallbacks
@@ -869,13 +871,13 @@ The endpoint registry that powers the Source column and Data Explorer link gener
 
 ## 15. Error Handling Strategy
 
-### Highcharts errors
+### Render errors
 
-Highcharts fires a `displayError` event before throwing. We install a global listener that calls `event.preventDefault()` to suppress the throw, converting errors into console warnings. This prevents error #14 (string data in numeric chart) and similar issues from crashing the app.
+sdmx-dashboard-components reports each visual's status through `onVisualRender` and `onRenderComplete`. Failures carry a typed `SDMXRenderError` code (`ERR_FETCH`, `ERR_PARSE`, `ERR_EMPTY`, `ERR_NO_SERIES_DIMENSION`, `ERR_AMBIGUOUS_SERIES`, `ERR_CONCEPT_NOT_FOUND`, `ERR_ENGINE`), which `lib/render-error-hints.ts` turns into a repair hint for the agent.
 
 ### SDMx fetch errors
 
-`sdmx-json-parser` throws "Series not found and observations empty" in a Promise chain that the dashboard component doesn't catch. We listen for `unhandledrejection` on the window, filter for SDMx/Highcharts-related error messages, call `event.preventDefault()` to suppress the dev overlay, and forward to the error reporter.
+The library catches its own fetch and parse failures and reports them per visual. A window `unhandledrejection` listener remains as a safety net: it filters for SDMx/ECharts-related error messages, calls `event.preventDefault()` to suppress the dev overlay, and forwards to the error reporter.
 
 ### Error feedback loop
 
@@ -955,11 +957,6 @@ Based on the **Oceanic Data-Scapes** spec (`stitch_assets/stitch/oceanic_logic/D
 **Patch file:** `patches/sdmx-dashboard-components+0.4.5.patch`
 **Issue:** Null dereference when `getActiveDimensions()` returns fewer dimensions than expected for bar/column/lollipop/treemap charts.
 **Fix:** Added null-guard before `Y.values.sort(...)` — skips series construction with a console warning instead of crashing.
-
-### Highcharts error interception
-
-**Issue:** Highcharts throws `Error("Highcharts error #14")` synchronously during render when data contains string values where numbers are expected.
-**Fix:** Global `displayError` event listener on the Highcharts object, installed during dynamic import. Calls `e.preventDefault()` to suppress the throw.
 
 ### `columns` vs `colums` type mismatch
 

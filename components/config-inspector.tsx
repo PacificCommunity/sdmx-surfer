@@ -49,6 +49,8 @@ const CONTENT_KEYS = new Set([
   "download",
   "frame",
   "adaptiveTextSize",
+  "xAxisTitle",
+  "yAxisTitle",
 ]);
 
 function getKeyTone(key: string): string {
@@ -268,6 +270,8 @@ function VisualCard({
     ["colSize", visual.colSize],
     ["xAxisConcept", visual.xAxisConcept],
     ["yAxisConcept", visual.yAxisConcept],
+    ["xAxisTitle", visual.xAxisTitle],
+    ["yAxisTitle", visual.yAxisTitle],
     ["legend", visual.legend],
     ["data", visual.data],
     ["sortByValue", visual.sortByValue],

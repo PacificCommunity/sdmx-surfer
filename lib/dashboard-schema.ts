@@ -67,12 +67,9 @@ export const visualConfigSchema = z
     dataLink: z.string().optional(),
     metadataLink: z.string().optional(),
     extraOptions: z.record(z.string(), z.unknown()).optional(),
-    colorPalette: z
-      .record(
-        z.string(),
-        z.record(z.string(), z.union([z.string(), z.number()])),
-      )
-      .optional(),
+    colorPalette: z.record(z.string(), z.record(z.string(), z.string())).optional(),
+    xAxisTitle: textConfigSchema.optional(),
+    yAxisTitle: textConfigSchema.optional(),
     drilldown: z
       .object({
         xAxisConcept: z.string(),

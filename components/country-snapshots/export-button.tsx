@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { swapCanvasesForImages } from "@/lib/export-dashboard";
 
 /**
  * Count visible loading skeletons inside the PDF capture target. All our
@@ -75,11 +76,19 @@ export function ExportButton({ filenameStem }: { filenameStem: string }) {
         })
         .filter((l) => l.w > 0 && l.h > 0 && l.url);
 
-      const canvas = await html2canvas(target, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-      });
+      // Swap ECharts charts (rendered without toolbox icons) and readable
+      // map canvases for images during the capture, like the dashboard PDF.
+      const restoreCanvases = await swapCanvasesForImages(target);
+      let canvas: HTMLCanvasElement;
+      try {
+        canvas = await html2canvas(target, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+        });
+      } finally {
+        restoreCanvases();
+      }
       const imgData = canvas.toDataURL("image/png");
 
       const pdf = new jsPDF({

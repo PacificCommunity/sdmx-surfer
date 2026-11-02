@@ -1,4 +1,5 @@
 import type { UIMessage } from "ai";
+import { translateStoredSession } from "./extra-options";
 import type { SDMXDashboardConfig } from "./types";
 
 export interface SessionData {
@@ -196,10 +197,21 @@ export async function unpublishSession(sessionId: string): Promise<boolean> {
 // ---------------------------------------------------------------------------
 
 function rowToSessionData(row: Record<string, unknown>): SessionData {
+  // Sessions saved before the move to ECharts carry Highcharts extraOptions.
+  const stored = translateStoredSession(
+    Array.isArray(row.config_history) ? row.config_history : [],
+    Array.isArray(row.messages) ? (row.messages as UIMessage[]) : [],
+  );
+  if (stored.dropped.length > 0) {
+    console.warn(
+      "[session] " + String(row.id) + ": dropped extraOptions keys with no ECharts equivalent:",
+      stored.dropped,
+    );
+  }
   return {
     sessionId: row.id as string,
-    messages: (row.messages as UIMessage[]) ?? [],
-    configHistory: (row.config_history as SDMXDashboardConfig[]) ?? [],
+    messages: stored.messages,
+    configHistory: stored.configHistory as SDMXDashboardConfig[],
     configPointer: typeof row.config_pointer === "number" ? row.config_pointer : -1,
     title: typeof row.title === "string" ? row.title : "Untitled",
     updatedAt:

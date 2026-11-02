@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { SurferLogo } from "@/components/surfer-logo";
 import { getDashboardSubtitle, getDashboardTitle } from "@/lib/dashboard-text";
-import { useHighchartsViewportReflow } from "@/lib/use-highcharts-viewport-reflow";
 import { SDMXDashboardDynamic } from "@/components/sdmx-dashboard-dynamic";
 import { DataSourcesPanel, DashboardSourceFooter } from "@/components/data-sources-panel";
 import { DashboardExportMenu } from "@/components/dashboard-export-menu";
@@ -67,8 +66,6 @@ export default function PublicDashboardPage() {
       }
     })();
   }, [id]);
-
-  useHighchartsViewportReflow(dashboardRef, Boolean(config));
 
   if (notFound) {
     return (

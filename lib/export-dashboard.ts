@@ -1,10 +1,17 @@
-// NOTE: PDF export uses allowTaint:false to avoid a SecurityError from
-// cross-origin images loaded by sdmx-dashboard-components (Highcharts map
-// tiles, flag sprites, etc.). This means those images are silently skipped
-// in the PDF. The proper fix is for the library to either serve assets
-// from the same origin or add crossorigin="anonymous" to <image> elements.
+// Charts render to ECharts canvases and maps to OpenLayers canvases. Canvas
+// pixels are not part of innerHTML, and html2canvas would also capture the
+// ECharts save-as-image toolbox, so both PDF and static HTML export first swap
+// every chart and map canvas for an <img> holding its pixels (see
+// swapCanvasesForImages) and restore the live DOM afterwards.
+//
+// NOTE: a map canvas is only readable when its tiles were loaded with CORS
+// (crossOrigin="anonymous"). A map whose tile server does not send CORS
+// headers taints its canvas; toDataURL() then throws, the map is skipped,
+// and PDF capture (allowTaint:false) leaves it blank. The library sets
+// crossOrigin on its tile sources; a custom basemap URL must allow CORS.
 // Track in: PacificCommunity/sdmx-dashboard-components
 
+import { getInstanceByDom } from "echarts/core";
 import type { SDMXDashboardConfig } from "./types";
 import {
   getDashboardSubtitle,
@@ -76,101 +83,157 @@ const EXPORT_LAYOUT_CSS = `
 `;
 
 /**
- * Convert an SVG element to a canvas element in-place.
- * Returns a restore function that puts the original SVG back.
+ * Swap each ECharts chart and each readable OpenLayers map canvas under
+ * `root` for an <img> with the same pixels, hiding the original. Returns a
+ * function that removes the images and shows the originals again.
+ *
+ * Charts are found by the `_echarts_instance_` attribute ECharts puts on its
+ * container; `getInstanceByDom` must come from the same `echarts` copy the
+ * library uses (single copy via the peer dependency). Map canvases that are
+ * tainted by cross-origin tiles cannot be read and stay as they are.
  */
-async function svgToCanvas(
-  svg: SVGSVGElement,
-): Promise<{ canvas: HTMLCanvasElement; restore: () => void }> {
-  const rect = svg.getBoundingClientRect();
-  const width = rect.width || svg.width.baseVal.value || 600;
-  const height = rect.height || svg.height.baseVal.value || 400;
+export async function swapCanvasesForImages(
+  root: HTMLElement,
+): Promise<() => void> {
+  const restoreFns: (() => void)[] = [];
+  const images: HTMLImageElement[] = [];
 
-  const canvas = document.createElement("canvas");
-  const scale = 2;
-  canvas.width = width * scale;
-  canvas.height = height * scale;
-  canvas.style.width = width + "px";
-  canvas.style.height = height + "px";
-
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return { canvas, restore: () => {} };
-
-  // Clone the SVG and inline computed styles for correct rendering
-  const clone = svg.cloneNode(true) as SVGSVGElement;
-  clone.setAttribute("width", String(width));
-  clone.setAttribute("height", String(height));
-  clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-
-  // Serialize to data URL
-  const serializer = new XMLSerializer();
-  const svgString = serializer.serializeToString(clone);
-  const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(svgBlob);
-
-  const img = new Image();
-  img.width = width;
-  img.height = height;
-
-  const parent = svg.parentNode;
-  const nextSibling = svg.nextSibling;
-
-  // Replace SVG with canvas in the DOM
-  if (parent) {
-    parent.replaceChild(canvas, svg);
-  }
-
-  const restore = () => {
-    if (parent) {
-      if (nextSibling) {
-        parent.insertBefore(svg, nextSibling);
-      } else {
-        parent.appendChild(svg);
-      }
-      canvas.remove();
-    }
-    URL.revokeObjectURL(url);
+  const swap = (target: HTMLElement, img: HTMLImageElement) => {
+    const previousDisplay = target.style.display;
+    target.parentNode?.insertBefore(img, target);
+    target.style.display = "none";
+    images.push(img);
+    restoreFns.push(() => {
+      img.remove();
+      target.style.display = previousDisplay;
+    });
   };
 
-  return new Promise<{ canvas: HTMLCanvasElement; restore: () => void }>((resolve) => {
-    img.onload = () => {
-      ctx.scale(scale, scale);
-      ctx.drawImage(img, 0, 0, width, height);
-      URL.revokeObjectURL(url);
-      resolve({ canvas, restore });
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      resolve({ canvas, restore });
-    };
-    img.src = url;
-  });
+  for (const el of Array.from(
+    root.querySelectorAll<HTMLElement>("[_echarts_instance_]"),
+  )) {
+    const chart = getInstanceByDom(el);
+    if (!chart) continue;
+    const width = el.offsetWidth;
+    const height = el.offsetHeight;
+    if (width === 0 || height === 0) continue;
+    const img = document.createElement("img");
+    img.src = chart.getDataURL({
+      type: "png",
+      pixelRatio: 2,
+      backgroundColor: "#fff",
+      excludeComponents: ["toolbox"],
+    });
+    img.alt = "";
+    img.width = width;
+    img.height = height;
+    img.style.cssText = "display:block;max-width:100%;height:auto;";
+    swap(el, img);
+  }
+
+  for (const canvas of Array.from(
+    root.querySelectorAll<HTMLCanvasElement>(".ol-viewport canvas"),
+  )) {
+    let dataUrl: string;
+    try {
+      dataUrl = canvas.toDataURL("image/png");
+    } catch {
+      continue; // tainted by cross-origin tiles
+    }
+    // OpenLayers draws at devicePixelRatio and scales the canvas back down
+    // with a CSS transform; size the image to the rendered box instead, so
+    // `max-width: 100%` from the page CSS cannot shrink it before the
+    // transform applies.
+    const rect = canvas.getBoundingClientRect();
+    const img = document.createElement("img");
+    img.src = dataUrl;
+    img.alt = "";
+    img.className = canvas.className;
+    img.style.cssText = canvas.style.cssText;
+    img.style.transform = "none";
+    img.style.maxWidth = "none";
+    img.style.width = rect.width + "px";
+    img.style.height = rect.height + "px";
+    swap(canvas, img);
+  }
+
+  // Images with data URLs decode asynchronously; wait so captures see pixels.
+  await Promise.all(images.map((img) => img.decode().catch(() => undefined)));
+
+  return () => {
+    for (let i = restoreFns.length - 1; i >= 0; i--) restoreFns[i]();
+  };
 }
 
 /**
- * Convert all SVGs inside an element to canvases, returning a function to restore them.
+ * html2canvas draws inline SVG poorly, so the remaining SVGs (icons such as
+ * react-bootstrap-icons; charts are canvases) are rasterised to canvases
+ * for the PDF. Returns a function that puts the SVGs back.
  */
-async function replaceAllSvgsWithCanvases(element: HTMLElement): Promise<() => void> {
-  const svgs = Array.from(element.querySelectorAll("svg"));
+async function replaceIconSvgsWithCanvases(
+  element: HTMLElement,
+): Promise<() => void> {
   const restoreFns: (() => void)[] = [];
 
-  for (const svg of svgs) {
-    const { restore } = await svgToCanvas(svg);
-    restoreFns.push(restore);
-  }
+  await Promise.all(
+    Array.from(element.querySelectorAll("svg")).map(async (svg) => {
+      const rect = svg.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+
+      const scale = 2;
+      const canvas = document.createElement("canvas");
+      canvas.width = rect.width * scale;
+      canvas.height = rect.height * scale;
+      canvas.style.width = rect.width + "px";
+      canvas.style.height = rect.height + "px";
+      canvas.style.verticalAlign = getComputedStyle(svg).verticalAlign;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      // Icons paint with currentColor, which a detached SVG image loses.
+      const clone = svg.cloneNode(true) as SVGSVGElement;
+      clone.setAttribute("width", String(rect.width));
+      clone.setAttribute("height", String(rect.height));
+      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      clone.style.color = getComputedStyle(svg).color;
+      const url = URL.createObjectURL(
+        new Blob([new XMLSerializer().serializeToString(clone)], {
+          type: "image/svg+xml;charset=utf-8",
+        }),
+      );
+
+      const img = new Image();
+      await new Promise<void>((resolve) => {
+        img.onload = () => {
+          ctx.scale(scale, scale);
+          ctx.drawImage(img, 0, 0, rect.width, rect.height);
+          resolve();
+        };
+        img.onerror = () => resolve();
+        img.src = url;
+      });
+      URL.revokeObjectURL(url);
+
+      const parent = svg.parentNode;
+      if (!parent) return;
+      const nextSibling = svg.nextSibling;
+      parent.replaceChild(canvas, svg);
+      restoreFns.push(() => {
+        parent.insertBefore(svg, nextSibling);
+        canvas.remove();
+      });
+    }),
+  );
 
   return () => {
-    // Restore in reverse order to maintain DOM positions
-    for (let i = restoreFns.length - 1; i >= 0; i--) {
-      restoreFns[i]();
-    }
+    for (let i = restoreFns.length - 1; i >= 0; i--) restoreFns[i]();
   };
 }
 
 /**
  * Capture the rendered dashboard DOM as a PDF.
- * Converts Highcharts SVGs to canvas first so html2canvas can capture them,
- * then places the result into a jsPDF document.
+ * Swaps chart and map canvases for images and icon SVGs for canvases so
+ * html2canvas captures them, then places the result into a jsPDF document.
  */
 export async function exportToPdf(
   element: HTMLElement,
@@ -198,10 +261,14 @@ export async function exportToPdf(
   const title = getDashboardTitle(config);
   const sources = extractDataSources(config);
 
-  console.log("[PDF] replacing SVGs with canvases…");
-  const restoreSvgs = await replaceAllSvgsWithCanvases(element);
+  let restoreCanvases: () => void = () => {};
+  let restoreSvgs: () => void = () => {};
 
   try {
+    console.log("[PDF] swapping charts and maps for images, icons for canvases…");
+    restoreCanvases = await swapCanvasesForImages(element);
+    restoreSvgs = await replaceIconSvgsWithCanvases(element);
+
     console.log("[PDF] calling html2canvas…");
     const canvas = await html2canvasFn(element, {
       scale: 2,
@@ -247,6 +314,7 @@ export async function exportToPdf(
     console.log("[PDF] download triggered");
   } finally {
     restoreSvgs();
+    restoreCanvases();
   }
 }
 
@@ -374,22 +442,29 @@ function renderDataSourcesPage(
 
 /**
  * Export the dashboard as a self-contained static HTML file.
- * Captures the live rendered DOM (including Highcharts SVGs) as a snapshot.
+ * Captures the live rendered DOM as a snapshot, with charts and maps swapped
+ * for images of their canvases.
  * Works offline, from file://, email attachments — no JS or network needed.
  */
-export function exportToHtml(
+export async function exportToHtml(
   element: HTMLElement,
   config: SDMXDashboardConfig,
 ) {
   const title = getDashboardTitle(config);
   const subtitle = getDashboardSubtitle(config);
 
-  // Grab the rendered dashboard HTML including inline SVGs
-  const dashboardHtml = element.innerHTML;
-
-  // Collect computed styles from stylesheets that affect the dashboard.
-  // We inline a minimal set of Bootstrap grid + component styles.
-  const collectedCss = collectStyles(element);
+  // Canvases serialise empty, so read innerHTML while charts and maps are
+  // swapped for images. Collect the stylesheet rules that affect the
+  // dashboard (Bootstrap grid + component styles) against the same DOM.
+  const restoreCanvases = await swapCanvasesForImages(element);
+  let dashboardHtml: string;
+  let collectedCss: string;
+  try {
+    dashboardHtml = element.innerHTML;
+    collectedCss = collectStyles(element);
+  } finally {
+    restoreCanvases();
+  }
 
   const configJson = JSON.stringify(config, null, 2);
 
@@ -465,10 +540,22 @@ export function exportToHtml(
 }
 
 /**
+ * Library release the live HTML export loads from esm.sh, with the ECharts
+ * major and parser release it is built against. These must be published on
+ * npm (esm.sh 404s otherwise): bump both to 1.0.0-rc.2 / 0.4.1 once those
+ * releases are on npm.
+ */
+const LIVE_EXPORT_DASHBOARD_VERSION = "1.0.0-rc.1";
+const LIVE_EXPORT_ECHARTS_VERSION = "6";
+const LIVE_EXPORT_PARSER_VERSION = "0.4.0";
+
+/**
  * Export the dashboard as a live interactive HTML file.
  * Loads sdmx-dashboard-components from esm.sh CDN and re-renders with live data.
  * Requires: HTTP server (not file://) + internet connection.
  * Charts are fully interactive (tooltips, hover, zoom).
+ * Uses the registry parser with no proxy, so providers that need the app's
+ * SDMX proxy (ECB, IMF, BIS, OECD, Eurostat, StatsNZ) do not load in it.
  */
 export function exportToHtmlLive(config: SDMXDashboardConfig) {
   const title = getDashboardTitle(config);
@@ -478,8 +565,39 @@ export function exportToHtmlLive(config: SDMXDashboardConfig) {
 
   const esmReact = "https://esm.sh/react@19";
   const esmReactDom = "https://esm.sh/react-dom@19";
+  const esmDashboardPackage = `https://esm.sh/sdmx-dashboard-components@${LIVE_EXPORT_DASHBOARD_VERSION}`;
   const esmDashboard =
-    "https://esm.sh/sdmx-dashboard-components@0.4.6?deps=react@19,react-dom@19";
+    `${esmDashboardPackage}?deps=react@19,react-dom@19,` +
+    `echarts@${LIVE_EXPORT_ECHARTS_VERSION},` +
+    `sdmx-json-parser@${LIVE_EXPORT_PARSER_VERSION}`;
+  // Two esm.sh module rewrites go through the import map:
+  // - The library does `import "ol/ol.css"`; esm.sh serves that as text/css,
+  //   which a browser refuses as a module, failing the whole dashboard
+  //   import. It maps to an empty module and the stylesheet is linked
+  //   instead. The range follows the library's `ol` dependency.
+  // - The parser ships a CommonJS bundle, so esm.sh exposes only a default
+  //   export while the library imports `{ SDMXParser }`. The parser module
+  //   maps to a shim that re-exports it by name; the shim loads the real file
+  //   under a query suffix so the map does not send it back to itself.
+  const esmOlCssModule = "https://esm.sh/ol@^8.2.0/ol.css?target=es2022";
+  const olCssHref = "https://esm.sh/ol@^8.2.0/ol.css";
+  const esmParserModule = `https://esm.sh/sdmx-json-parser@${LIVE_EXPORT_PARSER_VERSION}/es2022/sdmx-json-parser.mjs`;
+  const parserShim =
+    "data:text/javascript," +
+    encodeURIComponent(
+      `import p from "${esmParserModule}?raw-default"; ` +
+        "export const SDMXParser = p.SDMXParser; export default p;",
+    );
+  const importMap = JSON.stringify({
+    imports: {
+      react: esmReact,
+      "react/": `${esmReact}/`,
+      "react-dom": esmReactDom,
+      "react-dom/": `${esmReactDom}/`,
+      [esmOlCssModule]: "data:text/javascript,",
+      [esmParserModule]: parserShim,
+    },
+  });
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -488,7 +606,9 @@ export function exportToHtmlLive(config: SDMXDashboardConfig) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(title)} — Data Surfer</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap-grid.min.css">
-  <link rel="stylesheet" href="https://esm.sh/sdmx-dashboard-components@0.4.6/dist/index.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap-utilities.min.css">
+  <link rel="stylesheet" href="${esmDashboardPackage}/dist/style.css">
+  <link rel="stylesheet" href="${olCssHref}">
   <style>
     ${EXPORT_THEME_CSS}
     ${EXPORT_LAYOUT_CSS}
@@ -505,7 +625,7 @@ export function exportToHtmlLive(config: SDMXDashboardConfig) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="${BRAND_GOOGLE_FONTS_HREF}" rel="stylesheet">
   <script type="importmap">
-  { "imports": { "react": "${esmReact}", "react/": "${esmReact}/", "react-dom": "${esmReactDom}", "react-dom/": "${esmReactDom}/" } }
+  ${importMap}
   <\/script>
 </head>
 <body>
@@ -526,17 +646,19 @@ export function exportToHtmlLive(config: SDMXDashboardConfig) {
   <script type="module">
     import { createElement } from "${esmReact}";
     import { createRoot } from "${esmReactDom}/client";
-    import { SDMXDashboard } from "${esmDashboard}";
     const config = ${configJson};
     try {
+      // Dynamic import inside the try: a failed CDN load shows an error
+      // instead of leaving the loading dots up forever.
+      const { SDMXDashboard } = await import("${esmDashboard}");
       createRoot(document.getElementById('root'))
         .render(createElement(SDMXDashboard, { config, lang: 'en' }));
     } catch (err) {
       document.getElementById('root').innerHTML =
-        '<div class="error"><strong>Failed to render<\\/strong>' +
-        '<p>This file must be served over HTTP, not opened from file://.<\\/p>' +
+        '<div class="error"><strong>Failed to load or render the dashboard<\\/strong>' +
+        '<p>This file must be served over HTTP (not file://) with internet access.<\\/p>' +
         '<p>Try: <code>npx serve .<\\/code><\\/p>' +
-        '<code>' + (err.message || err) + '<\\/code><\\/div>';
+        '<code>' + String(err && err.message || err).replace(/</g, '&lt;') + '<\\/code><\\/div>';
     }
   <\/script>
   <noscript><div class="error"><strong>JavaScript required<\/strong><code>${escapeHtml(configJson)}</code></div></noscript>
@@ -548,7 +670,7 @@ export function exportToHtmlLive(config: SDMXDashboardConfig) {
 
 /**
  * Collect CSS rules that apply to elements inside the given root.
- * Inlines Bootstrap grid classes, Highcharts styles, and component styles
+ * Inlines Bootstrap grid classes and component styles
  * so the exported HTML renders correctly without external stylesheets.
  */
 function collectStyles(root: HTMLElement): string {
@@ -563,16 +685,12 @@ function collectStyles(root: HTMLElement): string {
       for (const rule of Array.from(cssRules)) {
         if (rule instanceof CSSStyleRule) {
           // Include rules that match elements in the dashboard,
-          // plus common Bootstrap grid and Highcharts patterns
+          // plus common Bootstrap grid patterns
           const sel = rule.selectorText;
           if (seen.has(sel)) continue;
 
           const isGridRule = /^\.(?:row|col|container|mb-|display-)/.test(sel);
-          const isHighcharts = sel.includes("highcharts");
-          const matchesContent =
-            isGridRule ||
-            isHighcharts ||
-            safeQuerySelector(root, sel);
+          const matchesContent = isGridRule || safeQuerySelector(root, sel);
 
           if (matchesContent) {
             seen.add(sel);
@@ -586,7 +704,6 @@ function collectStyles(root: HTMLElement): string {
               const sel = sub.selectorText;
               if (
                 /^\.(?:row|col|container)/.test(sel) ||
-                sel.includes("highcharts") ||
                 safeQuerySelector(root, sel)
               ) {
                 inner.push(sub.cssText);

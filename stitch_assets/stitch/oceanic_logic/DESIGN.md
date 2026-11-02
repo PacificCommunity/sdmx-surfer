@@ -63,7 +63,7 @@ In this system, elevation is an environmental property, not a drop-shadow effect
 ### Chat & Collaboration
 *   **Chat Bubbles:** User messages in `primary` (#004467) with `on_primary` text. System/Data responses in `secondary_container` (#8aeff9) to reflect the teal oceanic theme.
 
-### Highcharts-Compatible Palette
+### Chart Palette (ECharts)
 For data visualizations, use this sequence to ensure high contrast and brand alignment:
 1.  **Deep Sea:** `#004467` (Primary)
 2.  **Reef Teal:** `#006970` (Secondary)

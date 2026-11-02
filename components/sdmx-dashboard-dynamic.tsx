@@ -1,31 +1,26 @@
 "use client";
 
+import type { ComponentProps } from "react";
 import dynamic from "next/dynamic";
 
-declare module "highcharts" {
-  let __errorHandlerInstalled: boolean | undefined;
-}
-
+/**
+ * The library (ECharts, OpenLayers) is browser-only, so it loads client-side.
+ * Renders inside `.sdmx-scope` (display: contents), the scope of the
+ * Bootstrap utility shim in app/globals.css.
+ */
 export const SDMXDashboardDynamic = dynamic(
   () =>
-    Promise.all([
-      import("sdmx-dashboard-components"),
-      import("highcharts"),
-    ]).then(([mod, hcMod]) => {
-      const Highcharts = hcMod.default;
-      if (Highcharts.addEvent && !Highcharts.__errorHandlerInstalled) {
-        Highcharts.addEvent(Highcharts, "displayError", function (
-          e: { code: number; message: string; preventDefault: () => void },
-        ) {
-          console.warn(
-            "[Highcharts] error #" + String(e.code) + ":",
-            e.message,
-          );
-          e.preventDefault();
-        });
-        Highcharts.__errorHandlerInstalled = true;
-      }
-      return mod.SDMXDashboard;
+    import("sdmx-dashboard-components").then((mod) => {
+      const { SDMXDashboard } = mod;
+      return function ScopedSDMXDashboard(
+        props: ComponentProps<typeof SDMXDashboard>,
+      ) {
+        return (
+          <div className="sdmx-scope">
+            <SDMXDashboard {...props} />
+          </div>
+        );
+      };
     }),
   { ssr: false },
 );

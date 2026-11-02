@@ -12,7 +12,7 @@
 This document scopes and specifies the architecture for a web-based product that allows users to create, edit, and interact with live SDMX data dashboards through natural-language conversation with an AI agent. Critically, three of the four core ingredients already exist as working software:
 
 - **sdmx-mcp-gateway** (Baffelan/sdmx-mcp-gateway): a Python-based MCP server implementing progressive discovery of SDMX dataflows on SPC's .Stat platform, with tools for structure exploration, dimension browsing, data availability checking, and validated query construction.
-- **sdmx-dashboard-components** (PacificCommunity/sdmx-dashboard-components): a published npm library (v0.4.5) of React components (SDMXDashboard, SDMXChart, SDMXMap, SDMXValue) that render interactive dashboards from JSON configuration files, using Highcharts for visualisation.
+- **sdmx-dashboard-components** (PacificCommunity/sdmx-dashboard-components): a published npm library (v1.0) of React components (SDMXDashboard, SDMXChart, SDMXMap, SDMXValue) that render interactive dashboards from JSON configuration files, using ECharts for visualisation.
 - **sdmx-dashboard-demo** (PacificCommunity/sdmx-dashboard-demo): a Next.js application that loads JSON config files and renders dashboards using the component library. Already Dockerised and deployed on Vercel.
 
 The missing piece — and the scope of this project — is the **AI agent loop**: a server-side process that connects the chat interface to the MCP, produces valid dashboard JSON configs through conversation, and pushes them to the existing rendering components for live preview. The user arrives at a web interface, describes what they want to see, and watches a dashboard materialise in real time using the existing component library. They then continue the conversation to refine it. No SDMX knowledge is required.
@@ -48,8 +48,8 @@ The gateway also provides standard (non-progressive) tools (`discover_dataflows`
 
 **Repository:** github.com/PacificCommunity/sdmx-dashboard-components
 **Language:** TypeScript / React (Vite build)
-**Charting:** Highcharts (including styled mode support)
-**npm package:** sdmx-dashboard-components (v0.4.5)
+**Charting:** ECharts 6 (canvas)
+**npm package:** sdmx-dashboard-components (v1.0)
 
 This library provides four main components:
 
@@ -58,7 +58,7 @@ This library provides four main components:
 - **SDMXMap**: renders a choropleth map linking SDMX data to GeoJSON geometries.
 - **SDMXValue**: renders a single KPI value with optional unit and adaptive text sizing.
 
-The components handle SDMX-JSON fetching and parsing internally. They support multi-language configs, custom color palettes, Highcharts extraOptions pass-through, data expressions (arithmetic operators, `hist`, `count`), and `sortByValue`. The download button per-chart is supported via the `download` config flag.
+The components handle SDMX-JSON fetching and parsing internally. They support multi-language configs, custom color palettes, ECharts extraOptions pass-through, data expressions (arithmetic operators, `hist`, `count`), and `sortByValue`. The download button per-chart is supported via the `download` config flag.
 
 ### 2.3 sdmx-dashboard-demo
 
@@ -120,7 +120,7 @@ The sdmx-mcp-gateway currently uses stdio transport, designed for local CLI use 
 Browser
 ┌─────────────────┬────────────────────────────┐
 │   Chat UI        │   SDMXDashboard component   │
-│   (SSE client)   │   [EXISTING] Highcharts     │
+│   (SSE client)   │   [EXISTING] ECharts        │
 │                  │   + data export (CSV/XLSX)  │
 └───────┬─────────┴─────────┬──────────────────┘
         │  SSE stream       │  SDMX REST queries
@@ -173,14 +173,14 @@ The stack is largely determined by the existing codebase. New additions are mark
 | Layer | Technology | Status |
 |-------|-----------|--------|
 | MCP server | sdmx-mcp-gateway (Python, FastMCP) | Exists. Needs per-session state + SSE transport. |
-| Dashboard components | sdmx-dashboard-components (React, Highcharts, Vite) | Exists (npm v0.4.5). May need export enhancements. |
+| Dashboard components | sdmx-dashboard-components (React, ECharts, Vite) | Exists (npm v1.0). May need export enhancements. |
 | Dashboard app shell | sdmx-dashboard-demo (Next.js, Docker) | Exists. Will be extended with chat UI + agent route. |
 | Agent loop | Node.js / Bun + Anthropic SDK or Vercel AI SDK | **NEW.** Core deliverable. |
 | Chat UI | React + useChat (Vercel AI SDK) or custom SSE client | **NEW.** Integrates into the Next.js app. |
 | AI API | Anthropic Messages API (Claude Sonnet 4) | External service. Native MCP + streaming. |
 | MCP transport bridge | stdio subprocess or SSE bridge to Python gateway | **NEW.** Connects JS agent loop to Python MCP. |
 | Config patching | fast-json-patch (RFC 6902) | **NEW.** For incremental edits. |
-| Data export (CSV/XLSX) | SheetJS or Highcharts export module | Partial (download flag exists). May need enhancement. |
+| Data export (CSV/XLSX) | SheetJS or ECharts save-as-image toolbox | Partial (download flag exists). May need enhancement. |
 | PDF export | Puppeteer (server-side) or html2canvas + jsPDF | **NEW.** Publication-quality dashboard snapshots. |
 | Persistence | PostgreSQL + Drizzle ORM (or GitHub Gists) | Partially exists (Gist storage). Expand for sessions. |
 | Authentication | SPC SSO / OAuth 2.0 (Phase 3) | **NEW.** Required for production. |
@@ -196,7 +196,7 @@ The existing dashboard components and demo app are mature (130+ commits, 159+ co
 
 ### 7.2 The Agent Produces Configs, Not Code
 
-The agent's output is a JSON config conforming to the existing schema. It never writes React code, Highcharts options, or SDMX parsing logic. This means the agent's correctness can be validated mechanically (JSON schema validation) before the config reaches the renderer.
+The agent's output is a JSON config conforming to the existing schema. It never writes React code, ECharts options, or SDMX parsing logic. This means the agent's correctness can be validated mechanically (JSON schema validation) before the config reaches the renderer.
 
 ### 7.3 Progressive Discovery Is Already Solved
 
@@ -212,7 +212,7 @@ The agent communicates config changes via the `update_dashboard` synthetic tool 
 
 ### 7.6 Data Export Strategy
 
-The existing component library already supports a per-chart download flag (Highcharts' built-in export). For full dashboard data export (multi-sheet Excel) and PDF export, new functionality will need to be added — either as enhancements to sdmx-dashboard-components or as features in the host application. Highcharts' server-side export module or client-side html2canvas + jsPDF are the main options for PDF.
+The existing component library already supports a per-chart download flag (ECharts' save-as-image toolbox). For full dashboard data export (multi-sheet Excel) and PDF export, new functionality will need to be added — either as enhancements to sdmx-dashboard-components or as features in the host application. ECharts' `getDataURL()` per chart, combined with client-side html2canvas + jsPDF, is the main option for PDF.
 
 ---
 
@@ -257,7 +257,7 @@ The existing component library already supports a per-chart download flag (Highc
 - Input sanitisation: validate all agent-produced configs against JSON schema; prevent prompt injection from reaching SDMX queries.
 - SDMX query safety: whitelist allowed .Stat endpoints; reject excessively broad queries.
 - Dashboard sharing (read-only links).
-- SPC branding and theming (Highcharts styled mode).
+- SPC branding and theming (the library's `SDMXTheme`, registered as an ECharts theme).
 - Monitoring: agent loop telemetry, token usage, error rates, latency.
 
 **Estimated effort:** 6–10 weeks.
@@ -275,7 +275,6 @@ The existing component library already supports a per-chart download flag (Highc
 | Token cost per session | Medium — progressive discovery helps, but multi-turn editing still consumes tokens. | JSON patches reduce output; cache MCP responses within session; per-session token caps. |
 | LLM resource abuse | High in production. | Authentication required; rate limits; monitoring. Not needed for PoC. |
 | Config format evolution | Low–Medium — the existing format may gain new features. | Version the agent's system prompt alongside component library releases. |
-| Highcharts licensing | Medium — Highcharts is not free for commercial use. | Verify SPC's Highcharts license covers this deployment. |
 
 ---
 
@@ -295,7 +294,7 @@ The existing component library already supports a per-chart download flag (Highc
 
 ### 10.2 Out of Scope
 
-- Rewriting sdmx-dashboard-components or replacing Highcharts.
+- Rewriting sdmx-dashboard-components or replacing ECharts.
 - Rewriting sdmx-mcp-gateway or changing its Python implementation.
 - Direct manipulation of dashboards (drag-and-drop). Natural Phase 3+ feature.
 - Data ingestion or ETL. The product reads from .Stat; it does not write to it.

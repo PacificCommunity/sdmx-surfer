@@ -1,16 +1,27 @@
 "use client";
 
+import type { ComponentProps } from "react";
 import dynamic from "next/dynamic";
 
 /**
- * Dynamic wrappers for the library components so Highcharts (browser-only)
- * doesn't run during SSR. Mirrors the pattern used by
- * components/sdmx-dashboard-dynamic.tsx.
+ * Dynamic wrappers for the library components so ECharts and OpenLayers
+ * (browser-only) don't run during SSR. Mirrors the pattern used by
+ * components/sdmx-dashboard-dynamic.tsx, including the `.sdmx-scope` wrapper
+ * for the Bootstrap utility shim.
  */
 
 export const SnapshotValue = dynamic(
   () =>
-    import("sdmx-dashboard-components").then((mod) => mod.SDMXValue),
+    import("sdmx-dashboard-components").then((mod) => {
+      const { SDMXValue } = mod;
+      return function ScopedSDMXValue(props: ComponentProps<typeof SDMXValue>) {
+        return (
+          <div className="sdmx-scope">
+            <SDMXValue {...props} />
+          </div>
+        );
+      };
+    }),
   { ssr: false, loading: () => <ValueSkeleton /> },
 );
 
@@ -22,36 +33,15 @@ function ValueSkeleton() {
 
 export const SnapshotChart = dynamic(
   () =>
-    Promise.all([
-      import("sdmx-dashboard-components"),
-      import("highcharts"),
-    ]).then(([mod, hcMod]) => {
-      const Highcharts = hcMod.default as unknown as {
-        addEvent?: (
-          target: unknown,
-          event: string,
-          handler: (e: {
-            code: number;
-            message: string;
-            preventDefault: () => void;
-          }) => void,
-        ) => void;
-        __snapshotErrorHandlerInstalled?: boolean;
+    import("sdmx-dashboard-components").then((mod) => {
+      const { SDMXChart } = mod;
+      return function ScopedSDMXChart(props: ComponentProps<typeof SDMXChart>) {
+        return (
+          <div className="sdmx-scope">
+            <SDMXChart {...props} />
+          </div>
+        );
       };
-      if (
-        Highcharts.addEvent &&
-        !Highcharts.__snapshotErrorHandlerInstalled
-      ) {
-        Highcharts.addEvent(Highcharts, "displayError", function (e) {
-          console.warn(
-            "[snapshot Highcharts] error #" + String(e.code) + ":",
-            e.message,
-          );
-          e.preventDefault();
-        });
-        Highcharts.__snapshotErrorHandlerInstalled = true;
-      }
-      return mod.SDMXChart;
     }),
   { ssr: false, loading: () => <ChartSkeleton /> },
 );

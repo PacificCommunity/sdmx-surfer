@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { loadSession } from "@/lib/session";
 import { getDashboardSubtitle, getDashboardTitle } from "@/lib/dashboard-text";
-import { useHighchartsViewportReflow } from "@/lib/use-highcharts-viewport-reflow";
 import { SDMXDashboardDynamic } from "@/components/sdmx-dashboard-dynamic";
 import { DataSourcesPanel, DashboardSourceFooter } from "@/components/data-sources-panel";
 import { DashboardExportMenu } from "@/components/dashboard-export-menu";
@@ -42,8 +41,6 @@ export default function DashboardViewPage() {
       }
     })();
   }, [sessionId]);
-
-  useHighchartsViewportReflow(dashboardRef, Boolean(config));
 
   if (notFound) {
     return (

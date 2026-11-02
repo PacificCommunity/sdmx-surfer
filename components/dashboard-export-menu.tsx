@@ -48,8 +48,20 @@ export function useDashboardExport(
         key: "html-static",
         label: "HTML (static)",
         sub: "Works offline",
-        run: () => {
-          if (dashboardRef.current) exportToHtml(dashboardRef.current, config);
+        run: async () => {
+          if (!dashboardRef.current) return;
+          setExporting(true);
+          try {
+            await exportToHtml(dashboardRef.current, config);
+          } catch (err) {
+            console.error("HTML export failed:", err);
+            alert(
+              "HTML export failed: " +
+                (err instanceof Error ? err.message : String(err)),
+            );
+          } finally {
+            setExporting(false);
+          }
         },
       },
       {

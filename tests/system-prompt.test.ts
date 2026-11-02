@@ -14,6 +14,18 @@ describe("system prompt treemap rules", () => {
   });
 
   it("offers a stacked bar for comparing composition across countries", () => {
-    expect(prompt).toMatch(/"stacking": "normal"/);
+    expect(prompt).toMatch(/"stacked": true/);
+  });
+});
+
+describe("system prompt chart options", () => {
+  const prompt = getSystemPrompt();
+
+  it("labels the value axis with axisTitle", () => {
+    expect(prompt).toMatch(/"axisTitle":/);
+  });
+
+  it("leaves no Highcharts vocabulary", () => {
+    expect(prompt).not.toMatch(/highcharts|plotOptions|stacking|"title": \{ "text"/i);
   });
 });

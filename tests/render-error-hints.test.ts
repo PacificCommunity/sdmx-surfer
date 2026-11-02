@@ -84,7 +84,8 @@ describe("describeRenderError", () => {
 
     expect(text).toMatch(/FIX:/);
     expect(text).toMatch(/single value/);
-    expect(text).toMatch(/stacking/);
+    expect(text).toMatch(/"stacked": true/);
+    expect(text).not.toMatch(/stacking|plotOptions/);
   });
 
   it("no longer claims treemaps need a varying series dimension", () => {

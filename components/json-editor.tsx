@@ -7,6 +7,7 @@ import {
   dashboardConfigSchema,
   formatDashboardConfigError,
 } from "@/lib/dashboard-schema";
+import { translateDashboardExtraOptions } from "@/lib/extra-options";
 import { ConfigInspector } from "@/components/config-inspector";
 import type { SDMXDashboardConfig } from "@/lib/types";
 
@@ -56,11 +57,21 @@ export function JsonEditor({
         setParseError(formatDashboardConfigError(validation.error));
         return;
       }
+      // A pasted config may come from a dashboard saved under Highcharts.
+      const { config: applied, dropped } = translateDashboardExtraOptions(
+        validation.data as SDMXDashboardConfig,
+      );
+      if (dropped.length > 0) {
+        console.warn(
+          "[json-editor] dropped extraOptions keys with no ECharts equivalent:",
+          dropped,
+        );
+      }
       setParseError(null);
       setDirty(false);
       setEditing(false);
-      setText(JSON.stringify(validation.data, null, 2));
-      onApply(validation.data as SDMXDashboardConfig);
+      setText(JSON.stringify(applied, null, 2));
+      onApply(applied);
     } catch (e) {
       setParseError((e as Error).message);
     }

@@ -4,7 +4,7 @@ A web app where users describe dashboards in natural language and an AI agent pr
 
 Built on three existing components:
 - **sdmx-mcp-gateway** — Python MCP server for progressive SDMx data discovery
-- **sdmx-dashboard-components** — React library rendering dashboards from JSON configs via Highcharts
+- **sdmx-dashboard-components** — React library rendering dashboards from JSON configs via ECharts
 - **AI SDK v6** — connects a chat interface to the AI, which orchestrates discovery and produces dashboard configs
 
 Access is invite-only. Users sign in via email magic links. Sessions and usage are persisted in PostgreSQL.
@@ -328,8 +328,8 @@ flowchart TB
 | JSON Config | `.json` | Yes | N/A |
 
 ### Error feedback loop
-- Highcharts errors intercepted (no crashes)
-- Fetch failures caught via `unhandledrejection`
+- Per-panel render status and typed error codes from the library (no crashes)
+- Uncaught fetch failures still caught via `unhandledrejection` as a safety net
 - Errors debounced, deduplicated, and auto-sent to AI as system messages
 - AI attempts to fix the dashboard config and re-emit; max 2 auto-retries
 

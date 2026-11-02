@@ -18,7 +18,6 @@ import {
   getDashboardTitle,
   getTextConfigValue,
 } from "@/lib/dashboard-text";
-import { useHighchartsViewportReflow } from "@/lib/use-highcharts-viewport-reflow";
 import type { SDMXDashboardConfig } from "@/lib/types";
 import type { VisualRenderStatus } from "sdmx-dashboard-components";
 import {
@@ -47,7 +46,6 @@ interface DashboardPreviewProps {
 }
 
 const LOAD_COMPLETE_SELECTOR = [
-  ".highcharts-container",
   ".ol-viewport",
   "svg",
   "canvas",
@@ -131,7 +129,10 @@ export const DashboardPreview = memo(function DashboardPreview({
   const handleRenderComplete = useCallback(
     (statuses: VisualRenderStatus[]) => {
       for (const s of statuses) {
-        if (s.status === "error" && s.error) {
+        // Any status carrying an error is forwarded, including
+        // status "empty" (ERR_EMPTY: 200 without observations or a
+        // NoRecordsFound 404), so the agent can widen the query.
+        if ((s.status === "error" || s.status === "empty") && s.error) {
           // Carry the typed error code through, not just the message: the
           // code selects a specific corrective action for the agent.
           reportError(
@@ -159,7 +160,7 @@ export const DashboardPreview = memo(function DashboardPreview({
         event.reason?.message || String(event.reason) || "Unknown error";
       if (
         msg.includes("fetching data") ||
-        msg.includes("Highcharts") ||
+        msg.includes("ECharts") ||
         msg.includes("not found in dataflow") ||
         msg.includes("observations empty") ||
         msg.includes("dimension") ||
@@ -204,11 +205,6 @@ export const DashboardPreview = memo(function DashboardPreview({
   const needsGraphicSignal = config
     ? dashboardNeedsGraphicSignal(config)
     : false;
-
-  useHighchartsViewportReflow(
-    dashboardRootRef,
-    Boolean(config && tab === "preview" && hasValidRows),
-  );
 
   useEffect(() => {
     if (!config || tab !== "preview" || !hasValidRows) {

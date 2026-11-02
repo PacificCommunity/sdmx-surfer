@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "bootstrap/dist/css/bootstrap-grid.min.css";
-import "sdmx-dashboard-components/dist/sdmx-dashboard-components.css";
+import "sdmx-dashboard-components/dist/style.css";
 import "./globals.css";
 import { BRAND_GOOGLE_FONTS_HREF } from "@/lib/brand-theme";
 import { SdmxProxyBoot } from "./sdmx-proxy-boot";

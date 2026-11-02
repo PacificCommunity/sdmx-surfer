@@ -1,5 +1,7 @@
 # sdmx-dashboard-components: proposed library improvements
 
+> **Note (2 Nov 2026):** this document describes the Highcharts-based 0.4.x library and the fork built on it, and is kept as a record. The move to the ECharts-based 1.0, including which of these items 1.0 already covers and how the rest are ported, is planned in [sdmx-dashboard-components-1.0-integration.md](sdmx-dashboard-components-1.0-integration.md).
+
 Giulio Valentino Dalla Riva · SDD - SPC · 12 June 2026
 
 **Audience:** the sdmx-dashboard-components maintainers, and anyone preparing PRs against `PacificCommunity/sdmx-dashboard-components` or `PacificCommunity/sdmx-json-parser`.

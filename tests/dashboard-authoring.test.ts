@@ -168,7 +168,7 @@ describe("dashboard authoring compiler", () => {
     );
   });
 
-  function compileTreemap(extraOptions?: Record<string, unknown>) {
+  function compileChart(chart: Record<string, unknown>) {
     const parsed = dashboardToolConfigSchema.parse({
       id: "composition",
       rows: [
@@ -177,12 +177,12 @@ describe("dashboard authoring compiler", () => {
             {
               kind: "chart",
               id: "mix",
-              chartType: "treemap",
+              chartType: "bar",
               title: "Revenue mix",
-              dataUrl: "https://example.com/rest/data/DF_X/A.MH.X.1000+2000",
-              xAxis: "TRANSACTION",
-              seriesBy: "GEO_PICT",
-              ...(extraOptions ? { extraOptions } : {}),
+              dataUrl: "https://example.com/rest/data/DF_X/A..X.1000+2000",
+              xAxis: "GEO_PICT",
+              seriesBy: "TRANSACTION",
+              ...chart,
             },
           ],
         },
@@ -191,25 +191,51 @@ describe("dashboard authoring compiler", () => {
     return compileDashboardToolConfig(parsed).rows[0].columns[0];
   }
 
-  it("colours treemap tiles by point and squarifies them by default", () => {
-    expect(compileTreemap().extraOptions).toEqual({
-      plotOptions: {
-        treemap: { colorByPoint: true, layoutAlgorithm: "squarified" },
-      },
+  it("adds no chart options of its own to a treemap", () => {
+    expect(compileChart({ chartType: "treemap" }).extraOptions).toBeUndefined();
+  });
+
+  it("compiles axisTitle and categoryAxisTitle to the native axis titles", () => {
+    const compiled = compileChart({
+      axisTitle: { en: "USD millions", fr: "Millions USD" },
+      categoryAxisTitle: "Country",
+    });
+
+    expect(compiled.yAxisTitle).toEqual({
+      text: { en: "USD millions", fr: "Millions USD" },
+    });
+    expect(compiled.xAxisTitle).toEqual({ text: "Country" });
+    expect(compiled.extraOptions).toBeUndefined();
+  });
+
+  it("leaves the axis titles unset when the intent has none", () => {
+    const compiled = compileChart({});
+
+    expect(compiled.xAxisTitle).toBeUndefined();
+    expect(compiled.yAxisTitle).toBeUndefined();
+  });
+
+  it("compiles stacked to one stack shared by every series", () => {
+    expect(compileChart({ stacked: true }).extraOptions).toEqual({
+      series: { stack: "total" },
     });
   });
 
-  it("lets a treemap's own options override the defaults", () => {
-    const compiled = compileTreemap({
-      tooltip: { valueDecimals: 1 },
-      plotOptions: { treemap: { layoutAlgorithm: "sliceAndDice" } },
+  it("merges stacked with the intent's own extraOptions", () => {
+    const compiled = compileChart({
+      stacked: true,
+      extraOptions: { grid: { left: 80 }, series: { barMaxWidth: 40 } },
     });
 
     expect(compiled.extraOptions).toEqual({
-      tooltip: { valueDecimals: 1 },
-      plotOptions: {
-        treemap: { colorByPoint: true, layoutAlgorithm: "sliceAndDice" },
-      },
+      grid: { left: 80 },
+      series: { barMaxWidth: 40, stack: "total" },
     });
+  });
+
+  it("rejects a numeric colorPalette value", () => {
+    expect(() =>
+      compileChart({ colorPalette: { TRANSACTION: { "1000": 3 } } }),
+    ).toThrow();
   });
 });

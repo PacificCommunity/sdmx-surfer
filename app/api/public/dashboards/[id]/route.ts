@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import { db, dashboardSessions } from "@/lib/db";
+import { translateDashboardExtraOptions } from "@/lib/extra-options";
+import type { SDMXDashboardConfig } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -59,7 +61,17 @@ export async function GET(
       );
     }
 
-    const config = history[Math.min(pointer, history.length - 1)];
+    // Dashboards published before the move to ECharts carry Highcharts
+    // extraOptions.
+    const { config, dropped } = translateDashboardExtraOptions(
+      history[Math.min(pointer, history.length - 1)] as SDMXDashboardConfig,
+    );
+    if (dropped.length > 0) {
+      console.warn(
+        "[public-dashboard] " + row.id + ": dropped extraOptions keys with no ECharts equivalent:",
+        dropped,
+      );
+    }
 
     return NextResponse.json(
       {
