@@ -388,3 +388,13 @@ Steps 1–10 of the integration order are done, step 6 on the forks only (no ups
 - Open the upstream PRs from `surfer-parity` and `dialects-0.4`, and get rc.2 and 0.4.1 published.
 - Library suite: a few transport, `stableConfig` and theme tests timed out once under full-suite load and passed on re-run.
 - The release assets were replaced once under the same versions (after the acceptance fixes). Next's build cache then served the old library code until `.next` was deleted. Bump the version for every future re-release instead of replacing an asset.
+
+**Future: single-series bar, column and lollipop charts** (not scheduled)
+
+Today a bar, column or lollipop chart whose query varies only along the x axis fails with `ERR_NO_SERIES_DIMENSION` (7 panels on published dashboards, e.g. `fuel_pct_imports_bar` on `bf2de76e88832347`: 12 countries, all 2019). The check exists because Highcharts drew a blank panel; ECharts can draw these charts. Removing the check alone gives a poor chart: one series named after the fixed period ("2019") or, without `legend.concept`, after `FREQ` ("Annual"). The intended design, to live in the library because only it knows which dimensions vary once the data arrives:
+
+- Drop `ERR_NO_SERIES_DIMENSION` for this case only; keep `ERR_AMBIGUOUS_SERIES`.
+- No legend and no series name; the tooltip reads "Vanuatu · 2019 · 24 %".
+- Title the category axis with the varying dimension ("Country") unless `categoryAxisTitle` is set. Open point: SDMX structures name dimensions verbosely (SPC's `GEO_PICT` is "Pacific Island Countries and territories"), so either use that label as is, or map common dimensions to short names (`GEO_PICT`/`REF_AREA` → Country, `SEX` → Sex) and fall back to the structure's label.
+- Append the fixed time period to the subtitle ("… · 2019"). When the latest value per category comes from different periods, say "latest available, 2015–2019" and give each bar's period in its tooltip.
+- Show no other fixed dimension (`FREQ`, `UNIT_MULT`, `SEX=_T`, …).
