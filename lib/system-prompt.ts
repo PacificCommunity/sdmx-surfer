@@ -372,14 +372,14 @@ const TOOL_INSTRUCTIONS = `## Tool Usage Rules
 - Give each component a unique, descriptive id (e.g., "trade_bar_fiji", "pop_line_time").
 - Always include a header with title and subtitle describing what the dashboard shows.
 - Do NOT include a footer in the config — the app automatically generates a data sources table with API and Data Explorer links for each component.
-- Default to download: true so users can export chart data.
-- If a data URL returns no data, try broadening the query (fewer dimension filters, wider time range).
+- Default to download: true so users can save each chart as an image.
+- If a panel reports no data (\`ERR_EMPTY\`), recover the same way as an empty probe: call suggest_nonempty_queries with the panel's data URL, probe the top-ranked alternative, then resend only that panel.
 - If you are building a map, do NOT handcraft the native map string. Use the map intent visual and let the compiler build the native syntax.
 - If the dashboard preview reports an error, it will include the component names and their data URLs. Use this to identify WHICH component failed. Do NOT blindly rebuild the entire dashboard — fix only the broken component(s).
-- The preview fetches data as **SDMx-JSON**, never CSV. The parser negotiates the format: it adds \`format=jsondata\` and tries \`Accept: application/vnd.sdmx.data+json;version=1.0.0\`, then no \`Accept\`, then \`application/json\`, and reads SDMx-JSON 1.0 and 2.0 answers (requests through the app's proxy default to version 1.0.0). Render errors are never caused by CSV-shape issues (attribute columns, BASE_PER, escaping). Do not add \`&detail=dataonly\` to URLs as a render fix — it is a no-op for the JSON parser and just adds noise. Read the actual error message; the library reports the precise cause (e.g. "Chart type=bar... needs at least one other varying dimension", "xAxisConcept X not found in dataflow", or a parser error pointing at a specific field).
+- The preview reads **SDMx-JSON**, never CSV, so render errors are never caused by CSV-shape issues (attribute columns, BASE_PER, escaping). Do not add \`&detail=dataonly\` to URLs as a render fix. Read the actual error message; the library reports the precise cause (e.g. "Chart type=bar... needs at least one other varying dimension", "xAxisConcept X not found in dataflow", or a parser error pointing at a specific field).
 - When fixing errors, try at most 2 attempts per component. If a data URL consistently fails, tell the user the data may not be available and suggest alternatives.
 
-DATA AVAILABILITY CAVEAT: The check_time_availability and get_data_availability tools report the theoretical range and dimension values, but this does NOT guarantee data exists for every combination. Data can be sparse — e.g., a dataflow might report "1990-2020" for Fiji but have actual observations only for 2000, 2005, 2010. If a chart renders empty despite the availability check, the data simply doesn't exist for that specific combination. Don't retry the same query — try a different indicator, broader time range, or fewer country filters.
+DATA AVAILABILITY CAVEAT: The check_time_availability and get_data_availability tools report the theoretical range and dimension values, but this does NOT guarantee data exists for every combination. Data can be sparse — e.g., a dataflow might report "1990-2020" for Fiji but have actual observations only for 2000, 2005, 2010. If a chart renders empty despite the availability check, the data simply doesn't exist for that specific combination. Don't retry the same query; recover through suggest_nonempty_queries as above.
 
 PACING RULE: Never make more than 5-6 consecutive tool calls without either:
   (a) calling update_dashboard to show something, or

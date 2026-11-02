@@ -35,7 +35,7 @@ const HINTS: Record<RenderErrorCode, string> = {
   ERR_PARSE:
     "The endpoint returned something the parser could not read. Rebuild the URL with build_data_url and probe it; if the probe also fails, pick a different dataflow.",
   ERR_EMPTY:
-    "The query returned no observations. Widen it: drop lastNObservations, broaden the time range, or remove a dimension filter. Use suggest_nonempty_queries to find a filter combination that has data, then probe before resending.",
+    "The query returned no observations. Do not relax it by hand: call suggest_nonempty_queries with this panel's data URL, probe the top-ranked alternative, then resend only this panel. If nothing usable comes back, tell the user and pick a different dataflow.",
   ERR_NO_SERIES_DIMENSION:
     "A bar/column/lollipop chart needs a series dimension that actually varies. Either set seriesBy to a dimension with more than one value in this query, or switch chartType to line or pie. For cross-country comparisons use xAxis=TIME_PERIOD with seriesBy=<geo dimension>; never put the geo dimension on the x-axis.",
   ERR_AMBIGUOUS_SERIES:
