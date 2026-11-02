@@ -388,6 +388,7 @@ Steps 1–10 of the integration order are done, step 6 on the forks only (no ups
 - Open the upstream PRs from `surfer-parity` and `dialects-0.4`, and get rc.2 and 0.4.1 published.
 - Library suite: a few transport, `stableConfig` and theme tests timed out once under full-suite load and passed on re-run.
 - The release assets were replaced once under the same versions (after the acceptance fixes). Next's build cache then served the old library code until `.next` was deleted. Bump the version for every future re-release instead of replacing an asset.
+- Where the implementation differs from the plan above: the `SDMXTheme` is merged under the built option, not registered with `echarts.registerTheme` (L9); `ERR_ENGINE` comes from guards around ECharts calls, since ECharts 6 has no `error` event (L1); the parser has ten provider fixtures, not eleven (StatsNZ has none). Upstream PR descriptions are drafted in `docs/upstream-prs/`.
 
 **Future: single-series bar, column and lollipop charts** (not scheduled)
 
