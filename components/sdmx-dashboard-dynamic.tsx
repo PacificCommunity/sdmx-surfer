@@ -2,11 +2,13 @@
 
 import type { ComponentProps } from "react";
 import dynamic from "next/dynamic";
+import { BRAND_CHART_THEME } from "@/lib/brand-theme";
 
 /**
  * The library (ECharts, OpenLayers) is browser-only, so it loads client-side.
  * Renders inside `.sdmx-scope` (display: contents), the scope of the
- * Bootstrap utility shim in app/globals.css.
+ * Bootstrap utility shim in app/globals.css. Charts default to the brand
+ * palette; a `theme` prop overrides it.
  */
 export const SDMXDashboardDynamic = dynamic(
   () =>
@@ -17,7 +19,7 @@ export const SDMXDashboardDynamic = dynamic(
       ) {
         return (
           <div className="sdmx-scope">
-            <SDMXDashboard {...props} />
+            <SDMXDashboard theme={BRAND_CHART_THEME} {...props} />
           </div>
         );
       };

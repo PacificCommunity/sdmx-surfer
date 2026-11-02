@@ -185,7 +185,12 @@ async function migrate(apply: boolean): Promise<void> {
   const skipped: string[] = [];
   const allDropped = new Map<string, number>();
 
-  if (apply) {
+  // Back up lazily, right before the first write, so a re-run with nothing
+  // left to translate leaves no extra backup table behind.
+  let backupMade = false;
+  async function ensureBackup(): Promise<void> {
+    if (backupMade) return;
+    backupMade = true;
     const stamp = new Date().toISOString().replace(/\D/g, "").slice(0, 14);
     const backup = "dashboard_sessions_backup_extra_options_" + stamp;
     await db.execute(
@@ -229,6 +234,7 @@ async function migrate(apply: boolean): Promise<void> {
       );
 
       if (!apply) continue;
+      await ensureBackup();
       // Optimistic check: skip a row someone saved since it was read.
       const updated = await db
         .update(dashboardSessions)

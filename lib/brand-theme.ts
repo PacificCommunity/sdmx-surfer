@@ -1,3 +1,5 @@
+import type { SDMXTheme } from "sdmx-dashboard-components";
+
 /**
  * Mirror of the CSS tokens in globals.css, for contexts that cannot read them:
  * the dashboard component theme and PDF/image export. Keep the two in step.
@@ -28,6 +30,25 @@ export const BRAND_THEME = {
     textMuted: "#6f6f6f",
   },
 } as const;
+
+/** Mirror of the `--color-chart-*` tokens in globals.css, in order. */
+export const BRAND_CHART_PALETTE = [
+  "#031f79",
+  "#11a2dc",
+  "#e37019",
+  "#52c9d6",
+  "#ffc72e",
+  "#03689a",
+  "#668aad",
+] as const;
+
+/**
+ * Default theme for every library chart. A visual's own `colorPalette` still
+ * wins over the palette.
+ */
+export const BRAND_CHART_THEME: SDMXTheme = {
+  palette: [...BRAND_CHART_PALETTE],
+};
 
 export const BRAND_GOOGLE_FONTS_HREF =
   "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap";

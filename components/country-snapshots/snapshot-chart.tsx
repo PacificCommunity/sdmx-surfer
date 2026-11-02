@@ -2,12 +2,13 @@
 
 import type { ComponentProps } from "react";
 import dynamic from "next/dynamic";
+import { BRAND_CHART_THEME } from "@/lib/brand-theme";
 
 /**
  * Dynamic wrappers for the library components so ECharts and OpenLayers
  * (browser-only) don't run during SSR. Mirrors the pattern used by
  * components/sdmx-dashboard-dynamic.tsx, including the `.sdmx-scope` wrapper
- * for the Bootstrap utility shim.
+ * for the Bootstrap utility shim and the brand chart palette.
  */
 
 export const SnapshotValue = dynamic(
@@ -38,7 +39,7 @@ export const SnapshotChart = dynamic(
       return function ScopedSDMXChart(props: ComponentProps<typeof SDMXChart>) {
         return (
           <div className="sdmx-scope">
-            <SDMXChart {...props} />
+            <SDMXChart theme={BRAND_CHART_THEME} {...props} />
           </div>
         );
       };

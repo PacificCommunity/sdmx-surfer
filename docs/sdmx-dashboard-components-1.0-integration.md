@@ -356,7 +356,7 @@ Other branches of this repository: `origin/country-snapshots` shows 11 commits a
 
 ## Status (2 Nov 2026)
 
-Steps 1–7, 9 and 10 of the integration order are done; step 6 is done on the fork only, and step 8 is done except `--apply`.
+Steps 1–10 of the integration order are done, step 6 on the forks only (no upstream PRs yet). `--apply` ran on 2 Nov against the database in `.env.local` and rewrote 19 sessions; the original data is in `dashboard_sessions_backup_extra_options_20261102024218`. `…_20261102024236` is a redundant copy of the already-migrated table, made by a second run before the script learned to back up only when it writes; it can be dropped. Charts default to the brand palette (`BRAND_CHART_THEME` in `lib/brand-theme.ts`, mirroring `--color-chart-*`).
 
 | Piece | Where |
 | --- | --- |
@@ -386,7 +386,5 @@ Steps 1–7, 9 and 10 of the integration order are done; step 6 is done on the f
 **Still to do**
 
 - Open the upstream PRs from `surfer-parity` and `dialects-0.4`, and get rc.2 and 0.4.1 published.
-- Run `scripts/migrate-extra-options.mts --apply` against production (it writes a backup table first).
-- Decide brand palette versus ECharts default; the surfer passes no `theme` yet.
 - Library suite: a few transport, `stableConfig` and theme tests timed out once under full-suite load and passed on re-run.
 - The release assets were replaced once under the same versions (after the acceptance fixes). Next's build cache then served the old library code until `.next` was deleted. Bump the version for every future re-release instead of replacing an asset.
