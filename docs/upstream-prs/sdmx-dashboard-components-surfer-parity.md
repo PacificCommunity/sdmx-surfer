@@ -1,6 +1,6 @@
 # Error contract, render lifecycle, transport, theming and fixes on top of 1.0.0-rc.1
 
-Branch `gvdr/sdmx-dashboard-components:surfer-parity` (88d1d25), based on `v1.0.0-rc.1` (239c6b6), 20 commits, 67 files, +5512/−494.
+Branch `gvdr/sdmx-dashboard-components:surfer-parity` (37f543f), based on `v1.0.0-rc.1` (239c6b6), 21 commits, 67 files, +5742/−498.
 
 ## Summary
 
@@ -35,14 +35,16 @@ All new props and config fields are optional. Without them a visual renders as i
 | 17 | 2fe8993 | Show a failed chart in a compact panel | error presentation | 2 | 2 |
 | 18 | 147b2d5 | Hide overlapping time axis labels | date axes | 3 | 2 |
 | 19 | 88d1d25 | Default the series dimension of a treemap without legend.concept | treemap | 3 | 2 |
+| 20 | 74998d9 | Keep the transport when an inline fetcher changes identity | transport | 5 | 4 |
+| 21 | 37f543f | Report a dashboard config that fails to load | error contract | 3 | 5 |
 
-The L-numbers refer to the work items in the downstream integration plan. Commits 15–19 are fixes found during downstream acceptance testing on rc.2.
+The L-numbers refer to the work items in the downstream integration plan. Commits 15–19 are fixes found during downstream acceptance testing on rc.2; commits 20–21 fix weaknesses found while preparing this PR.
 
 **Suggested review order**
 
 1. 2635b43 (lint config). It is mechanical, and every later commit was linted with it.
-2. a92bcaa, 8e2f19b, b912b68, dbcb593: request headers and the error contract. `lib/errors.ts` and `lib/utils/validateChartData.ts` define the public messages.
-3. 6e47d0c, 0b39e55: transport and refetch keys. This is the most delicate logic (`lib/utils/transport.ts`, effects keyed on config content).
+2. a92bcaa, 8e2f19b, b912b68, dbcb593, 37f543f: request headers and the error contract. `lib/errors.ts` and `lib/utils/validateChartData.ts` define the public messages.
+3. 6e47d0c, 0b39e55, 74998d9: transport and refetch keys. This is the most delicate logic (`lib/utils/transport.ts`, effects keyed on config content, the fetcher read through a ref).
 4. 5cfb710, 2fe8993: slots and the compact error panel.
 5. The remaining commits are largely independent features: d904419, 62c19b0, 17e1bc0, 1e6bf32, 04c44b5 + 147b2d5, ff27052 + 22d70c2, 88d1d25.
 6. 2071394: version bump plus 82 README lines.
@@ -54,7 +56,8 @@ The L-numbers refer to the work items in the downstream integration plan. Commit
 | Lint config | 2635b43 | nothing |
 | Accept header | a92bcaa | nothing (uses the parser's negotiation when the parser is 0.4.1) |
 | Error contract + lifecycle + validation | 8e2f19b, b912b68, dbcb593, 2fe8993, 88d1d25 | a92bcaa (touches the same request helper) |
-| Transport | 6e47d0c, 0b39e55 | error contract |
+| Transport | 6e47d0c, 0b39e55, 74998d9 | error contract |
+| Config URL errors | 37f543f | error contract, 5cfb710 (`renderError`), 74998d9 (same effect) |
 | Slots, interaction | 5cfb710, d904419 | error contract (`SDMXVisualProps`) |
 | Axis titles / download / rows | 62c19b0 | none in principle; 22d70c2 later changes the layout of the axis names it adds |
 | Theme + hidden table | 17e1bc0 | `SDMXVisualProps` |
@@ -190,15 +193,14 @@ Each entry was checked against `git diff v1.0.0-rc.1..surfer-parity`.
 | **Map join** | ISO3 → ISO2 lookup on the GeoJSON id | By code, then ISO alpha-3 key as alpha-2, then by label. The tooltip keeps its observation after the first draw | Features with label-only matches stayed empty |
 | **Map tiles** | XYZ source without `crossOrigin` | `crossOrigin: "anonymous"`, and `basemap` chooses the source | A tainted canvas could not be exported |
 | **Value refetch** (0b39e55) | `SDMXValue` fetched on mount and on language change only | Refetches when the load key (data expression, language, `xAxisConcept`) changes. Title/unit/decimals edits re-render from the transport cache | An edited KPI kept the old number until remounted |
-| **Config change → new transport → refetch** (6e47d0c) | Effects keyed on object identity, so an inline `config={{…}}` re-fetched on every parent render | Effects keyed on `JSON.stringify(config)`. The dashboard creates one transport per (config, language, `fetcher`), so a content change invalidates the cache and refetches | Prevents fetch loops when a callback updates parent state |
+| **Config change → new transport → refetch** (6e47d0c, 74998d9) | Effects keyed on object identity, so an inline `config={{…}}` re-fetched on every parent render | Effects keyed on `JSON.stringify(config)`. The dashboard creates one transport per (config, language), so a content change invalidates the cache and refetches. The fetcher is read through a ref, so an inline `fetcher` neither refetches nor clears the cache, and a replaced one serves the next request | Prevents fetch loops when a callback updates parent state |
 | **Shared requests** (6e47d0c) | Each visual fetched separately, and one 5xx failed the visual | Identical in-flight requests (URL + Accept + Accept-Language) are shared, 2xx responses are cached for the transport's lifetime, and network errors/5xx are retried once after 300 ms | Fewer requests, tolerance of transient errors |
 | **`download`** (62c19b0) | Ignored; the toolbox was always shown | `false` hides it | Config field was documented but not honoured |
 | **Hidden data table** (17e1bc0) | None | Every chart renders a visually hidden `<table>` (rc.1's table pivot) captioned with the chart title | Screen-reader access |
-| **Dashboard config URL** (6e47d0c) | Global `fetch` | `fetcher` if given, else `fetch` | Auth/proxy for the config too |
+| **Dashboard config URL** (6e47d0c, 37f543f) | Global `fetch`. A failed load was logged with `console.log` and "Loading..." stayed | `fetcher` if given, else `fetch`. A non-2xx response or network failure gives `ERR_FETCH`, a non-JSON body `ERR_PARSE` (no `visualId`, `detail: { url, status? }`), shown in place of the dashboard through `renderError` or the default alert panel and logged with `console.error` | Auth/proxy for the config too; a wrong URL was indistinguishable from a slow one |
 
-Two side effects follow from the code [INFERENCE]:
+One side effect follows from the code [INFERENCE]:
 
-- The dashboard's transport `useMemo` lists `fetcher` in its dependencies, and the config-URL effect does too. An inline `fetcher={(u, i) => …}` creates a new transport on every dashboard render, which clears the cache and refetches. Consumers should memoise the fetcher. The README does not say this.
 - `SDMXChart`'s `theme` merges an `SDMXTheme` under the built option. The theme is not registered with `echarts.registerTheme`.
 
 ## Dependencies and tooling
@@ -220,7 +222,7 @@ Measured on 2026-11-02, with rc.1 in a temporary worktree sharing the branch's `
 | | Test files | Tests | Lint | Build |
 |---|---|---|---|---|
 | `v1.0.0-rc.1` (239c6b6) | 2 | 8 passed | fails (no ESLint config) per 2635b43 | — |
-| `surfer-parity` (88d1d25) | 25 | 203 passed | `npm run lint` passes (`--max-warnings 0`) | `npm run build` completes |
+| `surfer-parity` (37f543f) | 25 | 212 passed | `npm run lint` passes (`--max-warnings 0`) | `npm run build` completes |
 
 Under full-suite load, a few tests in `transport`, `stableConfig` and `theme` timed out once during downstream work and passed on re-run. They passed in the run above.
 
@@ -242,7 +244,6 @@ Under full-suite load, a few tests in `transport`, `stableConfig` and `theme` ti
 - **Interactions** are emitted by charts only. Table, value and map accept `onUserInteraction` but never call it.
 - **Map GeoJSON / vector tiles** are loaded by OpenLayers and do not go through `fetcher` (the README says so).
 - **`ERR_ENGINE`** relies on try/catch guards around ECharts calls, because ECharts 6 has no `error` event. A throw inside an ECharts callback outside those calls is not caught.
-- **Dashboard config URL** load errors are only logged with `console.log`. They produce no typed error or status.
 - **Error classification** of non-library errors depends on message text, because parser 0.4.0 re-wraps errors with `new Error(err)` and loses the type. Parser 0.4.1 keeps `code: "NO_RECORDS"`.
 - **Future design (not in this PR): single-series bar/column/lollipop.** ECharts can draw a grouping chart where only the x axis varies; the check exists because Highcharts drew a blank panel. The proposed design:
   - drop `ERR_NO_SERIES_DIMENSION` for that case only;
@@ -269,7 +270,7 @@ Fork: <https://github.com/gvdr/sdmx-dashboard-components>. Branches: [`pr1-obser
 | d904419 | b0bfe2d onUserInteraction | pr2 |
 | 62c19b0 | 5f6cec8 semantic axis titles; b203443 `columns` alias | pr3 |
 | 17e1bc0 | 08812e3 theme prop; 5a3f439 hidden data table | pr3 |
-| 1e6bf32, ff27052, dbcb593, 22d70c2, 2fe8993, 147b2d5, 88d1d25 | new (no fork counterpart) | — |
+| 1e6bf32, ff27052, dbcb593, 22d70c2, 2fe8993, 147b2d5, 88d1d25, 74998d9, 37f543f | new (no fork counterpart) | — |
 | 2635b43, 2071394 | tooling / release | — |
 
 ## How to try it
@@ -296,7 +297,7 @@ export function Demo({ config }) {
     <SDMXDashboard
       config={config}
       lang="en"
-      fetcher={fetcher}                       // module-level or memoised: a new identity re-creates the transport
+      fetcher={fetcher}
       theme={{ palette: ["#0b6e99", "#e07a5f", "#3d405b"], numberFormat: { locale: "en-NZ" } }}
       onRenderComplete={onDone}
       onDataFetch={(t) => console.debug(t.host, t.status, t.durationMs, t.fromCache)}
