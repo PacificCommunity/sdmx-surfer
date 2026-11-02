@@ -1,0 +1,17 @@
+[
+  { "branch": "pr/test-setup", "title": "test: jsdom setup for component tests", "body": "pr-test-setup.md", "depends_on": [] },
+  { "branch": "pr/eslint-config", "title": "lint: add an ESLint config so npm run lint runs", "body": "pr-eslint-config.md", "depends_on": [] },
+  { "branch": "pr/no-accept-header", "title": "data: stop sending the SDMX-JSON 2.0 Accept header", "body": "pr-no-accept-header.md", "depends_on": [] },
+  { "branch": "pr/treemap-default-series", "title": "treemap: default the series dimension without legend.concept", "body": "pr-treemap-default-series.md", "depends_on": [] },
+  { "branch": "pr/date-axes", "title": "chart: dates on business-day and weekly time axes", "body": "pr-date-axes.md", "depends_on": ["pr/test-setup"] },
+  { "branch": "pr/chart-layout", "title": "chart: top legend below the title, drop grid.containLabel", "body": "pr-chart-layout.md", "depends_on": ["pr/test-setup"] },
+  { "branch": "pr/axis-titles", "title": "chart: axis titles, download flag, typed dashboard rows", "body": "pr-axis-titles.md", "depends_on": ["pr/chart-layout"] },
+  { "branch": "pr/error-contract", "title": "errors: typed render errors and render status callbacks", "body": "pr-error-contract.md", "depends_on": ["pr/test-setup"] },
+  { "branch": "pr/series-validation", "title": "chart: descriptive errors for ambiguous series structure", "body": "pr-series-validation.md", "depends_on": ["pr/error-contract"] },
+  { "branch": "pr/transport", "title": "data: injectable fetcher with dedup, cache, retry and telemetry", "body": "pr-transport.md", "depends_on": ["pr/error-contract", "pr/no-accept-header"] },
+  { "branch": "pr/slots", "title": "ui: renderLoading, renderEmpty and renderError slots", "body": "pr-slots.md", "depends_on": ["pr/error-contract"] },
+  { "branch": "pr/config-url-errors", "title": "dashboard: report a config URL that fails to load", "body": "pr-config-url-errors.md", "depends_on": ["pr/transport", "pr/slots"] },
+  { "branch": "pr/interaction", "title": "chart: onUserInteraction callback", "body": "pr-interaction.md", "depends_on": ["pr/error-contract"] },
+  { "branch": "pr/theme-a11y", "title": "theme: SDMXTheme and a hidden data table under each chart", "body": "pr-theme-a11y.md", "depends_on": ["pr/error-contract"] },
+  { "branch": "pr/map-fixes", "title": "map: colour scale, zero values, join, basemap and export", "body": "pr-map-fixes.md", "depends_on": ["pr/error-contract"] }
+]
