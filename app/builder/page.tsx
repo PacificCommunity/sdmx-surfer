@@ -23,37 +23,7 @@ import {
   type SessionSummary,
 } from "@/lib/session";
 import { getDashboardTitle } from "@/lib/dashboard-text";
-
-function extractDashboardConfig(
-  messages: { parts: Array<Record<string, unknown>> }[],
-): SDMXDashboardConfig | null {
-  for (let i = messages.length - 1; i >= 0; i--) {
-    const msg = messages[i];
-    for (let j = msg.parts.length - 1; j >= 0; j--) {
-      const part = msg.parts[j] as Record<string, unknown>;
-      const isUpdateDashboard =
-        part.type === "tool-update_dashboard" ||
-        (part.type === "dynamic-tool" &&
-          (part as { toolName?: string }).toolName === "update_dashboard");
-
-      if (!isUpdateDashboard) continue;
-
-      const state = (part as { state?: string }).state;
-      if (state !== "output-available") continue;
-
-      const output = (part as { output?: Record<string, unknown> }).output;
-      if (!output) continue;
-
-      if (output.dashboard) {
-        return output.dashboard as SDMXDashboardConfig;
-      }
-      if (output.rows) {
-        return output as unknown as SDMXDashboardConfig;
-      }
-    }
-  }
-  return null;
-}
+import { extractDashboardConfig } from "@/lib/dashboard-messages";
 
 function syncDashboardConfigIntoMessages(
   messages: UIMessage[],
@@ -176,6 +146,10 @@ export default function BuilderPage() {
         const ctx = dataflowContextRef.current;
         if (ctx) dataflowContextRef.current = null;
 
+        // snapshot() reads the hook's refs, so this first-render closure
+        // still sees the config the preview shows now.
+        const { history, pointer } = configHistory.snapshot();
+
         return {
           body: {
             ...(body ?? {}),
@@ -185,6 +159,7 @@ export default function BuilderPage() {
             messageId,
             previewError: outgoingPreviewErrorRef.current ?? undefined,
             dataflowContext: ctx ?? undefined,
+            currentConfig: history[pointer] ?? undefined,
             modelOverride: {
               provider: selectedModelRef.current.provider,
               model: selectedModelRef.current.model,

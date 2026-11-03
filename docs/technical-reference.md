@@ -121,7 +121,8 @@ Client component managing the entire builder UI.
 
 **Key patterns:**
 - **Stable transport:** `DefaultChatTransport` created once in a `useRef`, with `prepareSendMessagesRequest` reading session ID from a ref (avoids recreating transport on session change).
-- **Config extraction:** `extractDashboardConfig()` walks messages in reverse, finding the latest `update_dashboard` tool output with `state === "output-available"`.
+- **Config extraction:** `extractDashboardConfig()` (`lib/dashboard-messages.ts`) walks messages in reverse, finding the latest `update_dashboard` tool output with `state === "output-available"`.
+- **Preview config to the model:** every request carries `currentConfig`, the config at the undo pointer. `app/api/chat/route.ts` passes it to `currentDashboardContext()`, which adds a "Current Dashboard" block (config JSON quarantined) to the volatile system message unless the conversation already ends on that exact config. Without it, a forked dashboard or a reopened session whose config never came from an `update_dashboard` call is invisible to the agent. Configs over 100K characters are described, not included.
 - **Message sync:** `syncDashboardConfigIntoMessages()` patches the latest `update_dashboard` tool output when the user edits config manually via the JSON tab or undo/redo.
 - **Stable callbacks:** All callbacks passed to child components use refs internally to avoid breaking `React.memo` on `DashboardPreview`.
 - **Session persistence:** `useEffect` debounces saves to the DB via `/api/sessions` (1.5s) on every messages/config change.

@@ -1,4 +1,4 @@
-import { streamText, tool, convertToModelMessages, stepCountIs } from "ai";
+import { streamText, tool, convertToModelMessages, stepCountIs, type UIMessage } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
 import { mcpTransportConfig } from "@/lib/mcp-client";
 import { getModelForUser } from "@/lib/model-router";
@@ -22,6 +22,7 @@ import { createRequestLogger } from "@/lib/logger";
 import { resolveDataflowNamesFromConfig } from "@/lib/dataflow-names";
 import { sanitizeToolInputs } from "@/lib/sanitize-messages";
 import { filterMcpTools } from "@/lib/mcp-tool-policy";
+import { currentDashboardContext } from "@/lib/dashboard-messages";
 
 // Upper bounds on user-controlled strings before they touch the model.
 // The chat turn cap is generous — well above typical long sessions — while
@@ -41,13 +42,18 @@ const chatRequestSchema = z.object({
     model: z.string(),
   }).optional(),
   dataflowContext: z.string().max(MAX_DATAFLOW_CONTEXT_CHARS).optional(),
+  // The config in the live preview. The model only sees configs it emitted
+  // itself; a forked, reopened or hand-edited dashboard reaches it only here.
+  currentConfig: z
+    .looseObject({ id: z.string(), rows: z.array(z.unknown()) })
+    .optional(),
 });
 
 // Wrap attacker-influenced text in a delimited, labelled block so the model
-// treats it as data, not instructions. The two user-controlled entry points
-// are previewError (from the client's preview-render error handler) and
+// treats it as data, not instructions. The user-controlled entry points are
+// previewError (from the client's preview-render error handler),
 // dataflowContext (composed from published-dashboard metadata — some fields
-// are user-editable).
+// are user-editable) and currentConfig (editable in the JSON tab).
 function quarantine(content: string, source: string): string {
   return (
     '<untrusted-user-data source="' +
@@ -108,7 +114,8 @@ export async function POST(req: Request) {
   let mcpClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
 
   try {
-    const { messages, previewError, modelOverride, dataflowContext } = chatRequestSchema.parse(await req.json());
+    const { messages, previewError, modelOverride, dataflowContext, currentConfig } =
+      chatRequestSchema.parse(await req.json());
 
     // Extract last user message for logging
     const uiMessages = messages as Array<{ role?: string; parts?: Array<{ type?: string; text?: string }> }>;
@@ -150,7 +157,16 @@ export async function POST(req: Request) {
     const quarantinedDataflowContext = dataflowContext
       ? quarantine(dataflowContext, "dataflow-context")
       : "";
-
+    // Same trust boundary as messages, which convertToModelMessages consumes.
+    const uiMessageList = messages as UIMessage[];
+    const dashboardContext = currentDashboardContext(currentConfig, uiMessageList);
+    const currentDashboardPrompt = dashboardContext
+      ? "## Current Dashboard\n\n" +
+        dashboardContext.instructions +
+        (dashboardContext.configJson
+          ? "\n\n" + quarantine(dashboardContext.configJson, "current-dashboard")
+          : "")
+      : "";
     // System prompt is split into two system MESSAGES so the stable base
     // (~6.4K tokens, identical across every turn and step) can carry an
     // Anthropic cache breakpoint. Cache prefix order is tools → system →
@@ -163,6 +179,7 @@ export async function POST(req: Request) {
     const volatileSystem = [
       tier2Summary,
       quarantinedDataflowContext,
+      currentDashboardPrompt,
       previewRepairPrompt,
     ]
       .filter(Boolean)
