@@ -160,11 +160,16 @@ providers exist to allow. Only `google`, `microsoft-entra-id` and `github` can
 be named; `email` and `credentials` are refused, so a typo can fail to open
 something and can never open the door to our own account table.
 
-**Matching is exact.** `spc.int` admits `someone@spc.int` and nothing else;
-`mail.spc.int` needs its own row. There is no wildcard or subdomain form, by
-decision: a subdomain grant reads smaller than it is, and this table is the only
-thing between a stranger and an account. It does not admit `notspc.int`, which
-anyone can register, nor `spc.int@gmail.com`.
+**Exact rows and suffix rows.** A plain row is exact: `spc.int` admits
+`someone@spc.int` and nothing else; `mail.spc.int` needs its own row. A row
+starting with a dot is a suffix rule: `.govt.nz` admits any strictly deeper
+host, such as `mfat.govt.nz`, `health.govt.nz` or `a.b.govt.nz`. That covers all
+of the NZ public sector under `govt.nz`, councils included, so it reads smaller
+than it is. The apex is not included: add `govt.nz` as its own row if ever
+needed. Neither form admits `notspc.int` / `xgovt.nz`, which anyone can
+register, nor `spc.int@gmail.com` or `govt.nz.evil.com`. The admin surface
+refuses single-label suffixes (`.nz`, `.com`) and any rule covering a personal
+mail provider (`gmail.com`, `.gmail.com`). There is no `*` wildcard form.
 
 The rule is worth exactly as much as the address behind it. Google and Microsoft
 verify what they return; GitHub is verified by the app on each sign-in, because

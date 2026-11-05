@@ -16,6 +16,7 @@ import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 import {
+  domainRuleCandidates,
   emailDomain,
   githubEmailIsVerified,
   isBootstrapAdmin,
@@ -23,7 +24,7 @@ import {
   signupIsOpenFor,
 } from "@/lib/signup-policy";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { authConfig } from "./auth.config";
 import {
   db,
@@ -457,7 +458,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // reads an environment variable, where the rules below each cost a query.
       if (signupIsOpenFor(account?.provider)) return true;
 
-      // Institutional domain, matched exactly against allowed_domains.
+      // Institutional domain: an exact row for the host, or a `.suffix` row
+      // covering it, found with one indexed IN lookup over the candidates.
       //
       // Degrades to the invite list if that table cannot be read, rather than
       // taking sign-in down with it. This is a real ordering hazard, not a
@@ -470,7 +472,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const byDomain = await db
             .select({ domain: allowedDomains.domain })
             .from(allowedDomains)
-            .where(eq(allowedDomains.domain, host))
+            .where(inArray(allowedDomains.domain, domainRuleCandidates(host)))
             .limit(1);
           if (byDomain.length > 0) return true;
         } catch (err) {

@@ -22,10 +22,13 @@
  * addresses, and a domain rule alone would exclude exactly the people it exists
  * to include.
  *
- * MATCHING IS EXACT. There is no subdomain form. A subdomain grant reads
- * smaller than it is, and this list is the only thing between a stranger and an
- * account, so a domain that needs a subdomain gets its own row and someone
- * decides to put it there.
+ * A row is either exact or a suffix rule. `spc.int` admits `spc.int` and
+ * nothing else. `.govt.nz` (leading dot) admits any strictly deeper host,
+ * `mfat.govt.nz` or `a.b.govt.nz`, but not the apex `govt.nz` and not
+ * `xgovt.nz`. Suffix rules exist so a whole public sector can self-sign-up
+ * without a row per agency; they read smaller than they are, so the admin
+ * surface refuses single-label suffixes and anything covering a personal
+ * mail provider (`domainRuleProblem`).
  *
  * The rule is worth exactly as much as the address behind it. It is sound with
  * Google, Microsoft and GitHub because each verifies the address it returns. A
@@ -55,16 +58,66 @@ export function emailDomain(email: string): string | null {
 }
 
 /**
- * Does this address belong to one of the listed domains?
+ * Does one `allowed_domains` row admit this host?
  *
- * Exact comparison on the host. A suffix test over the whole address would
- * admit `notspc.int`, which anyone can register for a few dollars.
+ * Exact rows compare equal. A `.suffix` row needs the host to end with the
+ * suffix including its dot, so `xgovt.nz` and the apex `govt.nz` both fail.
+ */
+export function domainRuleAdmits(host: string, rule: string): boolean {
+  const h = host.trim().toLowerCase();
+  const r = normaliseDomain(rule);
+  if (!h || !r) return false;
+  if (r.startsWith(".")) return r.length > 1 && h.length > r.length && h.endsWith(r);
+  return h === r;
+}
+
+/**
+ * Every rule string that could admit this host: the host itself, then each
+ * `.suffix` of at least two labels. For `a.mfat.govt.nz`: `a.mfat.govt.nz`,
+ * `.mfat.govt.nz`, `.govt.nz`. Single-label suffixes (`.nz`) are never
+ * generated, so even a stray such row cannot admit anyone. Lets the database
+ * answer with one indexed `IN` lookup instead of a scan.
+ */
+export function domainRuleCandidates(host: string): string[] {
+  const h = host.trim().toLowerCase();
+  if (!h) return [];
+  const labels = h.split(".");
+  const out = [h];
+  for (let i = 1; i <= labels.length - 2; i++) {
+    out.push("." + labels.slice(i).join("."));
+  }
+  return out;
+}
+
+/**
+ * Why a rule may not be stored, or null if it may. Refuses single-label
+ * suffixes (`.nz`, `.com`) and any rule that would admit a personal mail
+ * provider (`gmail.com`, `.gmail.com`, `.com`).
+ */
+export function domainRuleProblem(rule: string): string | null {
+  const r = normaliseDomain(rule);
+  if (r.startsWith(".") && r.slice(1).split(".").length < 2) {
+    return "A suffix rule needs at least two labels, such as .govt.nz";
+  }
+  if (PERSONAL_EMAIL_DOMAINS.some(
+      (d) => d === r.replace(/^\./, "") || domainRuleAdmits(d, r),
+    )) {
+    return (
+      "That would admit a personal mail provider. Admitting it would let " +
+      "anyone sign in. Invite the individual address instead."
+    );
+  }
+  return null;
+}
+
+/**
+ * Does this address belong to one of the listed domains? Each entry is an
+ * exact host or a `.suffix` rule; see `domainRuleAdmits`.
  */
 export function isInstitutionalEmail(email: string, domains: string[]): boolean {
   const host = emailDomain(email.trim().toLowerCase());
   if (!host) return false;
-  const listed = new Set(domains.map(normaliseDomain));
-  return listed.has(host);
+  return domains.some((d) => domainRuleAdmits(host, d));
 }
 
 /**

@@ -4,7 +4,7 @@ import { desc, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, allowedDomains } from "@/lib/db";
 import { checkCsrf } from "@/lib/csrf";
-import { isPersonalEmailDomain, normaliseDomain } from "@/lib/signup-policy";
+import { domainRuleProblem, normaliseDomain } from "@/lib/signup-policy";
 
 /**
  * Institutional domains admitted without an invite.
@@ -17,8 +17,8 @@ import { isPersonalEmailDomain, normaliseDomain } from "@/lib/signup-policy";
  * addresses belong on the invite list, one at a time.
  */
 
-// A hostname, not an address and not a wildcard. Matching is exact, so a
-// pattern here would be stored and silently never match.
+// A hostname for an exact rule, or `.hostname` for a suffix rule admitting
+// every strictly deeper subdomain. Not an address and not a `*` wildcard.
 const domainSchema = z.object({
   domain: z
     .string()
@@ -26,8 +26,8 @@ const domainSchema = z.object({
     .min(3)
     .max(253)
     .regex(
-      /^@?[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+\.?$/i,
-      "Must be a bare domain such as spc.int",
+      /^(@|\.)?[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+\.?$/i,
+      "Must be a domain such as spc.int, or a suffix such as .govt.nz",
     ),
   organisation: z.string().trim().max(200).optional(),
   note: z.string().trim().max(500).optional(),
@@ -73,15 +73,9 @@ export async function POST(req: Request) {
   }
 
   const domain = normaliseDomain(parsed.data.domain);
-  if (isPersonalEmailDomain(domain)) {
-    return NextResponse.json(
-      {
-        error:
-          "That is a personal mail provider. Admitting it would let anyone " +
-          "sign in. Invite the individual address instead.",
-      },
-      { status: 400 },
-    );
+  const problem = domainRuleProblem(domain);
+  if (problem) {
+    return NextResponse.json({ error: problem }, { status: 400 });
   }
 
   await db

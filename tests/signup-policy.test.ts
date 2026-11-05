@@ -1,6 +1,9 @@
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import {
   bootstrapAdminEmails,
+  domainRuleAdmits,
+  domainRuleCandidates,
+  domainRuleProblem,
   githubEmailIsVerified,
   emailDomain,
   entraEmailIsVerified,
@@ -244,5 +247,40 @@ describe("github address verification", () => {
       githubEmailIsVerified([{ email: "x@spc.int", verified: "true" }], "x@spc.int"),
     ).toBe(false);
     expect(githubEmailIsVerified(payload, "")).toBe(false);
+  });
+});
+
+describe("suffix domain rules", () => {
+  it("admits subdomains and deeper subdomains", () => {
+    expect(domainRuleAdmits("mfat.govt.nz", ".govt.nz")).toBe(true);
+    expect(domainRuleAdmits("a.b.govt.nz", ".govt.nz")).toBe(true);
+    expect(isInstitutionalEmail("x@health.govt.nz", [".govt.nz"])).toBe(true);
+  });
+  it("rejects apex, lookalikes and appended hosts", () => {
+    expect(domainRuleAdmits("govt.nz", ".govt.nz")).toBe(false);
+    expect(domainRuleAdmits("xgovt.nz", ".govt.nz")).toBe(false);
+    expect(domainRuleAdmits("govt.nz.evil.com", ".govt.nz")).toBe(false);
+    expect(isInstitutionalEmail("x@govt.nz", [".govt.nz"])).toBe(false);
+  });
+  it("leaves exact rules exact", () => {
+    expect(domainRuleAdmits("spc.int", "spc.int")).toBe(true);
+    expect(domainRuleAdmits("mail.spc.int", "spc.int")).toBe(false);
+  });
+  it("lists candidate rules, skipping single-label suffixes", () => {
+    expect(domainRuleCandidates("a.mfat.govt.nz")).toEqual([
+      "a.mfat.govt.nz",
+      ".mfat.govt.nz",
+      ".govt.nz",
+    ]);
+    expect(domainRuleCandidates("spc.int")).toEqual(["spc.int"]);
+  });
+  it("refuses broad or personal rules for admin entry", () => {
+    expect(domainRuleProblem(".com")).not.toBeNull();
+    expect(domainRuleProblem(".nz")).not.toBeNull();
+    expect(domainRuleProblem(".gmail.com")).not.toBeNull();
+    expect(domainRuleProblem("gmail.com")).not.toBeNull();
+    expect(domainRuleProblem(".co.uk")).not.toBeNull();
+    expect(domainRuleProblem(".govt.nz")).toBeNull();
+    expect(domainRuleProblem("spc.int")).toBeNull();
   });
 });

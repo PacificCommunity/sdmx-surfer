@@ -66,8 +66,12 @@ export default function AdminDomainsPage() {
       </h1>
       <p className="mb-6 max-w-2xl text-sm text-on-surface-variant">
         Anyone whose work address is at one of these domains can sign in without
-        an invite. Matching is exact: <code>spc.int</code> does not cover
-        <code> mail.spc.int</code>, which needs its own row. Personal mail
+        an invite. A plain row is exact: <code>spc.int</code> does not cover
+        <code> mail.spc.int</code>. A row starting with a dot is a suffix rule:
+        <code> .govt.nz</code> admits every subdomain, such as
+        <code> mfat.govt.nz</code> or <code>health.govt.nz</code> (and councils),
+        but not the apex <code>govt.nz</code>, which needs its own row.
+        Single-label suffixes such as <code>.nz</code> and personal mail
         providers are refused, since one row would admit everyone; invite those
         addresses individually instead.
       </p>
