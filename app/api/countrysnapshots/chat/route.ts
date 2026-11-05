@@ -6,7 +6,7 @@ import { getModelForUser } from "@/lib/model-router";
 import { sanitizeToolInputs } from "@/lib/sanitize-messages";
 import { createRequestLogger } from "@/lib/logger";
 import { db, dashboardSessions } from "@/lib/db";
-import { requireSnapshotSession } from "@/lib/country-snapshots/auth";
+import { auth } from "@/lib/auth";
 import { type SnapshotContext } from "@/lib/country-snapshots/system-prompt";
 import {
   buildSystemMessages,
@@ -25,10 +25,11 @@ const STEP_LIMIT_INDEX = 25;
 export const maxDuration = 120;
 
 export async function POST(req: Request) {
-  const session = await requireSnapshotSession();
-  if (!session) {
+  const session = await auth();
+  if (!session?.user?.userId) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const userId = session.user.userId;
 
   // Global AI budget circuit breaker applies everywhere, snapshots included.
   const budget = await checkGlobalBudget();
@@ -43,13 +44,13 @@ export async function POST(req: Request) {
     );
   }
 
-  const cap = await checkTurnCap(session.userId);
+  const cap = await checkTurnCap(userId);
   if (!cap.allowed) {
     return Response.json(
       {
         error: "cap-reached",
         message:
-          "You have reached today's free chat limit. Sign in via 'Explore in Surfer' to continue.",
+          "You have reached today's Country Snapshots chat limit. It resets within 24 hours.",
         used: cap.used,
         cap: cap.cap,
       },
@@ -57,10 +58,10 @@ export async function POST(req: Request) {
     );
   }
 
-  const logger = createRequestLogger(
-    session.userId,
-    `snapshot-${session.uid.slice(0, 8)}`,
-  );
+  // No dashboard session id: the snapshot conversation row is only written
+  // in onFinish, after the log flush, and usage_logs.session_id is a foreign
+  // key to dashboard_sessions.
+  const logger = createRequestLogger(userId, "anonymous");
   let mcpClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
 
   try {
@@ -100,7 +101,7 @@ export async function POST(req: Request) {
     const systemMessages = buildSystemMessages(ctx);
     const tools = buildSnapshotTools(mcpTools, mode);
 
-    const modelConfig = await getModelForUser(session.userId);
+    const modelConfig = await getModelForUser(userId);
     logger.setModelInfo(
       modelConfig.modelId,
       modelConfig.providerId,
@@ -172,11 +173,19 @@ export async function POST(req: Request) {
         // every turn, so the whole exchange lives in ONE row (update-first,
         // insert on the first turn). The update predicate scopes by owner —
         // a client-supplied sessionId must never touch another user's row.
+        // The row belongs to the signed-in user, so it shows up in their
+        // Surfer session list: store the reply as a UIMessage ({ id, role,
+        // parts }) like the client's own messages, because the builder
+        // renders message.parts and crashes on a bare { role, content }.
         try {
           const finalText = steps[steps.length - 1]?.text ?? "";
           const updatedMessages = [
             ...(messages as unknown[]),
-            { role: "assistant", content: finalText },
+            {
+              id: crypto.randomUUID(),
+              role: "assistant",
+              parts: [{ type: "text", text: finalText }],
+            },
           ];
           if (sessionId) {
             const updated = await db
@@ -188,7 +197,7 @@ export async function POST(req: Request) {
               .where(
                 and(
                   eq(dashboardSessions.id, sessionId),
-                  eq(dashboardSessions.user_id, session.userId),
+                  eq(dashboardSessions.user_id, userId),
                 ),
               )
               .returning({ id: dashboardSessions.id });
@@ -198,7 +207,7 @@ export async function POST(req: Request) {
               // and we log + move on rather than clobbering anything).
               await db.insert(dashboardSessions).values({
                 id: sessionId,
-                user_id: session.userId,
+                user_id: userId,
                 title: `Snapshot chat — ${snapshotContext.countryCodes.join("+") || "catalogue"} ${snapshotContext.themeSlug}`,
                 messages: updatedMessages as unknown as never,
                 config_history: [] as unknown as never,

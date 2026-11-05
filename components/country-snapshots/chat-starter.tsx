@@ -273,8 +273,7 @@ export function ChatStarter() {
 
         {capReached ? (
           <p className="mt-3 rounded-md bg-amber-50 p-2 text-xs text-amber-800">
-            Daily chat limit reached. Sign in via &ldquo;Save to my Surfer
-            account&rdquo; on a dashboard to continue.
+            Daily chat limit reached. It resets within 24 hours.
           </p>
         ) : null}
         {error && !capReached ? (

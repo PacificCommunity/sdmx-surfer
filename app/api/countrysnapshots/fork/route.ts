@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db, dashboardSessions } from "@/lib/db";
-import { requireSnapshotSession } from "@/lib/country-snapshots/auth";
+import { loginPathWithCallback } from "@/lib/login-redirect";
 import {
   getSnapshotCatalogue,
   getCountry,
@@ -17,14 +17,14 @@ import {
  * Fork a Country Snapshot into the authenticated Surfer space.
  *
  * Flow:
- *   1. Validate the snapshot cookie (the user must be in the snapshot area).
- *   2. Validate the country/theme params against the catalogue.
- *   3. If no authenticated Surfer session, redirect to /login with a `next`
- *      param that round-trips back to this endpoint after sign-in.
- *   4. Build the dashboard config from (countries, theme) and insert a new
- *      dashboard_sessions row owned by the real user, seeded with the
+ *   1. Validate the country/theme params against the catalogue.
+ *   2. If there is no Surfer session (the snapshot pages require one, but
+ *      the session may have expired), redirect to /login with a
+ *      `callbackUrl` that round-trips back to this endpoint after sign-in.
+ *   3. Build the dashboard config from (countries, theme) and insert a new
+ *      dashboard_sessions row owned by the signed-in user, seeded with the
  *      config and a leading system note explaining the fork origin.
- *   5. Redirect into /builder?session=<id>.
+ *   4. Redirect into /builder?session=<id>.
  *
  * Accepts both GET (from a plain link) and POST (from a form). GET is the
  * common case because the overlay's "Explore in Surfer" link is a normal
@@ -40,14 +40,6 @@ export async function POST(req: Request) {
 }
 
 async function handle(req: Request) {
-  const snap = await requireSnapshotSession();
-  if (!snap) {
-    return NextResponse.redirect(
-      new URL("/countrysnapshots/login", req.url),
-      303,
-    );
-  }
-
   const url = new URL(req.url);
   const countryParam = url.searchParams.get("country") ?? "";
   const themeSlug = url.searchParams.get("theme") ?? "";
@@ -71,16 +63,10 @@ async function handle(req: Request) {
   }
   const countries = resolved.filter((c): c is Country => Boolean(c));
 
-  // Real Surfer auth required to own the forked session.
-  const surferSession = await auth();
-  if (!surferSession?.user?.userId) {
-    // Round-trip through /login and back to this exact fork request. The
-    // login page reads `callbackUrl` (not `next`) and its safety check
-    // requires a same-origin path — so pass pathname+search, never the
-    // absolute URL.
-    const callbackUrl = encodeURIComponent(url.pathname + url.search);
+  const session = await auth();
+  if (!session?.user?.userId) {
     return NextResponse.redirect(
-      new URL(`/login?callbackUrl=${callbackUrl}`, req.url),
+      new URL(loginPathWithCallback(url.pathname + url.search), req.url),
       303,
     );
   }
@@ -138,7 +124,7 @@ async function handle(req: Request) {
   const [row] = await db
     .insert(dashboardSessions)
     .values({
-      user_id: surferSession.user.userId,
+      user_id: session.user.userId,
       title,
       config_history: [nativeConfig] as unknown as never,
       config_pointer: 0,

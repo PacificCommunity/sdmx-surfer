@@ -43,6 +43,7 @@ deploys.
 
 **Done since 2026-06-12:**
 
+- Country Snapshots uses the normal Surfer sign-in: the shared access password and its anonymous per-browser identities are removed, and snapshot chat, its daily turn cap and forks into the builder are attributed to the signed-in user. Existing anonymous snapshot users stay in `auth_users` untouched. (2026-11-06)
 - Platform model picker refreshed: Opus 5 → Opus 5.5, Gemini 3.1 Pro → Gemini 4 Argon plus Gemini 3.8 Flash, Mistral Large 3 → Mistral Large 4. BYOK lists unchanged. (2026-10-27)
 - Default platform model moved to GPT-6.1 Terra (via the AI Gateway; Sonnet 5.5 when the gateway is off); Opus 5 and Sonnet 5.5 stay selectable. (2026-10-27)
 - OAuth sign-in built on `country-snapshots`, awaiting provider registrations (§4.3). (2026-08-07)
@@ -204,7 +205,7 @@ The database schema already includes the OAuth accounts table (`auth_accounts`).
 
 Effort: two to four days, depending on how much of the linking logic we want from day one.
 
-**Decided 2026-06-26: OAuth-only sign-in on the existing Auth.js (NextAuth v5) stack, with Google, Microsoft, and GitHub.** Rationale: Google plus Microsoft covers nearly all institutional and personal users (Microsoft, not GitHub, is the real coverage gap for a government audience; GitHub is added for the developer-leaning subset). Keeping the providers on our own Auth.js stack leaves identities in our Neon database rather than a third-party identity SaaS, which fits the hosting-jurisdiction posture (§4.1, §7.3) and avoids discarding the recently completed v4 to v5 migration. Consequences: the email allowlist and the Resend magic-link/password flows are removed (sign-up is open to anyone who can authenticate with a supported provider; password reset is owned by the OAuth provider, so no transactional email service is needed). The Okta/Keycloak SSO is dropped from scope and can be re-added later if an institutional partner requires it. Country Snapshots stays behind its own shared password, independent of this change.
+**Decided 2026-06-26: OAuth-only sign-in on the existing Auth.js (NextAuth v5) stack, with Google, Microsoft, and GitHub.** Rationale: Google plus Microsoft covers nearly all institutional and personal users (Microsoft, not GitHub, is the real coverage gap for a government audience; GitHub is added for the developer-leaning subset). Keeping the providers on our own Auth.js stack leaves identities in our Neon database rather than a third-party identity SaaS, which fits the hosting-jurisdiction posture (§4.1, §7.3) and avoids discarding the recently completed v4 to v5 migration. Consequences: the email allowlist and the Resend magic-link/password flows are removed (sign-up is open to anyone who can authenticate with a supported provider; password reset is owned by the OAuth provider, so no transactional email service is needed). The Okta/Keycloak SSO is dropped from scope and can be re-added later if an institutional partner requires it. Country Snapshots originally kept its own shared password, independent of this change; **decided 2026-11-06** to drop it so no password is handed out, and the area now requires the same Surfer sign-in.
 
 #### Who owns the provider registrations
 

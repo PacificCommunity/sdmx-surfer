@@ -10,9 +10,10 @@ function dailyTurnCap(): number {
 }
 
 /**
- * Count usage_logs rows attributed to a snapshot anonymous user in the last
- * 24 hours. Each completed chat turn writes one row, so this equals the
- * turn count.
+ * Count the signed-in user's usage_logs rows in the last 24 hours. Each
+ * completed chat turn writes one row, so this equals the turn count — across
+ * snapshot chat and the Surfer builder alike, since both log under the same
+ * user id.
  */
 export async function checkTurnCap(userId: string): Promise<{
   allowed: boolean;

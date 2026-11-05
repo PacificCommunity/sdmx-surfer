@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireSnapshotSession } from "@/lib/country-snapshots/auth";
+import { auth } from "@/lib/auth";
 
 export async function POST(req: Request) {
-  const session = await requireSnapshotSession();
-  if (!session) return NextResponse.json({ ok: false }, { status: 401 });
+  const session = await auth();
+  if (!session?.user?.userId) {
+    return NextResponse.json({ ok: false }, { status: 401 });
+  }
   let body: { indicator?: string; dataflow?: string; error?: string };
   try {
     body = await req.json();
@@ -17,7 +19,7 @@ export async function POST(req: Request) {
     indicator: body.indicator,
     dataflow: body.dataflow,
     error: body.error?.slice(0, 200),
-    uid: session.uid,
+    userId: session.user.userId,
   });
   return NextResponse.json({ ok: true });
 }

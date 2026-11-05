@@ -160,7 +160,7 @@ export function ChatOverlay({
 
           <div className="border-t border-neutral-200 px-3 py-2 text-xs">
             <a href={forkHref} className="text-on-secondary-container underline">
-              Explore in Surfer (sign in required)
+              Explore in Surfer
             </a>
           </div>
         </aside>

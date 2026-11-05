@@ -3,7 +3,7 @@ import { createMCPClient } from "@ai-sdk/mcp";
 import { z } from "zod";
 import { mcpTransportConfig } from "@/lib/mcp-client";
 import { getModelForUser } from "@/lib/model-router";
-import { requireSnapshotSession } from "@/lib/country-snapshots/auth";
+import { auth } from "@/lib/auth";
 import {
   buildStableSystemMessage,
   buildSnapshotTools,
@@ -27,7 +27,7 @@ import {
  * Index and page modes have different tool sets and therefore different
  * cache entries; the client passes whichever mode its surface uses.
  *
- * Abuse guards: requires the snapshot cookie, and a per-instance debounce
+ * Abuse guards: requires a signed-in Surfer session, and a per-instance debounce
  * (one warm per mode per WARM_DEBOUNCE_MS) absorbs reload spam.
  */
 
@@ -45,8 +45,8 @@ const lastWarmAt: Record<SnapshotChatMode, number> = { index: 0, page: 0 };
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
-  const session = await requireSnapshotSession();
-  if (!session) {
+  const session = await auth();
+  if (!session?.user?.userId) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
       indicatorIds: [],
     });
 
-    const modelConfig = await getModelForUser(session.userId);
+    const modelConfig = await getModelForUser(session.user.userId);
 
     const result = await generateText({
       model: modelConfig.model,

@@ -5,8 +5,8 @@ import { AppFooter } from "@/components/app-footer";
 
 /**
  * Outer Country Snapshots layout: checks the build-time feature flag and
- * carries the chrome. The shared-password gate lives in (authed)/layout.tsx so
- * /login bypasses it.
+ * carries the chrome. Access is the normal Surfer sign-in, enforced by the
+ * proxy (proxy.ts), which sends signed-out visitors to /login and back.
  *
  * Country Snapshots is a sibling of Data Surfer under the Pacific Data Hub
  * rather than a section of it: separate audience, separate access, its own
