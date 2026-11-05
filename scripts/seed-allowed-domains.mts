@@ -22,7 +22,7 @@
 import { config } from "dotenv";
 config({ path: ".env.local" });
 
-import { isPersonalEmailDomain, normaliseDomain } from "../lib/signup-policy";
+import { domainRuleProblem, normaliseDomain } from "../lib/signup-policy";
 
 // Imported dynamically, after dotenv has run. `lib/db` reads DATABASE_URL at
 // module load, and ESM evaluates every static import before any statement in
@@ -60,6 +60,7 @@ const OBSERVED: Seed[] = [
  */
 const PARTNERS: Seed[] = [
   { domain: "mfat.govt.nz", organisation: "New Zealand Ministry of Foreign Affairs and Trade", note: "partner: named in scope" },
+  { domain: ".govt.nz", organisation: "New Zealand public sector (every govt.nz subdomain)", note: "partner: NZ agencies requested alongside MFAT" },
   { domain: "dfat.gov.au", organisation: "Australian Department of Foreign Affairs and Trade", note: "partner: named in scope" },
   { domain: "forumsec.org", organisation: "Pacific Islands Forum Secretariat", note: "regional organisation (CROP)" },
   { domain: "sprep.org", organisation: "Secretariat of the Pacific Regional Environment Programme", note: "regional organisation (CROP)" },
@@ -100,12 +101,14 @@ async function main() {
   const write = process.argv.includes("--write");
   const seeds = [...OBSERVED, ...PARTNERS];
 
-  // A consumer domain here would open the service to everyone while looking
-  // like an ordinary row.
-  const personal = seeds.filter((s) => isPersonalEmailDomain(s.domain));
-  if (personal.length) {
-    console.error("Refusing to seed personal domains: " +
-      personal.map((s) => s.domain).join(", "));
+  // A consumer domain (or a suffix covering one) would open the service to
+  // everyone while looking like an ordinary row.
+  const refused = seeds
+    .map((s) => ({ domain: s.domain, problem: domainRuleProblem(s.domain) }))
+    .filter((s) => s.problem !== null);
+  if (refused.length) {
+    console.error("Refusing to seed: " +
+      refused.map((s) => s.domain + " (" + String(s.problem) + ")").join(", "));
     process.exit(1);
   }
 
