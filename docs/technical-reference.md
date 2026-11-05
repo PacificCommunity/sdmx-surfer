@@ -96,13 +96,14 @@ The core server-side module. Handles POST requests from the chat client.
 6. Convert UI messages to model messages via `convertToModelMessages()`
 7. Extract Tier 2 knowledge from conversation history
 8. Build system prompt (Tier 1 static + Tier 2 dynamic + optional preview repair context)
-9. Call `streamText()` with the resolved model, MCP tools, and `update_dashboard`
+9. Call `streamText()` with the resolved model, MCP tools, `update_dashboard` and `get_indicator_coverage`
 10. Return streaming SSE response via `toUIMessageStreamResponse()`
 
 **Key mechanisms:**
 
 - **Per-request MCP client:** Each request creates a fresh `MCPClient` instance via `createMCPClient`. The client is closed in `onFinish` (or on error). This is safe for multi-user because there is no shared module-level singleton.
 - **`update_dashboard` tool:** Custom tool intercepted by the agent loop (not forwarded to MCP). Accepts either a simplified authoring config or a native config. The authoring config is compiled to native via `compileDashboardToolConfig()` before being returned in the tool output for the client to extract.
+- **`get_indicator_coverage` tool:** App-defined, SPC only. Input `{ dataflow_id?, indicator?, country?, year_from?, year_to? }`; answers from `models/dataflow-coverage.json` through `queryCoverage()` in `lib/coverage/query.ts`. Shapes: one indicator in one flow (per area); a flow's indicators (± one area); every flow carrying an indicator code, via an inverted index built when the artifact loads (unknown codes fall back to a code/label text search and return candidates); or the flows with data for one area. Areas read `"2000-2005,2010 (12)"` (years with data, then observations). Output is capped by `COVERAGE_LIMITS` (40 indicators per flow, 15 flows per indicator, per-area detail for the biggest 4).
 - **Step budget:** `stopWhen: stepCountIs(25)` limits total steps. `prepareStep` at step 20+ injects an urgent system message telling the AI to emit a draft dashboard immediately. The nudge sits closer to the ceiling (5 steps of grace) because the post-2026-04-22 MCP workflow adds an explicit recovery step (`suggest_nonempty_queries`) per empty probe, so multi-panel dashboards need room for recoveries before the draft is forced.
 - **Prompt caching:** `providerOptions.anthropic.cacheControl` marks the system prompt for Anthropic's native ephemeral caching (~90% cost reduction on the cached prefix for subsequent messages in the same session). Only active when the resolved model is an Anthropic model.
 
@@ -352,8 +353,17 @@ Strips message fields that must not be echoed into system prompts or logs (e.g. 
 
 ### `app/explore/page.tsx` and `app/explore/[id]/page.tsx` — Data Catalogue
 
-- `/explore` — lists all dataflows from the MCP gateway with keyword search and country filter. Semantic search uses the granite-embedding-small-r2 ONNX model to rank results by query similarity.
-- `/explore/[id]` — drills into a single dataflow, showing dimensions, code lists, and data availability.
+- `/explore` — lists all dataflows from the MCP gateway with keyword search and country filter. Semantic search uses the granite-embedding-small-r2 ONNX model to rank results by query similarity. Each card carries a one-line coverage summary ("560 indicators · 25 areas · 1980–2026") when the coverage artifact has the flow.
+- `/explore/[id]` — drills into a single dataflow, showing dimensions, code lists, and data availability, plus an "Indicator coverage" section (`app/explore/[id]/indicator-coverage.tsx`): a filterable indicator list sorted by observations and, for the selected indicator, an area × year grid shaded by observation count (countries first, then sub-national units, then aggregates; spans over 40 years grouped into aligned 2/5/10/20-year columns). Range-mode flows show each area's first–last year instead. Data comes from `/api/explore/[id]?coverage=1` and `?coverage=1&indicator=X`.
+
+### `lib/coverage/` — Indicator Coverage
+
+Per-indicator, per-area, per-year observation counts for every SPC dataflow, stored in `models/dataflow-coverage.json` (types in `lib/coverage/types.ts`; about 2.5 MB for all 127 flows, so it is committed uncompressed). Kept out of `models/dataflow-index.json`, which `lib/embeddings.ts` loads whole.
+
+- **Build:** `npm run build-coverage` (`scripts/build-coverage.ts`) reads the index for the flow list, structures and `availability.obsCount`, then queries `stats-nsi-stable.pacificdata.org/rest` (the base `build-index` uses). Flows up to 750,000 observations are built in `counts` mode: the full SDMX-CSV (`/data/SPC,DF_X,/all`) is streamed through `lib/coverage/csv.ts` and only key columns are counted (`lib/coverage/aggregate.ts`); rows with an empty OBS_VALUE do not count. Bigger flows (the PACCOMTRADE and TRADE_FOOD trade flows, 0.9–3.7M observations) use `range` mode: availability constraints per indicator code, then per indicator × area while that stays within 200 calls, giving first–last year and observations per area but no per-year counts. DF_TRADE_FOOD exceeds the pair budget (3 indicators × 178 importers) and lists its importers without ranges. Indicator and area labels come from the codelists. At most 3 requests run at once, each with retries and backoff and a per-request timeout; Node's default `Accept-Language: *` makes the NSI answer 500, so the build sends `en`.
+- **Incremental:** each flow stores a signature of the index facts it came from (obsCount, time envelope, dimensions and codelists, format version). Unchanged signatures are skipped; `--force` rebuilds all, `--only DF_A,DF_B` rebuilds a few. A failing flow keeps its previous coverage, and a run that changes nothing leaves the file byte-identical. Measured 2026-11-06: full build of 127 flows in 3 minutes (DF_SDG 21 s, DF_SAM_CATCH 33 s, DF_TRADE_FOOD 38 s), a no-change run in about a second.
+- **Roles** (`lib/coverage/roles.ts`): the area is `GEO_PICT` or `REF_AREA` (the SDG family), else the first dimension on an SPC geo codelist (DF_TRADE_FOOD's IMPORTER), else none (DF_SAM_CATCH, DF_COMMODITY_PRICES, DF_CURRENCIES). The indicator is `INDICATOR`, else `SERIES`, else the first remaining dimension that is not FREQ, time, geo-coded or a generic breakdown (SEX, AGE, URBANIZATION, ...), preferring one whose id or codelist mentions INDICATOR (DF_POWER_GEN → ENERGY_SOURCE, DF_CLIMATE_CHANGE → CLIMATE_CHANGE_INDICATORS). With no candidate, a single `_ALL` pseudo-indicator carries the flow. ISO alpha-2 codes are countries; `XX-…` codes are sub-national; everything else (MEL, MIC, POL, _T) is an aggregate and sorts last.
+- **Readers:** `lib/coverage/load.ts` (lazy, memoised, server only), `lib/coverage/query.ts` (card summary, explore payloads, tool answers). `next.config.ts` traces the artifact into `/api/explore`, `/api/explore/**` and `/api/chat`.
 
 ### `app/admin/page.tsx` — Admin Interface
 
@@ -384,9 +394,9 @@ Magic link authentication flow:
 
 The agent has access to ~20 tools:
 - **18+ MCP tools** from sdmx-mcp-gateway (discovered dynamically via `mcpClient.tools()`)
-- **1 custom tool:** `update_dashboard` (intercepted by the route handler)
+- **2 custom tools:** `update_dashboard` and `get_indicator_coverage` (handled by the route handler)
 
-The MCP tools are "dynamic" tools in AI SDK v6 terms — their schemas come from the MCP server at runtime. The `update_dashboard` tool is a "static" tool defined inline with a Zod schema.
+The MCP tools are "dynamic" tools in AI SDK v6 terms — their schemas come from the MCP server at runtime. The custom tools are "static" tools defined inline with Zod schemas.
 
 ### Progressive discovery workflow
 

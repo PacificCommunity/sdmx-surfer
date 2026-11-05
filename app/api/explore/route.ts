@@ -1,5 +1,7 @@
 import { withMCPClient, callMcpTool } from "@/lib/mcp-client";
 import { loadIndex, semanticSearch } from "@/lib/embeddings";
+import { loadCoverage } from "@/lib/coverage/load";
+import { formatFlowSummary, summarizeFlow } from "@/lib/coverage/query";
 
 // The country lookup is a multi-second gateway call (measured 3.5-4.1s) and
 // the default listing is the whole catalogue. Neither is per-user, and neither
@@ -10,9 +12,17 @@ const REFERENCE_CACHE = { "cache-control": "private, max-age=3600" };
  * GET /api/explore — list all dataflows (from pre-built index, no MCP)
  * GET /api/explore?country=FJ — find dataflows with data for a country (MCP)
  * GET /api/explore?q=climate+vulnerability — semantic search (index + embedding API)
+ *
+ * Index-backed listings carry `coverage`, a one-line summary from
+ * models/dataflow-coverage.json ("560 indicators · 25 areas · 1980–2026").
  */
 export async function GET(req: Request) {
   try {
+    const flows = loadCoverage()?.artifact.flows;
+    const coverageLine = (id: string) => {
+      const flow = flows?.[id];
+      return flow ? formatFlowSummary(summarizeFlow(flow)) : null;
+    };
     const url = new URL(req.url);
     const country = url.searchParams.get("country");
     const query = url.searchParams.get("q");
@@ -34,6 +44,7 @@ export async function GET(req: Request) {
             score: r.score,
             endpoint: r.endpoint,
             categories: catMap.get(r.id) || [],
+            coverage: coverageLine(r.id),
           })),
           total: results.length,
           searchType: "semantic",
@@ -53,6 +64,7 @@ export async function GET(req: Request) {
               id: e.id, name: e.name, description: e.description,
               endpoint: e.endpoint ?? "SPC",
               categories: e.categories || [],
+              coverage: coverageLine(e.id),
             })),
             total: filtered.length,
             searchType: "keyword",
@@ -82,6 +94,7 @@ export async function GET(req: Request) {
           description: e.description,
           endpoint: e.endpoint ?? "SPC",
           categories: e.categories || [],
+          coverage: coverageLine(e.id),
         })),
         total: index.entries.length,
       }, { headers: REFERENCE_CACHE });

@@ -5,6 +5,7 @@ import { BRAND_THEME } from "@/lib/brand-theme";
 import { primaryCategoryIcon } from "@/lib/category-icons";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { IndicatorCoverage } from "./indicator-coverage";
 
 interface Dimension {
   id: string;
@@ -352,7 +353,7 @@ export default function DataflowDetailPage() {
                 <p className="mt-1 font-[family-name:var(--font-display)] text-2xl font-extrabold text-on-surface">
                   {availability.countries.length > 0
                     ? availability.countries.filter((c) => c.obsCount > 0).length
-                    : availability.dimensions.find((d) => d.id === "GEO_PICT")?.values.length || "-"}
+                    : availability.dimensions.find((d) => d.id === "GEO_PICT" || d.id === "REF_AREA")?.values.length || "-"}
                 </p>
               </div>
               <div className="rounded-[var(--radius-xl)] bg-surface-card p-4 shadow-ambient">
@@ -416,6 +417,8 @@ export default function DataflowDetailPage() {
             )}
           </section>
         )}
+
+        <IndicatorCoverage dataflowId={dataflowId} />
 
         {/* Dimensions — expandable codelists */}
         <section className="mb-6">

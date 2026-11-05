@@ -16,6 +16,8 @@ interface Dataflow {
   name: string;
   description?: string;
   categories?: Category[];
+  /** One-line indicator coverage summary, when the coverage artifact has the flow. */
+  coverage?: string | null;
 }
 
 interface CountryResult {
@@ -146,6 +148,11 @@ function DataflowCard({ df }: { df: Dataflow }) {
       {df.description && (
         <p className="line-clamp-2 text-xs leading-relaxed text-on-surface-variant">
           {df.description}
+        </p>
+      )}
+      {df.coverage && (
+        <p className="mt-auto pt-2 text-[11px] font-semibold tabular-nums text-on-surface-variant">
+          {df.coverage}
         </p>
       )}
     </Link>

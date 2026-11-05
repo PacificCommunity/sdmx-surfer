@@ -269,7 +269,7 @@ The app generates dashboards through a server-side chat loop.
 2. server authenticates the user
 3. server resolves the model to use
 4. server creates a per-request MCP client
-5. LLM can call MCP tools plus the synthetic `update_dashboard` tool
+5. LLM can call MCP tools plus two app-defined tools: `update_dashboard` and `get_indicator_coverage` (SPC only; reads the committed coverage artifact, see below)
 6. the app compiles authoring-schema output into native dashboard config
 7. the builder extracts the latest dashboard config from tool output and renders it
 
@@ -290,6 +290,16 @@ This matters for maintainability because there are effectively two config layers
 
 - LLM-facing authoring contract
 - runtime-facing dashboard-library contract
+
+### Indicator coverage
+
+`models/dataflow-coverage.json` records, for every SPC dataflow, which areas and years carry observations per indicator (indicator × area × year counts). It is built by `scripts/build-coverage.ts` (`npm run build-coverage`) from public .Stat REST and refreshed by the same daily workflow as the dataflow index, right after it. It is kept out of `models/dataflow-index.json` because `lib/embeddings.ts` loads the index whole.
+
+Readers go through `lib/coverage/load.ts`, a lazy, memoised, server-only read:
+
+- `/explore` cards show a one-line summary per flow ("560 indicators · 25 areas · 1980–2026"), sent by `/api/explore`
+- `/explore/[id]` has an "Indicator coverage" section fed one flow (`?coverage=1`) or one indicator (`?coverage=1&indicator=X`) at a time by `/api/explore/[id]`, so the page never ships the artifact
+- the agent's `get_indicator_coverage` tool answers which flows carry an indicator code (an inverted index built at load time), and which areas and years have data
 
 ## 9. Rendering Surfaces
 

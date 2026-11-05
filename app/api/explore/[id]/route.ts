@@ -1,5 +1,7 @@
 import { withMCPClient, callMcpTool } from "@/lib/mcp-client";
 import { getDataflowEntry } from "@/lib/embeddings";
+import { loadCoverage } from "@/lib/coverage/load";
+import { indicatorGrid, listIndicators } from "@/lib/coverage/query";
 
 /**
  * Everything this route returns is reference material about a dataflow:
@@ -18,6 +20,11 @@ const REFERENCE_CACHE = { "cache-control": "private, max-age=3600" };
  * GET /api/explore/[id] — get dataflow structure (from index) + diagram (from MCP)
  * GET /api/explore/[id]?codes=GEO_PICT — get dimension codes (MCP)
  * GET /api/explore/[id]?availability=1 — get data availability (MCP)
+ * GET /api/explore/[id]?coverage=1 — indicator list from the coverage artifact
+ * GET /api/explore/[id]?coverage=1&indicator=X — that indicator's area × year grid
+ *
+ * Coverage is served one flow (or one indicator) at a time so the page never
+ * ships models/dataflow-coverage.json whole.
  */
 export async function GET(
   req: Request,
@@ -28,6 +35,29 @@ export async function GET(
     const url = new URL(req.url);
     const codesFor = url.searchParams.get("codes");
     const availability = url.searchParams.get("availability");
+
+    if (url.searchParams.get("coverage")) {
+      const loaded = loadCoverage();
+      const flow = loaded?.artifact.flows[dataflowId];
+      if (!loaded || !flow) return Response.json({ coverage: null }, { headers: REFERENCE_CACHE });
+      const indicator = url.searchParams.get("indicator");
+      if (indicator) {
+        const grid = indicatorGrid(flow, indicator, loaded.artifact.areaLabels);
+        return Response.json({ grid }, { headers: REFERENCE_CACHE });
+      }
+      return Response.json({
+        coverage: {
+          detail: flow.detail,
+          indicatorDim: flow.indicatorDim,
+          indicatorRule: flow.indicatorRule,
+          areaDim: flow.areaDim,
+          obs: flow.obs,
+          first: flow.first,
+          last: flow.last,
+          indicators: listIndicators(flow),
+        },
+      }, { headers: REFERENCE_CACHE });
+    }
 
     // Dimension codes — always live from MCP
     if (codesFor) {

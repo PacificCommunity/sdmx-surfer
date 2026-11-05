@@ -10,6 +10,10 @@
 # structure and availability, and embeds only entries whose text actually
 # changed. A day with no catalogue changes makes no embedding calls, leaves the
 # file byte-identical, and produces no commit.
+#
+# Indicator coverage (models/dataflow-coverage.json) rides along: it is keyed
+# off the index just rebuilt and only re-reads flows whose availability or
+# structure moved.
 name: Refresh dataflow index
 
 on:
@@ -58,17 +62,30 @@ jobs:
           GOOGLE_AI_API_KEY: ${{ secrets.GOOGLE_AI_API_KEY }}
         run: npm run build-index
 
+      # Per-indicator area × year counts for every SPC flow, read from public
+      # .Stat (no secrets). Incremental on the index refreshed above: only flows
+      # whose obsCount, time envelope or dimensions changed are re-read, and an
+      # idle day leaves the file byte-identical. A full rebuild of all 127
+      # flows took about 3 minutes (2026-11-06); a no-change day takes seconds.
+      # A failing flow keeps its previous coverage. continue-on-error so a .Stat
+      # outage can never stop the index itself from being committed.
+      - name: Refresh indicator coverage
+        continue-on-error: true
+        run: npm run build-coverage
+
       - name: Commit if the catalogue moved
         run: |
-          if git diff --quiet -- models/dataflow-index.json; then
-            echo "No change to the index."
+          # Staged rather than `git diff`, which would miss a first-time file.
+          git add models/dataflow-index.json models/dataflow-coverage.json
+          if git diff --cached --quiet; then
+            echo "No change to the index or coverage."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add models/dataflow-index.json
-          git commit -m "Refresh dataflow index
+          git commit -m "Refresh dataflow index and coverage
 
-          Automated daily refresh of structure and availability. Embeddings are
-          recomputed only for entries whose text changed."
+          Automated daily refresh of structure, availability and indicator
+          coverage. Embeddings are recomputed only for entries whose text
+          changed; coverage only for flows whose availability moved."
           git push

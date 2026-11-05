@@ -19,7 +19,9 @@ import {
   formatKnowledgeSummary,
 } from "@/lib/tier2-knowledge";
 import { createRequestLogger } from "@/lib/logger";
-import { resolveDataflowNamesFromConfig } from "@/lib/dataflow-names";
+import { getDataflowName, resolveDataflowNamesFromConfig } from "@/lib/dataflow-names";
+import { loadCoverage } from "@/lib/coverage/load";
+import { queryCoverage } from "@/lib/coverage/query";
 import { sanitizeToolInputs } from "@/lib/sanitize-messages";
 import { filterMcpTools } from "@/lib/mcp-tool-policy";
 import { currentDashboardContext } from "@/lib/dashboard-messages";
@@ -239,6 +241,31 @@ export async function POST(req: Request) {
               currentStep,
             );
             return result;
+          },
+        }),
+        get_indicator_coverage: tool({
+          description:
+            "SPC endpoint only. Look up which areas and years actually have observations, per indicator, " +
+            "in a daily-built coverage index of every SPC .Stat dataflow (counts per indicator × area × year). " +
+            "Use it before building SPC queries to pick countries and years that have data, and to find every " +
+            "SPC dataflow carrying an indicator code (the same code links across flows: SDG series such as " +
+            "AG_LND_FRST appear in DF_SDG and DF_NMDI). Pass any of dataflow_id, indicator (code, or text to " +
+            "search labels), country (code or name), year_from, year_to. Area values read " +
+            "\"2000-2005,2010 (12)\": years with data, then the observation count. Says nothing about other endpoints.",
+          inputSchema: z.object({
+            dataflow_id: z.string().optional().describe("SPC dataflow id, e.g. DF_SDG or DF_POP_PROJ"),
+            indicator: z.string().optional().describe("Indicator/series code, e.g. SH_STA_STNT; free text searches labels"),
+            country: z.string().optional().describe("Area code (FJ, WS, MEL) or name (Fiji)"),
+            year_from: z.number().int().optional(),
+            year_to: z.number().int().optional(),
+          }),
+          execute: async (input) => {
+            const loaded = loadCoverage();
+            if (!loaded) return { error: "The coverage index is not available on this deployment." };
+            return {
+              ...queryCoverage(input, { ...loaded, nameOf: getDataflowName }),
+              coverage_date: loaded.artifact.createdAt.slice(0, 10),
+            };
           },
         }),
       },

@@ -12,7 +12,9 @@ const nextConfig: NextConfig = {
   },
   serverExternalPackages: ["@ai-sdk/mcp"],
   outputFileTracingIncludes: {
-    "/api/explore": ["./models/dataflow-index.json"],
+    "/api/explore": ["./models/dataflow-index.json", "./models/dataflow-coverage.json"],
+    "/api/explore/**": ["./models/dataflow-coverage.json"],
+    "/api/chat": ["./models/dataflow-coverage.json"],
   },
   async rewrites() {
     if (process.env.INCLUDE_COUNTRY_SNAPSHOTS === "0") {

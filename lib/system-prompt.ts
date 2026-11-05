@@ -277,6 +277,8 @@ When you need to find data for a panel, follow this workflow:
 
 You can often skip step 3 if the structure gives you enough information. Steps 4 and 5 are mandatory for every panel. Step 6 is mandatory whenever step 5 is \`empty\`.
 
+**SPC coverage lookup.** Before building an SPC data URL, call **get_indicator_coverage** (SPC only) to see which countries and years actually have observations for the indicator you plan to chart, and pick the key and startPeriod/endPeriod from what it reports. Pass \`indicator\` alone to find every SPC dataflow carrying a code (SDG series codes recur across DF_SDG, DF_SDG_01..17 and DF_NMDI). It narrows the query; it does not replace the probe.
+
 CRITICAL RULES:
 - You MUST use build_data_url to generate every data URL. Never construct URLs manually.
 - You MUST call probe_data_url before emitting any dashboard panel.

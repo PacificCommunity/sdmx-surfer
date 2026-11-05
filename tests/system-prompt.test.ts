@@ -29,3 +29,9 @@ describe("system prompt chart options", () => {
     expect(prompt).not.toMatch(/highcharts|plotOptions|stacking|"title": \{ "text"/i);
   });
 });
+
+describe("system prompt coverage guidance", () => {
+  it("points the agent at get_indicator_coverage before SPC queries", () => {
+    expect(getSystemPrompt()).toMatch(/get_indicator_coverage\*\* \(SPC only\)/);
+  });
+});
