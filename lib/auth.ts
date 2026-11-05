@@ -23,6 +23,7 @@ import {
   entraEmailIsVerified,
   signupIsOpenFor,
 } from "@/lib/signup-policy";
+import { buildMagicLinkBody, MAGIC_LINK_SUBJECT } from "@/lib/magic-link-email";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq, inArray } from "drizzle-orm";
 import { authConfig } from "./auth.config";
@@ -62,31 +63,6 @@ function extractIp(request: Request | undefined): string | null {
 // ---------------------------------------------------------------------------
 // Resend email sender
 // ---------------------------------------------------------------------------
-function buildMagicLinkBody(verifyUrl: string): { html: string; text: string } {
-  const html =
-    "<p>Hi,</p>" +
-    "<p>You requested access to <strong>Data Surfer</strong>, " +
-    "an early-alpha tool built at the Pacific Community (SPC) for exploring " +
-    "SDMx data through conversation.</p>" +
-    '<p><a href="' + verifyUrl + '">Click here to sign in</a></p>' +
-    "<p>This link expires in 15 minutes and can only be used once. " +
-    "If you did not request this, you can safely ignore this email.</p>" +
-    "<p>Happy surfing,<br>Giulio Valentino Dalla Riva<br>Pacific Community (SPC)</p>";
-
-  const text =
-    "Hi,\n\n" +
-    "You requested access to Data Surfer, an early-alpha tool built at the " +
-    "Pacific Community (SPC) for exploring SDMx data through conversation.\n\n" +
-    "Sign in: " + verifyUrl + "\n\n" +
-    "This link expires in 15 minutes and can only be used once. " +
-    "If you did not request this, you can safely ignore this email.\n\n" +
-    "Happy surfing,\n" +
-    "Giulio Valentino Dalla Riva\n" +
-    "Pacific Community (SPC)\n";
-
-  return { html, text };
-}
-
 async function sendMagicLink(params: {
   identifier: string;
   url: string;
@@ -134,7 +110,7 @@ async function sendMagicLink(params: {
     const { error } = await resend.emails.send({
       from,
       to: identifier,
-      subject: "Get ready to surf SDMx data",
+      subject: MAGIC_LINK_SUBJECT,
       html,
       text,
     });
@@ -149,7 +125,7 @@ async function sendMagicLink(params: {
   const { error } = await resend.emails.send({
     from,
     to: identifier,
-    subject: "Get ready to surf SDMx data",
+    subject: MAGIC_LINK_SUBJECT,
     html,
     text,
   });
