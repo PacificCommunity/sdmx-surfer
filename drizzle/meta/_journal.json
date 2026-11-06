@@ -57,6 +57,13 @@
       "when": 1785960869356,
       "tag": "0007_worried_sheva_callister",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793927494818,
+      "tag": "0008_petite_black_widow",
+      "breakpoints": true
     }
   ]
 }

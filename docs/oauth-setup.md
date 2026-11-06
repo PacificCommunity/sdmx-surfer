@@ -152,13 +152,24 @@ Three rules, any one of which admits a user:
 3. Their exact address is in `allowed_emails`, the invite list.
 
 **Rule 1 is per provider, and that is the whole design.** The service is open to
-the public through Google and Microsoft, while the magic link and the password
-path stay on rules 2 and 3. A single on/off switch cannot express that: on, it
-also opens the magic link, so anyone with any working address gets an account
-and the two lists govern nothing; off, it closes the public sign-in that the
-providers exist to allow. Only `google`, `microsoft-entra-id` and `github` can
-be named; `email` and `credentials` are refused, so a typo can fail to open
-something and can never open the door to our own account table.
+the public through Google and Microsoft, while the magic link, the password path
+and self-service accounts stay on rules 2 and 3. A single on/off switch cannot
+express that: on, it also opens the magic link, so anyone with any working
+address gets an account and the two lists govern nothing; off, it closes the
+public sign-in that the providers exist to allow. Only `google`,
+`microsoft-entra-id` and `github` can be named; `email`, `credentials` and
+`email-proof` are refused, so a typo can fail to open something and can never
+open the door to our own account table.
+
+Rules 2 and 3 (plus the break-glass list) are one function, `isEmailAdmitted`
+in `lib/admission.ts`, shared by the `signIn` callback, the password provider
+and the email-proof flow, so a domain-admitted user can hold a password too.
+
+**Self-service password accounts.** Users at an admitted address can create a
+password account, or reset its password, by sending one email from that address
+to us; no mail is sent to them. This exists because SPC's Exchange silently drops
+the magic link. Flow, the reasoning for DMARC pass + exact From as proof, and the
+Resend Receiving / DNS / webhook setup: [email-proof-signup.md](email-proof-signup.md).
 
 **Exact rows and suffix rows.** A plain row is exact: `spc.int` admits
 `someone@spc.int` and nothing else; `mail.spc.int` needs its own row. A row
@@ -235,17 +246,17 @@ administrator requires an administrator to be signed in.
    on production. The usage caps are the cost control from that point: 20 turns
    per day per user and a hard USD 1,000 cumulative budget. Add `github` later
    if it is wanted; it is second tier and nothing waits on it.
-6. **Retire the password provider** once every administrator has a working
-   provider identity (step 4), in a separate change.
+6. **Keep the password provider.** An earlier version of this plan retired it
+   once every administrator had a provider identity. It is now the self-service
+   route in for staff whose mail system drops the magic link and whose IT has not
+   approved Microsoft sign-in (see [email-proof-signup.md](email-proof-signup.md)).
 
-**The magic link and `allowed_domains` are not transitional.** An earlier
-version of this plan retired them along with the password path. That was wrong:
-they are the second route in, for the institutions whose staff have no Google or
+**The magic link, `allowed_domains` and passwords are not transitional.** They
+are the second route in, for the institutions whose staff have no Google or
 Microsoft account behind their work address, and for the regional statistics
 staff who work from personal addresses. Public signup through the two providers
 and an allowlisted route that skips them are both permanent.
 
-Steps 0 to 5 are reversible: unset a variable and the provider disappears;
-remove a provider from `AUTH_OPEN_SIGNUP_PROVIDERS` and that door closes again
-without touching the others. Step 6 is not, which is why it is last, separate,
-and gated on step 4 rather than on step 4 having been intended.
+Every step is reversible: unset a variable and the provider disappears; remove a
+provider from `AUTH_OPEN_SIGNUP_PROVIDERS` and that door closes again without
+touching the others.

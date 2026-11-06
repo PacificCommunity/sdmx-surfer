@@ -16,16 +16,22 @@ import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 import {
-  domainRuleCandidates,
-  emailDomain,
   githubEmailIsVerified,
   isBootstrapAdmin,
   entraEmailIsVerified,
   signupIsOpenFor,
 } from "@/lib/signup-policy";
 import { buildMagicLinkBody, MAGIC_LINK_SUBJECT } from "@/lib/magic-link-email";
+import { isEmailAdmitted } from "@/lib/admission";
+import {
+  emailProofCanComplete,
+  proofSecretFromCookieHeader,
+  proofSecretMatches,
+} from "@/lib/email-proof";
+import { requestIp } from "@/lib/request-ip";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
+import { z } from "zod";
 import { authConfig } from "./auth.config";
 import {
   db,
@@ -33,8 +39,7 @@ import {
   authAccounts,
   authVerificationTokens,
   authEvents,
-  allowedEmails,
-  allowedDomains,
+  emailProofs,
 } from "./db/index";
 import {
   verifyPassword,
@@ -43,22 +48,6 @@ import {
   recordLoginFailure,
 } from "./password";
 import { isCredentialAttemptThrottled } from "./auth-throttle";
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-// In v5 the credentials `authorize` receives a Web `Request`, whose headers are
-// a `Headers` object (not a plain map as in v4).
-function extractIp(request: Request | undefined): string | null {
-  const headers = request?.headers;
-  if (!headers || typeof headers.get !== "function") return null;
-  const raw = headers.get("x-forwarded-for") ?? headers.get("x-real-ip");
-  if (!raw) return null;
-  // x-forwarded-for may contain a comma-separated chain; take the first entry
-  const first = raw.split(",")[0]?.trim();
-  return first || null;
-}
 
 // ---------------------------------------------------------------------------
 // Resend email sender
@@ -270,10 +259,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ...oauthProviders,
     emailProvider,
 
-    // Admin-provisioned password sign-in. Users do not self-register here;
-    // passwords are set by an admin via the admin panel or CLI, and the user
-    // signs in with their email + that password. Allowlist is enforced in
-    // the signIn callback (same gate as magic-link).
+    // Password sign-in. Passwords are set by an admin (admin panel or CLI) or
+    // by the user through the email-proof flow below. Admission is checked
+    // here and again in the signIn callback, same rules as every other path.
     CredentialsProvider({
       id: "credentials",
       name: "Password",
@@ -294,7 +282,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               user_id: userId,
               email: email ?? "",
               event_type: "login_failure",
-              ip: extractIp(request),
+              ip: requestIp(request),
               metadata: { reason },
             });
           } catch {
@@ -317,13 +305,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return fail("rate_limited", email, null);
         }
 
-        // Same allowlist gate as magic-link sign-in
-        const allow = await db
-          .select({ email: allowedEmails.email })
-          .from(allowedEmails)
-          .where(eq(allowedEmails.email, email))
-          .limit(1);
-        if (allow.length === 0) return fail("not_allowlisted", email, null);
+        if (!(await isEmailAdmitted(email))) return fail("not_admitted", email, null);
 
         const rows = await db
           .select()
@@ -347,7 +329,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 user_id: user.id,
                 email,
                 event_type: "account_locked",
-                ip: extractIp(request),
+                ip: requestIp(request),
               });
             } catch {
               // ignore audit failures
@@ -362,7 +344,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             user_id: user.id,
             email,
             event_type: "login_success",
-            ip: extractIp(request),
+            ip: requestIp(request),
           });
         } catch {
           // ignore audit failures
@@ -375,13 +357,104 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         };
       },
     }),
+
+    // Completion of a self-service signup or password reset proved by an
+    // email the user sent us (lib/email-proof.ts). Only the browser that
+    // started the proof holds the cookie secret, and the proof must have been
+    // verified by the inbound webhook moments ago. Installs the password
+    // chosen at the start and signs the user in.
+    CredentialsProvider({
+      id: "email-proof",
+      name: "Email proof",
+      credentials: {
+        proofId: { label: "Proof", type: "text" },
+      },
+      async authorize(credentials, request) {
+        const fail = async (reason: string, email: string): Promise<null> => {
+          try {
+            await db.insert(authEvents).values({
+              email,
+              event_type: "email_proof_failure",
+              ip: requestIp(request),
+              metadata: { reason },
+            });
+          } catch {
+            // audit logging must never block the auth path
+          }
+          return null;
+        };
+
+        const proofId = z.uuid().safeParse(credentials?.proofId);
+        if (!proofId.success) return fail("missing_proof", "");
+        const secret = proofSecretFromCookieHeader(
+          request.headers.get("cookie"),
+          proofId.data,
+        );
+        if (!secret) return fail("missing_cookie", "");
+
+        const [proof] = await db
+          .select()
+          .from(emailProofs)
+          .where(eq(emailProofs.id, proofId.data))
+          .limit(1);
+        if (!proof || !proofSecretMatches(secret, proof.browser_secret_hash)) {
+          return fail("unknown_proof", "");
+        }
+        const now = new Date();
+        if (!emailProofCanComplete(proof, now)) return fail("not_completable", proof.email);
+        if (!(await isEmailAdmitted(proof.email))) return fail("not_admitted", proof.email);
+
+        // Claim the proof first: the conditional update lets exactly one
+        // request through, however many race here.
+        const [claimed] = await db
+          .update(emailProofs)
+          .set({ consumed_at: now })
+          .where(and(eq(emailProofs.id, proof.id), isNull(emailProofs.consumed_at)))
+          .returning({ id: emailProofs.id });
+        if (!claimed) return fail("already_consumed", proof.email);
+
+        // New users get the default role; an existing user keeps theirs and
+        // has any lockout cleared along with the new password.
+        const [user] = await db
+          .insert(authUsers)
+          .values({
+            email: proof.email,
+            emailVerified: now,
+            password_hash: proof.password_hash,
+          })
+          .onConflictDoUpdate({
+            target: authUsers.email,
+            set: {
+              emailVerified: now,
+              password_hash: proof.password_hash,
+              failed_attempts: 0,
+              locked_until: null,
+            },
+          })
+          .returning({ id: authUsers.id, email: authUsers.email, name: authUsers.name });
+
+        try {
+          await db.insert(authEvents).values({
+            user_id: user.id,
+            email: user.email,
+            event_type: "email_proof_completed",
+            ip: requestIp(request),
+            metadata: { purpose: proof.purpose, code: proof.code },
+          });
+        } catch {
+          // ignore audit failures
+        }
+
+        return { id: user.id, email: user.email, name: user.name ?? undefined };
+      },
+    }),
   ],
 
   callbacks: {
     ...authConfig.callbacks,
 
-    // Admit on any of three grounds: open signup, an institutional domain, or
-    // an invite. See lib/signup-policy.
+    // Admit on open signup for the provider, or otherwise on the shared rules
+    // (break-glass, institutional domain, invite). See lib/admission.
     //
     // A provider can return no email (a GitHub account with every address
     // private). We reject that rather than admitting an identity we cannot
@@ -420,53 +493,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       }
 
-      // Break-glass first, so a locked-out administrator is never gated by a
-      // list they can no longer edit.
-      if (isBootstrapAdmin(normalizedEmail)) return true;
-
       // Public signup, for the providers it has been opened for. Scoped to the
       // provider rather than global: Google and Microsoft are meant to be open
-      // to anyone, while the magic link and password paths stay on the lists
-      // below. Opening those too would admit anyone with any working address
-      // and leave both lists governing nothing.
+      // to anyone, while the magic link, password and email-proof paths stay
+      // on the lists. Opening those too would admit anyone with any working
+      // address and leave both lists governing nothing.
       //
       // This runs before the lists rather than after because it is cheaper: it
-      // reads an environment variable, where the rules below each cost a query.
+      // reads an environment variable, where the rules each cost a query.
       if (signupIsOpenFor(account?.provider)) return true;
 
-      // Institutional domain: an exact row for the host, or a `.suffix` row
-      // covering it, found with one indexed IN lookup over the candidates.
-      //
-      // Degrades to the invite list if that table cannot be read, rather than
-      // taking sign-in down with it. This is a real ordering hazard, not a
-      // hypothetical one: the code queries this table on every sign-in, so
-      // shipping it ahead of its migration would lock every user out at once.
-      // Failing this way only ever removes a way in, never adds one.
-      const host = emailDomain(normalizedEmail);
-      if (host) {
-        try {
-          const byDomain = await db
-            .select({ domain: allowedDomains.domain })
-            .from(allowedDomains)
-            .where(inArray(allowedDomains.domain, domainRuleCandidates(host)))
-            .limit(1);
-          if (byDomain.length > 0) return true;
-        } catch (err) {
-          console.error(
-            "[auth] allowed_domains unreadable, falling back to the invite " +
-              "list. Has migration 0007 been applied?",
-            err,
-          );
-        }
-      }
-
-      // Otherwise an individual invite, which is how personal addresses get in.
-      const rows = await db
-        .select({ email: allowedEmails.email })
-        .from(allowedEmails)
-        .where(eq(allowedEmails.email, normalizedEmail))
-        .limit(1);
-      return rows.length > 0;
+      return isEmailAdmitted(normalizedEmail);
     },
 
     // On first sign-in (user object is present), fetch role from DB and store

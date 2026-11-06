@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react";
 import { AppFooter } from "@/components/app-footer";
 import { BrandField } from "@/components/brand-field";
 import type { OAuthProviderInfo } from "@/lib/oauth-providers";
+import { EmailProofPanel, type PasswordPolicy } from "./email-proof-panel";
 
 function getSafeCallbackUrl(rawCallbackUrl: string | null): string {
   if (!rawCallbackUrl) return "/";
@@ -14,9 +15,16 @@ function getSafeCallbackUrl(rawCallbackUrl: string | null): string {
   return rawCallbackUrl;
 }
 
-type Mode = "magic" | "password";
+type Mode = "magic" | "password" | "signup" | "reset";
 
-function LoginForm({ providers }: { providers: OAuthProviderInfo[] }) {
+interface LoginProps {
+  providers: OAuthProviderInfo[];
+  /** Whether self-service signup / reset by email proof is configured. */
+  selfServiceEnabled: boolean;
+  passwordPolicy: PasswordPolicy;
+}
+
+function LoginForm({ providers, selfServiceEnabled, passwordPolicy }: LoginProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   // Preserve callbackUrl from query params (e.g. from "Explore this" on a
@@ -50,7 +58,10 @@ function LoginForm({ providers }: { providers: OAuthProviderInfo[] }) {
     }
 
     if (result.error === "AccessDenied") {
-      setError("This email is not on the invite list.");
+      setError(
+        "This email isn't admitted: it needs an approved organisation domain " +
+          "or an invitation.",
+      );
       return;
     }
 
@@ -84,6 +95,12 @@ function LoginForm({ providers }: { providers: OAuthProviderInfo[] }) {
 
     router.push(callbackUrl);
     router.refresh();
+  }
+
+  function changeMode(next: Mode) {
+    setMode(next);
+    setError(null);
+    setPassword("");
   }
 
   return (
@@ -127,6 +144,14 @@ function LoginForm({ providers }: { providers: OAuthProviderInfo[] }) {
             Use a different email
           </button>
         </div>
+      ) : mode === "signup" || mode === "reset" ? (
+        <EmailProofPanel
+          key={mode}
+          purpose={mode}
+          callbackUrl={callbackUrl}
+          passwordPolicy={passwordPolicy}
+          onBack={() => changeMode("magic")}
+        />
       ) : mode === "magic" ? (
         /* Magic link form */
         <form onSubmit={handleSubmit} noValidate>
@@ -233,9 +258,19 @@ function LoginForm({ providers }: { providers: OAuthProviderInfo[] }) {
             Sign in with a password instead
           </button>
 
+          {selfServiceEnabled && (
+            <button
+              type="button"
+              onClick={() => changeMode("signup")}
+              className="mt-2 w-full text-center text-xs text-on-surface-variant transition-colors hover:text-primary hover:underline"
+            >
+              New here? Create an account
+            </button>
+          )}
+
           <p className="mt-4 text-center text-xs text-text-muted">
-            Invite-only access. Contact your SPC administrator to request
-            access.
+            Open to staff of approved organisations and to invited users.
+            Contact your SPC administrator to request access.
           </p>
         </form>
       ) : (
@@ -243,7 +278,8 @@ function LoginForm({ providers }: { providers: OAuthProviderInfo[] }) {
         <form onSubmit={handlePasswordSubmit} noValidate>
           <h2 className="type-headline-sm mb-1 text-on-surface">Sign in</h2>
           <p className="mb-6 text-sm text-on-surface-variant">
-            Use the passphrase your administrator shared with you.
+            Use the password you set, or the passphrase your administrator
+            shared with you.
           </p>
 
           <div className="mb-4">
@@ -304,6 +340,16 @@ function LoginForm({ providers }: { providers: OAuthProviderInfo[] }) {
             {loading ? "Signing in..." : "Sign in"}
           </button>
 
+          {selfServiceEnabled && (
+            <button
+              type="button"
+              onClick={() => changeMode("reset")}
+              className="mt-4 w-full text-center text-xs text-on-surface-variant transition-colors hover:text-primary hover:underline"
+            >
+              Forgot password?
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => {
@@ -321,7 +367,7 @@ function LoginForm({ providers }: { providers: OAuthProviderInfo[] }) {
   );
 }
 
-export function LoginView({ providers }: { providers: OAuthProviderInfo[] }) {
+export function LoginView(props: LoginProps) {
   return (
     // A split field: the brand carries the left, the form sits on a plain
     // surface at the right. The pattern runs at full strength on the brand
@@ -367,7 +413,7 @@ export function LoginView({ providers }: { providers: OAuthProviderInfo[] }) {
               </div>
             }
           >
-            <LoginForm providers={providers} />
+            <LoginForm {...props} />
           </Suspense>
 
           <AppFooter className="mt-6" compact />

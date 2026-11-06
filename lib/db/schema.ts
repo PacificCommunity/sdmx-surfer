@@ -9,7 +9,9 @@ import {
   index,
   primaryKey,
   numeric,
+  uuid,
 } from "drizzle-orm/pg-core";
+import type { EmailProofRejection } from "../email-proof";
 
 // ---------------------------------------------------------------------------
 // auth_users
@@ -42,7 +44,9 @@ export const authEvents = pgTable(
     // email is always captured so we can trace activity by identifier
     email: text("email").notNull(),
     // event_type: password_set | password_cleared | login_success |
-    // login_failure | account_locked | password_self_change
+    // login_failure | account_locked | password_self_change |
+    // email_proof_started | email_proof_verified | email_proof_rejected |
+    // email_proof_completed | email_proof_failure
     event_type: text("event_type").notNull(),
     // Who performed the action (admin for set/clear, user for self-change / login)
     actor_user_id: text("actor_user_id").references(() => authUsers.id),
@@ -217,3 +221,43 @@ export const authMagicLinkRefs = pgTable("auth_magic_link_refs", {
   expiresAt: timestamp("expires_at").notNull(),
   usedAt: timestamp("used_at"),
 });
+
+// ---------------------------------------------------------------------------
+// email_proofs  (self-service signup / password reset proved by inbound mail)
+// ---------------------------------------------------------------------------
+//
+// One row per attempt. The user picks a password, then proves the address by
+// SENDING an email to verify-<code>@INBOUND_EMAIL_DOMAIN; the inbound webhook
+// marks the row verified when that message passed DMARC with a From exactly
+// equal to `email`. The browser that started the attempt holds a secret (only
+// its hash is stored here) and must present it to complete. See
+// lib/email-proof.ts and docs/oauth-setup.md.
+export const emailProofs = pgTable(
+  "email_proofs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** Lowercase base32, the local-part suffix of the address mailed to. */
+    code: text("code").notNull().unique(),
+    /** Normalised (trimmed, lowercased) address being proved. */
+    email: text("email").notNull(),
+    purpose: text("purpose", { enum: ["signup", "reset"] }).notNull(),
+    /** Argon2id hash of the password chosen at start, installed on completion. */
+    password_hash: text("password_hash").notNull(),
+    /** sha256 hex of the secret held in the starting browser's cookie. */
+    browser_secret_hash: text("browser_secret_hash").notNull(),
+    /** Requester address, for the per-IP start throttle. */
+    ip: text("ip"),
+    created_at: timestamp("created_at").notNull().defaultNow(),
+    expires_at: timestamp("expires_at").notNull(),
+    verified_at: timestamp("verified_at"),
+    consumed_at: timestamp("consumed_at"),
+    /** Why the inbound message was refused; see EmailProofRejection. */
+    rejection: text("rejection").$type<EmailProofRejection>(),
+  },
+  (table) => [
+    index("email_proofs_email_created_idx").on(table.email, table.created_at),
+    index("email_proofs_ip_created_idx").on(table.ip, table.created_at),
+  ],
+);
+
+export type EmailProof = typeof emailProofs.$inferSelect;

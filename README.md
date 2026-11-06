@@ -7,7 +7,7 @@ Built on three existing components:
 - **sdmx-dashboard-components** — React library rendering dashboards from JSON configs via ECharts
 - **AI SDK v6** — connects a chat interface to the AI, which orchestrates discovery and produces dashboard configs
 
-Access is invite-only. Users sign in via email magic links. Sessions and usage are persisted in PostgreSQL.
+Access is limited to approved organisation domains and invited users. Users sign in with Google/Microsoft/GitHub (when configured), email magic links, or a password they set themselves by proving their address with one email they send us (see `docs/email-proof-signup.md`). Sessions and usage are persisted in PostgreSQL.
 
 ## Prerequisites
 
@@ -259,8 +259,9 @@ flowchart TB
 ## Features
 
 ### Authentication and access control
-- Email magic-link sign-in via Resend (no passwords)
-- Invite-only: email must be in the `allowed_emails` allowlist before a link is sent
+- OAuth (Google, Microsoft, GitHub), email magic-link via Resend, and passwords
+- Admission: an `allowed_domains` rule, the `allowed_emails` invite list, or a provider opened in `AUTH_OPEN_SIGNUP_PROVIDERS`
+- Self-service password signup/reset proved by an inbound email (DMARC pass + exact From), no mail sent to the user
 - All routes protected by NextAuth middleware (`proxy.ts`)
 - Admin role for invite and user management
 

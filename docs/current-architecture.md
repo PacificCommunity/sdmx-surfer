@@ -14,7 +14,7 @@ At a high level, the app combines:
 - a server-side chat route that talks to an MCP gateway
 - a dashboard rendering library (`sdmx-dashboard-components`)
 - database-backed session persistence
-- invite-only authentication
+- allowlisted authentication (institutional domains, invites, opt-in open OAuth providers)
 - optional publication of dashboards to a public gallery
 
 This repository contains the production app, not only a prototype shell. Some older architecture documents still describe planned features or earlier states. This document is the source of truth for the currently implemented behavior.
@@ -39,13 +39,14 @@ This repository contains the production app, not only a prototype shell. Some ol
 - `/api/sessions/[id]/publish` — authenticated owner publish/unpublish endpoint
 - `/api/public/dashboards` and `/api/public/dashboards/[id]` — public read-only published dashboard endpoints
 - `/api/admin/*` — authenticated admin-only operational endpoints
-- `/api/auth/*` — NextAuth endpoints
+- `/api/auth/*` — NextAuth endpoints, plus the public self-service email-proof endpoints (`/api/auth/email-proof/start`, `/api/auth/email-proof/status`) and the Resend inbound webhook (`/api/auth/inbound-email`)
 
 ### External dependencies
 
 - MCP gateway for SDMx discovery/query tooling
 - `sdmx-dashboard-components` for dashboard rendering
-- NextAuth with email magic links for authentication
+- NextAuth (Auth.js v5) with OAuth providers, email magic links, passwords and inbound-email proof
+- Resend for outbound magic links and inbound (Receiving) proof emails
 - Postgres via Drizzle for persistence
 
 ## 3. Route Model and Access Rights
@@ -235,13 +236,14 @@ This projection boundary must be preserved in any cleanup or component extractio
 
 ## 7. Authentication and Authorization Model
 
-Authentication is invite-only and email-link based.
+Authentication is Auth.js (NextAuth v5) with JWT sessions; admission is by allowlist rules.
 
 ### Auth model
 
-- NextAuth v4
-- EmailProvider / magic-link flow
-- allowlist check against `allowed_emails`
+- providers (`lib/auth.ts`): Google / Microsoft Entra ID / GitHub when configured, email magic link, password (`credentials`), and `email-proof`
+- admission (`lib/admission.ts` `isEmailAdmitted`, shared by every path): break-glass `AUTH_BOOTSTRAP_ADMINS`, an `allowed_domains` rule (exact host or `.suffix`), or the `allowed_emails` invite list; OAuth providers named in `AUTH_OPEN_SIGNUP_PROVIDERS` admit anyone
+- GitHub and Microsoft addresses are verified in the `signIn` callback before any rule runs
+- self-service passwords: a user proves an admitted address by sending one email to `verify-<code>@INBOUND_EMAIL_DOMAIN`; the Resend webhook accepts it only on DMARC pass with an exact From match, and the starting browser (cookie secret) completes via the `email-proof` provider, which creates the account or sets the new password. State in `email_proofs`; see `docs/email-proof-signup.md`
 - session enriched with:
   - `userId`
   - `role`

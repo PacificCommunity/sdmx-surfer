@@ -60,13 +60,15 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // If the user has no password set (magic-link only), we require them to
-  // have an admin set one first. This keeps the "admin provisions" invariant.
+  // Changing a password needs the current one. Without one (OAuth or
+  // magic-link only), a password is set by an admin or by the user's own
+  // email proof ("Forgot password?" on the sign-in page).
   if (!user.password_hash) {
     return NextResponse.json(
       {
         error:
-          "Your account does not have a password set. Ask an admin to provision one.",
+          "Your account does not have a password set. Use \"Forgot password?\" " +
+          "on the sign-in page, or ask an admin to provision one.",
       },
       { status: 400 },
     );
