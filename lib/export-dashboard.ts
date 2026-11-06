@@ -542,12 +542,11 @@ export async function exportToHtml(
 /**
  * Library release the live HTML export loads from esm.sh, with the ECharts
  * major and parser release it is built against. These must be published on
- * npm (esm.sh 404s otherwise): bump both to 1.0.0-rc.2 / 0.4.1 once those
- * releases are on npm.
+ * npm (esm.sh 404s otherwise); keep them equal to the package.json versions.
  */
-const LIVE_EXPORT_DASHBOARD_VERSION = "1.0.0-rc.1";
+const LIVE_EXPORT_DASHBOARD_VERSION = "1.0.0-rc.2";
 const LIVE_EXPORT_ECHARTS_VERSION = "6";
-const LIVE_EXPORT_PARSER_VERSION = "0.4.0";
+const LIVE_EXPORT_PARSER_VERSION = "0.4.2";
 
 /**
  * Export the dashboard as a live interactive HTML file.
