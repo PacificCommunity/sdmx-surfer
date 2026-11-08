@@ -281,6 +281,12 @@ export const ENDPOINTS: EndpointInfo[] = [
   },
 ];
 
+/**
+ * Hosts a map visual may load its boundary layer from (GeoJSON or vector
+ * tiles), besides the providers above.
+ */
+export const MAP_LAYER_HOSTS: readonly string[] = ["geonode.pacificdata.org", "www.spc.int"];
+
 const UNKNOWN_ENDPOINT: EndpointInfo = {
   key: "UNKNOWN",
   name: "External source",

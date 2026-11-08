@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getDashboardTitle } from "./dashboard-text";
+import { visualReferenceProblems } from "./dashboard-safety";
 
 export const localizedStringSchema = z.union([
   z.string(),
@@ -96,6 +97,10 @@ export const visualConfigSchema = z
           path: ["data"],
         });
       }
+    }
+
+    for (const message of visualReferenceProblems(config)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message, path: ["data"] });
     }
   });
 

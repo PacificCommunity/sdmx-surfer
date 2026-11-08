@@ -132,7 +132,7 @@ describe("dashboard authoring compiler", () => {
               type: "line",
               xAxisConcept: "TIME_PERIOD",
               yAxisConcept: "OBS_VALUE",
-              data: "https://example.com/rest/data/DF_X/A..X",
+              data: "https://stats-sdmx-disseminate.pacificdata.org/rest/data/DF_X/A..X",
             },
           ],
         },

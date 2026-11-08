@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { contentSecurityPolicy } from "./lib/content-security-policy";
 
 const nextConfig: NextConfig = {
   // Pin the workspace root. A stray package-lock.json exists above this
@@ -15,6 +16,19 @@ const nextConfig: NextConfig = {
     "/api/explore": ["./models/dataflow-index.json", "./models/dataflow-coverage.json"],
     "/api/explore/**": ["./models/dataflow-coverage.json"],
     "/api/chat": ["./models/dataflow-coverage.json"],
+  },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: contentSecurityPolicy(process.env.NODE_ENV !== "production"),
+          },
+        ],
+      },
+    ];
   },
   async rewrites() {
     if (process.env.INCLUDE_COUNTRY_SNAPSHOTS === "0") {

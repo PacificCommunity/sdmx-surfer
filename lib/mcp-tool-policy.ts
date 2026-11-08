@@ -25,6 +25,8 @@
  * policy against the full set).
  */
 
+import { detectEndpoint } from "@/lib/endpoints-registry";
+
 /** The progressive-discovery workflow documented in the system prompt. */
 export const DEFAULT_MODEL_FACING_MCP_TOOLS = [
   "list_dataflows",
@@ -61,8 +63,61 @@ export function filterMcpTools<T extends Record<string, unknown>>(
   tools: T,
 ): Partial<T> {
   const allow = modelFacingMcpTools();
-  if (!allow) return tools;
   return Object.fromEntries(
-    Object.entries(tools).filter(([name]) => allow.has(name)),
+    Object.entries(tools)
+      .filter(([name]) => !allow || allow.has(name))
+      .map(([name, tool]) => [name, URL_FETCHING_TOOLS.includes(name) ? guardDataUrl(tool) : tool]),
   ) as Partial<T>;
+}
+
+// The gateway fetches whatever `data_url` these tools are given, so a steered
+// model could aim it at any host: a channel for leaking conversation text in
+// a URL, or a probe of the gateway's own network. Only registered SDMX
+// providers pass.
+const URL_FETCHING_TOOLS: readonly string[] = ["probe_data_url", "suggest_nonempty_queries"];
+
+// Read the host without a URL parser: the gateway parses URLs with its own
+// library, and a string two parsers read differently (backslashes, "@" in the
+// authority, whitespace) could pass here and reach another host there. So the
+// authority must be a bare hostname and the rest free of such characters.
+const PLAIN_HTTP_URL = /^https?:\/\/([a-z0-9.-]+)(?::\d{1,5})?(?:[/?#][^\s\\]*)?$/i;
+
+/** Why the gateway must not fetch this data URL, or null when it may. */
+export function dataUrlRefusal(dataUrl: string): string | null {
+  const match = PLAIN_HTTP_URL.exec(dataUrl);
+  if (!match) return "not a plain http(s) URL";
+  if (detectEndpoint("https://" + match[1]).key === "UNKNOWN") {
+    return match[1] + " is not a registered SDMX provider";
+  }
+  return null;
+}
+
+function guardDataUrl(tool: unknown): unknown {
+  if (
+    typeof tool !== "object" ||
+    tool === null ||
+    !("execute" in tool) ||
+    typeof tool.execute !== "function"
+  ) {
+    return tool;
+  }
+  const execute = tool.execute;
+  return {
+    ...tool,
+    execute: async (args: unknown, options: unknown) => {
+      const dataUrl =
+        typeof args === "object" && args !== null && "data_url" in args ? args.data_url : null;
+      const refusal = typeof dataUrl === "string" && dataUrl !== "" ? dataUrlRefusal(dataUrl) : null;
+      if (refusal) {
+        return {
+          isError: true,
+          content: [{
+            type: "text",
+            text: "Refused: " + refusal + ". Probe only URLs from build_data_url for a registered endpoint.",
+          }],
+        };
+      }
+      return execute(args, options);
+    },
+  };
 }

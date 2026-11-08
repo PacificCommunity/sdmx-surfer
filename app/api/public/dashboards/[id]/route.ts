@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import { db, dashboardSessions } from "@/lib/db";
 import { translateDashboardExtraOptions } from "@/lib/extra-options";
+import { stripDashboardMarkup, visualReferenceProblems } from "@/lib/dashboard-safety";
 import type { SDMXDashboardConfig } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -73,12 +74,34 @@ export async function GET(
       );
     }
 
+    // Dashboards published before the URL and markup rules existed are held
+    // to them here: a panel fetching from an unregistered host becomes a
+    // note, and markup is stripped from all text.
+    const safeConfig = stripDashboardMarkup({
+      ...config,
+      rows: config.rows.map((row) => ({
+        ...row,
+        columns: row.columns.map((visual) =>
+          visualReferenceProblems(visual).length === 0
+            ? visual
+            : {
+                id: visual.id,
+                type: "note" as const,
+                colSize: visual.colSize,
+                note: {
+                  text: "This panel was removed: it loads data from outside the registered SDMX providers.",
+                },
+              },
+        ),
+      })),
+    });
+
     return NextResponse.json(
       {
         id: row.id,
         title: row.public_title || row.title,
         description: row.public_description || null,
-        config,
+        config: safeConfig,
         author: row.author_display_name || null,
         publishedAt: row.published_at?.toISOString() || null,
       },

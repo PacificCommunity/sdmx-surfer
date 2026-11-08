@@ -699,7 +699,9 @@ function MermaidDiagram({ code }: { code: string }) {
             fontFamily: "Inter, system-ui, sans-serif",
             fontSize: "12px",
           },
-          securityLevel: "loose",
+          // Labels come from provider metadata: strict escapes HTML in them
+          // and disables click handlers before the SVG is injected below.
+          securityLevel: "strict",
         });
         const { svg: rendered } = await mermaid.render(
           "mermaid-" + Date.now(),

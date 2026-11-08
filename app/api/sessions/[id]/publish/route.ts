@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { db, dashboardSessions } from "@/lib/db";
 import { checkCsrf } from "@/lib/csrf";
 import { checkDashboardQuota } from "@/lib/usage-caps";
+import { dashboardReferenceProblems } from "@/lib/dashboard-safety";
 
 export const maxDuration = 25;
 
@@ -93,6 +94,14 @@ export async function POST(
     if (history.length === 0 || pointer < 0) {
       return NextResponse.json(
         { error: "Cannot publish a session without a dashboard config" },
+        { status: 400 },
+      );
+    }
+
+    const problems = dashboardReferenceProblems(history[Math.min(pointer, history.length - 1)]);
+    if (problems.length > 0) {
+      return NextResponse.json(
+        { error: "Cannot publish: " + problems.join("; ") },
         { status: 400 },
       );
     }

@@ -20,6 +20,7 @@ import {
 } from "@/lib/tier2-knowledge";
 import { createRequestLogger } from "@/lib/logger";
 import { getDataflowName, resolveDataflowNamesFromConfig } from "@/lib/dataflow-names";
+import { dashboardReferenceProblems, stripDashboardMarkup } from "@/lib/dashboard-safety";
 import { loadCoverage } from "@/lib/coverage/load";
 import { queryCoverage } from "@/lib/coverage/query";
 import { sanitizeToolInputs } from "@/lib/sanitize-messages";
@@ -225,18 +226,28 @@ export async function POST(req: Request) {
             config: z.infer<typeof dashboardToolConfigSchema>;
           }) => {
             const compiledConfig = compileDashboardToolConfig(config);
-            compiledConfig.dataflows = resolveDataflowNamesFromConfig(compiledConfig);
+            const problems = dashboardReferenceProblems(compiledConfig);
+            if (problems.length > 0) {
+              return {
+                success: false,
+                error:
+                  "Not applied: " + problems.join("; ") +
+                  ". Data URLs must come from build_data_url for a registered endpoint.",
+              };
+            }
+            const dashboard = stripDashboardMarkup(compiledConfig);
+            dashboard.dataflows = resolveDataflowNamesFromConfig(dashboard);
             dashboardEmitted = true;
             const result = {
               success: true,
-              dashboard: compiledConfig,
+              dashboard,
               message:
                 "Dashboard updated. The preview now shows: " +
-                getConfigTitle(compiledConfig),
+                getConfigTitle(dashboard),
             };
             logger.recordToolCall(
               "update_dashboard",
-              { configId: compiledConfig.id },
+              { configId: dashboard.id },
               result,
               currentStep,
             );

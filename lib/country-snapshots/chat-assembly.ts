@@ -5,6 +5,7 @@ import {
   dashboardToolConfigSchema,
 } from "@/lib/dashboard-authoring";
 import { resolveDataflowNamesFromConfig } from "@/lib/dataflow-names";
+import { dashboardReferenceProblems, stripDashboardMarkup } from "@/lib/dashboard-safety";
 import { getConfigTitle } from "@/lib/dashboard-schema";
 import { getMode, catalogueTool } from "./catalogue-access";
 import {
@@ -94,13 +95,23 @@ export function buildUpdateDashboardTool() {
       config: z.infer<typeof dashboardToolConfigSchema>;
     }) => {
       const compiled = compileDashboardToolConfig(config);
-      compiled.dataflows = resolveDataflowNamesFromConfig(compiled);
+      const problems = dashboardReferenceProblems(compiled);
+      if (problems.length > 0) {
+        return {
+          success: false,
+          error:
+            "Not applied: " + problems.join("; ") +
+            ". Data URLs must come from build_data_url for a registered endpoint.",
+        };
+      }
+      const dashboard = stripDashboardMarkup(compiled);
+      dashboard.dataflows = resolveDataflowNamesFromConfig(dashboard);
       return {
         success: true,
-        dashboard: compiled,
+        dashboard,
         message:
           "Dashboard updated. The preview now shows: " +
-          getConfigTitle(compiled),
+          getConfigTitle(dashboard),
       };
     },
   });

@@ -234,6 +234,19 @@ The current public detail API is `GET /api/public/dashboards/[id]`. It only serv
 
 This projection boundary must be preserved in any cleanup or component extraction work.
 
+### What a dashboard config may make a browser do
+
+Configs come from the model, the JSON editor and forks of published dashboards, and every viewer's browser acts on them. `lib/dashboard-safety.ts` holds the rules:
+
+- **Data references** (`data`) may only reach the SDMX providers in `lib/endpoints-registry.ts` and the map layer hosts (`MAP_LAYER_HOSTS`: `geonode.pacificdata.org`, `www.spc.int`). Each token of the data expression is resolved with the browser's URL parser, so spellings like `//host`, `https:\\host` or `provider@host` are judged by where the browser would really go. `dataLink`/`metadataLink` must be http(s).
+- **Text carries no HTML.** The chart library writes map titles and tooltips with `innerHTML`, and ECharts renders tooltip formatter strings as HTML, so tags are stripped from every string except `data`.
+
+Where they apply: the JSON editor and native tool input (schema refinement in `lib/dashboard-schema.ts`); both `update_dashboard` tools, which refuse the config and tell the model why; session saves (markup stripped); publishing (refused); and `GET /api/public/dashboards/[id]`, which turns an offending panel into a note and strips markup, so dashboards published before the rules are covered too.
+
+The agent's own reach is limited in `lib/mcp-tool-policy.ts`: the gateway fetches whatever `data_url` `probe_data_url` and `suggest_nonempty_queries` receive, so those calls are refused unless the URL is a plain http(s) URL on a registered provider. The model has no other network tool.
+
+A Content-Security-Policy on every response (`lib/content-security-policy.ts`, set in `next.config.ts`) limits `connect-src` to this site, the providers and the map layer hosts, and images to the basemap and colour-scheme hosts. Scripts still allow `'unsafe-inline'` for Next.js's inline bootstrap, so the CSP limits where data can go, not whether injected markup runs; stripping markup covers that.
+
 ## 7. Authentication and Authorization Model
 
 Authentication is Auth.js (NextAuth v5) with JWT sessions; admission is by allowlist rules.

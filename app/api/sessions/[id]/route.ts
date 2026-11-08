@@ -4,6 +4,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, dashboardSessions } from "@/lib/db";
 import { checkCsrf } from "@/lib/csrf";
+import { stripDashboardMarkup } from "@/lib/dashboard-safety";
 
 // A session read/write is a single indexed query; anything over a few seconds
 // means the DB is misbehaving. Cap the function so the client sees a quick
@@ -99,7 +100,7 @@ export async function PUT(
   };
   if (title !== undefined) updates.title = title;
   if (messages !== undefined) updates.messages = messages;
-  if (configHistory !== undefined) updates.config_history = configHistory;
+  if (configHistory !== undefined) updates.config_history = stripDashboardMarkup(configHistory);
   if (configPointer !== undefined) updates.config_pointer = configPointer;
 
   try {
