@@ -111,12 +111,16 @@ export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
               onError={(err) => logFailure(item, err as Error)}
             >
               <SnapshotValue
+                // Any className replaces the library's chart-sized 400px box.
+                className="py-6"
                 config={{
                   id: item.id,
                   type: "value",
                   xAxisConcept: "OBS_VALUE",
                   data: item.dataUrl,
                   title: { text: "" },
+                  // The query holds only the latest observation, so this is its year.
+                  subtitle: { text: "{TIME_PERIOD}" },
                 }}
                 language="en"
               />
@@ -146,15 +150,12 @@ export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
                   title: { text: "" },
                   // The config builder's decision engine already worked out
                   // which dimension (if any) varies and should be the chart
-                  // series — no page-type logic belongs here.
-                  ...(item.legendConcept
-                    ? {
-                        legend: {
-                          concept: item.legendConcept,
-                          location: "bottom" as const,
-                        },
-                      }
-                    : {}),
+                  // series — no page-type logic belongs here. Without one,
+                  // the chart has a single series and a legend would only
+                  // name the frequency ("Annual").
+                  legend: item.legendConcept
+                    ? { concept: item.legendConcept, location: "bottom" as const }
+                    : { location: "none" as const },
                 }}
                 language="en"
               />

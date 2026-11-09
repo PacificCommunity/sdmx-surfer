@@ -20,6 +20,7 @@
  * Usage:
  *   tsx scripts/augment-country-snapshot-types.ts
  *     [--concurrency 8] [--only II.4] [--report data/.../report.md]
+ *     [--recheck-locked]   (re-probe locked pairs too; data can disappear)
  *
  * Requires MCP_GATEWAY_URL (and optionally MCP_AUTH_TOKEN) in the environment.
  */
@@ -50,14 +51,14 @@ type ProbeResult = {
   series_count?: number;
 };
 
-function buildProbes(only?: string): Probe[] {
+function buildProbes(only: string | undefined, recheckLocked: boolean): Probe[] {
   const probes: Probe[] = [];
   for (const i of catalogue.indicators) {
     if (only && i.id !== only) continue;
     if (!i.apiUrlTemplate) continue;
     for (const c of catalogue.countries) {
       const existing = cached[i.id]?.[c.code];
-      if (existing?.locked) continue;
+      if (existing?.locked && !recheckLocked) continue;
       probes.push({
         indicatorId: i.id,
         countryCode: c.code,
@@ -190,17 +191,23 @@ async function main() {
       concurrency: { type: "string", default: "8" },
       only: { type: "string" },
       report: { type: "string" },
+      // Locked pairs can lose their data: FM's V.2 and V.3 had 16 years in
+      // June 2026 and none by November. Re-probe everything before a demo.
+      "recheck-locked": { type: "boolean", default: false },
     },
   });
   const concurrency = Math.max(1, Number(values.concurrency) || 8);
-  const probes = buildProbes(values.only);
+  const recheckLocked = values["recheck-locked"] ?? false;
+  const probes = buildProbes(values.only, recheckLocked);
   const merged: ChartTypesCache = JSON.parse(JSON.stringify(cached));
 
   let skippedLocked = 0;
-  for (const i of catalogue.indicators) {
-    if (!i.apiUrlTemplate) continue;
-    for (const c of catalogue.countries) {
-      if (cached[i.id]?.[c.code]?.locked) skippedLocked++;
+  if (!recheckLocked) {
+    for (const i of catalogue.indicators) {
+      if (!i.apiUrlTemplate) continue;
+      for (const c of catalogue.countries) {
+        if (cached[i.id]?.[c.code]?.locked) skippedLocked++;
+      }
     }
   }
 

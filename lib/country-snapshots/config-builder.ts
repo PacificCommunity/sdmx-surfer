@@ -337,7 +337,16 @@ function bareItem(
     id: i.id,
     title: i.title,
     rendering: i.rendering,
-    dataUrl,
+    // A value tile shows the first observation returned; asking for only the
+    // latest one makes that the newest figure rather than whichever comes first.
+    dataUrl:
+      decision.kind === "value" && dataUrl ? withLatestObservationOnly(dataUrl) : dataUrl,
     source: i.dataflow ? { dataflow: i.dataflow, visUrl: i.visUrl } : undefined,
   };
+}
+
+function withLatestObservationOnly(dataUrl: string): string {
+  const url = new URL(dataUrl);
+  url.searchParams.set("lastNObservations", "1");
+  return url.toString();
 }

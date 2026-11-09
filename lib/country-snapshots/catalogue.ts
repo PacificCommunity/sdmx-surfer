@@ -45,20 +45,28 @@ export type Catalogue = {
 
 import { catalogue as generated } from "./catalogue.generated";
 
+// The spreadsheet keeps placeholder rows titled "-" (19 in the 2025 sheet):
+// planned slots with neither a name nor a source. Nothing about them can be
+// shown, so they never reach a page, the TOC or the assistant.
+const catalogue: Catalogue = {
+  ...generated,
+  indicators: generated.indicators.filter((i) => /[A-Za-z0-9]/.test(i.title)),
+};
+
 export function getSnapshotCatalogue(): Catalogue {
-  return generated;
+  return catalogue;
 }
 
 export function getCountry(code: string): Country | undefined {
-  return generated.countries.find((c) => c.code === code);
+  return catalogue.countries.find((c) => c.code === code);
 }
 
 export function getThemeBySlug(slug: string): Theme | undefined {
-  return generated.themes.find((t) => t.slug === slug);
+  return catalogue.themes.find((t) => t.slug === slug);
 }
 
 export function getIndicatorsForTheme(themeId: string): Indicator[] {
-  return generated.indicators
+  return catalogue.indicators
     .filter((i) => i.themeId === themeId)
     .sort((a, b) => a.id.localeCompare(b.id, "en", { numeric: true }));
 }

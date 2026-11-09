@@ -151,15 +151,11 @@ export function RegionalRenderer({ config }: { config: SnapshotConfig }) {
                   title: { text: "" },
                   // The builder's decision engine resolved which dimension
                   // varies (GEO for combined views, post-split strata never
-                  // reach here with their own concept).
-                  ...(item.legendConcept
-                    ? {
-                        legend: {
-                          concept: item.legendConcept,
-                          location: "bottom" as const,
-                        },
-                      }
-                    : {}),
+                  // reach here with their own concept). With none, a legend
+                  // would only name the frequency.
+                  legend: item.legendConcept
+                    ? { concept: item.legendConcept, location: "bottom" as const }
+                    : { location: "none" as const },
                 }}
                 language="en"
               />
