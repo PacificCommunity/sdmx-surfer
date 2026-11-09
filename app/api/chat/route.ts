@@ -202,6 +202,7 @@ export async function POST(req: Request) {
 
     let dashboardEmitted = false;
     let currentStep = 0;
+    let turnCostUsd: number | null = null;
 
     const modelConfig = await getModelForUser(userId, modelOverride);
     logger.setModelInfo(modelConfig.modelId, modelConfig.providerId, modelConfig.keySource);
@@ -300,6 +301,16 @@ export async function POST(req: Request) {
         // to override on ordinary steps.
         return {};
       },
+      // Cost is summed as each step finishes, so a turn that ends in onError
+      // or onAbort (stream timeout) still records what the gateway already
+      // billed. onFinish's own usage/providerMetadata cover the final step only.
+      onStepFinish: ({ providerMetadata }) => {
+        const cost = providerMetadata?.gateway?.cost;
+        const parsed = typeof cost === "string" || typeof cost === "number" ? Number(cost) : NaN;
+        if (!Number.isFinite(parsed)) return;
+        turnCostUsd = (turnCostUsd ?? 0) + parsed;
+        logger.setCostUsd(turnCostUsd);
+      },
       onFinish: async ({ text, totalUsage, steps }) => {
         logger.setAiResponse(text);
         // MCP tool calls are recorded here, from `steps[]`, rather than from
@@ -309,67 +320,47 @@ export async function POST(req: Request) {
         // to the entire SDMx layer. `steps[]` is the same array the cost sum
         // above relies on, so it is known to be populated. update_dashboard
         // logs itself in execute(); skip it here to avoid double counting.
-        steps.forEach((step, stepIndex) => {
-          for (const tc of step.toolCalls ?? []) {
-            const call = tc as unknown as {
-              toolName?: string;
-              input?: unknown;
-              output?: unknown;
-            };
-            const name = String(call.toolName ?? "");
-            if (!name || name === "update_dashboard") continue;
-            logger.recordToolCall(
-              name,
-              (call.input ?? {}) as Record<string, unknown>,
-              call.output,
-              stepIndex,
+        // Analytics must never stop the usage row from being written: from
+        // August to November 2026 an exception here (outputs read from
+        // `toolCalls`, where they do not exist) silently dropped every turn
+        // that used an SDMX tool, and with it the budget and turn caps.
+        try {
+          steps.forEach((step, stepIndex) => {
+            for (const call of step.toolCalls) {
+              if (call.toolName === "update_dashboard") continue;
+              const result = step.toolResults.find((r) => r.toolCallId === call.toolCallId);
+              logger.recordToolCall(call.toolName, call.input, result?.output, stepIndex);
+            }
+          });
+          // Cache observability: read ≫ write on warm turns means the
+          // system-message cache breakpoint is working (see systemMessages).
+          const cacheDetails = (
+            totalUsage as
+              | {
+                  inputTokenDetails?: {
+                    cacheReadTokens?: number;
+                    cacheWriteTokens?: number;
+                    noCacheTokens?: number;
+                  };
+                }
+              | undefined
+          )?.inputTokenDetails;
+          if (cacheDetails?.cacheReadTokens || cacheDetails?.cacheWriteTokens) {
+            console.info(
+              "[api/chat] prompt cache: read=" +
+                (cacheDetails.cacheReadTokens ?? 0) +
+                " write=" +
+                (cacheDetails.cacheWriteTokens ?? 0) +
+                " uncached=" +
+                (cacheDetails.noCacheTokens ?? 0) +
+                " across " +
+                steps.length +
+                " steps",
             );
           }
-        });
-        // AI SDK v6: `onFinish` extends the FINAL step's `StepResult`. The
-        // `usage` and `providerMetadata` on the event refer to that final step
-        // only — not the whole turn. For multi-step agent runs (every SDMx
-        // Surfer turn is 8-20 steps) summing per-step costs from `steps[]` is
-        // the only way to get the real total. Use `totalUsage` for tokens.
-        let totalCost = 0;
-        let anyCost = false;
-        for (const step of steps) {
-          const c = (
-            step.providerMetadata as { gateway?: { cost?: string } } | undefined
-          )?.gateway?.cost;
-          if (c == null) continue;
-          const parsed = parseFloat(c);
-          if (Number.isFinite(parsed)) {
-            totalCost += parsed;
-            anyCost = true;
-          }
-        }
-        logger.setCostUsd(anyCost ? totalCost : null);
-        // Cache observability: read ≫ write on warm turns means the
-        // system-message cache breakpoint is working (see systemMessages).
-        const cacheDetails = (
-          totalUsage as
-            | {
-                inputTokenDetails?: {
-                  cacheReadTokens?: number;
-                  cacheWriteTokens?: number;
-                  noCacheTokens?: number;
-                };
-              }
-            | undefined
-        )?.inputTokenDetails;
-        if (cacheDetails?.cacheReadTokens || cacheDetails?.cacheWriteTokens) {
-          console.info(
-            "[api/chat] prompt cache: read=" +
-              (cacheDetails.cacheReadTokens ?? 0) +
-              " write=" +
-              (cacheDetails.cacheWriteTokens ?? 0) +
-              " uncached=" +
-              (cacheDetails.noCacheTokens ?? 0) +
-              " across " +
-              steps.length +
-              " steps",
-          );
+        } catch (err) {
+          console.error("[api/chat] usage analytics failed", err);
+          logger.recordError("usage analytics: " + (err instanceof Error ? err.message : String(err)));
         }
         await logger.flush(
           totalUsage

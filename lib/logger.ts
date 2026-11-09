@@ -10,7 +10,7 @@ export interface ChatLogEntry {
   aiResponse: string;
   toolCalls: Array<{
     name: string;
-    args: Record<string, unknown>;
+    args: unknown;
     resultPreview: string;
     stepNumber: number;
   }>;
@@ -26,14 +26,16 @@ export interface ChatLogEntry {
 
 /** Truncate a value to a short preview string for logging */
 function preview(value: unknown, maxLen = 300): string {
-  const s = typeof value === "string" ? value : JSON.stringify(value);
+  // JSON.stringify(undefined) is undefined, not a string: a tool with no
+  // output must still preview.
+  const s = typeof value === "string" ? value : (JSON.stringify(value) ?? String(value));
   if (s.length <= maxLen) return s;
   return s.slice(0, maxLen) + "...";
 }
 
-/** Safely truncate args for logging — returns an object, never a broken JSON string */
-function safePreviewArgs(args: Record<string, unknown>, maxLen: number): Record<string, unknown> {
-  const json = JSON.stringify(args);
+/** Safely truncate args for logging — returns the value, or a truncated string form */
+function safePreviewArgs(args: unknown, maxLen: number): unknown {
+  const json = JSON.stringify(args) ?? "";
   if (json.length <= maxLen) return args;
   // Too large to store fully — store a truncated string representation instead
   return { _truncated: json.slice(0, maxLen) + "..." };
@@ -73,7 +75,7 @@ export function createRequestLogger(userId: string, sessionId: string) {
 
     recordToolCall(
       name: string,
-      args: Record<string, unknown>,
+      args: unknown,
       result: unknown,
       step: number,
     ) {
