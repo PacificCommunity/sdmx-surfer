@@ -58,7 +58,7 @@ The route model is simple but important. Some pages look very similar in the UI 
 These routes are intentionally reachable without authentication:
 
 - `/login`
-- `/about` (Data Surfer and Country Snapshots; the footer links here from every page)
+- `/about` (Data Surfer only: Country Snapshots is for signed-in users and is not described publicly)
 - `/gallery`
 - `/p/[id]`
 - `/api/public/dashboards`
