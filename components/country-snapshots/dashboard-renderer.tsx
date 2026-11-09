@@ -112,7 +112,7 @@ export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
             >
               <SnapshotValue
                 // Any className replaces the library's chart-sized 400px box.
-                className="py-6"
+                className="snapshot-value py-6"
                 config={{
                   id: item.id,
                   type: "value",

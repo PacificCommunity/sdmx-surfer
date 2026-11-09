@@ -335,6 +335,20 @@ h1, h2, h3, h4, h5, h6 {
   color: #6c757d;
 }
 
+/* Country Snapshots value tile: the year (the library's subtitle h4) as a
+   small caption under the figure. Scoped so builder KPI tiles are unchanged. */
+.snapshot-value .value-node {
+  align-items: center;
+}
+
+.snapshot-value .value-node h4 {
+  order: 2;
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-on-surface-variant);
+}
+
 .sdmx-scope .position-absolute {
   position: absolute;
 }
