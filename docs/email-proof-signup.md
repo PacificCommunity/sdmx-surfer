@@ -97,3 +97,29 @@ the variables.
 - `auth_events` records `email_proof_started`, `email_proof_verified`,
   `email_proof_rejected` (with the reason, From and authentication results),
   `email_proof_completed` and `email_proof_failure`.
+
+## Signup without proof (`UNVERIFIED_SIGNUP_DOMAINS`)
+
+For partners whose mail cannot do the proof (Microsoft 365 mailboxes that never
+see our links, Microsoft sign-in waiting on IT), the owner accepts **not
+verifying the address** for named domains. Set
+`UNVERIFIED_SIGNUP_DOMAINS=mfat.govt.nz` (comma-separated, `allowed_domains`
+syntax: exact `mfat.govt.nz` or suffix `.govt.nz`; invalid or personal-provider
+entries are dropped with a warning). Empty or unset means off.
+
+- On `/login`, **New here? Create an account** then shows even without email
+  proof. A work email at a listed domain plus a password (twice) calls
+  `POST /api/auth/signup` and signs straight in with that password. Other
+  addresses fall into the email-proof flow when it is configured, or are told
+  self-service is limited to the listed domains.
+- The address is NOT verified: anyone can register any address at a listed
+  domain, first come first served. If someone squats a colleague's address, an
+  admin deletes that account and the real owner signs up again.
+- It only ever creates accounts. An existing account answers 409 and is never
+  changed (no password set or reset), so it cannot take one over. Forgotten
+  passwords go to the Surfer admin, as the password form says.
+- `isEmailAdmitted` still governs: the address must also pass the
+  `allowed_domains` / invite / break-glass rules.
+- At most 5 signups per IP and 20 overall per hour, counted from the
+  `auth_events` rows of type `unverified_signup` (metadata: the domain).
+  Such users have a password and a null `emailVerified`.

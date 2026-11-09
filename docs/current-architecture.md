@@ -92,6 +92,8 @@ These require both authentication and `session.user.role === "admin"`:
 
 The admin restriction is enforced in the route handlers, not by middleware matcher rules alone.
 
+The `/admin` overview (`/api/admin/overview`) shows the live AI Gateway credit balance and total used (`lib/gateway-credits.ts`, `GET https://ai-gateway.vercel.sh/v1/credits`; the key is shared by dev and production, so both figures cover every deployment using it), last-24-hour spend and turns overall and per user from `usage_logs` (window computed with the DB's `now()` because `created_at` is a zoneless timestamp), and refreshes every 60 s while the tab is visible. Logged `usage_logs` costs are a lower bound: every multi-step turn from August to 9 Nov 2026 went unlogged (fixed in commit a907336), so totals covering that period undercount; the gateway total is authoritative.
+
 ## 4. Core User Flows
 
 ### 4.1 Builder flow
@@ -257,6 +259,7 @@ Authentication is Auth.js (NextAuth v5) with JWT sessions; admission is by allow
 - admission (`lib/admission.ts` `isEmailAdmitted`, shared by every path): break-glass `AUTH_BOOTSTRAP_ADMINS`, an `allowed_domains` rule (exact host or `.suffix`), or the `allowed_emails` invite list; OAuth providers named in `AUTH_OPEN_SIGNUP_PROVIDERS` admit anyone
 - GitHub and Microsoft addresses are verified in the `signIn` callback before any rule runs
 - self-service passwords: a user proves an admitted address by sending one email to `verify-<code>@INBOUND_EMAIL_DOMAIN`; the Resend webhook accepts it only on DMARC pass with an exact From match, and the starting browser (cookie secret) completes via the `email-proof` provider, which creates the account or sets the new password. State in `email_proofs`; see `docs/email-proof-signup.md`
+- unverified password signup (opt-in, `UNVERIFIED_SIGNUP_DOMAINS`): addresses at the listed domains create a password account via `POST /api/auth/signup` without proving the address (first come first served; admission rules still apply; existing accounts are never modified, 409 instead; throttled 5/IP/hour and 20/hour from `auth_events` `unverified_signup` rows). See `lib/unverified-signup.ts` and `docs/email-proof-signup.md`
 - session enriched with:
   - `userId`
   - `role`

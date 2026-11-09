@@ -10,6 +10,7 @@ import {
   and,
   isNull,
   inArray,
+  type SQL,
 } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import {
@@ -22,6 +23,16 @@ import {
 } from "@/lib/db";
 import { USAGE_EPOCH, COST_TRUSTED_FROM } from "@/lib/admin-epoch";
 import { hasSignedUp } from "@/lib/admin-query";
+import { fetchGatewayCredits } from "@/lib/gateway-credits";
+
+/**
+ * A zoneless usage_logs timestamp as a UTC ISO string. The column is written
+ * with the DB's now(), so it is read in the session's zone and converted;
+ * the bare value would be parsed by the browser as local time.
+ */
+function utcIso(timestamp: SQL): SQL<string> {
+  return sql<string>`to_char(${timestamp} at time zone current_setting('TimeZone') at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`;
+}
 
 // ---------------------------------------------------------------------------
 // GET /api/admin/overview — lean aggregates for the admin landing page
@@ -55,6 +66,14 @@ interface RecentActivityRow {
   createdAt: string | null;
 }
 
+interface Last24hUserRow {
+  userId: string;
+  userEmail: string | null;
+  turns: number;
+  costUsd: number | null;
+  lastTurnAt: string | null;
+}
+
 export async function GET() {
   const session = await auth();
   if (!session?.user?.userId) {
@@ -64,6 +83,9 @@ export async function GET() {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  // Started first so the 5 s external call overlaps the DB queries; it never
+  // rejects (null on any failure).
+  const gatewayCreditsPromise = fetchGatewayCredits();
   try {
     // Structural counts (all-time)
     const [usersRow] = await db
@@ -206,7 +228,7 @@ export async function GET() {
         costUsd: usageLogs.cost_usd,
         stepCount: usageLogs.step_count,
         durationMs: usageLogs.duration_ms,
-        createdAt: sql<string>`${usageLogs.created_at}`,
+        createdAt: utcIso(sql`${usageLogs.created_at}`),
       })
       .from(usageLogs)
       .leftJoin(authUsers, eq(authUsers.id, usageLogs.user_id))
@@ -226,6 +248,43 @@ export async function GET() {
       stepCount: r.stepCount,
       durationMs: r.durationMs,
       createdAt: r.createdAt,
+    }));
+
+    // Last 24 hours. usage_logs.created_at is `timestamp without time zone`
+    // written with the DB's now(), so the window is computed with now() in SQL
+    // too — comparing against a JS Date would drift by the TZ offset.
+    const last24hWindow = gte(
+      usageLogs.created_at,
+      sql`now() - interval '24 hours'`,
+    );
+    const [last24hTotals] = await db
+      .select({
+        turns: count(usageLogs.id),
+        costUsd: sum(usageLogs.cost_usd),
+        turnsWithoutCost: sql<string>`count(*) filter (where ${usageLogs.cost_usd} is null)`,
+      })
+      .from(usageLogs)
+      .where(last24hWindow);
+    const last24hUserRows = await db
+      .select({
+        userId: usageLogs.user_id,
+        userEmail: authUsers.email,
+        turns: count(usageLogs.id),
+        costUsd: sum(usageLogs.cost_usd),
+        lastTurnAt: utcIso(sql`max(${usageLogs.created_at})`),
+      })
+      .from(usageLogs)
+      .leftJoin(authUsers, eq(authUsers.id, usageLogs.user_id))
+      .where(last24hWindow)
+      .groupBy(usageLogs.user_id, authUsers.email)
+      .orderBy(sql`coalesce(sum(${usageLogs.cost_usd}), 0) desc`)
+      .limit(50);
+    const last24hByUser: Last24hUserRow[] = last24hUserRows.map((r) => ({
+      userId: r.userId,
+      userEmail: r.userEmail,
+      turns: Number(r.turns ?? 0),
+      costUsd: r.costUsd === null ? null : Number(r.costUsd),
+      lastTurnAt: r.lastTurnAt,
     }));
 
     const totalInputTokens = Number(usageSpend?.totalInputTokens ?? 0);
@@ -255,6 +314,13 @@ export async function GET() {
       },
       spendByModel,
       recentActivity,
+      last24h: {
+        costUsd: Number(last24hTotals?.costUsd ?? 0),
+        turns: Number(last24hTotals?.turns ?? 0),
+        turnsWithoutCost: Number(last24hTotals?.turnsWithoutCost ?? 0),
+        byUser: last24hByUser,
+      },
+      gatewayCredits: await gatewayCreditsPromise,
     });
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

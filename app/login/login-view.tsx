@@ -21,10 +21,18 @@ interface LoginProps {
   providers: OAuthProviderInfo[];
   /** Whether self-service signup / reset by email proof is configured. */
   selfServiceEnabled: boolean;
+  /** `UNVERIFIED_SIGNUP_DOMAINS` rules; empty when unverified signup is off. */
+  unverifiedSignupRules: string[];
   passwordPolicy: PasswordPolicy;
 }
 
-function LoginForm({ providers, selfServiceEnabled, passwordPolicy }: LoginProps) {
+function LoginForm({
+  providers,
+  selfServiceEnabled,
+  unverifiedSignupRules,
+  passwordPolicy,
+}: LoginProps) {
+  const unverifiedSignupEnabled = unverifiedSignupRules.length > 0;
   const searchParams = useSearchParams();
   const router = useRouter();
   // Preserve callbackUrl from query params (e.g. from "Explore this" on a
@@ -150,6 +158,8 @@ function LoginForm({ providers, selfServiceEnabled, passwordPolicy }: LoginProps
           purpose={mode}
           callbackUrl={callbackUrl}
           passwordPolicy={passwordPolicy}
+          emailProofEnabled={selfServiceEnabled}
+          unverifiedRules={unverifiedSignupRules}
           onBack={() => changeMode("magic")}
         />
       ) : mode === "magic" ? (
@@ -258,7 +268,7 @@ function LoginForm({ providers, selfServiceEnabled, passwordPolicy }: LoginProps
             Sign in with a password instead
           </button>
 
-          {selfServiceEnabled && (
+          {(selfServiceEnabled || unverifiedSignupEnabled) && (
             <button
               type="button"
               onClick={() => changeMode("signup")}
@@ -348,6 +358,12 @@ function LoginForm({ providers, selfServiceEnabled, passwordPolicy }: LoginProps
             >
               Forgot password?
             </button>
+          )}
+
+          {unverifiedSignupEnabled && (
+            <p className="mt-4 text-center text-xs text-text-muted">
+              Forgot your password? Ask the Surfer admin to reset it.
+            </p>
           )}
 
           <button

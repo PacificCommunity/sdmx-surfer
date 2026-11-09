@@ -7,7 +7,8 @@
  *   npx tsx scripts/set-password.ts user@example.com --ask    # prompt for one
  *
  * Rules:
- *   - The email must already be on the allowlist. (Use add-pilot-user first.)
+ *   - The email must be admitted: on the invite list, or at a domain in
+ *     allowed_domains (self-registered accounts included).
  *   - If the auth_users row doesn't exist yet, this script creates it.
  *   - Any existing password is overwritten. Failed-attempt counters and
  *     lockouts are cleared.
@@ -28,7 +29,6 @@ import { stdin as input, stdout as output } from "node:process";
 import { randomUUID } from "node:crypto";
 import { sql } from "@vercel/postgres";
 import { generatePassphrase } from "../lib/passphrase";
-import { hashPassword, validatePasswordShape } from "../lib/password";
 
 const args = process.argv.slice(2);
 const email = args.find((a) => !a.startsWith("--"));
@@ -59,15 +59,17 @@ async function readPasswordFromStdin(): Promise<string> {
 }
 
 async function main() {
-  // 1. Check allowlist
-  const allowRows = await sql`
-    SELECT 1 FROM allowed_emails WHERE email = ${normalizedEmail} LIMIT 1
-  `;
-  if (allowRows.rows.length === 0) {
+  // Imported here, after dotenv: both modules load lib/db, which reads the
+  // connection string when it loads, and static imports run before config().
+  const { isEmailAdmitted } = await import("../lib/admission");
+  const { hashPassword, validatePasswordShape } = await import("../lib/password");
+
+  // 1. Check admission.
+  if (!(await isEmailAdmitted(normalizedEmail))) {
     console.error(
       "Error: " +
         normalizedEmail +
-        " is not on the allowlist.\n" +
+        " is not admitted (no invite and no allowed domain).\n" +
         "Add them first: npx tsx scripts/add-pilot-user.ts " +
         normalizedEmail,
     );

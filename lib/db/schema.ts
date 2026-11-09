@@ -46,7 +46,7 @@ export const authEvents = pgTable(
     // event_type: password_set | password_cleared | login_success |
     // login_failure | account_locked | password_self_change |
     // email_proof_started | email_proof_verified | email_proof_rejected |
-    // email_proof_completed | email_proof_failure
+    // email_proof_completed | email_proof_failure | unverified_signup
     event_type: text("event_type").notNull(),
     // Who performed the action (admin for set/clear, user for self-change / login)
     actor_user_id: text("actor_user_id").references(() => authUsers.id),

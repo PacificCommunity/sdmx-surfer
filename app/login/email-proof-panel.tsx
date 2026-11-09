@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { z } from "zod";
+import { describeDomainRules, unverifiedSignupAllows } from "@/lib/unverified-signup";
 
 export interface PasswordPolicy {
   minLength: number;
@@ -55,17 +56,25 @@ function rejectionMessage(reason: string | undefined, email: string): string {
 
 /**
  * Self-service signup or password reset: choose a password, then prove the
- * address by sending one email from it. See lib/email-proof.ts.
+ * address by sending one email from it (see lib/email-proof.ts). A signup at a
+ * `UNVERIFIED_SIGNUP_DOMAINS` domain skips the proof and is created directly
+ * (see lib/unverified-signup.ts); reset is always by email proof.
  */
 export function EmailProofPanel({
   purpose,
   callbackUrl,
   passwordPolicy,
+  emailProofEnabled,
+  unverifiedRules,
   onBack,
 }: {
   purpose: "signup" | "reset";
   callbackUrl: string;
   passwordPolicy: PasswordPolicy;
+  /** Whether the email-proof flow is configured. */
+  emailProofEnabled: boolean;
+  /** `UNVERIFIED_SIGNUP_DOMAINS` rules; empty when that signup is off. */
+  unverifiedRules: string[];
   onBack: () => void;
 }) {
   const [email, setEmail] = useState("");
@@ -125,6 +134,19 @@ export function EmailProofPanel({
       return;
     }
 
+    if (purpose === "signup" && unverifiedSignupAllows(email, unverifiedRules)) {
+      await createUnverifiedAccount();
+      return;
+    }
+    if (!emailProofEnabled) {
+      setError(
+        "Self-service accounts are only open to addresses at " +
+          describeDomainRules(unverifiedRules) +
+          "; ask the Surfer admin for access.",
+      );
+      return;
+    }
+
     setLoading(true);
     const res = await fetch("/api/auth/email-proof/start", {
       method: "POST",
@@ -145,6 +167,31 @@ export function EmailProofPanel({
     setProof({ ...started.data, email: email.trim().toLowerCase() });
   }
 
+  /** Create the account directly, then sign in with the password just chosen. */
+  async function createUnverifiedAccount() {
+    setLoading(true);
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    }).catch(() => null);
+    if (!res?.ok) {
+      setLoading(false);
+      const failure = errorResponseSchema.safeParse(
+        res ? await res.json().catch(() => null) : null,
+      );
+      setError(failure.success ? failure.data.error : "Something went wrong. Please try again.");
+      return;
+    }
+    // Leaves the page on success, so loading stays on.
+    await signIn("credentials", {
+      email: email.trim().toLowerCase(),
+      password,
+      redirect: true,
+      callbackUrl,
+    });
+  }
+
   function restart() {
     setProof(null);
     setError(null);
@@ -161,6 +208,18 @@ export function EmailProofPanel({
   }
 
   const heading = purpose === "signup" ? "Create an account" : "Reset your password";
+  const unverifiedDomains = describeDomainRules(unverifiedRules);
+  let intro =
+    (purpose === "signup" ? "For staff of approved organisations and invited users. " : "") +
+    "Choose a password, then prove your address by sending us one email.";
+  if (purpose === "signup" && unverifiedRules.length > 0) {
+    intro = emailProofEnabled
+      ? "Choose a password. Addresses at " + unverifiedDomains + " are signed in " +
+        "straight away; other approved organisations and invited users then " +
+        "prove their address by sending us one email."
+      : "For staff at " + unverifiedDomains + ". Choose a password to create " +
+        "your account.";
+  }
 
   if (proof) {
     const mailto =
@@ -238,12 +297,7 @@ export function EmailProofPanel({
   return (
     <form onSubmit={handleStart} noValidate>
       <h2 className="type-headline-sm mb-1 text-on-surface">{heading}</h2>
-      <p className="mb-6 text-sm text-on-surface-variant">
-        {purpose === "signup"
-          ? "For staff of approved organisations and invited users. "
-          : ""}
-        Choose a password, then prove your address by sending us one email.
-      </p>
+      <p className="mb-6 text-sm text-on-surface-variant">{intro}</p>
 
       <div className="mb-4">
         <label htmlFor="proof-email" className="type-label-md mb-2 block text-on-surface-variant">

@@ -29,6 +29,19 @@ interface RecentActivityRow {
   createdAt: string | null;
 }
 
+interface Last24hUserRow {
+  userId: string;
+  userEmail: string | null;
+  turns: number;
+  costUsd: number | null;
+  lastTurnAt: string | null;
+}
+
+interface GatewayCredits {
+  balanceUsd: number;
+  totalUsedUsd: number;
+}
+
 interface OverviewResponse {
   epoch: string;
   costTrustedFrom: string;
@@ -49,6 +62,13 @@ interface OverviewResponse {
   };
   spendByModel: SpendByModelRow[];
   recentActivity: RecentActivityRow[];
+  last24h: {
+    costUsd: number;
+    turns: number;
+    turnsWithoutCost: number;
+    byUser: Last24hUserRow[];
+  };
+  gatewayCredits: GatewayCredits | null;
 }
 
 function formatTimeAgo(iso: string | null): string {
@@ -64,21 +84,54 @@ function formatTimeAgo(iso: string | null): string {
   return deltaDay + "d ago";
 }
 
+const REFRESH_INTERVAL_MS = 60_000;
+// Gateway balance thresholds (USD) for the credit card's warning colours.
+const CREDIT_AMBER_BELOW_USD = 50;
+const CREDIT_RED_BELOW_USD = 15;
+
+function creditCardClass(credits: GatewayCredits | null): string {
+  if (!credits) return "bg-surface-card text-on-surface-variant";
+  if (credits.balanceUsd < CREDIT_RED_BELOW_USD) {
+    return "bg-red-50 text-red-700 ring-1 ring-inset ring-red-200";
+  }
+  if (credits.balanceUsd < CREDIT_AMBER_BELOW_USD) {
+    return "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200";
+  }
+  return "bg-surface-card text-on-surface-variant";
+}
+
 export default function AdminOverviewPage() {
   const [data, setData] = useState<OverviewResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
 
+  // Poll while the tab is visible so spend stays current during a demo. A
+  // failed refresh keeps the previous data; the "updated" label then shows
+  // how stale it is.
   useEffect(() => {
-    void (async () => {
+    let cancelled = false;
+    const load = async () => {
       try {
-        const res = await fetch("/api/admin/overview");
+        const res = await fetch("/api/admin/overview", { cache: "no-store" });
         if (!res.ok) return;
         const json = (await res.json()) as OverviewResponse;
+        if (cancelled) return;
         setData(json);
+        setUpdatedAt(new Date());
+      } catch (error) {
+        console.warn("[admin] overview refresh failed", error);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
-    })();
+    };
+    void load();
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible") void load();
+    }, REFRESH_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
   }, []);
 
   if (loading) {
@@ -107,7 +160,16 @@ export default function AdminOverviewPage() {
     );
   }
 
-  const { totals, invites, spendByModel, recentActivity, epoch, costTrustedFrom } = data;
+  const {
+    totals,
+    invites,
+    spendByModel,
+    recentActivity,
+    last24h,
+    gatewayCredits,
+    epoch,
+    costTrustedFrom,
+  } = data;
   const formatDate = (iso: string) =>
     new Date(iso).toLocaleDateString("en-GB", {
       day: "numeric",
@@ -125,6 +187,110 @@ export default function AdminOverviewPage() {
 
   return (
     <div className="space-y-8">
+      {/* Live spend — gateway balance (authoritative) and the last 24 hours */}
+      <div>
+        <div className="mb-2 flex items-baseline justify-between">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-bold text-on-surface">
+            Spend now
+          </h2>
+          <span className="type-label-md text-on-surface-variant tabular-nums">
+            {updatedAt
+              ? "updated " + updatedAt.toLocaleTimeString("en-GB")
+              : ""}
+          </span>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div
+            className={
+              "rounded-[var(--radius-lg)] px-4 py-3 shadow-ambient " +
+              creditCardClass(gatewayCredits)
+            }
+          >
+            <div className="type-label-md">AI Gateway credit</div>
+            {gatewayCredits ? (
+              <>
+                <div className="font-[family-name:var(--font-display)] text-2xl font-bold tabular-nums">
+                  {formatUsd(gatewayCredits.balanceUsd)}
+                  <span className="ml-1 text-xs font-semibold">left</span>
+                </div>
+                <div className="mt-0.5 text-[10px]">
+                  {formatUsd(gatewayCredits.totalUsedUsd)} used in total ·
+                  shared key, covers dev + production
+                </div>
+              </>
+            ) : (
+              <div className="font-[family-name:var(--font-display)] text-2xl font-bold">
+                unavailable
+              </div>
+            )}
+          </div>
+          <div className="rounded-[var(--radius-lg)] bg-surface-card px-4 py-3 shadow-ambient">
+            <div className="type-label-md text-on-surface-variant">
+              Last 24 hours
+            </div>
+            <div className="font-[family-name:var(--font-display)] text-2xl font-bold text-on-surface tabular-nums">
+              {formatUsd(last24h.costUsd)}
+            </div>
+            <div className="mt-0.5 text-[10px] text-on-surface-variant">
+              {last24h.turns.toLocaleString() +
+                (last24h.turns === 1 ? " turn" : " turns")}
+              {last24h.turnsWithoutCost > 0 && (
+                <span className="ml-1 font-semibold text-amber-700">
+                  · {last24h.turnsWithoutCost.toLocaleString()}{" "}
+                  {last24h.turnsWithoutCost === 1 ? "turn" : "turns"} without
+                  cost
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Last 24 hours by user */}
+      <div>
+        <h3 className="font-[family-name:var(--font-display)] mb-2 text-lg font-bold text-on-surface">
+          Last 24 hours by user
+        </h3>
+        {last24h.byUser.length === 0 ? (
+          <div className="ghost-border rounded-[var(--radius-lg)] bg-surface-card px-6 py-8 text-center">
+            <p className="type-label-md text-on-surface-variant">
+              No requests in the last 24 hours.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-[var(--radius-lg)] bg-surface-card shadow-ambient">
+            <div className="grid grid-cols-12 gap-3 bg-surface-high/50 px-6 py-2 text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant">
+              <div className="col-span-5">User</div>
+              <div className="col-span-2 text-right">Turns</div>
+              <div className="col-span-3 text-right">Cost</div>
+              <div className="col-span-2 text-right">Last active</div>
+            </div>
+            {last24h.byUser.map((r) => (
+              <div
+                key={r.userId}
+                className="grid grid-cols-12 gap-3 border-t border-surface-high/20 px-6 py-2 text-xs text-on-surface-variant"
+              >
+                <div className="col-span-5 truncate text-on-surface">
+                  {r.userEmail ?? "(unknown)"}
+                </div>
+                <div className="col-span-2 text-right tabular-nums">
+                  {r.turns.toLocaleString()}
+                </div>
+                <div className="col-span-3 text-right tabular-nums">
+                  {formatUsd(r.costUsd)}
+                </div>
+                <div
+                  className="col-span-2 text-right tabular-nums"
+                  title={r.lastTurnAt ?? undefined}
+                >
+                  {formatTimeAgo(r.lastTurnAt)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Top KPI strip — scoped to the epoch */}
       <div>
         <div className="mb-2 flex items-baseline justify-between">
@@ -169,6 +335,12 @@ export default function AdminOverviewPage() {
             }
           />
         </div>
+        <p className="mt-2 px-1 text-[10px] text-on-surface-variant">
+          Logged spend is a lower bound: usage logging missed every multi-step
+          turn from August to 9 Nov 2026 (fixed in commit a907336), so totals
+          covering that period undercount. The AI Gateway total above is
+          authoritative.
+        </p>
       </div>
 
       {/* Spend by model */}
