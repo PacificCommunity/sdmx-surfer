@@ -43,6 +43,7 @@ deploys.
 
 **Done since 2026-06-12:**
 
+- Mistral Large 4 removed from the platform model picker after reports that its turns failed on dev. BYOK Mistral keys still work. The picker now starts on the default platform model instead of flashing Sonnet while the list loads. (2026-11-09)
 - Country Snapshots uses the normal Surfer sign-in: the shared access password and its anonymous per-browser identities are removed, and snapshot chat, its daily turn cap and forks into the builder are attributed to the signed-in user. Existing anonymous snapshot users stay in `auth_users` untouched. (2026-11-06)
 - Platform model picker refreshed: Opus 5 → Opus 5.5, Gemini 3.1 Pro → Gemini 4 Argon plus Gemini 3.8 Flash, Mistral Large 3 → Mistral Large 4. BYOK lists unchanged. (2026-10-27)
 - Default platform model moved to GPT-6.1 Terra (via the AI Gateway; Sonnet 5.5 when the gateway is off); Opus 5 and Sonnet 5.5 stay selectable. (2026-10-27)

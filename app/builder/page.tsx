@@ -25,6 +25,7 @@ import {
 import { getDashboardTitle } from "@/lib/dashboard-text";
 import { extractDashboardConfig } from "@/lib/dashboard-messages";
 import { CHAT_UI_THROTTLE_MS } from "@/lib/chat-ui";
+import { PLATFORM_MODELS } from "@/lib/platform-models";
 
 function syncDashboardConfigIntoMessages(
   messages: UIMessage[],
@@ -98,13 +99,14 @@ interface ModelOption {
   label: string;
 }
 
-// Placeholder until /api/settings/keys resolves on mount; then the first
-// platform model (the server-side default for the current env) replaces it.
-// anthropic/claude-sonnet-5-5 has a direct-SDK path even with the gateway off.
+// Placeholder until /api/settings/keys resolves on mount, after which the
+// server's list replaces it. Gateway deployments list the platform models in
+// catalogue order, so starting on the first one keeps the picker from
+// flashing another model while the list loads.
 const FALLBACK_OPTION: ModelOption = {
-  provider: "anthropic",
-  model: "claude-sonnet-5-5",
-  label: "Sonnet 5.5",
+  provider: PLATFORM_MODELS[0].providerId,
+  model: PLATFORM_MODELS[0].modelId,
+  label: PLATFORM_MODELS[0].label,
 };
 
 export default function BuilderPage() {

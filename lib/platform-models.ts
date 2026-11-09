@@ -44,12 +44,6 @@ export const PLATFORM_MODELS: PlatformModel[] = [
     label: "Gemini 3.8 Flash",
     description: "Google — fast and low cost, 1M context",
   },
-  {
-    providerId: "mistral",
-    modelId: "mistral-large-4",
-    label: "Mistral Large 4",
-    description: "Mistral — EU-hosted, 512K context",
-  },
 ];
 
 export function findPlatformModel(

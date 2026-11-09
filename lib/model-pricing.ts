@@ -31,8 +31,6 @@ const PRICING: Record<string, ModelPrice> = {
   "gemini-3.1-pro-preview": { input: 2.0, output: 12.0 },
   "gemini-3.8-flash": { input: 0.75, output: 3.75 },
   "gemini-4-argon": { input: 2.0, output: 10.0 },
-  // Mistral
-  "mistral-large-4": { input: 1.36, output: 4.18 },
 };
 
 /**
