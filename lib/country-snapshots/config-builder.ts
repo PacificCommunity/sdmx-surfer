@@ -16,7 +16,6 @@ export type DashboardItem = {
   dataUrl?: string; // template URL with country code(s) substituted
   rendering: Indicator["rendering"];
   source?: { dataflow: string; visUrl?: string };
-  notes?: string;
 };
 
 export type SnapshotConfig = {
@@ -340,6 +339,5 @@ function bareItem(
     rendering: i.rendering,
     dataUrl,
     source: i.dataflow ? { dataflow: i.dataflow, visUrl: i.visUrl } : undefined,
-    notes: i.notes,
   };
 }

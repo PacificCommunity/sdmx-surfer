@@ -99,9 +99,6 @@ export function DashboardRenderer({ config }: { config: SnapshotConfig }) {
               {item.title}
             </h2>
           </div>
-          {item.notes ? (
-            <p className="mb-2 text-xs italic text-neutral-500">{item.notes}</p>
-          ) : null}
           {item.missingCountries?.length ? (
             <p className="mb-2 text-xs text-amber-700">
               No data for: {item.missingCountries.join(", ")}
