@@ -42,6 +42,7 @@
     "@vercel/postgres": "^0.10.0",
     "ai": "^6.0.134",
     "bootstrap": "^5.3.8",
+    "botid": "^1.5.12",
     "d3-scale-chromatic": "^3.1.0",
     "dotenv": "^17.3.1",
     "drizzle-orm": "^0.45.1",

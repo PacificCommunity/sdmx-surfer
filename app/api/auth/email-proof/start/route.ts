@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { checkBotId } from "botid/server";
 import { z } from "zod";
 import { and, count, eq, gte, lt } from "drizzle-orm";
 import { db, emailProofs, authEvents } from "@/lib/db";
@@ -50,6 +51,11 @@ export async function POST(req: Request) {
   const config = emailProofConfig();
   if (!config) {
     return NextResponse.json({ error: "Self-service accounts are not enabled." }, { status: 503 });
+  }
+
+  // Registered for BotID in instrumentation-client.ts.
+  if ((await checkBotId()).isBot) {
+    return NextResponse.json({ error: "Automated requests are not allowed." }, { status: 403 });
   }
 
   let body: unknown;

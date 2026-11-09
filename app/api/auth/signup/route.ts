@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { checkBotId } from "botid/server";
 import { z } from "zod";
 import { and, count, eq, gte } from "drizzle-orm";
 import { db, authUsers, authEvents } from "@/lib/db";
@@ -41,6 +42,12 @@ export async function POST(req: Request) {
   const rules = unverifiedSignupDomains();
   if (rules.length === 0) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  // Accounts here are unverified, so a script could mint them at will; the
+  // path is registered for BotID in instrumentation-client.ts.
+  if ((await checkBotId()).isBot) {
+    return NextResponse.json({ error: "Automated requests are not allowed." }, { status: 403 });
   }
 
   const body: unknown = await req.json().catch(() => null);

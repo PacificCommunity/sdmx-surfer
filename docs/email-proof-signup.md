@@ -123,3 +123,6 @@ entries are dropped with a warning). Empty or unset means off.
 - At most 5 signups per IP and 20 overall per hour, counted from the
   `auth_events` rows of type `unverified_signup` (metadata: the domain).
   Such users have a password and a null `emailVerified`.
+- Both `POST /api/auth/signup` and `POST /api/auth/email-proof/start` call
+  Vercel BotID (`checkBotId()`, registered in `instrumentation-client.ts`) and
+  refuse automated requests with 403. Local development always passes.
