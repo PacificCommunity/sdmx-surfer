@@ -91,6 +91,28 @@ function normaliseUrl(raw: string): { url: string; fixed: boolean } {
   return { url: out, fixed: out !== raw };
 }
 
+/**
+ * Normalise the SDG target code that starts many titles: the sheet has
+ * "SDG 3.2 .1", "SDG 3. 4. 1" and "SDG  1.5.2, 11.5.2".
+ */
+export function tidyTitle(title: string): string {
+  return title.replace(/^SDG\s+([\d\s.,a-z]+?)\s+-\s+/, (_m, code: string) => {
+    const tidy = code.replace(/\s*\.\s*/g, ".").replace(/\s*,\s*/g, ", ").trim();
+    return "SDG " + tidy + " - ";
+  });
+}
+
+/**
+ * Rows the 2026 sheet gives identical titles; each differs by one indicator
+ * code. Applied only while the sheet still has the title being corrected, so
+ * a re-ordered or edited sheet is not mislabelled.
+ */
+const TITLE_CORRECTIONS: Record<string, { from: string; to: string }> = {
+  "II.33": { from: "Status of NCD policy and legislation (Mana Dashboard)", to: "NCD policy (Mana Dashboard): multi-sectoral NCD taskforce" },
+  "II.34": { from: "Status of NCD policy and legislation (Mana Dashboard)", to: "NCD policy (Mana Dashboard): national strategy addressing NCDs and risk factors" },
+  "II.35": { from: "Status of NCD policy and legislation (Mana Dashboard)", to: "NCD policy (Mana Dashboard): national guidelines for care of main NCDs" },
+};
+
 export async function importExcel(
   buffer: Buffer,
   sourceName: string,
@@ -239,7 +261,7 @@ export async function importExcel(
     indicatorsOut.push({
       id: ID,
       themeId: currentThemeId,
-      title: EN,
+      title: TITLE_CORRECTIONS[ID]?.from === tidyTitle(EN) ? TITLE_CORRECTIONS[ID].to : tidyTitle(EN),
       mfatName: MFAT_NAME && MFAT_NAME !== EN ? MFAT_NAME : undefined,
       rendering: RENDERING,
       dataflow: DF && DF !== "-" ? DF : undefined,

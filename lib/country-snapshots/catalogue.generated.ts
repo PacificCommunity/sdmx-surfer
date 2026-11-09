@@ -458,7 +458,7 @@ export const catalogue: Catalogue = {
     {
       "id": "II.7",
       "themeId": "II",
-      "title": "SDG 3.2 .1 - Infant mortality rate (per 1,000 live births)",
+      "title": "SDG 3.2.1 - Infant mortality rate (per 1,000 live births)",
       "mfatName": "Child mortality rates (per 1,000 live births)",
       "rendering": "CHART",
       "dataflow": "DF_SDG_03",
@@ -617,7 +617,7 @@ export const catalogue: Catalogue = {
     {
       "id": "II.22",
       "themeId": "II",
-      "title": "SDG 3. 4. 1 - Mortality rate attributed to cardiovascular disease, cancer, diabetes or chronic respiratory disease",
+      "title": "SDG 3.4.1 - Mortality rate attributed to cardiovascular disease, cancer, diabetes or chronic respiratory disease",
       "mfatName": "Mortality rate attributed to cardiovascular disease, cancer, chronic respiratory disease or diabetes",
       "rendering": "CHART",
       "dataflow": "DF_SDG_03",
@@ -679,7 +679,7 @@ export const catalogue: Catalogue = {
     {
       "id": "II.28",
       "themeId": "II",
-      "title": "SDG 3.c.1 - Health worker density",
+      "title": "SDG 3.c.1 - Health worker density (per 10,000 population)",
       "mfatName": "Nurses and midwives (per 1,000 people)",
       "rendering": "CHART",
       "dataflow": "DF_SDG_03",
@@ -708,7 +708,7 @@ export const catalogue: Catalogue = {
     {
       "id": "II.33",
       "themeId": "II",
-      "title": "Status of NCD policy and legislation (Mana Dashboard)",
+      "title": "NCD policy (Mana Dashboard): multi-sectoral NCD taskforce",
       "mfatName": "NCD - Health system response programmes (six sub-components)",
       "rendering": "CHART",
       "dataflow": "DF_BP50",
@@ -719,7 +719,7 @@ export const catalogue: Catalogue = {
     {
       "id": "II.34",
       "themeId": "II",
-      "title": "Status of NCD policy and legislation (Mana Dashboard)",
+      "title": "NCD policy (Mana Dashboard): national strategy addressing NCDs and risk factors",
       "mfatName": "NCD - Health system response programmes (six sub-components)",
       "rendering": "CHART",
       "dataflow": "DF_BP50",
@@ -729,7 +729,7 @@ export const catalogue: Catalogue = {
     {
       "id": "II.35",
       "themeId": "II",
-      "title": "Status of NCD policy and legislation (Mana Dashboard)",
+      "title": "NCD policy (Mana Dashboard): national guidelines for care of main NCDs",
       "mfatName": "NCD - Health system response programmes (six sub-components)",
       "rendering": "CHART",
       "dataflow": "DF_BP50",
@@ -870,7 +870,7 @@ export const catalogue: Catalogue = {
     {
       "id": "III.26",
       "themeId": "III",
-      "title": "SDG 4.1.2 - Completion rate",
+      "title": "SDG 4.1.2 - Completion rate, primary education (%)",
       "mfatName": "SDG 4.1.2 Completion rate (primary education, lower secondary education, upper secondary education),",
       "rendering": "CHART",
       "dataflow": "DF_SDG_04",
@@ -887,7 +887,7 @@ export const catalogue: Catalogue = {
     {
       "id": "III.29",
       "themeId": "III",
-      "title": "SDG 4.1.2 - Completion rate",
+      "title": "SDG 4.1.2 - Completion rate, lower secondary education (%)",
       "mfatName": "SDG 4.1.2 Completion rate (primary education, lower secondary education, upper secondary education),",
       "rendering": "CHART",
       "dataflow": "DF_SDG_04",
@@ -904,7 +904,7 @@ export const catalogue: Catalogue = {
     {
       "id": "III.32",
       "themeId": "III",
-      "title": "SDG 4.1.2 - Completion rate",
+      "title": "SDG 4.1.2 - Completion rate, upper secondary education (%)",
       "mfatName": "SDG 4.1.2 Completion rate (primary education, lower secondary education, upper secondary education),",
       "rendering": "CHART",
       "dataflow": "DF_SDG_04",
@@ -1061,7 +1061,7 @@ export const catalogue: Catalogue = {
     {
       "id": "IV.9",
       "themeId": "IV",
-      "title": "SDG 8.5.1 - Average hourly earnings",
+      "title": "SDG 8.5.1 - Average hourly earnings (local currency)",
       "mfatName": "Average hourly earnings",
       "rendering": "CHART",
       "dataflow": "DF_SDG_08",
@@ -1078,7 +1078,7 @@ export const catalogue: Catalogue = {
     {
       "id": "IV.12",
       "themeId": "IV",
-      "title": "SDG 8.5.2 - Unemployment rate",
+      "title": "SDG 8.5.2 - Unemployment rate, aged 15 years old and over - 19th ICLS (%)",
       "mfatName": "Unemployment rate (by sex, age, urbanisation level (urban, rural) and disability status (Blue Pacific 2050)",
       "rendering": "CHART",
       "dataflow": "DF_SDG_08",
@@ -1095,7 +1095,7 @@ export const catalogue: Catalogue = {
     {
       "id": "IV.15",
       "themeId": "IV",
-      "title": "SDG 8.5.2 - Unemployment rate",
+      "title": "SDG 8.5.2 - Unemployment rate, aged 15-24 years - 19th ICLS (%)",
       "mfatName": "Unemployment rate (by sex, age, urbanisation level (urban, rural) and disability status (Blue Pacific 2050)",
       "rendering": "CHART",
       "dataflow": "DF_SDG_08",
@@ -1457,7 +1457,7 @@ export const catalogue: Catalogue = {
     {
       "id": "V.11",
       "themeId": "V",
-      "title": "SDG 8.3.1 - Proportion of informal employment in non-agriculture sector",
+      "title": "SDG 8.3.1 - Proportion of informal employment in non-agriculture sector, 19th ICLS",
       "mfatName": "SDG 8.3.1 -  Proportion of informal employment in non agricultural employment, by sex;",
       "rendering": "CHART",
       "dataflow": "DF_SDG_08",
@@ -1631,7 +1631,7 @@ export const catalogue: Catalogue = {
     {
       "id": "VII.8",
       "themeId": "VII",
-      "title": "SDG  1.5.2, 11.5.2 - Direct economic loss attributed to disasters relative to GDP",
+      "title": "SDG 1.5.2, 11.5.2 - Direct economic loss attributed to disasters relative to GDP",
       "mfatName": "SDG 1.5.2: Direct economic loss attributed to disasters relative to GDP",
       "rendering": "CHART",
       "dataflow": "DF_SDG_11",

@@ -4,7 +4,21 @@ import {
   importExcel,
   renderCatalogueTs,
   renderReportMd,
+  tidyTitle,
 } from "../../scripts/import-country-snapshots";
+
+describe("tidyTitle", () => {
+  it("normalises the spacing of the SDG target code", () => {
+    expect(tidyTitle("SDG 3.2 .1 - Infant mortality rate")).toBe("SDG 3.2.1 - Infant mortality rate");
+    expect(tidyTitle("SDG 3. 4. 1 - Mortality rate")).toBe("SDG 3.4.1 - Mortality rate");
+    expect(tidyTitle("SDG  1.5.2, 11.5.2 - Direct economic loss")).toBe("SDG 1.5.2, 11.5.2 - Direct economic loss");
+    expect(tidyTitle("SDG 3.b.1 - Coverage")).toBe("SDG 3.b.1 - Coverage");
+  });
+
+  it("leaves titles without an SDG code alone", () => {
+    expect(tidyTitle("Total fertility rate. 2020 - 2025")).toBe("Total fertility rate. 2020 - 2025");
+  });
+});
 
 const SDG_URL =
   "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_03,4.3/A.G.SP_DYN_ADKL.[TAG_GEO].F.Y15T19.........?dimensionAtObservation=AllDimensions";

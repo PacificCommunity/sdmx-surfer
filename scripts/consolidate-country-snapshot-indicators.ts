@@ -8,7 +8,8 @@
  * group is collapsed into a single consolidated indicator with:
  *   - URL: differing position's values joined with "+" so the query returns
  *     all sub-series at once (e.g. SEX=M+F+_T).
- *   - title: longest common prefix of the source titles, trimmed.
+ *   - title: common prefix of the source titles plus their common ending
+ *     when it carries words (see mergedTitle).
  *   - seriesConcept: the SDMx dimension name at the differing position,
  *     looked up from data/country-snapshots/dataflow-dimensions.json.
  *   - consolidatedFromIds: the source indicator ids, kept for diff review.
@@ -93,6 +94,31 @@ function longestCommonPrefix(strs: string[]): string {
     if (lastOpen >= 0) out = out.slice(0, lastOpen).trim();
   }
   return out.replace(/[\s\-,:/]+$/u, "").trim();
+}
+
+/**
+ * Title for a merged group: the common prefix, plus the common ending when the
+ * rows differ in a list-like qualifier. "Completion rate, both sex and primary
+ * education (%)" / "…, Female and primary education (%)" → "Completion rate,
+ * primary education (%)", where the prefix alone would drop "primary
+ * education". Only when the shared start ends at ", " or " - ": rows that
+ * differ mid-phrase ("lives within 1km of the coast" / "…5km…") keep the
+ * prefix alone, as splicing their ending would make no sense.
+ */
+function mergedTitle(strs: string[]): string {
+  const prefix = longestCommonPrefix(strs);
+  let rawPrefix = strs[0] ?? "";
+  let suffix = rawPrefix;
+  for (const s of strs.slice(1)) {
+    while (!s.startsWith(rawPrefix)) rawPrefix = rawPrefix.slice(0, -1);
+    while (!s.endsWith(suffix)) suffix = suffix.slice(1);
+  }
+  if (!/(,|\s-)\s*$/u.test(rawPrefix)) return prefix;
+  // Start at a word boundary: "ale and primary…" (Female/Male) → " and primary…".
+  if (/^[\p{L}\p{N}]/u.test(suffix)) suffix = suffix.slice(suffix.search(/[^\p{L}\p{N}]/u) >>> 0);
+  const tail = suffix.replace(/^[\s,\-:/]+/u, "").replace(/^and\s+/iu, "").trim();
+  if (!/\p{L}{3}/u.test(tail) || prefix.includes(tail)) return prefix;
+  return prefix + (tail.startsWith("(") ? " " : ", ") + tail;
 }
 
 /**
@@ -213,7 +239,7 @@ function consolidate(input: Catalogue): ConsolidationResult {
         a.id.localeCompare(b.id, "en", { numeric: true }),
       );
     const primary = sorted[0];
-    const title = longestCommonPrefix(sorted.map((g) => g.title)) || primary.title;
+    const title = mergedTitle(sorted.map((g) => g.title)) || primary.title;
 
     const distinctNotes = Array.from(
       new Set(
