@@ -14,8 +14,8 @@ export function getMode(): CatalogueAccessMode {
  * it can answer questions without re-discovering dataflows via MCP.
  *
  * Format is dense but readable — themes as H2 headings, indicators as
- * "- id title [dataflow=X | no data source]" lines. Roughly ~5-8K tokens
- * for the full 102-indicator catalogue.
+ * "- id title [dataflow=X | no data source]" lines. About 10K tokens for the
+ * 2026 catalogue (153 visible indicators).
  */
 export function renderCatalogueForPrompt(
   cat: Catalogue = getSnapshotCatalogue(),

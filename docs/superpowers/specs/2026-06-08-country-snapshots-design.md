@@ -157,18 +157,18 @@ A standalone Node script:
 
 ```
 scripts/import-country-snapshots.ts
-  --in     data/country-snapshots/country_snapshots_2025.xlsx
+  --in     data/country-snapshots/country_snapshots_2026.xlsx
   --out    lib/country-snapshots/catalogue.generated.ts
   --report data/country-snapshots/import-report.md
 ```
 
 Behaviour:
 
-- Reads the `REPORTS` and `INDICATORS` sheets. Ignores `work` and review sheets unless explicitly passed.
+- Reads countries from the `REPORTS` sheet and indicators from the `work` sheet (SPC's 2026 exercise list, which replaced the 2025 `INDICATORS` sheet). SUMMARY and PICTURE rows are layout rows and are skipped.
 - Validates the invariants in §5.1. Rejects the build on any violation.
 - Normalises old version-pinned URLs (`SPC,DF_X,3.0/...` becomes `SPC,DF_X,/...`) per the 2026 spreadsheet update notes.
 - Writes a deterministic TypeScript file: stable key ordering, no incidental timestamps in row positions, so git diffs are minimal across reruns.
-- Writes a markdown import report listing: skipped rows, duplicates rejected, URL fixups applied, indicators without data sources.
+- Writes a markdown import report listing: skipped rows, duplicates rejected, URL fixups applied, indicators without data sources, and rows whose URL has no `[TAG_GEO]` country placeholder (kept out of the catalogue rather than guessed).
 
 Re-running the importer when MFAT sends a new spreadsheet is the standard update flow. The diff in `catalogue.generated.ts` is reviewable in the PR.
 
@@ -417,7 +417,7 @@ Compare pages are fully dynamic, not pre-rendered. With up to 5 countries the co
 ## 17. References
 
 - Brainstorming dialogue: this conversation, 2026-06-08.
-- Source catalogue: `country_snapshots_2025.xlsx`.
+- Source catalogue: `country_snapshots_2025.xlsx` at design time; since November 2026, the `work` sheet of SPC's `country_snapshots_2026.xlsx` (upstream `PacificCommunity/sdd-country_snapshots`).
 - Surfer current architecture: `docs/current-architecture.md`.
 - Production readiness: `docs/prototype-to-production.md`.
 - Security posture: `SECURITY_AUDIT.md`.

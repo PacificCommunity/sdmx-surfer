@@ -2,8 +2,8 @@
 import type { Catalogue } from "./catalogue";
 
 export const catalogue: Catalogue = {
-  "generatedAt": "2026-06-09T00:00:00Z",
-  "sourceFile": "country_snapshots_2025.xlsx",
+  "generatedAt": "2026-11-09T00:00:00Z",
+  "sourceFile": "country_snapshots_2026.xlsx",
   "countries": [
     {
       "code": "AS",
@@ -219,9 +219,9 @@ export const catalogue: Catalogue = {
       "title": "Constitutional form",
       "rendering": "TABLE",
       "dataflow": "DF_KEYFACTS",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_KEYFACTS,/A.[TAG_GEO].GOV?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Topic%2C0%7CMulti-domain%23XDO%23&pg=0&fc=Topic&bp=true&snb=6&df[ds]=ds%3ASPC2&df[id]=DF_KEYFACTS&df[ag]=SPC&df[vs]=1.0&pd=2020%2C2021&dq=A..GOV&ly[rw]=GEO_PICT",
-      "notes": "New"
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_KEYFACTS,/A.[TAG_GEO].GOV?startPeriod=2020&dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Topic,0%7CMulti-domain%23XDO%23&pg=0&fc=Topic&bp=true&snb=6&df[ds]=ds%3ASPC2&df[id]=DF_KEYFACTS&df[ag]=SPC&pd=2020,&dq=A..GOV&ly[rw]=GEO_PICT&to[TIME_PERIOD]=false",
+      "notes": "New | cross checked and updated URLs to ommit particular version of DF (C. Idler)"
     },
     {
       "id": "I.2",
@@ -236,13 +236,25 @@ export const catalogue: Catalogue = {
       "rendering": "TABLE"
     },
     {
+      "id": "I.4",
+      "themeId": "I",
+      "title": "SDG 5.5.1 - Number of parliamentary seats",
+      "mfatName": "Number of parliamentary seats",
+      "rendering": "TABLE",
+      "dataflow": "DF_SDG_05",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_05,/A.G.SG_GEN_PARLNT.[TAG_GEO]...........?lastNObservations=1&dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_05&df[ag]=SPC&pd=2025,&dq=A..SG_GEN_PARLNT............&to[TIME_PERIOD]=false",
+      "notes": "cross checked and updated URLs to ommit particular version of DF and updated cut off year to 2025 (C. Idler)"
+    },
+    {
       "id": "I.5",
       "themeId": "I",
       "title": "Mid-year population estimate",
       "rendering": "TABLE",
       "dataflow": "DF_POP_PROJ",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_PROJ,/A.[TAG_GEO].MIDYEARPOPEST._T._T?startPeriod=2015&endPeriod=2025&dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_PROJ&df[ag]=SPC&df[vs]=3.0&dq=A.[TAG_GEO].MIDYEARPOPEST._T._T&pd=%2C&ly[rw]=TIME_PERIOD"
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_PROJ,/A.[TAG_GEO].MIDYEARPOPEST._T._T?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_PROJ&df[ag]=SPC&dq=A..MIDYEARPOPEST._T._T&pd=,&ly[rw]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "cross checked and updated URLs to ommit particular version of DF (C. Idler)"
     },
     {
       "id": "I.6",
@@ -251,7 +263,8 @@ export const catalogue: Catalogue = {
       "rendering": "TABLE",
       "dataflow": "DF_POP_URBAN",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_URBAN,/A.[TAG_GEO].POPRFCOU.U?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_URBAN&df[ag]=SPC&df[vs]=1.0&dq=A.[TAG_GEO].POPRFCOU.U&pd=%2C&ly[rw]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_URBAN&df[ag]=SPC&dq=A..POPRFCOU.U&pd=,&ly[rw]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "cross checked and updated URLs to ommit particular version of DF (C. Idler)"
     },
     {
       "id": "I.7",
@@ -260,7 +273,8 @@ export const catalogue: Catalogue = {
       "rendering": "TABLE",
       "dataflow": "DF_POP_AGE",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_AGE,/A.[TAG_GEO].MEDIANAGE._T?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_AGE&df[ag]=SPC&df[vs]=1.0&dq=A.[TAG_GEO].MEDIANAGE._T&pd=%2C&ly[rw]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_AGE&df[ag]=SPC&dq=A..MEDIANAGE._T&pd=,&ly[rw]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "cross checked and updated URLs to ommit particular version of DF (C. Idler)"
     },
     {
       "id": "I.8",
@@ -269,7 +283,8 @@ export const catalogue: Catalogue = {
       "rendering": "TABLE",
       "dataflow": "DF_POP_PROJ",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_PROJ,/A.[TAG_GEO].POPYGR._T._T?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_PROJ&df[ag]=SPC&df[vs]=3.0&dq=A.[TAG_GEO].POPYGR._T._T&pd=%2C&ly[rw]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_PROJ&df[ag]=SPC&dq=A..POPYGR._T._T&pd=,&ly[rw]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "cross checked and updated URLs to ommit particular version of DF (C. Idler)"
     },
     {
       "id": "I.9",
@@ -278,7 +293,8 @@ export const catalogue: Catalogue = {
       "rendering": "TABLE",
       "dataflow": "DF_HHCOUNTS",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_HHCOUNTS,/A.[TAG_GEO].HHSZ?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_HHCOUNTS&df[ag]=SPC&df[vs]=1.0&dq=A.[TAG_GEO].HHSZ&pd=%2C&ly[rw]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_HHCOUNTS&df[ag]=SPC&dq=A..HHSZ&pd=,&ly[rw]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "cross checked and updated URLs to ommit particular version of DF (C. Idler)"
     },
     {
       "id": "I.10",
@@ -287,7 +303,8 @@ export const catalogue: Catalogue = {
       "rendering": "TABLE",
       "dataflow": "DF_POP_DENSITY",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_DENSITY,/A.[TAG_GEO].POPDENSITY?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_DENSITY&df[ag]=SPC&df[vs]=1.0&dq=A.[TAG_GEO].POPDENSITY&pd=%2C&ly[rw]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_DENSITY&df[ag]=SPC&dq=A..POPDENSITY&pd=,&ly[rw]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "cross checked and updated URLs to ommit particular version of DF (C. Idler)"
     },
     {
       "id": "I.11",
@@ -297,7 +314,8 @@ export const catalogue: Catalogue = {
       "rendering": "TABLE",
       "dataflow": "DF_POP_AGE",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_AGE,/A.[TAG_GEO].DEPRATIO1564._T?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_AGE&df[ag]=SPC&df[vs]=1.0&dq=A.[TAG_GEO].DEPRATIO1564._T&pd=%2C&ly[rw]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_AGE&df[ag]=SPC&dq=A..DEPRATIO1564._T&pd=,&ly[rw]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "cross checked and updated URLs to ommit particular version of DF (C. Idler)"
     },
     {
       "id": "I.12",
@@ -307,35 +325,24 @@ export const catalogue: Catalogue = {
       "rendering": "TABLE",
       "dataflow": "DF_POP_AGE",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_AGE,/A.[TAG_GEO].POPYOUTH._T?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=population&pg=0&hc[Topic]=Population&snb=42&df[ds]=ds%3ASPC2&df[id]=DF_POP_AGE&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..POPYOUTH._T&ly[rw]=GEO_PICT&to[TIME_PERIOD]=false",
-      "notes": "New 2024"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=population&pg=0&hc[Topic]=Population&snb=42&df[ds]=ds%3ASPC2&df[id]=DF_POP_AGE&df[ag]=SPC&pd=,&dq=A..POPYOUTH._T&ly[rw]=GEO_PICT&to[TIME_PERIOD]=false",
+      "notes": "New 2024 | cross checked and updated URLs to ommit particular version of DF (C. Idler)"
     },
     {
       "id": "I.13",
       "themeId": "I",
-      "title": "% of population that lives within 1km of the coast",
+      "title": "% of population that lives within",
       "rendering": "TABLE",
       "dataflow": "DF_POP_COAST",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_COAST,/A.[TAG_GEO].COASTALPOPRF.1KM?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_COAST&df[ag]=SPC&df[vs]=2.0&dq=A.[TAG_GEO].COASTALPOPRF.1KM&pd=%2C&ly[rw]=TIME_PERIOD"
-    },
-    {
-      "id": "I.14",
-      "themeId": "I",
-      "title": "% of population that lives within 5km of the coast",
-      "rendering": "TABLE",
-      "dataflow": "DF_POP_COAST",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_COAST,/A.[TAG_GEO].COASTALPOPRF.5KM?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_COAST&df[ag]=SPC&df[vs]=2.0&dq=A.[TAG_GEO].COASTALPOPRF.5KM&pd=%2C&ly[rw]=TIME_PERIOD"
-    },
-    {
-      "id": "I.15",
-      "themeId": "I",
-      "title": "% of population that lives within 10km of the coast",
-      "rendering": "TABLE",
-      "dataflow": "DF_POP_COAST",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_COAST,/A.[TAG_GEO].COASTALPOPRF.10KM?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_COAST&df[ag]=SPC&df[vs]=2.0&dq=A.[TAG_GEO].COASTALPOPRF.10KM&pd=%2C&ly[rw]=TIME_PERIOD"
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_COAST,/A.[TAG_GEO].COASTALPOPRF.1KM+5KM+10KM?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_COAST&df[ag]=SPC&dq=A..COASTALPOPRF.1KM&pd=,&ly[rw]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "cross checked and updated URLs to ommit particular version of DF (C. Idler)",
+      "seriesConcept": "RANGE",
+      "consolidatedFromIds": [
+        "I.13",
+        "I.14",
+        "I.15"
+      ]
     },
     {
       "id": "I.16",
@@ -344,7 +351,8 @@ export const catalogue: Catalogue = {
       "rendering": "TABLE",
       "dataflow": "DF_POP_DENSITY",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_DENSITY,/A.[TAG_GEO].LANDAREA?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_DENSITY&df[ag]=SPC&df[vs]=1.0&dq=A.[TAG_GEO].LANDAREA&pd=%2C&ly[rw]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_POP_DENSITY&df[ag]=SPC&dq=A..LANDAREA&pd=,&ly[rw]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "cross checked and updated URLs to ommit particular version of DF (C. Idler)"
     },
     {
       "id": "I.17",
@@ -353,8 +361,8 @@ export const catalogue: Catalogue = {
       "rendering": "TABLE",
       "dataflow": "DF_WBWDI",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].AG_LND_FRST_ZS?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&df[vs]=1.0&dq=A.[TAG_GEO].AG_LND_FRST_ZS&pd=%2C&ly[rw]=TIME_PERIOD",
-      "notes": "Relaunch land use"
+      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&dq=A..AG_LND_FRST_ZS&pd=,&ly[rw]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "Relaunch land use | cross checked and updated URLs to ommit particular version of DF (C. Idler)"
     },
     {
       "id": "I.18",
@@ -363,32 +371,36 @@ export const catalogue: Catalogue = {
       "rendering": "TABLE",
       "dataflow": "DF_WBWDI",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].AG_LND_AGRI_ZS?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&df[vs]=1.0&dq=A.[TAG_GEO].AG_LND_AGRI_ZS&pd=%2C&ly[rw]=TIME_PERIOD",
-      "notes": "Relaunch land use"
+      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&dq=A..AG_LND_AGRI_ZS&pd=,&ly[rw]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "Relaunch land use | cross checked and updated URLs to ommit particular version of DF (C. Idler)"
     },
     {
       "id": "I.19",
       "themeId": "I",
       "title": "Environmental Sustainability",
-      "rendering": "TEXT"
+      "rendering": "TEXT",
+      "notes": "As with previous year, the indicator lacks definition"
     },
     {
       "id": "I.20",
       "themeId": "I",
       "title": "Ethnic fractionalisation",
-      "rendering": "TEXT"
+      "rendering": "TEXT",
+      "notes": "As with previous year, the indicator lacks definition"
     },
     {
       "id": "I.21",
       "themeId": "I",
       "title": "Language fractionalisation",
-      "rendering": "TEXT"
+      "rendering": "TEXT",
+      "notes": "As with previous year, the indicator lacks definition"
     },
     {
       "id": "I.22",
       "themeId": "I",
       "title": "Religion fractionalisation",
-      "rendering": "TEXT"
+      "rendering": "TEXT",
+      "notes": "As with previous year, the indicator lacks definition"
     },
     {
       "id": "II.1",
@@ -398,7 +410,8 @@ export const catalogue: Catalogue = {
       "rendering": "CHART",
       "dataflow": "DF_VITAL",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_VITAL,/A.[TAG_GEO].LEB.M+F?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=expectancy&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_VITAL&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].LEB.M&ly[cl]=TIME_PERIOD",
+      "visUrl": "https://stats.pacificdata.org/vis?tm=expectancy&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_VITAL&df[ag]=SPC&pd=,&dq=A..LEB.M&to[TIME_PERIOD]=false",
+      "notes": "Data to be updated (Census/CRVS) | cross checked and updated URLs to ommit particular version of DF (C. Idler)",
       "seriesConcept": "SEX",
       "consolidatedFromIds": [
         "II.1",
@@ -412,78 +425,323 @@ export const catalogue: Catalogue = {
       "rendering": "CHART",
       "dataflow": "DF_VITAL",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_VITAL,/A.[TAG_GEO].TFR.?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=fertility&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_VITAL&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].TFR.&ly[cl]=TIME_PERIOD",
-      "notes": "Was DF_POKCET"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=fertility&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_VITAL&df[ag]=SPC&pd=,&dq=A..TFR.&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "Was DF_POKCET | Data to be updated (Census/CRVS) | cross checked and updated URLs to ommit particular version of DF (C. Idler)"
+    },
+    {
+      "id": "II.4",
+      "themeId": "II",
+      "title": "SDG 3.7.2 - Adolescent birth rate",
+      "mfatName": "Adolescent fertility rate",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_03",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_03,/A.G.SP_DYN_ADKL.[TAG_GEO].F.Y15T19+Y10T14.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_03&df[ag]=SPC&dq=A.G.SP_DYN_ADKL..F.Y15T19.........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Aged 15-19 years | New / flag 3 | URLs changed + added disaggregation by aged (AS) + Removed particular version of DF | Aged 10-14 years",
+      "seriesConcept": "AGE",
+      "consolidatedFromIds": [
+        "II.4",
+        "II.5"
+      ]
+    },
+    {
+      "id": "II.6",
+      "themeId": "II",
+      "title": "SDG 3.1.1 - Maternal mortality ratio (per 100,000 live births)",
+      "mfatName": "Maternal mortality ratio (per 100,000 live births)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_03",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_03,/A.G.SH_STA_MORT.[TAG_GEO].F..........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_03&df[ag]=SPC&dq=A.G.SH_STA_MORT..F..........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "flag SDG | URLs changed (AS) + Removed particular version of DF"
+    },
+    {
+      "id": "II.7",
+      "themeId": "II",
+      "title": "SDG 3.2 .1 - Infant mortality rate (per 1,000 live births)",
+      "mfatName": "Child mortality rates (per 1,000 live births)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_03",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_03,/A.G.SH_DYN_IMRT.[TAG_GEO]._T.Y0.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_03&df[ag]=SPC&dq=A.G.SH_DYN_IMRT.._T.Y0.........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Data available by sex | Added sex=_T / flag SDG | URLs changed - disaggregation available by sex (AS) + Removed particular version of DF"
+    },
+    {
+      "id": "II.8",
+      "themeId": "II",
+      "title": "SDG 3.2.1 - Under-five mortality rate",
+      "mfatName": "SDG 3.2.1 - Under 5 mortality rate",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_03",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_03,/A.G.SH_DYN_MORT.[TAG_GEO]._T.Y0T4.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_03&df[ag]=SPC&dq=A.G.SH_DYN_MORT.._T.Y0T4.........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Data available by sex | Indicator added for MFAT, flag SDG - possible to disaggregated by sex (AS) + Removed particular version of DF"
     },
     {
       "id": "II.9",
+      "themeId": "II",
+      "title": "SDG 2.2.1 - Proportion of children moderately or severely stunted (children under 5)",
+      "mfatName": "Prevalence of stunting, height for age (% of children under 5)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_02",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_02,/A.G.SH_STA_STNT.[TAG_GEO]._T..........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_02&df[ag]=SPC&dq=A.G.SH_STA_STNT.._T..........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Data available by sex | flag SDG | URLs changed - possible to disaggregated by sex (AS)  + Removed particular version of DF"
+    },
+    {
+      "id": "II.10",
+      "themeId": "II",
+      "title": "SDG 3.1.2 - Proportion of births attended by skilled health personnel",
+      "mfatName": "Skilled birth attendance",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_03",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_03,/A.G.SH_STA_BRTC.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_03&df[ag]=SPC&dq=A.G.SH_STA_BRTC............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "flag SDG | URLs changed (AS) + Removed particular version of DF"
+    },
+    {
+      "id": "II.11",
       "themeId": "II",
       "title": "Contraceptive prevalence rate (%)",
       "mfatName": "Modern contraceptive prevalence rate",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_HEA",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A.[TAG_GEO].NMDI0116.._T._T..?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=contraceptive&pg=0&snb=6&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_HEA&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0116._T._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD",
-      "notes": "New"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=contraceptive&pg=0&snb=6&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_HEA&df[ag]=SPC&pd=%2C&dq=A..NMDI0116._T._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD",
+      "notes": "New | Data to be updated (MICS) | Need to update data set. We can use  https://genderdata.worldbank.org/en/indicator/sp-dyn-zs"
     },
     {
-      "id": "II.11",
+      "id": "II.12",
+      "themeId": "II",
+      "title": "SDG 3.7.1 - Proportion of women of reproductive age (aged 15-49 years) who have their need for family planning satisfied with modern methods",
+      "mfatName": "Met need for family planning, modern methods",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_03",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_03,/A.G.SH_FPL_MTMM.[TAG_GEO].F.Y15T49.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_03&df[ag]=SPC&dq=A.G.SH_FPL_MTMM..F.Y15T49.........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "flag SDG | URLs changed (AS) + Removed particular version of DF"
+    },
+    {
+      "id": "II.13",
       "themeId": "II",
       "title": "Proportion of 1 year old children immunized against measles (%)",
       "mfatName": "Immunisation coverage by vaccine (three main types - DPT, HepB3, Measles)",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_HEA",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A.[TAG_GEO].NMDI0103._T._T._T..?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators%2C0%7CNational%20Minimum%20Development%20Indicators%23NMDI%23&pg=0&fc=Development%20indicators&bp=true&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_HEA&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0103._T._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
-      "notes": "New 2024"
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators%2C0%7CNational%20Minimum%20Development%20Indicators%23NMDI%23&pg=0&fc=Development%20indicators&bp=true&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_HEA&df[ag]=SPC&pd=%2C&dq=A..NMDI0103._T._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "New 2024 | URLs verified (AS) + Removed particular version of DF"
     },
     {
-      "id": "II.12",
+      "id": "II.14",
+      "themeId": "II",
+      "title": "SDG 3.b.1 - Proportion of the target population who received measles-containing-vaccine second-dose (MCV2)",
+      "mfatName": "SDG 3.b.1 - Percentage of children who received the 2nd dose of measles containing vaccine (MCV2) according to the nationally recommended schedule (%)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_03",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_03,/A.G.SH_ACS_MCV2.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_03&df[ag]=SPC&dq=A.G.SH_ACS_MCV2............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Indicator added for MFAT, flag SDG (AS) + Removed particular version of DF"
+    },
+    {
+      "id": "II.15",
       "themeId": "II",
       "title": "Proportion of one year olds fully immunized against EPI target diseases (3 doses diptheria, tetanus, toxoid & pertussis) (%)",
       "mfatName": "Immunisation coverage by vaccine (three main types - DPT, HepB3, Measles)",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_HEA",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A.[TAG_GEO].NMDI0145._T._T._T..?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators%2C0%7CNational%20Minimum%20Development%20Indicators%23NMDI%23&pg=0&fc=Development%20indicators&bp=true&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_HEA&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0145._T._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
-      "notes": "New 2024"
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators%2C0%7CNational%20Minimum%20Development%20Indicators%23NMDI%23&pg=0&fc=Development%20indicators&bp=true&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_HEA&df[ag]=SPC&pd=%2C&dq=A..NMDI0145._T._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "New 2024 | Remove this indicator (AS) + Removed particular version of DF"
     },
     {
-      "id": "II.13",
+      "id": "II.16",
+      "themeId": "II",
+      "title": "SDG 3.b.1 - Proportion of the target population who received 3 doses of diphtheria-tetanus-pertussis (DTP3) vaccine",
+      "mfatName": "Immunisation coverage by vaccine (three main types - DPT, HepB3, Measles)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_03",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_03,/A.G.SH_ACS_DTP3.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_03&df[ag]=SPC&dq=A.G.SH_ACS_DTP3............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Added with regards to MFAT request (AS) + Removed particular version of DF"
+    },
+    {
+      "id": "II.17",
+      "themeId": "II",
+      "title": "SDG 3.b.1 - Proportion of the target population who received a 3rd dose of pneumococcal conjugate (PCV3) vaccine",
+      "mfatName": "Immunisation coverage by vaccine (three main types - DPT, HepB3, Measles)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_03",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_03,/A.G.SH_ACS_PCV3.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_03&df[ag]=SPC&dq=A.G.SH_ACS_PCV3............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Added with regards to MFAT request (AS) + Removed particular version of DF"
+    },
+    {
+      "id": "II.18",
+      "themeId": "II",
+      "title": "SDG 3.b.1 - Proportion of the target population who received the final dose of human papillomavirus (HPV) vaccine",
+      "mfatName": "Immunisation coverage by vaccine (three main types - DPT, HepB3, Measles)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_03",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_03,/A.G.SH_ACS_HPV.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_03&df[ag]=SPC&df[vs]=4.3&dq=A.G.SH_ACS_HPV............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Added with regards to MFAT request (AS) + Removed particular version of DF"
+    },
+    {
+      "id": "II.19",
       "themeId": "II",
       "title": "Proportion of one year olds fully immunized against EPI target diseases (3 doses hepatitis B - HepB3) (%)",
       "mfatName": "Immunisation coverage by vaccine (three main types - DPT, HepB3, Measles)",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_HEA",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A.[TAG_GEO].NMDI0146._T._T._T..?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators%2C0%7CNational%20Minimum%20Development%20Indicators%23NMDI%23&pg=0&fc=Development%20indicators&bp=true&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_HEA&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0146._T._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
-      "notes": "New 2024"
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators%2C0%7CNational%20Minimum%20Development%20Indicators%23NMDI%23&pg=0&fc=Development%20indicators&bp=true&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_HEA&df[ag]=SPC&pd=%2C&dq=A..NMDI0146._T._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "New 2024 | remove the indicator (AS) + Removed particular version of DF"
     },
     {
-      "id": "II.14",
+      "id": "II.20",
       "themeId": "II",
-      "title": "Mortality rate attributed to cardiovascular disease, cancer, chronic respiratory disease or diabetes",
+      "title": "SDG 3.3.1 - Number of new HIV infections per 1,000 uninfected population - 15",
+      "mfatName": "HIV",
       "rendering": "CHART",
-      "dataflow": "DF_NMDI_HEA",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A.[TAG_GEO].SH_DTH_NCD._T._T._T..?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&tm=mortality%20rate&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_HEA&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].SH_DTH_NCD._T._T._T..&ly[cl]=TIME_PERIOD"
+      "dataflow": "DF_SDG_03",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_03,/A.G.SH_HIV_INCD.[TAG_GEO]._T.Y15T24+Y15T49.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_03&df[ag]=SPC&df[vs]=4.3&dq=A.G.SH_HIV_INCD.._T.Y15T24.........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Data available for other age groups and by sex | add indicator of interest (AS)",
+      "seriesConcept": "AGE",
+      "consolidatedFromIds": [
+        "II.20",
+        "II.21"
+      ]
     },
     {
-      "id": "II.15",
+      "id": "II.22",
+      "themeId": "II",
+      "title": "SDG 3. 4. 1 - Mortality rate attributed to cardiovascular disease, cancer, diabetes or chronic respiratory disease",
+      "mfatName": "Mortality rate attributed to cardiovascular disease, cancer, chronic respiratory disease or diabetes",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_03",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_03,/A.G.SH_DTH_NCOM.[TAG_GEO]._T.Y30T69.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_03&df[ag]=SPC&dq=A.G.SH_DTH_NCOM.._T.Y30T69.........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Aged 30-69 years, data available by sex | Flag as an SDG 3.4.1 | URLs changed - possible to disaggregated by sex (AS)  + Removed particular version of DF"
+    },
+    {
+      "id": "II.23",
       "themeId": "II",
       "title": "Prevalence of overweight or obese adults - BMI >= 25.0",
       "mfatName": "Prevalence of obesity among adults (%)",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_HEA",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_HEA,/A.[TAG_GEO].NMDI0131._T._T._T..?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=health&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_HEA&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].NMDI0131._T._T._T.."
+      "visUrl": "https://stats.pacificdata.org/vis?tm=health&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_HEA&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].NMDI0131._T._T._T..",
+      "notes": "URLs changed (AS) + Removed particular version of DF"
     },
     {
-      "id": "II.23",
+      "id": "II.24",
       "themeId": "II",
-      "title": "-",
+      "title": "Prevalence of overweight, male (% of male adults)",
+      "rendering": "CHART",
+      "dataflow": "DF_NMDI",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI,/A.[TAG_GEO].NMDI0131M.M....?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?tm=NMDI&pg=0&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI&df[ag]=SPC&df[vs]=1.0&dq=A..NMDI0131M.M....&pd=,&to[TIME_PERIOD]=false"
+    },
+    {
+      "id": "II.25",
+      "themeId": "II",
+      "title": "Prevalence of overweight, female (% of female adults)",
+      "rendering": "CHART",
+      "dataflow": "DF_NMDI",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI,/A.[TAG_GEO].NMDI0131F.F....?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?tm=NMDI&pg=0&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI&df[ag]=SPC&df[vs]=1.0&dq=A..NMDI0131F.F....&pd=,&to[TIME_PERIOD]=false"
+    },
+    {
+      "id": "II.26",
+      "themeId": "II",
+      "title": "SDG 3.a.1 - Age-standardised prevalence of current tobacco use",
+      "mfatName": "Tobacco use prevalence  in adults and youth",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_03",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_03,/A.G.SH_PRV_SMOK.[TAG_GEO]._T.Y_GE15.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_03&df[ag]=SPC&df[vs]=4.3&dq=A.G.SH_PRV_SMOK.._T.Y_GE15.........&pd=,&to[TIME_PERIOD]=false",
+      "notes": "Data available by sex | New / flag 3 | URLs changed (AS) + Removed particular version of DF"
+    },
+    {
+      "id": "II.27",
+      "themeId": "II",
+      "title": "SDG 3.8.1 - Coverage of essential health services",
+      "mfatName": "Universal Health Coverage Service Index",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_03",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_03,/A.G.SH_ACS_UNHC_25.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_03&df[ag]=SPC&dq=A.G.SH_ACS_UNHC_25............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "flag SDG | URLs changed (AS) + Removed particular version of DF"
+    },
+    {
+      "id": "II.28",
+      "themeId": "II",
+      "title": "SDG 3.c.1 - Health worker density",
+      "mfatName": "Nurses and midwives (per 1,000 people)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_03",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_03,/A.G.SH_MED_DEN.[TAG_GEO]......ISCO08_222_322+ISCO08_221+ISCO08_2261+ISCO08_2262.....?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_03&df[ag]=SPC&df[vs]=4.3&dq=A.G.SH_MED_DEN.......ISCO08_222_322.....&pd=,&to[TIME_PERIOD]=false",
+      "notes": "Data available by sex | flag SDG | URLs changed (AS) + Removed particular version of DF | New 2024 + flag SDG | URLs changed (AS)+ Removed particular version of DF",
+      "seriesConcept": "OCCUPATION",
+      "consolidatedFromIds": [
+        "II.28",
+        "II.29",
+        "II.30",
+        "II.31"
+      ]
+    },
+    {
+      "id": "II.32",
+      "themeId": "II",
+      "title": "SDG 3.d.1 - International Health Regulations (IHR) core capacity index",
+      "mfatName": "International Health Regulations (IHR) core capacity index",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_03",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_03,/A.G.SH_IHR_CAPS.[TAG_GEO]........_T...?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_03&df[ag]=SPC&dq=A.G.SH_IHR_CAPS........._T...&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "flag SDG | URLs changed - possible to disaggregate (AS) + Removed particular version of DF"
+    },
+    {
+      "id": "II.33",
+      "themeId": "II",
+      "title": "Status of NCD policy and legislation (Mana Dashboard)",
       "mfatName": "NCD - Health system response programmes (six sub-components)",
-      "rendering": "TEXT"
+      "rendering": "CHART",
+      "dataflow": "DF_BP50",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_BP50,/A.BPI_MANAL1.[TAG_GEO]._T._T._T._T._T._T._Z._T?lastNObservations=1&dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=SPC2&df[id]=DF_BP50&df[ag]=SPC&av=true&lo=1&lom=LASTNOBSERVATIONS&dq=A.BPI_MANAL1.._T._T._T._T._T._T._Z._T&to[TIME_PERIOD]=false&ly[cl]=INDICATOR&ly[rw]=GEO_PICT&pd=,&lb=bt",
+      "notes": "3 of these now available in 2050 Database. Other components can be added to 2050 as 'supplementary indicators' | add the TAG_GEO (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "II.34",
+      "themeId": "II",
+      "title": "Status of NCD policy and legislation (Mana Dashboard)",
+      "mfatName": "NCD - Health system response programmes (six sub-components)",
+      "rendering": "CHART",
+      "dataflow": "DF_BP50",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_BP50,/A.BPI_MANASL2.[TAG_GEO]._T._T._T._T._T._T._Z._T?lastNObservations=1&dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=SPC2&df[id]=DF_BP50&df[ag]=SPC&av=true&lo=1&lom=LASTNOBSERVATIONS&dq=A.BPI_MANASL2.._T._T._T._T._T._T._Z._T&to[TIME_PERIOD]=false&pd=,&lb=bt"
+    },
+    {
+      "id": "II.35",
+      "themeId": "II",
+      "title": "Status of NCD policy and legislation (Mana Dashboard)",
+      "mfatName": "NCD - Health system response programmes (six sub-components)",
+      "rendering": "CHART",
+      "dataflow": "DF_BP50",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_BP50,/A.BPI_MANAGL2.[TAG_GEO]._T._T._T._T._T._T._Z._T?lastNObservations=1&dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=SPC2&df[id]=DF_BP50&df[ag]=SPC&av=true&lo=1&lom=LASTNOBSERVATIONS&dq=A.BPI_MANAGL2.._T._T._T._T._T._T._Z._T&to[TIME_PERIOD]=false&ly[cl]=INDICATOR&ly[rw]=GEO_PICT&pd=,"
+    },
+    {
+      "id": "II.36",
+      "themeId": "II",
+      "title": "",
+      "rendering": "TEXT",
+      "notes": "Make a test with the 3 variables or decompose them"
     },
     {
       "id": "III.1",
@@ -493,7 +751,8 @@ export const catalogue: Catalogue = {
       "rendering": "CHART",
       "dataflow": "DF_NMDI_EDU",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0429._T._T._T..?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&df[vs]=1.0&dq=A.[TAG_GEO].NMDI0429._T._T._T..&pd=%2C&tm=education&pg=0&ly[cl]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&dq=A.[TAG_GEO].NMDI0429._T._T._T..&pd=%2C&tm=education&pg=0&ly[cl]=TIME_PERIOD",
+      "notes": "Remove the indicator (AS) + Removed particular version of DF (CI)"
     },
     {
       "id": "III.2",
@@ -502,130 +761,225 @@ export const catalogue: Catalogue = {
       "rendering": "CHART",
       "dataflow": "DF_NMDI_EDU",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0020._T._T._T..?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=education&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].NMDI0020._T._T._T.."
+      "visUrl": "https://stats.pacificdata.org/vis?tm=education&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].NMDI0020._T._T._T..",
+      "notes": "Propose to remove the indicator and replace with SDG (AS)'+ Removed particular version of DF (CI)"
+    },
+    {
+      "id": "III.3",
+      "themeId": "III",
+      "title": "SDG 1.a.2 - Proportion of total government spending on essential services, education",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_01",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_01,/A.G.SG_XPD_EDUC.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_01&df[ag]=SPC&df[vs]=4.3&dq=A.G.SG_XPD_EDUC............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Add the indicator to replace NMDI (AS)"
+    },
+    {
+      "id": "III.4",
+      "themeId": "III",
+      "title": "SDG 4.5.1 - Adjusted gender parity index for participation rate in organized learning (one year before the official primary entry age), (ratio)",
+      "mfatName": "Ratio of girls to boys in primary, secondary and tertiary education: Gender Parity Index",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_04",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_04,/A.G.SE_GPI_PTNPRE.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_04&df[ag]=SPC&df[vs]=4.3&dq=A.G.SE_GPI_PTNPRE............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&lb=nm&page=0",
+      "notes": "flag SDG | changed indicators and URLs'+ Removed particular version of DF (CI)"
     },
     {
       "id": "III.5",
+      "themeId": "III",
+      "title": "SDG 4.3.1 - Participation rate in formal and non-formal education and training - 15-24 years (data available by sex)",
+      "mfatName": "Participation rate of youth and adults in formal and non-formal education and training in the previous 12 months, by sex",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_04",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_04,/A.G.SE_ADT_EDUCTRN.[TAG_GEO]._T.Y15T24.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_04&df[ag]=SPC&df[vs]=4.3&dq=A.G.SE_ADT_EDUCTRN.._T.Y15T24.........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&lb=nm&page=0",
+      "notes": "Data available by sex | flag SDG | URLs changed (AS)'+ Removed particular version of DF (CI)"
+    },
+    {
+      "id": "III.6",
+      "themeId": "III",
+      "title": "SDG 4.3.1 - Participation rate in formal and non-formal education and training - 15-64 years (data available by sex)",
+      "mfatName": "Participation rate of youth and adults in formal and non-formal education and training in the previous 12 months, by sex",
+      "rendering": "CHART",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_04,/A.G.SE_ADT_EDUCTRN.[TAG_GEO]._T.Y15T64.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_04&df[ag]=SPC&df[vs]=4.3&dq=A.G.SE_ADT_EDUCTRN.._T.Y15T64.........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&lb=nm&page=0",
+      "notes": "Data available by sex | added and specify the age category"
+    },
+    {
+      "id": "III.7",
       "themeId": "III",
       "title": "Transition rate (primary/secondary)",
       "mfatName": "Survival rate to the last grade of lower secondary general education (%) (Transition rate)",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_EDU",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0431._T._T._T..?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=transition%20rate&pg=0&snb=2&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0431._T._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
-      "notes": "New 2024"
-    },
-    {
-      "id": "III.6",
-      "themeId": "III",
-      "title": "Educational attainment",
-      "mfatName": "Percentage of population (age 25 and over) by highest level of educational attainment (primary and lower secondary), by sex",
-      "rendering": "CHART",
-      "notes": "New 2024 | Update with the gender data"
-    },
-    {
-      "id": "III.7",
-      "themeId": "III",
-      "title": "Literacy Rates of 15-24 year olds",
-      "mfatName": "Literacy rate of youth (%ages 15-24) - by sex and rural/urban",
-      "rendering": "CHART",
-      "dataflow": "DF_NMDI_EDU",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0019._T+F+M._T._T..?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=literacy%20rate&pg=0&snb=5&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0019._T._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD",
-      "notes": "New | New 2024",
-      "seriesConcept": "SEX",
-      "consolidatedFromIds": [
-        "III.7",
-        "III.8",
-        "III.9"
-      ]
+      "visUrl": "https://stats.pacificdata.org/vis?tm=transition%20rate&pg=0&snb=2&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&pd=%2C&dq=A..NMDI0431._T._T._T..&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "New 2024 | + Removed particular version of DF (CI)"
     },
     {
       "id": "III.10",
       "themeId": "III",
-      "title": "Literacy Rates of 15-24 year olds",
+      "title": "SDG 4.6.1 - Literacy Rates of 15-24 year olds",
       "mfatName": "Literacy rate of youth (%ages 15-24) - by sex and rural/urban",
       "rendering": "CHART",
-      "dataflow": "DF_NMDI_EDU",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_EDU,/A.[TAG_GEO].NMDI0019._T._T.U+R._T.?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators%2C0%7CNational%20Minimum%20Development%20Indicators%23NMDI%23&pg=0&fc=Development%20indicators&bp=true&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_EDU&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..NMDI0019._T._T.U._T.&ly[rw]=GEO_PICT&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
-      "notes": "New 2024",
-      "seriesConcept": "URBANIZATION",
+      "dataflow": "DF_SDG_04",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_04,/A.G.SE_ADT_LITR.[TAG_GEO]._T+F+M.Y15T24......SKILL_LTRCY...?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_04&df[ag]=SPC&df[vs]=4.3&dq=A.G.SE_ADT_LITR.._T.Y15T24......SKILL_LTRCY...&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&lb=nm&page=0",
+      "notes": "Data available for other age groups | New | URLs changed (AS)'+ Removed particular version of DF (CI) | New 2024",
+      "seriesConcept": "SEX",
       "consolidatedFromIds": [
         "III.10",
-        "III.11"
+        "III.11",
+        "III.12"
       ]
     },
     {
-      "id": "III.12",
+      "id": "III.15",
       "themeId": "III",
-      "title": "Literacy Rates of 25-64 year olds (%)",
+      "title": "SDG 4.6.1 - Literacy Rates of 25-64 year olds",
       "mfatName": "Literacy rate of adults (%ages 25-64) - by sex and rural/urban",
       "rendering": "CHART",
-      "dataflow": "DF_UIS",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_UIS,/A.[TAG_GEO].LR_AG25T64?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=literacy%20rate&pg=0&snb=5&df[ds]=ds%3ASPC2&df[id]=DF_UIS&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..LR_AG25T64&ly[rw]=INDICATOR&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
-      "notes": "New 2024"
-    },
-    {
-      "id": "III.13",
-      "themeId": "III",
-      "title": "Literacy Rates of 25-64 year olds (% - female)",
-      "mfatName": "Literacy rate of adults (%ages 25-64) - by sex and rural/urban",
-      "rendering": "CHART",
-      "dataflow": "DF_UIS",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_UIS,/A.[TAG_GEO].LR_AG25T64_F?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=literacy%20rate&pg=0&snb=5&df[ds]=ds%3ASPC2&df[id]=DF_UIS&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..LR_AG25T64_F&ly[rw]=INDICATOR&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
-      "notes": "New 2024"
-    },
-    {
-      "id": "III.14",
-      "themeId": "III",
-      "title": "Literacy Rates of 25-64 year olds (% - male)",
-      "mfatName": "Literacy rate of adults (%ages 25-64) - by sex and rural/urban",
-      "rendering": "CHART",
-      "dataflow": "DF_UIS",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_UIS,/A.[TAG_GEO].LR_AG25T64_M?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=literacy%20rate&pg=0&snb=5&df[ds]=ds%3ASPC2&df[id]=DF_UIS&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A..LR_AG25T64_M&ly[rw]=INDICATOR&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
-      "notes": "New 2024"
-    },
-    {
-      "id": "III.21",
-      "themeId": "III",
-      "title": "-",
-      "mfatName": "Compulsory school ages and ranges for primary and secondary",
-      "rendering": "TEXT"
-    },
-    {
-      "id": "III.22",
-      "themeId": "III",
-      "title": "-",
-      "mfatName": "Government scholarships: ratio women to men",
-      "rendering": "TEXT"
-    },
-    {
-      "id": "III.23",
-      "themeId": "III",
-      "title": "-",
-      "mfatName": "Mean years of schooling",
-      "rendering": "TEXT"
+      "dataflow": "DF_SDG_04",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_04,/A.G.SE_ADT_LITR.[TAG_GEO]._T+F+M.Y25T64......SKILL_LTRCY...?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_04&df[ag]=SPC&df[vs]=4.3&dq=A.G.SE_ADT_LITR.._T.Y25T64......SKILL_LTRCY...&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&lb=nm&page=0",
+      "notes": "New 2024 | URLs changed (AS)'+ Removed particular version of DF (CI)",
+      "seriesConcept": "SEX",
+      "consolidatedFromIds": [
+        "III.15",
+        "III.16",
+        "III.17"
+      ]
     },
     {
       "id": "III.24",
       "themeId": "III",
+      "title": "SDG 4.1.1 - Proportion of children and young people achieving a minimum proficiency level in",
+      "mfatName": "SDG 4.1.1 - Proportion of children and young people achieving a minimum proficiency level in reading and mathematics (by age, sex, education level and subject).",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_04",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_04,/A.G.SE_TOT_PRFL.[TAG_GEO].....ISCED11_1...SKILL_READ+SKILL_MATH...?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_04&df[ag]=SPC&dq=A.G.SE_TOT_PRFL......ISCED11_1...SKILL_READ...&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Primary education | Indicator added to replace previous ones + Removed particular version of DF (CI)",
+      "seriesConcept": "COMPOSITE_BREAKDOWN",
+      "consolidatedFromIds": [
+        "III.24",
+        "III.25"
+      ]
+    },
+    {
+      "id": "III.26",
+      "themeId": "III",
+      "title": "SDG 4.1.2 - Completion rate",
+      "mfatName": "SDG 4.1.2 Completion rate (primary education, lower secondary education, upper secondary education),",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_04",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_04,/A.G.SE_TOT_CPLR.[TAG_GEO]._T+F+M.._T._T.ISCED11_1......?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_04&df[ag]=SPC&dq=A.G.SE_TOT_CPLR.._T.._T._T.ISCED11_1......&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Data available by location and wealth quintile | Indicator added for MFAT, flag SDG - possible to disaggregated by location and quintile (AS) + Removed particular version of DF (CI)",
+      "seriesConcept": "SEX",
+      "consolidatedFromIds": [
+        "III.26",
+        "III.27",
+        "III.28"
+      ]
+    },
+    {
+      "id": "III.29",
+      "themeId": "III",
+      "title": "SDG 4.1.2 - Completion rate",
+      "mfatName": "SDG 4.1.2 Completion rate (primary education, lower secondary education, upper secondary education),",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_04",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_04,/A.G.SE_TOT_CPLR.[TAG_GEO]._T+F+M.._T._T.ISCED11_2......?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_04&df[ag]=SPC&dq=A.G.SE_TOT_CPLR.._T.._T._T.ISCED11_2......&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Data available by location and wealth quintile | Indicator added for MFAT, flag SDG - possible to disaggregated by location and quintile (AS) + Removed particular version of DF (CI)",
+      "seriesConcept": "SEX",
+      "consolidatedFromIds": [
+        "III.29",
+        "III.30",
+        "III.31"
+      ]
+    },
+    {
+      "id": "III.32",
+      "themeId": "III",
+      "title": "SDG 4.1.2 - Completion rate",
+      "mfatName": "SDG 4.1.2 Completion rate (primary education, lower secondary education, upper secondary education),",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_04",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_04,/A.G.SE_TOT_CPLR.[TAG_GEO]._T+F+M.._T._T.ISCED11_3......?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_04&df[ag]=SPC&dq=A.G.SE_TOT_CPLR.._T.._T._T.ISCED11_3......&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Data available by location and wealth quintile | Indicator added for MFAT, flag SDG - possible to disaggregated by location and quintile (AS) + Removed particular version of DF (CI)",
+      "seriesConcept": "SEX",
+      "consolidatedFromIds": [
+        "III.32",
+        "III.33",
+        "III.34"
+      ]
+    },
+    {
+      "id": "III.35",
+      "themeId": "III",
+      "title": "SDG 4.2.2 - Participation rate in organized learning (one year before the official primary entry age)",
+      "mfatName": "SDG 4.2.2 - Participation rate in Early Child Education (one year before the official primary entry age).",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_04",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_04,/A.G.SE_PRE_PARTN.[TAG_GEO]._T..........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_04&df[ag]=SPC&dq=A.G.SE_PRE_PARTN.._T..........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Data available by sex | Indicator added for MFAT, flag SDG - possible to disaggregated by sex (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "III.36",
+      "themeId": "III",
+      "title": "Primary education - Theorical Entry Age",
+      "mfatName": "Compulsory school ages and ranges for primary and secondary",
+      "rendering": "CHART",
+      "dataflow": "DF_UIS",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_UIS,/A.[TAG_GEO].OTH002?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?tm=education&pg=0&snb=48&df[ds]=ds%3ASPC2&df[id]=DF_UIS&df[ag]=SPC&df[vs]=1.0&dq=A..OTH002&pd=,&to[TIME_PERIOD]=false",
+      "notes": "Need to ask dissemination team to add the information"
+    },
+    {
+      "id": "III.37",
+      "themeId": "III",
+      "title": "SDG 4.b.1 - Total official flows for scholarships, by recipient countries",
+      "mfatName": "Government scholarships: ratio women to men",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_04",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_04,/A.G.DC_TOF_SCHIPSL.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_04&df[ag]=SPC&df[vs]=4.3&dq=A.G.DC_TOF_SCHIPSL............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&lb=nm&page=0",
+      "notes": "Not feasible for the moment | Indicator added for MFAT, flag SDG (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "III.38",
+      "themeId": "III",
       "title": "-",
+      "mfatName": "Mean years of schooling",
+      "rendering": "TEXT",
+      "notes": "Need to ask dissemination team to add the information"
+    },
+    {
+      "id": "III.39",
+      "themeId": "III",
+      "title": "Duration of compulsory education (years)",
       "mfatName": "Expected years of schooling",
-      "rendering": "TEXT"
+      "rendering": "CHART",
+      "dataflow": "DF_UIS",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_UIS,/A.[TAG_GEO].OTH001?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?tm=education&pg=0&snb=48&df[ds]=ds%3ASPC2&df[id]=DF_UIS&df[ag]=SPC&df[vs]=1.0&dq=A..OTH001&pd=,&to[TIME_PERIOD]=false",
+      "notes": "Need to ask dissemination team to add the information"
     },
     {
       "id": "IV.1",
       "themeId": "IV",
-      "title": "Annual GDP growth (%)",
+      "title": "SDG 17.13.1 - Annual GDP growth (%)",
+      "mfatName": "Annual GDP growth (%)",
       "rendering": "CHART",
-      "dataflow": "DF_NATIONAL_ACCOUNTS",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NATIONAL_ACCOUNTS,/A.USD.[TAG_GEO].GDPCVR?endPeriod=2021&dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Topic%2C0%7CEconomy%23ECO%23&pg=0&fc=Topic&df[ds]=ds%3ASPC2&df[id]=DF_NATIONAL_ACCOUNTS&df[ag]=SPC&df[vs]=1.0&pd=%2C2021&dq=A.USD.[TAG_GEO].GDPCVR&ly[cl]=TIME_PERIOD",
-      "notes": "Was DF_WBWDI"
+      "dataflow": "DF_SDG_17",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_17,/A.G.NY_GDP_MKTP_KD_ZG.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_17&df[ag]=SPC&df[vs]=4.3&dq=A.G.NY_GDP_MKTP_KD_ZG............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Was DF_WBWDI | change the DF_NATIONAL_ACCOUNTS to DF_SDG_17 some values seem incorrect (AS)'+ Removed particular version of DF (CI)"
     },
     {
       "id": "IV.2",
@@ -635,7 +989,8 @@ export const catalogue: Catalogue = {
       "rendering": "CHART",
       "dataflow": "DF_SOCECO",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SOCECO,/A.[TAG_GEO].OFB2GDP?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=covid%2019&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_SOCECO&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].OFB2GDP&ly[cl]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=covid%2019&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_SOCECO&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].OFB2GDP&ly[cl]=TIME_PERIOD",
+      "notes": "URLs changed - value not updated (AS)'+ Removed particular version of DF (CI)"
     },
     {
       "id": "IV.3",
@@ -645,8 +1000,8 @@ export const catalogue: Catalogue = {
       "rendering": "CHART",
       "dataflow": "DF_WBWDI",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].NV_AGR_TOTL_ZS?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=wb%20wdi&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].NV_AGR_TOTL_ZS&ly[cl]=TIME_PERIOD",
-      "notes": "Relaunch GDP"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=wb%20wdi&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].NV_AGR_TOTL_ZS&ly[cl]=TIME_PERIOD",
+      "notes": "Relaunch GDP | URLs changed (AS)'+ Removed particular version of DF (CI)"
     },
     {
       "id": "IV.4",
@@ -656,8 +1011,8 @@ export const catalogue: Catalogue = {
       "rendering": "CHART",
       "dataflow": "DF_WBWDI",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].NV_IND_TOTL_ZS?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=wb%20wdi&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].NV_IND_TOTL_ZS&ly[cl]=TIME_PERIOD",
-      "notes": "Relaunch GDP"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=wb%20wdi&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].NV_IND_TOTL_ZS&ly[cl]=TIME_PERIOD",
+      "notes": "Relaunch GDP | URLs changed (AS)'+ Removed particular version of DF (CI)"
     },
     {
       "id": "IV.5",
@@ -667,34 +1022,144 @@ export const catalogue: Catalogue = {
       "rendering": "CHART",
       "dataflow": "DF_WBWDI",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].NV_SRV_TOTL_ZS?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=wb%20wdi&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].NV_SRV_TOTL_ZS&ly[cl]=TIME_PERIOD",
-      "notes": "Relaunch GDP"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=wb%20wdi&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].NV_SRV_TOTL_ZS&ly[cl]=TIME_PERIOD",
+      "notes": "Relaunch GDP | URLs changed (AS)'+ Removed particular version of DF (CI)"
+    },
+    {
+      "id": "IV.6",
+      "themeId": "IV",
+      "title": "SDG 16.6.1 - Primary government expenditures as a proportion of original approved budget",
+      "mfatName": "SDG 16.6.1 - Primary government expenditure as a proportion of original approved budget, by sector",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_16",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_16,/A.G.GF_XPD_GBPC.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_16&df[ag]=SPC&dq=A.G.GF_XPD_GBPC............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Indicator added for MFAT, flag SDG (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "IV.7",
+      "themeId": "IV",
+      "title": "SDG 17.1.1 - Total government revenue as a proportion of GDP",
+      "mfatName": "SDG 17.1.1 - Total government revenue as proportion of GDP",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_17",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_17,/A.G.GR_G14_GDP.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_17&df[ag]=SPC&dq=A.G.GR_G14_GDP............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Indicator added for MFAT, flag SDG (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "IV.8",
+      "themeId": "IV",
+      "title": "SDG 1.2.1 - Proportion of population living below the national poverty line",
+      "mfatName": "Poverty headcount ratio at national poverty lines (% of population)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_01",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_01,/A.G.SI_POV_NAHC.[TAG_GEO]._T._T._T........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_01&df[ag]=SPC&dq=A.G.SI_POV_NAHC.._T._T._T........&pd=,&to[TIME_PERIOD]=false",
+      "notes": "Flag as SDG + change the URL with the new SDG tables // No disaggregation available (AS) + Removed particular version of DF (CI)"
     },
     {
       "id": "IV.9",
+      "themeId": "IV",
+      "title": "SDG 8.5.1 - Average hourly earnings",
+      "mfatName": "Average hourly earnings",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_08",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_08,/A.G.SL_EMP_EARN.[TAG_GEO]._T+F+M.Y_GE15...._T.....?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_08&df[ag]=SPC&df[vs]=4.3&dq=A.G.SL_EMP_EARN.._T.Y_GE15...._T.....&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Data available by occupation | URLs changed and added disaggregation by sex (AS) '+ Removed particular version of DF (CI)",
+      "seriesConcept": "SEX",
+      "consolidatedFromIds": [
+        "IV.9",
+        "IV.10",
+        "IV.11"
+      ]
+    },
+    {
+      "id": "IV.12",
+      "themeId": "IV",
+      "title": "SDG 8.5.2 - Unemployment rate",
+      "mfatName": "Unemployment rate (by sex, age, urbanisation level (urban, rural) and disability status (Blue Pacific 2050)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_08",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_08,/A.G.SL_TLF_UEM_19ICLS.[TAG_GEO]._T+F+M.Y_GE15.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_08&df[ag]=SPC&dq=A.G.SL_TLF_UEM_19ICLS.._T.Y_GE15.........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Data available by age group and disability status | URLs changed, flag SDG, added disaggregation level (AS) + Removed particular version of DF (CI)",
+      "seriesConcept": "SEX",
+      "consolidatedFromIds": [
+        "IV.12",
+        "IV.13",
+        "IV.14"
+      ]
+    },
+    {
+      "id": "IV.15",
+      "themeId": "IV",
+      "title": "SDG 8.5.2 - Unemployment rate",
+      "mfatName": "Unemployment rate (by sex, age, urbanisation level (urban, rural) and disability status (Blue Pacific 2050)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_08",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_08,/A.G.SL_TLF_UEM_19ICLS.[TAG_GEO]._T+F+M.Y15T24.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_08&df[ag]=SPC&dq=A.G.SL_TLF_UEM_19ICLS.._T.Y15T24.........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Data available by age group and disability status | URLs changed, flag SDG, added disaggregation level (AS) + Removed particular version of DF (CI)",
+      "seriesConcept": "SEX",
+      "consolidatedFromIds": [
+        "IV.15",
+        "IV.16",
+        "IV.17"
+      ]
+    },
+    {
+      "id": "IV.18",
       "themeId": "IV",
       "title": "GINI index (World Bank estimate)",
       "rendering": "CHART",
       "dataflow": "DF_WBWDI",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].SI_POV_GINI?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=wb%20wdi&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].SI_POV_GINI&ly[cl]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=wb%20wdi&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].SI_POV_GINI&ly[cl]=TIME_PERIOD",
+      "notes": "URLs changed (AS)'+ Removed particular version of DF (CI)"
     },
     {
-      "id": "IV.11",
+      "id": "IV.19",
+      "themeId": "IV",
+      "title": "SDG 8.6.1 - Proportion of youth not in education, employment or training - 19th ICLS (%)",
+      "mfatName": "Proportion of youth (aged 15-24 years) not in education, employment or training",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_08",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_08,/A.G.SL_TLF_NEET_19ICLS.[TAG_GEO]._T.Y15T24.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_08&df[ag]=SPC&dq=A.G.SL_TLF_NEET_19ICLS.._T.Y15T24.........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Aged 15-24 years. Data available by sex | URLs updated, flag SDG, disaggregation available by sex + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "IV.20",
       "themeId": "IV",
       "title": "GDP, per capita, in USD",
       "mfatName": "GDP, per capita, (US$)",
       "rendering": "CHART",
       "dataflow": "DF_NATIONAL_ACCOUNTS",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NATIONAL_ACCOUNTS,/A.USD.[TAG_GEO].GDPCPC?endPeriod=2021&dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Topic%2C0%7CEconomy%23ECO%23&pg=0&fc=Topic&df[ds]=ds%3ASPC2&df[id]=DF_NATIONAL_ACCOUNTS&df[ag]=SPC&df[vs]=1.0&pd=%2C2021&dq=A.USD.[TAG_GEO].GDPCPC&ly[cl]=TIME_PERIOD",
-      "notes": "Was DF_POCKET"
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NATIONAL_ACCOUNTS,/A.USD.[TAG_GEO].GDPCPC?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Topic,0%7CEconomy%23ECO%23&pg=0&fc=Topic&df[ds]=ds%3ASPC2&df[id]=DF_NATIONAL_ACCOUNTS&df[ag]=SPC&pd=,&dq=A.USD..GDPCPC&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "Was DF_POCKET | URLs changed (AS)'+ Removed particular version of DF (CI)"
     },
     {
-      "id": "IV.12",
+      "id": "IV.21",
+      "themeId": "IV",
+      "title": "SDG 8.1.1 - Annual growth rate of real GDP per capita",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_08",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_08,/A.G.NY_GDP_PCAP.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_08&df[ag]=SPC&dq=A.G.NY_GDP_PCAP............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Indicator added for MFAT, flag SDG (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "IV.22",
       "themeId": "IV",
       "title": "Age dependency ratio, young (% of working-age population)",
-      "rendering": "TEXT"
+      "rendering": "CHART",
+      "dataflow": "DF_NMDI",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI,/A.[TAG_GEO].NMDI0005.....?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?tm=NMDI&pg=0&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI&df[ag]=SPC&df[vs]=1.0&dq=A..NMDI0005.....&pd=,&to[TIME_PERIOD]=false",
+      "notes": "Could be calculated and added to the existing table 'Population Structure by Age' | added"
     },
     {
       "id": "IX.1",
@@ -703,76 +1168,184 @@ export const catalogue: Catalogue = {
       "rendering": "CHART",
       "dataflow": "DF_WBWGI",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].VA_EST?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].VA_EST&ly[cl]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].VA_EST&ly[cl]=TIME_PERIOD",
+      "notes": "URL changed (AS)'+ Removed particular version of DF (CI)"
     },
     {
       "id": "IX.2",
+      "themeId": "IX",
+      "title": "Voice and Accountability - Governance score (0-100)",
+      "mfatName": "Voice and Accountability",
+      "rendering": "CHART",
+      "dataflow": "DF_WBWGI",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].VA_SCR?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&pd=,&dq=A..VA_SCR&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "Indicator added for MFAT (AS)"
+    },
+    {
+      "id": "IX.3",
       "themeId": "IX",
       "title": "Rule of Law",
       "rendering": "CHART",
       "dataflow": "DF_WBWGI",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].RL_EST?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].RL_EST&ly[cl]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].RL_EST&ly[cl]=TIME_PERIOD",
+      "notes": "URL changed (AS)'+ Removed particular version of DF (CI)"
     },
     {
-      "id": "IX.3",
+      "id": "IX.4",
+      "themeId": "IX",
+      "title": "Rule of Law - Governance score (0-100)",
+      "mfatName": "Rule of Law",
+      "rendering": "CHART",
+      "dataflow": "DF_WBWGI",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].RL_SCR?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&pd=,&dq=A..RL_SCR&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "Indicator added for MFAT (AS)"
+    },
+    {
+      "id": "IX.5",
       "themeId": "IX",
       "title": "Government Effectiveness",
       "rendering": "CHART",
       "dataflow": "DF_WBWGI",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].GE_EST?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].GE_EST&ly[cl]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].GE_EST&ly[cl]=TIME_PERIOD",
+      "notes": "URL changed (AS)'+ Removed particular version of DF (CI)"
     },
     {
-      "id": "IX.4",
+      "id": "IX.6",
+      "themeId": "IX",
+      "title": "Government Effectiveness - Governance score (0-100)",
+      "mfatName": "Government Effectiveness",
+      "rendering": "CHART",
+      "dataflow": "DF_WBWGI",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].GE_SCR?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&pd=,&dq=A..GE_SCR&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "Indicator added for MFAT (AS)"
+    },
+    {
+      "id": "IX.7",
       "themeId": "IX",
       "title": "Control of Corruption",
       "rendering": "CHART",
       "dataflow": "DF_WBWGI",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].CC_EST?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].CC_EST&ly[cl]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].CC_EST&ly[cl]=TIME_PERIOD",
+      "notes": "URL changed (AS)'+ Removed particular version of DF (CI)"
     },
     {
-      "id": "IX.5",
+      "id": "IX.8",
+      "themeId": "IX",
+      "title": "Control of Corruption - Governance score (0-100)",
+      "mfatName": "Control of Corruption",
+      "rendering": "CHART",
+      "dataflow": "DF_WBWGI",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].CC_SCR?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&pd=,&dq=A..CC_SCR&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "Indicator added for MFAT (AS)"
+    },
+    {
+      "id": "IX.9",
       "themeId": "IX",
       "title": "Regulatory quality",
       "rendering": "CHART",
       "dataflow": "DF_WBWGI",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].RQ_EST?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].RQ_EST&ly[cl]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].RQ_EST&ly[cl]=TIME_PERIOD",
+      "notes": "URL changed (AS)'+ Removed particular version of DF (CI)"
     },
     {
-      "id": "IX.6",
+      "id": "IX.10",
+      "themeId": "IX",
+      "title": "Regulatory quality - Governance score (0-100)",
+      "mfatName": "Regulatory quality",
+      "rendering": "CHART",
+      "dataflow": "DF_WBWGI",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].RQ_SCR?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&pd=,&dq=A..RQ_SCR&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "Indicator added for MFAT (AS)"
+    },
+    {
+      "id": "IX.11",
       "themeId": "IX",
       "title": "Political Stability and Absence of Violence/Terrorism",
       "rendering": "CHART",
       "dataflow": "DF_WBWGI",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].PV_EST?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].PV_EST&ly[cl]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].PV_EST&ly[cl]=TIME_PERIOD",
+      "notes": "URL changed (AS)'+ Removed particular version of DF (CI)"
     },
     {
-      "id": "IX.7",
+      "id": "IX.12",
+      "themeId": "IX",
+      "title": "Political Stability - Governance score (0-100)",
+      "mfatName": "Political Stability and Absence of Violence/Terrorism",
+      "rendering": "CHART",
+      "dataflow": "DF_WBWGI",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWGI,/A.[TAG_GEO].PV_SCR?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?tm=voice%20and%20accountability&pg=0&hc[Indicator]=Voice%20and%20Accountability&df[ds]=ds%3ASPC2&df[id]=DF_WBWGI&df[ag]=SPC&pd=,&dq=A..PV_SCR&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
+      "notes": "Indicator added for MFAT (AS)"
+    },
+    {
+      "id": "IX.13",
       "themeId": "IX",
       "title": "Number of persons in prison",
       "mfatName": "Persons held in prison (rate per 100,000)",
       "rendering": "CHART",
       "dataflow": "DF_PRISON",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_PRISON,/A.[TAG_GEO].COUNT?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=prison&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_PRISON&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].COUNT&ly[rw]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=prison&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_PRISON&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].COUNT&ly[rw]=TIME_PERIOD",
+      "notes": "URLs changed (AS) '+ Removed particular version of DF (CI)"
     },
     {
-      "id": "IX.11",
+      "id": "IX.14",
+      "themeId": "IX",
+      "title": "SDG 16.3.2 - Unsentenced detainees as a proportion of overall prison population",
+      "mfatName": "Unsentenced detainees",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_16",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_16,/A.G.VC_PRS_UNSNT.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_16&df[ag]=SPC&df[vs]=4.3&dq=A.G.VC_PRS_UNSNT............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "New 2024 + flag SDG | URLs changed (AS) '+ Removed particular version of DF (CI)"
+    },
+    {
+      "id": "IX.15",
+      "themeId": "IX",
+      "title": "SDG 16.7.1 - Proportion of youth in parliament (age 45 or below), Lower Chamber or Unicameral (%)",
+      "mfatName": "Proportions of positions (by sex, age, persons with disabilities and population groups) in public institutions (national and local legislatures, public service, and judiciary) compared to national distributions",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_16",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_16,/A.G.SG_DMK_PARLYTHP_LC.[TAG_GEO]..Y0T45.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_16&df[ag]=SPC&df[vs]=4.3&dq=A.G.SG_DMK_PARLYTHP_LC...Y0T45.........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Data available for other age groups | New 2024 + flag SDG | URLs changed (AS) '+ Removed particular version of DF (CI)"
+    },
+    {
+      "id": "IX.16",
+      "themeId": "IX",
+      "title": "SDG 16.7.1 - Proportion of youth in parliament (age 45 or below), Upper Chamber (%)",
+      "mfatName": "Proportions of positions (by sex, age, persons with disabilities and population groups) in public institutions (national and local legislatures, public service, and judiciary) compared to national distributions",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_16",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_16,/A.G.SG_DMK_PARLYTHP_UC.[TAG_GEO]..Y0T45.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_16&df[ag]=SPC&df[vs]=4.3&dq=A.G.SG_DMK_PARLYTHP_UC...Y0T45.........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Data available for other age groups | New 2024 + flag SDG | URLs changed (AS) '+ Removed particular version of DF (CI)"
+    },
+    {
+      "id": "IX.17",
       "themeId": "IX",
       "title": "-",
       "mfatName": "PEFA Assessment",
-      "rendering": "TEXT"
+      "rendering": "TEXT",
+      "notes": "Discuss with MFAT, possible to add compoments of this"
     },
     {
-      "id": "IX.12",
+      "id": "IX.18",
       "themeId": "IX",
       "title": "-",
       "mfatName": "Improvement against 50% or more of SDGs",
-      "rendering": "TEXT"
+      "rendering": "TEXT",
+      "notes": "As with previous year, the indicator lacks definition"
     },
     {
       "id": "V.1",
@@ -782,7 +1355,8 @@ export const catalogue: Catalogue = {
       "rendering": "CHART",
       "dataflow": "DF_EGOV",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_EGOV,/A.[TAG_GEO].EGI?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=government&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_EGOV&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].EGI&ly[cl]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=government&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_EGOV&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].EGI&ly[cl]=TIME_PERIOD",
+      "notes": "URLs changed (AS) '+ Removed particular version of DF (CI)"
     },
     {
       "id": "V.2",
@@ -792,7 +1366,8 @@ export const catalogue: Catalogue = {
       "rendering": "CHART",
       "dataflow": "DF_TOURISM_EARNINGS",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_TOURISM_EARNINGS,/A.[TAG_GEO].EARN2GDP.USD?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=tourism&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_TOURISM_EARNINGS&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].EARN2GDP.USD&ly[cl]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=tourism&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_TOURISM_EARNINGS&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].EARN2GDP.USD&ly[cl]=TIME_PERIOD",
+      "notes": "URLs changed (AS) '+ Removed particular version of DF (CI)"
     },
     {
       "id": "V.3",
@@ -802,7 +1377,8 @@ export const catalogue: Catalogue = {
       "rendering": "CHART",
       "dataflow": "DF_TOURISM_EARNINGS",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_TOURISM_EARNINGS,/A.[TAG_GEO].EARN2VIS.USD?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=tourism&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_TOURISM_EARNINGS&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].EARN2VIS.USD&ly[cl]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=tourism&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_TOURISM_EARNINGS&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].EARN2VIS.USD&ly[cl]=TIME_PERIOD",
+      "notes": "URLs changed (AS) '+ Removed particular version of DF (CI)"
     },
     {
       "id": "V.4",
@@ -812,7 +1388,8 @@ export const catalogue: Catalogue = {
       "rendering": "CHART",
       "dataflow": "DF_OVERSEAS_VISITORS",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_OVERSEAS_VISITORS,/A.[TAG_GEO]._T.NOSVA?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=visitor&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_OVERSEAS_VISITORS&df[ag]=SPC&df[vs]=2.0&pd=%2C&dq=A.[TAG_GEO]._T.NOSVA&ly[cl]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=visitor&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_OVERSEAS_VISITORS&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO]._T.NOSVA&ly[cl]=TIME_PERIOD",
+      "notes": "Data available by type of visitors | URLs changed (AS) '+ Removed particular version of DF (CI)"
     },
     {
       "id": "V.5",
@@ -821,7 +1398,8 @@ export const catalogue: Catalogue = {
       "rendering": "CHART",
       "dataflow": "DF_WBDAI",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBDAI,/A.[TAG_GEO].DAI?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=wb%20dai&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_WBDAI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].DAI&ly[cl]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=wb%20dai&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_WBDAI&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].DAI&ly[cl]=TIME_PERIOD",
+      "notes": "URLs changed (AS) '+ Removed particular version of DF (CI)"
     },
     {
       "id": "V.6",
@@ -831,25 +1409,100 @@ export const catalogue: Catalogue = {
       "rendering": "CHART",
       "dataflow": "DF_DIGITAL_DEVELOPMENT",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_DIGITAL_DEVELOPMENT,/A.[TAG_GEO].DD024?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=digital&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_DIGITAL_DEVELOPMENT&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].DD024&ly[cl]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=digital&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_DIGITAL_DEVELOPMENT&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].DD024&ly[cl]=TIME_PERIOD",
+      "notes": "I suggest to remove this one and use the SDG one (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "V.7",
+      "themeId": "V",
+      "title": "SDG 17.8.1 - Proportion of individuals using the Internet [17.8.1]",
+      "mfatName": "SDG 17.8.1 -  Proportion of individuals using the Internet.",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_17",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_17,/A.G.IT_USE_II99.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_17&df[ag]=SPC&dq=A.G.IT_USE_II99............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Indicator added for MFAT, flag SDG (AS) + Removed particular version of DF (CI)"
     },
     {
       "id": "V.8",
+      "themeId": "V",
+      "title": "SDG 17.3.1 - Foreign direct investments (FDI), official development assistance and South-South Cooperation",
+      "mfatName": "FDI as share of GDP",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_17",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_17,/A.G.GF_FRN_FDI.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_17&df[ag]=SPC&df[vs]=4.3&dq=A.G.GF_FRN_FDI............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "flag SDG | URLs changed (AS) '+ Removed particular version of DF (CI)"
+    },
+    {
+      "id": "V.9",
       "themeId": "V",
       "title": "Proportion of household income from agriculture and forestry activities (%)",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_FIS",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_FIS,/A.[TAG_GEO].NMDI0057._T._T._T..?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=nmdi&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_FIS&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].NMDI0057._T._T._T.."
+      "visUrl": "https://stats.pacificdata.org/vis?tm=nmdi&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_FIS&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].NMDI0057._T._T._T..",
+      "notes": "URLs updated but data not updated (HIES)'+ Removed particular version of DF (CI)"
     },
     {
-      "id": "V.9",
+      "id": "V.10",
       "themeId": "V",
       "title": "Proportion of labour force engaged in agriculture and forestry activities as their main economic activity (%)",
       "rendering": "CHART",
       "dataflow": "DF_NMDI_FIS",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_FIS,/A.[TAG_GEO].NMDI0059._T._T._T..?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=nmdi&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_FIS&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].NMDI0059._T._T._T.."
+      "visUrl": "https://stats.pacificdata.org/vis?tm=nmdi&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_FIS&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].NMDI0059._T._T._T..",
+      "notes": "URLs updated but data not updated (HIES)'+ Removed particular version of DF (CI)"
+    },
+    {
+      "id": "V.11",
+      "themeId": "V",
+      "title": "SDG 8.3.1 - Proportion of informal employment in non-agriculture sector",
+      "mfatName": "SDG 8.3.1 -  Proportion of informal employment in non agricultural employment, by sex;",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_08",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_08,/A.G.SL_ISV_IFEM_19ICLS.[TAG_GEO]._T+F+M.Y_GE15........ISIC4_BTU.?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_08&df[ag]=SPC&dq=A.G.SL_ISV_IFEM_19ICLS.._T.Y_GE15........ISIC4_BTU.&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Data available by sectors | Indicator added for MFAT, flag SDG, disaggregation by sex and sector (AS) + Removed particular version of DF (CI)",
+      "seriesConcept": "SEX",
+      "consolidatedFromIds": [
+        "V.11",
+        "V.12",
+        "V.13"
+      ]
+    },
+    {
+      "id": "VI.1",
+      "themeId": "VI",
+      "title": "SDG 7.1.1 - Proportion of population with access to electricity",
+      "mfatName": "Access to electricity (% of population)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_07",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_07,/A.G.EG_ACS_ELEC.[TAG_GEO]..._T........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_07&df[ag]=SPC&df[vs]=4.3&dq=A.G.EG_ACS_ELEC...._T........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Data are available by location. | flag SDG | URLs changed - disaggregated level by location possible (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "VI.2",
+      "themeId": "VI",
+      "title": "Access to clean fuels and technologies for cooking (% of population)",
+      "mfatName": "Proportion of population with primary reliance on clean fuels and technology",
+      "rendering": "CHART",
+      "dataflow": "DF_NMDI",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI,/A.[TAG_GEO].NMDI0006.....?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?tm=NMDI&pg=0&snb=8&df[ds]=ds%3ASPC2&df[id]=DF_NMDI&df[ag]=SPC&df[vs]=1.0&dq=A..NMDI0006.....&pd=,&to[TIME_PERIOD]=false",
+      "notes": "flag SDG | added"
+    },
+    {
+      "id": "VI.3",
+      "themeId": "VI",
+      "title": "SDG 7.3.1 - Energy intensity level of primary energy",
+      "mfatName": "Energy intensity level of primary energy",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_07",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_07,/A.G.EG_EGY_PRIM.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_07&df[ag]=SPC&df[vs]=4.3&dq=A.G.EG_EGY_PRIM............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "flag SDG | URLs changed (AS) + Removed particular version of DF (CI)"
     },
     {
       "id": "VI.4",
@@ -858,33 +1511,60 @@ export const catalogue: Catalogue = {
       "rendering": "CHART",
       "dataflow": "DF_WBWDI",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].EG_ELC_RNEW_ZS?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=renewable&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].EG_ELC_RNEW_ZS&ly[cl]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=renewable&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].EG_ELC_RNEW_ZS&ly[cl]=TIME_PERIOD",
+      "notes": "URLs changed (AS) + Removed particular version of DF (CI)"
     },
     {
       "id": "VI.5",
+      "themeId": "VI",
+      "title": "SDG 7.2.1 - Renewable energy share in the total final energy consumption",
+      "mfatName": "SDG 7.2.1 -  Renewable energy share in the total final energy consumption.",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_07",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_07,/A.G.EG_FEC_RNEW.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_07&df[ag]=SPC&df[vs]=4.3&dq=A.G.EG_FEC_RNEW............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Indicator added for MFAT, flag SDG (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "VI.6",
       "themeId": "VI",
       "title": "Proportion of Households with access to improved sanitation (%)",
       "mfatName": "Access to improved sanitation (% of population) by location",
       "rendering": "CHART",
       "dataflow": "DF_NMDI",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI,/A.[TAG_GEO].NMDI0134._T._T._T..?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=access%20sanitation&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_NMDI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].NMDI0134._T._T._T.."
+      "visUrl": "https://stats.pacificdata.org/vis?tm=access%20sanitation&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_NMDI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].NMDI0134._T._T._T..",
+      "notes": "remove use the SDG instead'+ Removed particular version of DF (CI)"
     },
     {
-      "id": "VI.6",
+      "id": "VI.7",
       "themeId": "VI",
-      "title": "Proportion of Households with access to improved drinking water (%)",
+      "title": "SDG 1.4.1 - Proportion of population using basic drinking water services",
       "mfatName": "Access to improved drinking water (% of population)",
       "rendering": "CHART",
-      "dataflow": "DF_NMDI",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI,/A.[TAG_GEO].NMDI0133._T._T._T..?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=access%20sanitation&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_NMDI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].NMDI0133._T._T._T.."
+      "dataflow": "DF_SDG_01",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_01,/A.G.SP_ACS_BSRVH2O.[TAG_GEO]..._T........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_01&df[ag]=SPC&df[vs]=4.3&dq=A.G.SP_ACS_BSRVH2O...._T........&pd=,&to[TIME_PERIOD]=false",
+      "notes": "Data are available by location. | URLs changed - disaggregated level by location possible (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "VI.8",
+      "themeId": "VI",
+      "title": "SDG 6.1.1 - Proportion of population using safely managed drinking water services",
+      "mfatName": "SDG 6.1.1 - Percentage of population with access to sufficient and safe water in their homes.",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_06",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_06,/A.G.SH_H2O_SAFE.[TAG_GEO]..._T........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_06&df[ag]=SPC&df[vs]=4.3&dq=A.G.SH_H2O_SAFE...._T........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Data are available by location. | Indicator added for MFAT, flag SDG, disaggregation level by location (AS) + Removed particular version of DF (CI)"
     },
     {
       "id": "VII.1",
       "themeId": "VII",
-      "title": "Global Climate Risk Index",
-      "rendering": "TEXT"
+      "title": "",
+      "mfatName": "Global Climate Risk Index",
+      "rendering": "TEXT",
+      "notes": "To discuss with MFAT - we could add the index from German Watch but need to check the usefullness of it"
     },
     {
       "id": "VII.2",
@@ -892,41 +1572,119 @@ export const catalogue: Catalogue = {
       "title": "CO2 emissions, per capita (metric tons)",
       "mfatName": "CO2 emissions (per capita)",
       "rendering": "CHART",
-      "dataflow": "DF_WBWDI",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].EN_ATM_CO2E_PC?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=co2&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].EN_ATM_CO2E_PC&ly[cl]=TIME_PERIOD",
-      "notes": "Was DF_NMDI_OTH"
+      "dataflow": "DF_NMDI_OTH",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_NMDI_OTH,/A.[TAG_GEO].NMDI0226.._T...?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?tm=co2&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_NMDI_OTH&df[ag]=SPC&df[vs]=1.0&pd=,&dq=A..NMDI0226.....&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0&snb=3",
+      "notes": "Was DF_NMDI_OTH | URLs changed data not updated (AS) + Removed particular version of DF (CI)"
     },
     {
       "id": "VII.3",
       "themeId": "VII",
       "title": "Climate-related development finance – commitment",
-      "rendering": "TEXT"
+      "rendering": "TEXT",
+      "notes": "Data from OECD: can be update in may but need to create a new table"
+    },
+    {
+      "id": "VII.4",
+      "themeId": "VII",
+      "title": "SDG 15.5.1 - Red List Index",
+      "mfatName": "Red List Index",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_15",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_15,/A.G.ER_RSK_LST.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_15&df[ag]=SPC&df[vs]=4.3&dq=A.G.ER_RSK_LST............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Was DF_NMDI | URLs changed (AS)'+ Removed particular version of DF (CI)"
+    },
+    {
+      "id": "VII.5",
+      "themeId": "VII",
+      "title": "SDG 11.5.1 - Number of deaths due to disaster (SDG 1.5.1, 13.1.1)",
+      "mfatName": "Number of deaths and missing persons attributed to disasters (last 5 years mean)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_11",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_11,/A.G.VC_DSR_MORT.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_11&df[ag]=SPC&df[vs]=4.3&dq=A.G.VC_DSR_MORT............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "flag SDG | URLs changed (AS)'+ Removed particular version of DF (CI)"
+    },
+    {
+      "id": "VII.6",
+      "themeId": "VII",
+      "title": "SDG 11.5.1 - Number of missing persons attributed to disasters",
+      "mfatName": "Number of deaths and missing persons attributed to disasters (last 5 years mean)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_11",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_11,/A.G.VC_DSR_MISS.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_11&df[ag]=SPC&df[vs]=4.3&dq=A.G.VC_DSR_MISS............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "flag SDG | URLs changed (AS)'+ Removed particular version of DF (CI)"
+    },
+    {
+      "id": "VII.7",
+      "themeId": "VII",
+      "title": "SDG 1.5.2, 11.5.2 - Direct disaster economic loss, average annual loss",
+      "mfatName": "Direct economic loss attributed to disasters (current US$)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_11",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_11,/A.G.VC_DSR_GDPLS.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_11&df[ag]=SPC&dq=A.G.VC_DSR_GDPLS............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "flag SDG | URLs changed (AS) + Removed particular version of DF (CI)"
     },
     {
       "id": "VII.8",
+      "themeId": "VII",
+      "title": "SDG  1.5.2, 11.5.2 - Direct economic loss attributed to disasters relative to GDP",
+      "mfatName": "SDG 1.5.2: Direct economic loss attributed to disasters relative to GDP",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_11",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_11,/A.G.VC_DSR_LSGP.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_11&df[ag]=SPC&dq=A.G.VC_DSR_LSGP............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Indicator added for MFAT, flag SDG (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "VII.9",
       "themeId": "VII",
       "title": "Rural population (% of total population)",
       "rendering": "CHART",
       "dataflow": "DF_POP_URBAN",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_POP_URBAN,/A.[TAG_GEO].POPRFCOU.R?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=rural%20population&pg=0&hc[Topic]=Population&hc[Urbanization]=Rural&df[ds]=ds%3ASPC2&df[id]=DF_POP_URBAN&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].POPRFCOU.R"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=rural%20population&pg=0&hc[Topic]=Population&hc[Urbanization]=Rural&df[ds]=ds%3ASPC2&df[id]=DF_POP_URBAN&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].POPRFCOU.R",
+      "notes": "URLs changed (AS)'+ Removed particular version of DF (CI)"
     },
     {
-      "id": "VII.9",
+      "id": "VII.10",
       "themeId": "VII",
       "title": "Food imports (% of merchandise imports)",
       "mfatName": "Food imports (% of merchandise imports)",
       "rendering": "CHART",
       "dataflow": "DF_WBWDI",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].TM_VAL_FOOD_ZS_UN?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=food%20imports&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].TM_VAL_FOOD_ZS_UN&ly[cl]=TIME_PERIOD"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=food%20imports&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].TM_VAL_FOOD_ZS_UN&ly[cl]=TIME_PERIOD",
+      "notes": "+ Removed particular version of DF (CI)"
     },
     {
       "id": "VII.11",
       "themeId": "VII",
+      "title": "SDG 15.1.2 - Average proportion of Terrestrial Key Biodiversity Areas (KBAs) covered by protected areas",
+      "mfatName": "Average proportion of Terrestrial Key Biodiversity Areas (KBAs) covered by protected areas (%)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_15",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_15,/A.G.ER_PTD_TERR.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_15&df[ag]=SPC&dq=A.G.ER_PTD_TERR............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "flag SDG | URLs changed (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "VII.12",
+      "themeId": "VII",
       "title": "Climate Finance for ODA (% total)",
-      "rendering": "TEXT"
+      "rendering": "TEXT",
+      "notes": "OECD data directly from OECD or Lowy Institute - need a new table in .stat | + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "VII.13",
+      "themeId": "VII",
+      "title": "",
+      "mfatName": "SDG 11.b.2 -  Proportion of local governments that adopt and implement local disaster risk reduction strategies.",
+      "rendering": "TEXT",
+      "notes": "I added this indicator as it was requested by MFAT but no data for the moment (AS) + Removed particular version of DF (CI)"
     },
     {
       "id": "VIII.1",
@@ -935,57 +1693,140 @@ export const catalogue: Catalogue = {
       "rendering": "CHART",
       "dataflow": "DF_KEYFACTS",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_KEYFACTS,/A.[TAG_GEO].EEZ?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=EEZ&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_KEYFACTS&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].EEZ"
+      "visUrl": "https://stats.pacificdata.org/vis?tm=EEZ&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_KEYFACTS&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].EEZ",
+      "notes": "URLs changed' (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "VIII.2",
+      "themeId": "VIII",
+      "title": "SDG 14.5.1 - Average proportion of Marine Key Biodiversity Areas (KBAs) covered by protected areas",
+      "mfatName": "Marine protected areas (% of territorial waters)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_14",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_14,/A.G.ER_MRN_MPA.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_14&df[ag]=SPC&df[vs]=4.3&dq=A.G.ER_MRN_MPA............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "flag SDG | URLs changed' (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "VIII.3",
+      "themeId": "VIII",
+      "title": "SDG 14.4.1 - Fish stocks within biologically sustainable levels (not overexploited)",
+      "mfatName": "Fish stocks within biologically sustainable levels",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_14",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_14,/A.G.ER_H2O_FWTL.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_14&df[ag]=SPC&df[vs]=4.3&dq=A.G.ER_H2O_FWTL............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "flag SDG | URLs changed (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "VIII.4",
+      "themeId": "VIII",
+      "title": "SDG 14.7.1 - Sustainable fisheries as a proportion of GDP",
+      "mfatName": "Sustainable fisheries as a proportion of GDP",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_14",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_14,/A.G.EN_SCP_FSHGDP.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_14&df[ag]=SPC&df[vs]=4.3&dq=A.G.EN_SCP_FSHGDP............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "flag SDG | URLs changed (AS) + Removed particular version of DF (CI)"
     },
     {
       "id": "VIII.5",
       "themeId": "VIII",
       "title": "-",
       "mfatName": "Percentage of population employed in fishing industry",
-      "rendering": "TEXT"
+      "rendering": "TEXT",
+      "notes": "We can calculate this one with HIES - need a space in .stat | + Removed particular version of DF (CI)"
     },
     {
       "id": "VIII.6",
       "themeId": "VIII",
       "title": "-",
       "mfatName": "Access fees collected (% of govt revenue)",
-      "rendering": "TEXT"
+      "rendering": "TEXT",
+      "notes": "Fisheries report cards at regional level - not feasible for the moment | + Removed particular version of DF (CI)"
     },
     {
       "id": "VIII.7",
       "themeId": "VIII",
       "title": "-",
       "mfatName": "Coastal subsistence catches (US$ millions)",
-      "rendering": "TEXT"
+      "rendering": "TEXT",
+      "notes": "Fisheries report cards at regional level - not feasible for the moment | + Removed particular version of DF (CI)"
     },
     {
-      "id": "VIII.8",
-      "themeId": "VIII",
-      "title": "Quantity of fish, crustaceans, molluscs and other aquatic invertebrates imported (tonnes)",
-      "mfatName": "Fish and Seafood Consumption",
+      "id": "X.1",
+      "themeId": "X",
+      "title": "SDG 16.7.2 - Proportion of population who believe decision-making is inclusive and responsive",
+      "mfatName": "Proportion of population who believe decision-making is inclusive and responsive",
       "rendering": "CHART",
-      "dataflow": "DF_TRADE_FOOD",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_TRADE_FOOD,/A.[TAG_GEO].Q._T+AS+CK+FJ+FM+GU+KI+MH+MP+NC+NR+NU+PF+PG+PN+PW+SB+TK+TO+TV+VU+WF+WS._T.03?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=SPC2&df[id]=DF_TRADE_FOOD&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.Q._T%2BAS%2BCK%2BFJ%2BFM%2BGU%2BKI%2BMH%2BMP%2BNC%2BNR%2BNU%2BPF%2BPG%2BPN%2BPW%2BSB%2BTK%2BTO%2BTV%2BVU%2BWF%2BWS._T.03&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
-      "notes": "New 2024"
+      "notes": "flag SDG | Remove the old link as there is no data in the new SDG table (before only one value for PNG) (AS)"
     },
     {
-      "id": "VIII.9",
-      "themeId": "VIII",
-      "title": "Quantity of fish, crustaceans, molluscs and other aquatic invertebrates exported (tonnes)",
-      "mfatName": "Fish and Seafood Consumption",
+      "id": "X.2",
+      "themeId": "X",
+      "title": "SDG 16.1.1 - Intentional homicides per 100,000 population",
+      "mfatName": "Violent deaths (per 100,000)",
       "rendering": "CHART",
-      "dataflow": "DF_TRADE_FOOD",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_TRADE_FOOD,/A.[TAG_GEO].Q._T.NR+WF+TV+TO+WS+NU+PF+CK+AS+PW+MH+KI+GU+FM+VU+SB+PG+NC+FJ.03?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&df[ds]=SPC2&df[id]=DF_TRADE_FOOD&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.Q._T.NR%2BWF%2BTV%2BTO%2BWS%2BNU%2BPF%2BCK%2BAS%2BPW%2BMH%2BKI%2BGU%2BFM%2BVU%2BSB%2BPG%2BNC%2BFJ.03&ly[cl]=TIME_PERIOD&to[TIME_PERIOD]=false",
-      "notes": "New 2024"
+      "dataflow": "DF_SDG_16",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_16,/A.G.VC_IHR_PSRC.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_16&df[ag]=SPC&df[vs]=4.3&dq=A.G.VC_IHR_PSRC............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "New 2024 + flag SDG | URLs changed (AS) '+ Removed particular version of DF (CI)"
     },
     {
       "id": "X.3",
       "themeId": "X",
+      "title": "SDG 16.1.3 - Proportion of population subjected to physical violence in the previous 12 months",
+      "mfatName": "SDG 16.1.3 -  Proportion of population subjected to (a) physical violence, (b) psychological violence and (c) sexual violence in the previous 12 months",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_16",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_16,/A.G.VC_VOV_PHYL.[TAG_GEO].F+M..........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_16&df[ag]=SPC&df[vs]=4.3&dq=A.G.VC_VOV_PHYL..F..........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Indicator added for MFAT, flag SDG (AS) + Removed particular version of DF (CI)",
+      "seriesConcept": "SEX",
+      "consolidatedFromIds": [
+        "X.3",
+        "X.4"
+      ]
+    },
+    {
+      "id": "X.5",
+      "themeId": "X",
+      "title": "SDG 16.1.3 - Proportion of population subjected to robbery in the previous 12 months",
+      "mfatName": "SDG 16.1.3 -  Proportion of population subjected to (a) physical violence, (b) psychological violence and (c) sexual violence in the previous 12 months",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_16",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_16,/A.G.VC_VOV_ROBB.[TAG_GEO].F+M..........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_16&df[ag]=SPC&df[vs]=4.3&dq=A.G.VC_VOV_ROBB..F..........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Indicator added for MFAT, flag SDG (AS) + Removed particular version of DF (CI)",
+      "seriesConcept": "SEX",
+      "consolidatedFromIds": [
+        "X.5",
+        "X.6"
+      ]
+    },
+    {
+      "id": "X.7",
+      "themeId": "X",
+      "title": "SDG 16.1.3 - Proportion of population subjected to physical assault in the previous 12 months",
+      "mfatName": "SDG 16.1.3 -  Proportion of population subjected to (a) physical violence, (b) psychological violence and (c) sexual violence in the previous 12 months",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_16",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_16,/A.G.VC_VOV_PHY_ASLT.[TAG_GEO].F+M..........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_16&df[ag]=SPC&df[vs]=4.3&dq=A.G.VC_VOV_PHY_ASLT..F..........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Indicator added for MFAT, flag SDG (AS) + Removed particular version of DF (CI)",
+      "seriesConcept": "SEX",
+      "consolidatedFromIds": [
+        "X.7",
+        "X.8"
+      ]
+    },
+    {
+      "id": "X.9",
+      "themeId": "X",
       "title": "-",
       "mfatName": "Political and civil freedoms",
-      "rendering": "TEXT"
+      "rendering": "TEXT",
+      "notes": "Data fromWB - prosperity data Civil liberties index - Possible to add need a new table in .stat"
     },
     {
       "id": "XI.1",
@@ -994,118 +1835,202 @@ export const catalogue: Catalogue = {
       "mfatName": "Teenage fertility rate (per 1,000 women aged 15-19 years)",
       "rendering": "CHART",
       "dataflow": "DF_VITAL",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_VITAL,/A.[TAG_GEO].TNFR._T?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?tm=teenage%20fertility&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_VITAL&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].TNFR._T&ly[cl]=TIME_PERIOD"
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_VITAL,/A.[TAG_GEO].TNFR.?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?tm=teenage%20fertility&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_VITAL&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].TNFR._T&ly[cl]=TIME_PERIOD",
+      "notes": "URLs changed (AS) '+ Removed particular version of DF (CI)"
+    },
+    {
+      "id": "XI.2",
+      "themeId": "XI",
+      "title": "SDG 5.2.2 - Proportion of women and girls aged 15 years and older subjected to sexual violence by persons other than an intimate partner",
+      "mfatName": "Women who have experienced physical and/or sexual violence by an intimate partner (% population)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_05",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_05,/A.G.VC_VAW_NONMARR.[TAG_GEO].F.Y_GE15.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_05&df[ag]=SPC&df[vs]=4.3&dq=A.G.VC_VAW_NONMARR..F.Y_GE15.........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "Data available for other age groups | flag SDG | URLs changed (AS) '+ Removed particular version of DF (CI)"
     },
     {
       "id": "XI.3",
+      "themeId": "XI",
+      "title": "SDG 5.2.1 - Proportion of ever-partnered women and girls subjected to physical and/or sexual violence by a current or former intimate partner in the previous 12 months",
+      "mfatName": "Ever-partnered women and girls victim of physical, sexual or psychological violence by a current or former intimate partner in the previous 12 months",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_05",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_05,/A.G.VC_VAW_MARR.[TAG_GEO].F.Y_GE15.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_05&df[ag]=SPC&df[vs]=4.3&dq=A.G.VC_VAW_MARR..F.Y_GE15.........&pd=,&to[TIME_PERIOD]=false",
+      "notes": "Aged 15 years old and over. Data available from women aged 15-49 years. | flag SDG | URLs changed - disaggregation available for 15-49 years (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "XI.4",
+      "themeId": "XI",
+      "title": "SDG 5.5.1 - Proportion of seats held by women in national parliaments (% of total number of seats)",
+      "mfatName": "Proportion of seats held by women in national parliaments",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_05",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_05,/A.G.SG_GEN_PARL.[TAG_GEO].F..........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_05&df[ag]=SPC&df[vs]=4.3&dq=A.G.SG_GEN_PARL..F..........&pd=,&to[TIME_PERIOD]=false",
+      "notes": "flag SDG | URLs changed (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "XI.5",
+      "themeId": "XI",
+      "title": "SDG 5.5.1 - Proportion of elected seats held by women in deliberative bodies of local government",
+      "mfatName": "SDG 5.5.1 - Proportion of seats held by women in (a) national parliaments and (b) local governments.",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_05",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_05,/A.G.SG_GEN_LOCGELS.[TAG_GEO].F..........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_05&df[ag]=SPC&df[vs]=4.3&dq=A.G.SG_GEN_LOCGELS..F..........&pd=,&to[TIME_PERIOD]=false",
+      "notes": "Indicator added for MFAT, flag SDG (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "XI.6",
       "themeId": "XI",
       "title": "Ratio of female to male labor force participation rate (%) (modeled ILO estimate)",
       "mfatName": "Ratio of female to male labour force participation rate (%) (modelled ILO estimate)",
       "rendering": "CHART",
       "dataflow": "DF_WBWDI",
       "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_WBWDI,/A.[TAG_GEO].SL_TLF_CACT_FM_ZS?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?dq=A.[TAG_GEO].SL_TLF_CACT_FM_ZS&pd=%2C&frequency=A&lc=en&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&df[vs]=1.0&ly[cl]=TIME_PERIOD&tm=wb%20"
+      "visUrl": "https://stats.pacificdata.org/vis?dq=A.[TAG_GEO].SL_TLF_CACT_FM_ZS&pd=%2C&frequency=A&lc=en&pg=0&df[ds]=ds%3ASPC2&df[id]=DF_WBWDI&df[ag]=SPC&ly[cl]=TIME_PERIOD&tm=wb%20",
+      "notes": "URLs changed (AS) + Removed particular version of DF (CI)"
     },
     {
       "id": "XI.7",
       "themeId": "XI",
-      "title": "Labour Force Participation Rate (female)",
+      "title": "Labour Force Participation Rate",
       "mfatName": "Labour Force Participation Rate by sex",
       "rendering": "CHART",
       "dataflow": "DF_EMPRATES",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_EMPRATES,/A.[TAG_GEO].LFPARTRATE.F._T._T._T?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Topic%2C0%7CSocial%23SOC%23&pg=0&fc=Topic&df[ds]=ds%3ASPC2&df[id]=DF_EMPRATES&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].LFPARTRATE.F._T._T._T",
-      "notes": "Was DF_NMDI_DEV"
-    },
-    {
-      "id": "XI.8",
-      "themeId": "XI",
-      "title": "Labour Force Participation Rate (male)",
-      "mfatName": "Labour Force Participation Rate by sex",
-      "rendering": "CHART",
-      "dataflow": "DF_EMPRATES",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_EMPRATES,/A.[TAG_GEO].LFPARTRATE.M._T._T._T?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Topic%2C0%7CSocial%23SOC%23&pg=0&fc=Topic&df[ds]=ds%3ASPC2&df[id]=DF_EMPRATES&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.[TAG_GEO].LFPARTRATE.M._T._T._T",
-      "notes": "Was DF_NMDI_DEV"
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_EMPRATES,/A.[TAG_GEO].LFPARTRATE.F+M._T._T._T?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Topic%2C0%7CSocial%23SOC%23&pg=0&fc=Topic&df[ds]=ds%3ASPC2&df[id]=DF_EMPRATES&df[ag]=SPC&pd=%2C&dq=A.[TAG_GEO].LFPARTRATE.F._T._T._T",
+      "notes": "Was DF_NMDI_DEV | URLs changed (AS) + Removed particular version of DF (CI)",
+      "seriesConcept": "SEX",
+      "consolidatedFromIds": [
+        "XI.7",
+        "XI.8"
+      ]
     },
     {
       "id": "XI.9",
       "themeId": "XI",
-      "title": "-",
-      "mfatName": "Status of UN Human Rights Treaties (CDC, CEDAW)",
-      "rendering": "TEXT"
+      "title": "SDG 5.5.2 - Proportion of women in managerial positions - 19th ICLS (%)",
+      "mfatName": "Female share of employment in senior and middle management (%)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_05",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_05,/A.G.IC_GEN_MGTL_19ICLS.[TAG_GEO].F.Y_GE15.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_05&df[ag]=SPC&df[vs]=4.3&dq=A.G.IC_GEN_MGTL_19ICLS..F.Y_GE15.........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "flag SDG | URLs changed (AS) + Removed particular version of DF (CI)"
     },
     {
       "id": "XI.10",
+      "themeId": "XI",
+      "title": "SDG 16.a.1 - Countries with National Human Rights Institutions in compliance with the Paris Principles (0 = No status; 1 = Status B, partially compliant; 2 = Status A, fully compliant)",
+      "mfatName": "Status of UN Human Rights Treaties (CDC, CEDAW)",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_16",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_16,/A.G.SG_NHR_CMPLNC.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?tm=human%20right&pg=0&snb=24&df[ds]=ds%3ASPC2&df[id]=DF_SDG_16&df[ag]=SPC&df[vs]=4.3&dq=A.G.SG_NHR_CMPLNC............&pd=,&to[TIME_PERIOD]=false",
+      "notes": "In the SDG refactoring,  we need to include SG_NHR_CMPLNC which measures compliance on UN treaties | Indicator added with the new SDG tables (AS)"
+    },
+    {
+      "id": "XI.11",
       "themeId": "XI",
       "title": "-",
       "mfatName": "Human Rights Measurement Initiative - Empowerment score",
       "rendering": "TEXT"
     },
     {
-      "id": "XI.11",
-      "themeId": "XI",
-      "title": "-",
-      "mfatName": "Types of violence against women by partner",
-      "rendering": "TEXT"
-    },
-    {
       "id": "XI.12",
       "themeId": "XI",
       "title": "-",
-      "mfatName": "Human Rights Measurement Initiative  - Safety from the State score",
-      "rendering": "TEXT"
+      "mfatName": "Types of violence against women by partner",
+      "rendering": "TEXT",
+      "notes": "Check with MICS"
     },
     {
       "id": "XI.13",
       "themeId": "XI",
       "title": "-",
-      "mfatName": "National retirement scheme ratio women to men",
-      "rendering": "TEXT"
+      "mfatName": "Human Rights Measurement Initiative  - Safety from the State score",
+      "rendering": "TEXT",
+      "notes": "We can add this to the HRMI table already in .stat"
     },
     {
       "id": "XI.14",
+      "themeId": "XI",
+      "title": "SDG 1.3.1 Population above retirement age receiving a pension",
+      "mfatName": "National retirement scheme ratio women to men",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_01",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_01,/A.G.SI_COV_PENSN.[TAG_GEO].F+M.Y_GE65.........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_01&df[ag]=SPC&df[vs]=4.3&dq=A.G.SI_COV_PENSN..F.Y_GE65.........&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "New indicator - SDG flag | URLs changed (AS) + Removed particular version of DF (CI)",
+      "seriesConcept": "SEX",
+      "consolidatedFromIds": [
+        "XI.14",
+        "XI.15"
+      ]
+    },
+    {
+      "id": "XI.16",
       "themeId": "XI",
       "title": "-",
       "mfatName": "Status of sexual orientation laws (parts can be core (legal) / non-core (protection against discrimination)",
       "rendering": "TEXT"
     },
     {
+      "id": "XII.1",
+      "themeId": "XII",
+      "title": "SDG 10.b.1 - Total assistance for development, by recipient",
+      "mfatName": "Aid by sector from all donors",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_10",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_10,/A.G.DC_TRF_TOTL.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=0&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_10&df[ag]=SPC&df[vs]=4.3&dq=A.G.DC_TRF_TOTL............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "flag SDG | URLs changed (AS) + Removed particular version of DF (CI)"
+    },
+    {
+      "id": "XII.2",
+      "themeId": "XII",
+      "title": "SDG 17.15.1 - Proportion of project objectives in new development interventions drawn from country-led result frameworks - data by recipient",
+      "mfatName": "New development interventions drawn from country-led result frameworks by recipients of development cooperation",
+      "rendering": "CHART",
+      "dataflow": "DF_SDG_17",
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_SDG_17,/A.G.SG_PLN_RECNDI.[TAG_GEO]...........?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?fs[0]=Development%20indicators,0%7CSustainable%20Development%20Goals%23SDG%23&pg=10&fc=Development%20indicators&bp=true&snb=18&df[ds]=ds%3ASPC2&df[id]=DF_SDG_17&df[ag]=SPC&df[vs]=4.3&dq=A.G.SG_PLN_RECNDI............&pd=,&to[TIME_PERIOD]=false&isAvailabilityDisabled=false&page=0",
+      "notes": "flag SDG | URLs changed (AS) + Removed particular version of DF (CI)"
+    },
+    {
       "id": "XII.3",
       "themeId": "XII",
       "title": "-",
       "mfatName": "Top 5 donors",
-      "rendering": "TEXT"
+      "rendering": "TEXT",
+      "notes": "Lowy Institute - Need to identify the top 5 by country (in the script or in a table)"
     },
     {
       "id": "XII.4",
       "themeId": "XII",
       "title": "-",
       "mfatName": "Total donors / fragmentation",
-      "rendering": "TEXT"
+      "rendering": "TEXT",
+      "notes": "Lowy Institute - Populate this one directly in the script or on .stats"
     },
     {
       "id": "XII.5",
       "themeId": "XII",
-      "title": "Value of transactions, aid and development finance (spent)",
+      "title": "Value of transactions, aid and development finance",
       "mfatName": "Total aid flows / aid/GDP",
       "rendering": "CHART",
       "dataflow": "DF_PAM",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_PAM,/A.[TAG_GEO].VU+TV+TO+SB+WS+PG+PW+NU+NR+FM+MH+KI+FJ+CK.TRVAL._T.SPE._T?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&tm=Total%20donors&pg=0&hc[Flow%20type]=Total&hc[Donor]=Total&snb=3&df[ds]=ds%3ASPC2&df[id]=DF_PAM&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.VU%2BTV%2BTO%2BSB%2BWS%2BPG%2BPW%2BNU%2BNR%2BFM%2BMH%2BKI%2BFJ%2BCK.TRVAL._T.SPE._T&ly[cl]=TIME_PERIOD&ly[rw]=GEO_PICT&to[TIME_PERIOD]=false",
-      "notes": "New 2024"
-    },
-    {
-      "id": "XII.6",
-      "themeId": "XII",
-      "title": "Value of transactions, aid and development finance (committed)",
-      "mfatName": "Total aid flows / aid/GDP",
-      "rendering": "CHART",
-      "dataflow": "DF_PAM",
-      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_PAM,/A.[TAG_GEO].VU+TV+TO+SB+WS+PG+PW+NU+NR+FM+MH+KI+FJ+CK.TRVAL._T.COM._T?dimensionAtObservation=AllDimensions",
-      "visUrl": "https://stats.pacificdata.org/vis?lc=en&tm=Total%20donors&pg=0&hc[Flow%20type]=Total&hc[Donor]=Total&snb=3&df[ds]=ds%3ASPC2&df[id]=DF_PAM&df[ag]=SPC&df[vs]=1.0&pd=%2C&dq=A.VU%2BTV%2BTO%2BSB%2BWS%2BPG%2BPW%2BNU%2BNR%2BFM%2BMH%2BKI%2BFJ%2BCK.TRVAL._T.COM._T&ly[cl]=TIME_PERIOD&ly[rw]=GEO_PICT&to[TIME_PERIOD]=false",
-      "notes": "New 2024"
+      "apiUrlTemplate": "https://stats-sdmx-disseminate.pacificdata.org/rest/data/SPC,DF_PAM,/A.[TAG_GEO].TRVAL._T.SPE+COM._T?dimensionAtObservation=AllDimensions",
+      "visUrl": "https://stats.pacificdata.org/vis?lc=en&tm=Total%20donors&pg=0&hc[Flow%20type]=Total&hc[Donor]=Total&snb=3&df[ds]=ds%3ASPC2&df[id]=DF_PAM&df[ag]=SPC&pd=%2C&dq=A.VU%2BTV%2BTO%2BSB%2BWS%2BPG%2BPW%2BNU%2BNR%2BFM%2BMH%2BKI%2BFJ%2BCK.TRVAL._T.SPE._T&ly[cl]=TIME_PERIOD&ly[rw]=GEO_PICT&to[TIME_PERIOD]=false",
+      "notes": "New 2024 | + Removed particular version of DF (CI)",
+      "seriesConcept": "COMMITTED_SPENT",
+      "consolidatedFromIds": [
+        "XII.5",
+        "XII.6"
+      ]
     }
   ]
 };

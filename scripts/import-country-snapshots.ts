@@ -2,9 +2,15 @@
 /**
  * Import the MFAT country snapshots spreadsheet into a typed catalogue.
  *
+ * Countries come from the `REPORTS` sheet; themes and indicators from
+ * INDICATOR_SHEET. SUMMARY and PICTURE rows are layout rows of the printed
+ * snapshot, not indicators, and are skipped. Indicator URLs that lack the
+ * [TAG_GEO] country placeholder are not guessed at: they stay out of the
+ * catalogue and are listed in the report for the curators.
+ *
  * Usage:
  *   tsx scripts/import-country-snapshots.ts \
- *     --in  data/country-snapshots/country_snapshots_2025.xlsx \
+ *     --in  data/country-snapshots/country_snapshots_2026.xlsx \
  *     --out lib/country-snapshots/catalogue.generated.ts \
  *     --report data/country-snapshots/import-report.md
  */
@@ -27,25 +33,29 @@ type ImportResult = {
     skippedRows: string[];
     urlFixups: string[];
     missingDataSources: string[];
+    missingCountryPlaceholder: string[];
     duplicates: string[];
   };
 };
 
+/** SPC's 2026 exercise list of snapshot indicators (upstream `work` sheet). */
+const INDICATOR_SHEET = "work";
+
+/** Row types that lay out the printed snapshot but are not indicators. */
+const LAYOUT_ROW_TYPES: Record<string, true> = { SUMMARY: true, PICTURE: true };
+
 const RENDERING_VALUES: Rendering[] = ["TABLE", "CHART", "MAP", "TEXT"];
 
-function cellToString(value: unknown): string {
+function cellToString(value: ExcelJS.CellValue): string {
   if (value === null || value === undefined) return "";
   if (typeof value === "string") return value.trim();
   if (typeof value === "number" || typeof value === "boolean") return String(value);
   if (value instanceof Date) return value.toISOString();
-  // ExcelJS sometimes returns { text, hyperlink } for cells with links.
-  if (typeof value === "object") {
-    const obj = value as { text?: unknown; hyperlink?: unknown; result?: unknown };
-    if (typeof obj.text === "string") return obj.text.trim();
-    if (typeof obj.hyperlink === "string") return obj.hyperlink.trim();
-    if (typeof obj.result === "string") return obj.result.trim();
-  }
-  return String(value).trim();
+  // Cells with mixed formatting (several 2026 rows) come back as rich text.
+  if ("richText" in value) return value.richText.map((r) => r.text).join("").trim();
+  if ("hyperlink" in value) return (value.text || value.hyperlink).trim();
+  if ("result" in value) return cellToString(value.result);
+  return "";
 }
 
 function slugify(s: string): string {
@@ -62,16 +72,15 @@ function slugify(s: string): string {
  *   1. Drop the dataflow version pin: `SPC,DF_X,3.0/` → `SPC,DF_X,/` (per the
  *      2026 spreadsheet update notes from C. Idler).
  *   2. Migrate legacy hosts to the canonical SPC endpoint
- *      `stats-sdmx-disseminate.pacificdata.org`. The 2025 spreadsheet uses
+ *      `stats-sdmx-disseminate.pacificdata.org`. Older spreadsheets used
  *      `stats-nsi-stable.pacificdata.org` for many indicators; both hosts
  *      currently resolve to the same backend, but the MCP gateway and the
  *      rest of Surfer use the disseminate one, so we standardise on it.
  *
- * SDG dataflow (DF_SDG_*) URLs are NOT migrated here. The 2026 SDG
- * restructure changed both the dimension layout (11 → 15 positions) and
- * the codelists (e.g. AGE Y00T04 → Y0T4); a mechanical translation can't
- * reliably preserve the original query intent. Those indicators are
- * dropped at import time pending a refreshed indicator list.
+ * SDG dataflows (DF_SDG_*) were restructured in 2026 (15 key positions
+ * instead of 11, renamed codelists). The 2026 exercise list carries URLs
+ * already written for the new layout, so they go through the same
+ * normalisation as every other row.
  */
 function normaliseUrl(raw: string): { url: string; fixed: boolean } {
   let out = raw.replace(/(SPC,[^,]+,)\d+(?:\.\d+)?\//g, "$1/");
@@ -82,18 +91,6 @@ function normaliseUrl(raw: string): { url: string; fixed: boolean } {
   return { url: out, fixed: out !== raw };
 }
 
-/**
- * SDG dataflows (DF_SDG_01..17) use a restructured DSD as of 2026: the
- * dimension layout changed (15 positions instead of 11) and several
- * codelists were renamed. The 2025 spreadsheet's URL templates are not
- * mechanically migrate-able with reasonable confidence. Drop these
- * indicators until a fresh list lands.
- */
-function isStaleSdgIndicator(dataflow: string | undefined): boolean {
-  if (!dataflow) return false;
-  return /^DF_SDG_\d+$/.test(dataflow);
-}
-
 export async function importExcel(
   buffer: Buffer,
   sourceName: string,
@@ -102,16 +99,17 @@ export async function importExcel(
   // exceljs typings predate Node's generic Buffer<ArrayBufferLike>; runtime accepts it.
   await wb.xlsx.load(buffer as unknown as ArrayBuffer);
   const reportsSheet = wb.getWorksheet("REPORTS");
-  const indicatorsSheet = wb.getWorksheet("INDICATORS");
+  const indicatorsSheet = wb.getWorksheet(INDICATOR_SHEET);
   if (!reportsSheet || !indicatorsSheet) {
     throw new Error(
-      `Workbook ${sourceName} is missing REPORTS or INDICATORS sheet`,
+      `Workbook ${sourceName} is missing REPORTS or ${INDICATOR_SHEET} sheet`,
     );
   }
 
   const skippedRows: string[] = [];
   const urlFixups: string[] = [];
   const missingDataSources: string[] = [];
+  const missingCountryPlaceholder: string[] = [];
   const duplicates: string[] = [];
 
   // ---- Countries (skip header row 1) ----
@@ -161,7 +159,7 @@ export async function importExcel(
   indicatorsSheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
     if (rowNumber === 1) return; // header
     const cells = Array.isArray(row.values) ? row.values : [];
-    // Columns (1-indexed): RID DO TYPE ID EN MFAT_NAME RENDERING DE API COMMENT1 DF COMMENT2 COMMENT_2025
+    // Columns (1-indexed): RID DO TYPE ID EN MFAT_NAME RENDERING DE API COMMENT1 DF COMMENT2 COMMENT_2025 COMMENT_2026
     const TYPE = cellToString(cells[3]);
     const ID = cellToString(cells[4]);
     const EN = cellToString(cells[5]);
@@ -178,6 +176,7 @@ export async function importExcel(
     const DF = cellToString(cells[11]);
     const COMMENT2 = cellToString(cells[12]);
     const COMMENT_2025 = cellToString(cells[13]);
+    const COMMENT_2026 = cellToString(cells[14]);
 
     if (TYPE === "HEADING") {
       currentThemeId = ID;
@@ -194,13 +193,14 @@ export async function importExcel(
       themes.push(t);
       return;
     }
+    if (LAYOUT_ROW_TYPES[TYPE]) return;
     if (TYPE !== "INDICATOR") {
-      skippedRows.push(`INDICATORS row ${rowNumber}: unknown type "${TYPE}"`);
+      skippedRows.push(`${INDICATOR_SHEET} row ${rowNumber}: unknown type "${TYPE}"`);
       return;
     }
     if (!currentThemeId) {
       skippedRows.push(
-        `INDICATORS row ${rowNumber} (${ID}): INDICATOR before any HEADING`,
+        `${INDICATOR_SHEET} row ${rowNumber} (${ID}): INDICATOR before any HEADING`,
       );
       return;
     }
@@ -212,15 +212,7 @@ export async function importExcel(
 
     if (!RENDERING_VALUES.includes(RENDERING)) {
       skippedRows.push(
-        `INDICATORS row ${rowNumber} (${ID}): unknown rendering "${RENDERING}"`,
-      );
-      return;
-    }
-
-    const dataflowCandidate = DF && DF !== "-" ? DF : undefined;
-    if (isStaleSdgIndicator(dataflowCandidate)) {
-      skippedRows.push(
-        `INDICATORS ${ID}: SDG dataflow ${dataflowCandidate} dropped pending refreshed indicator list`,
+        `${INDICATOR_SHEET} row ${rowNumber} (${ID}): unknown rendering "${RENDERING}"`,
       );
       return;
     }
@@ -228,27 +220,18 @@ export async function importExcel(
     let apiUrlTemplate: string | undefined;
     if (API && API !== "-") {
       const { url, fixed } = normaliseUrl(API);
-      if (fixed) urlFixups.push(`${ID}: ${API} -> ${url}`);
-      if (url.includes("[TAG_GEO]")) {
-        apiUrlTemplate = url;
-      } else if (/\/A\.\./.test(url)) {
-        // Empty geo dimension (A..) — substitute [TAG_GEO].
-        apiUrlTemplate = url.replace(/\/A\.\./, "/A.[TAG_GEO].");
-      } else if (/\/A\./.test(url)) {
-        // Time-only first dim then geo — insert [TAG_GEO] after A.
-        apiUrlTemplate = url.replace(/\/A\./, "/A.[TAG_GEO].");
-      } else {
-        skippedRows.push(
-          `INDICATORS ${ID}: could not parameterise URL with [TAG_GEO]; kept as-is`,
-        );
-        apiUrlTemplate = url;
+      if (!url.includes("[TAG_GEO]")) {
+        missingCountryPlaceholder.push(`${ID}: ${EN}: \`${url}\``);
+        return;
       }
+      if (fixed) urlFixups.push(`${ID}: ${API} -> ${url}`);
+      apiUrlTemplate = url;
     } else {
       missingDataSources.push(ID);
     }
 
     const visUrl = DE && DE !== "-" ? DE : undefined;
-    const noteParts = [COMMENT1, COMMENT2, COMMENT_2025]
+    const noteParts = [COMMENT1, COMMENT2, COMMENT_2025, COMMENT_2026]
       .map((s) => s.trim())
       .filter((s) => s && s !== "-");
     const notes = noteParts.length ? noteParts.join(" | ") : undefined;
@@ -279,7 +262,13 @@ export async function importExcel(
       themes,
       indicators: indicatorsOut,
     },
-    report: { skippedRows, urlFixups, missingDataSources, duplicates },
+    report: {
+      skippedRows,
+      urlFixups,
+      missingDataSources,
+      missingCountryPlaceholder,
+      duplicates,
+    },
   };
 }
 
@@ -308,6 +297,7 @@ export function renderReportMd(
     "",
     section("URL fixups", report.urlFixups),
     section("Indicators without data source", report.missingDataSources),
+    section("Rows without a country placeholder", report.missingCountryPlaceholder),
     section("Skipped rows", report.skippedRows),
     section("Duplicates rejected", report.duplicates),
   ].join("\n");
