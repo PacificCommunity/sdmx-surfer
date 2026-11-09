@@ -1,7 +1,7 @@
 import { streamText, tool, convertToModelMessages, stepCountIs, type UIMessage } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
 import { mcpTransportConfig } from "@/lib/mcp-client";
-import { getModelForUser } from "@/lib/model-router";
+import { getModelForUser, STREAM_TIMEOUT } from "@/lib/model-router";
 import { auth } from "@/lib/auth";
 import { checkCsrf } from "@/lib/csrf";
 import { checkChatAllowed } from "@/lib/usage-caps";
@@ -210,6 +210,7 @@ export async function POST(req: Request) {
       model: modelConfig.model,
       messages: [...systemMessages, ...modelMessages],
       providerOptions: modelConfig.providerOptions || {},
+      timeout: STREAM_TIMEOUT,
       tools: {
         ...mcpTools,
         update_dashboard: tool({

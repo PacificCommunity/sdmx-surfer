@@ -232,7 +232,14 @@ function MarkdownContent({
   );
 }
 
-export function MessageBubble({ message }: { message: UIMessage }) {
+export function MessageBubble({
+  message,
+  isStreaming,
+}: {
+  message: UIMessage;
+  /** True while this message is the one the model is still writing. */
+  isStreaming: boolean;
+}) {
   const isUser = message.role === "user";
 
   if (isUser) {
@@ -300,6 +307,9 @@ export function MessageBubble({ message }: { message: UIMessage }) {
                   : "unknown");
               const label = TOOL_LABELS[toolName] || toolName;
               const isDone = toolPart.state === "output-available";
+              // A call still unfinished once its message stopped streaming was
+              // cut off (stream timeout, dropped connection) and never will finish.
+              const isPending = !isDone && toolPart.state !== "output-error" && isStreaming;
 
               return (
                 <div
@@ -311,12 +321,14 @@ export function MessageBubble({ message }: { message: UIMessage }) {
                       "inline-block h-2 w-2 rounded-full " +
                       (isDone
                         ? "bg-secondary"
-                        : "bg-secondary-fixed-dim animate-pulse")
+                        : isPending
+                          ? "bg-secondary-fixed-dim animate-pulse"
+                          : "bg-red-500")
                     }
                   />
                   <span className="text-xs font-medium text-on-surface-variant">
                     {label}
-                    {isDone ? "" : "..."}
+                    {isPending ? "..." : isDone ? "" : " — did not finish"}
                   </span>
                   {isDone && (
                     <svg

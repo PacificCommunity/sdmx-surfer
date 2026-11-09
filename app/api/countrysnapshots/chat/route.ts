@@ -2,7 +2,7 @@ import { streamText, convertToModelMessages, stepCountIs } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
 import { and, eq } from "drizzle-orm";
 import { mcpTransportConfig } from "@/lib/mcp-client";
-import { getModelForUser } from "@/lib/model-router";
+import { getModelForUser, STREAM_TIMEOUT } from "@/lib/model-router";
 import { sanitizeToolInputs } from "@/lib/sanitize-messages";
 import { createRequestLogger } from "@/lib/logger";
 import { db, dashboardSessions } from "@/lib/db";
@@ -112,6 +112,7 @@ export async function POST(req: Request) {
       model: modelConfig.model,
       messages: [...systemMessages, ...modelMessages],
       providerOptions: modelConfig.providerOptions || {},
+      timeout: STREAM_TIMEOUT,
       tools: tools as Parameters<typeof streamText>[0]["tools"],
       stopWhen: stepCountIs(
         mode === "index" ? STEP_LIMIT_INDEX : STEP_LIMIT_PAGE,

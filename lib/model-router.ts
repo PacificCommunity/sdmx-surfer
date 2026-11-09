@@ -21,6 +21,15 @@ export interface ModelConfig {
   providerOptions?: ProviderOptions;
 }
 
+/**
+ * streamText `timeout`: end a turn whose model stream goes silent. A provider
+ * or gateway stream can stall mid-reply (seen once on 9 Nov 2026, mid tool
+ * call) and would otherwise hold the chat until the function's maxDuration.
+ * Normal gaps between chunks are a few seconds; two minutes leaves room for
+ * long reasoning pauses. The routes' onAbort handlers run when it fires.
+ */
+export const STREAM_TIMEOUT = { chunkMs: 120_000 };
+
 function useGateway(): boolean {
   return (
     process.env.USE_AI_GATEWAY === "1" &&

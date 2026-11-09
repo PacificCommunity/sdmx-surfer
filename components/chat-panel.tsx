@@ -99,7 +99,13 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
             </div>
             </BrandField>
           ) : (
-            messages.map((m) => <MessageBubble key={m.id} message={m} />)
+            messages.map((m, i) => (
+              <MessageBubble
+                key={m.id}
+                message={m}
+                isStreaming={isStreaming && i === messages.length - 1}
+              />
+            ))
           )}
 
           {isStreaming &&
