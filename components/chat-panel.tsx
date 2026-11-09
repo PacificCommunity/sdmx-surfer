@@ -11,6 +11,8 @@ interface ChatPanelProps {
   sendMessage: (message: { text: string }) => Promise<void>;
   onStop?: () => void;
   hasDashboard?: boolean;
+  /** Why the last reply stopped, when it failed in the browser or the request. */
+  error: string | null;
 }
 
 const SUGGESTIONS = [
@@ -26,7 +28,7 @@ const REFINEMENT_SUGGESTIONS = [
   "Change the colors and add a title",
 ];
 
-export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard }: ChatPanelProps) {
+export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard, error }: ChatPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -121,6 +123,13 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard 
                 </div>
               </div>
             )}
+
+          {error && (
+            <div className="rounded-[var(--radius-xl)] bg-red-50 px-4 py-3 text-xs text-red-700">
+              The reply stopped because of an error. Send your message again to retry.
+              <span className="mt-1 block font-mono text-[11px] text-red-600">{error}</span>
+            </div>
+          )}
 
           {/* Refinement nudge — shown after a dashboard is rendered and the AI isn't streaming */}
           {hasDashboard && !isStreaming && messages.length > 0 &&

@@ -24,6 +24,7 @@ import {
 } from "@/lib/session";
 import { getDashboardTitle } from "@/lib/dashboard-text";
 import { extractDashboardConfig } from "@/lib/dashboard-messages";
+import { CHAT_UI_THROTTLE_MS } from "@/lib/chat-ui";
 
 function syncDashboardConfigIntoMessages(
   messages: UIMessage[],
@@ -174,8 +175,9 @@ export default function BuilderPage() {
     }),
   );
 
-  const { messages, status, sendMessage, setMessages, stop, regenerate } = useChat({
+  const { messages, status, error, sendMessage, setMessages, stop, regenerate } = useChat({
     transport: transportRef.current,
+    experimental_throttle: CHAT_UI_THROTTLE_MS,
   });
 
   // ── Stable refs for callbacks (declared early so mount effect can use them) ──
@@ -904,6 +906,7 @@ export default function BuilderPage() {
             status={status}
             sendMessage={sendMessage}
             onStop={stop}
+            error={status === "error" ? (error?.message ?? "Unknown error") : null}
             hasDashboard={configHistory.current !== null}
           />
         </aside>

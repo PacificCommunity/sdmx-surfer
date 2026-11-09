@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { SnapshotContext } from "@/lib/country-snapshots/system-prompt";
 import { ChatMarkdown } from "./chat-markdown";
+import { CHAT_UI_THROTTLE_MS } from "@/lib/chat-ui";
 
 export function ChatOverlay({
   snapshotContext,
@@ -61,6 +62,7 @@ export function ChatOverlay({
 
   const { messages, sendMessage, status, error } = useChat({
     transport,
+    experimental_throttle: CHAT_UI_THROTTLE_MS,
     onError: (err) => {
       // Try to read the cap-reached payload from the server's 429 response.
       // The AI SDK rethrows a generic Error in this case; we surface a friendly UI.

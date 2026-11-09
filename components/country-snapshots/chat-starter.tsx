@@ -6,6 +6,7 @@ import { DefaultChatTransport } from "ai";
 import type { SDMXDashboardConfig } from "@/lib/types";
 import { SDMXDashboardDynamic } from "@/components/sdmx-dashboard-dynamic";
 import { ChatMarkdown } from "./chat-markdown";
+import { CHAT_UI_THROTTLE_MS } from "@/lib/chat-ui";
 
 // Curated examples. Kept regionally-neutral and varied across themes.
 const EXAMPLES = [
@@ -97,6 +98,7 @@ export function ChatStarter() {
 
   const { messages, sendMessage, status, error, setMessages } = useChat({
     transport,
+    experimental_throttle: CHAT_UI_THROTTLE_MS,
     onError: (err) => {
       if (String(err?.message ?? "").toLowerCase().includes("cap-reached")) {
         setCapReached(true);
