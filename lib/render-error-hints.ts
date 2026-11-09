@@ -37,7 +37,7 @@ const HINTS: Record<RenderErrorCode, string> = {
   ERR_EMPTY:
     "The query returned no observations. Do not relax it by hand: call suggest_nonempty_queries with this panel's data URL, probe the top-ranked alternative, then resend only this panel. If nothing usable comes back, tell the user and pick a different dataflow.",
   ERR_NO_SERIES_DIMENSION:
-    "A bar/column/lollipop chart needs a series dimension that actually varies. Either set seriesBy to a dimension with more than one value in this query, or switch chartType to line or pie. For cross-country comparisons use xAxis=TIME_PERIOD with seriesBy=<geo dimension>; never put the geo dimension on the x-axis.",
+    "A bar/column/lollipop chart needs a series. Set seriesBy (legend.concept in a native visual) to the dimension that names it. That dimension may hold a single value: for a ranking of countries in one year use xAxis=GEO_PICT, seriesBy=TIME_PERIOD with the query pinned to that year. Alternatively switch chartType to line or pie.",
   ERR_AMBIGUOUS_SERIES:
     "Two or more dimensions vary in this query, so the chart cannot tell which is the series. Pin every dimension except xAxis and seriesBy to a single value in the data URL (rebuild it with build_data_url), or set seriesBy explicitly.",
   ERR_CONCEPT_NOT_FOUND:

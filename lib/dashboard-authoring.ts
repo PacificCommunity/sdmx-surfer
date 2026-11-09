@@ -269,12 +269,14 @@ function compileChart(intent: ChartIntent): NativeVisualConfig {
     ["bar", "column", "lollipop", "treemap"].includes(intent.chartType) &&
     !intent.seriesBy
   ) {
+    // The library needs legend.concept to name the series of a grouping
+    // chart; a single-valued dimension (one year) gives a single series.
     throw new Error(
       "chart `" +
         intent.id +
         "` requires `seriesBy` for " +
         intent.chartType +
-        " visuals.",
+        " visuals: the dimension that names the series (it may hold a single value, e.g. TIME_PERIOD for one year).",
     );
   }
 

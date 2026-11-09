@@ -177,7 +177,7 @@ KPI best practices:
 When to use a table instead of a chart:
 - The user asks for figures, a breakdown, or "the numbers" rather than a trend or comparison.
 - The data is too sparse to plot honestly (one or two observations per series) but there are several series, so a KPI would hide most of it.
-- A chart was rejected for having no varying series dimension and widening the query is not appropriate — a table shows the same data without needing a second varying dimension.
+- The user wants exact figures for a handful of values, where a chart adds nothing a reader cannot get from the numbers.
 
 #### Chart
 \`\`\`json
@@ -197,8 +197,9 @@ Important chart rules:
 - \`xAxis\` is the dimension shown on the axis.
 - \`seriesBy\` is the legend / series dimension.
 - The compiler fills \`yAxisConcept: "OBS_VALUE"\` unless you override it.
-- For \`bar\`, \`column\`, and \`lollipop\`, you MUST provide \`seriesBy\`, it must be a different dimension from \`xAxis\`, and the \`seriesBy\` dimension must actually vary in the response (check the probe shows \`distinct_count > 1\` for it). If it does not vary, the library rejects the chart with "Chart type=bar with xAxis=... needs at least one other varying dimension". Fix by widening the query so the series dim varies, or switch to \`line\` or \`pie\` which work with a single varying dim.
-- **Cross-country comparison recipe — use this exact shape.** Countries are ALWAYS the series, NEVER the x-axis: \`"xAxis": "TIME_PERIOD", "seriesBy": "GEO_PICT"\`. This one shape covers both cases: full time range → \`line\` (one trend line per country); \`lastNObservations=1\` → \`bar\` (a single period on the axis, one bar per country). Do NOT emit \`"xAxis": "GEO_PICT"\`: the tempting transpose (\`xAxis: GEO_PICT, seriesBy: TIME_PERIOD\`) fails with \`lastNObservations=1\`, because every country then reports the same single period, TIME_PERIOD does not vary, and the chart is rejected with the error above. If you catch yourself putting a geography dimension on the x-axis, transpose the chart. (One exception: the stacked composition bar in the treemap rule below.)
+- For \`bar\`, \`column\`, and \`lollipop\`, you MUST provide \`seriesBy\`, and it must be a different dimension from \`xAxis\`. \`seriesBy\` names the series: when it varies there is one bar per value in each category; when it holds a single value (e.g. TIME_PERIOD in a query pinned to one year) the chart is a single series, which is fine. Without \`seriesBy\` and with nothing but \`xAxis\` varying, the library rejects the chart ("needs at least one other varying dimension").
+- **Ranking countries for one period — use this shape.** \`"chartType": "bar", "xAxis": "GEO_PICT", "seriesBy": "TIME_PERIOD", "sortByValue": "desc"\`, with the query pinned to one period by \`startPeriod\` = \`endPeriod\` (pick the year with get_indicator_coverage so most countries have data). One bar per country, longest first. With \`lastNObservations=1\` instead of a pinned year, countries whose latest year differs get bars of different colours, one per year; say so in the subtitle, or pin a common year.
+- **Comparing countries over time.** \`"chartType": "line", "xAxis": "TIME_PERIOD", "seriesBy": "GEO_PICT"\`: one trend line per country over the full time range.
 - A \`treemap\` divides ONE whole into tiles: put the parts on \`xAxis\` (e.g. a tax category dimension) and pin \`seriesBy\` to a single value in the query (e.g. one GEO_PICT code). With a varying \`seriesBy\` the library puts every series into the same treemap, so each part appears once per \`seriesBy\` value as tiles with repeated names, and the panel no longer shows one whole. To compare composition across several countries, use \`bar\` with \`xAxis\` = the geo dimension, \`seriesBy\` = the category dimension and \`"stacked": true\`, giving one stacked bar per country. Geography on the x-axis is safe here because the series is a category that varies within every country.
 - ALWAYS set \`unit\` with a meaningful text — the library shows it in tooltips, table headers and KPI values. Example: \`"unit": { "text": "USD millions", "location": "suffix" }\`
 - Label the value axis with \`axisTitle\` (a string, or \`{ "en": "...", "fr": "..." }\` for several languages): \`"axisTitle": "Trade value (USD millions)"\`. \`categoryAxisTitle\` labels the other axis. Write them for the values and the categories; the library puts the value axis horizontally for \`bar\` by itself.
@@ -259,7 +260,7 @@ CRITICAL RULES:
 - Use native passthrough only when necessary.
 
 DIMENSION PINNING RULE — prevent series explosion:
-- A chart has AT MOST two varying dimensions: \`seriesBy\` (which MUST vary for bar/column/lollipop, and is pinned to one value for a treemap) and \`xAxis\` (which may hold a single value, e.g. one period in the latest-value bar recipe). ALL other dimensions in the data query must be pinned to a single value.
+- A chart has AT MOST two varying dimensions: \`seriesBy\` (which may also hold a single value for bar/column/lollipop, and is pinned to one value for a treemap) and \`xAxis\`. ALL other dimensions in the data query must be pinned to a single value.
 - If you leave extra dimensions open, the API returns multiple series combinations and the chart becomes unreadable.
 - After calling get_dataflow_structure, identify ALL dimensions. Pin everything that is not the x-axis or the series dimension.`;
 

@@ -74,11 +74,12 @@ function splitStrata(
 // ---------------------------------------------------------------------------
 // The visual decision engine.
 //
-// The rendering library imposes exactly one structural rule:
+// The rendering library imposes one structural rule:
 //
 //   A CHART CAN SERIES ON AT MOST ONE VARYING NON-TIME DIMENSION.
 //
-//   - bar (and other column-likes) REQUIRE that one varying dimension;
+//   - bar (and other column-likes) need a series: a varying dimension, or a
+//     single-valued one named in legend.concept (a single series);
 //   - line tolerates zero (a single series) or one (legend.concept);
 //   - two or more varying dimensions cannot be drawn in one chart at all —
 //     the library merges the extra dimension's observations into the same
