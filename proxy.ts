@@ -36,6 +36,6 @@ export default NextAuth({
 
 export const config = {
   matcher: [
-    "/((?!api/auth|api/public|api/sdmx-proxy|api/countrysnapshots|api/training|training(?:/|$)|_next/static|_next/image|favicon.ico|models/|brand/|login|gallery(?:/|$)|p(?:/|$)).*)",
+    "/((?!api/auth|api/public|api/sdmx-proxy|api/countrysnapshots|api/training|training(?:/|$)|_next/static|_next/image|favicon.ico|models/|brand/|login|about(?:/|$)|gallery(?:/|$)|p(?:/|$)).*)",
   ],
 };

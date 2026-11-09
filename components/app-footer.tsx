@@ -22,6 +22,7 @@ export function AppFooter({
   product?: "data-surfer" | "country-snapshots";
 }) {
   const name = product === "country-snapshots" ? "Country Snapshots" : "Data Surfer";
+  const aboutHref = product === "country-snapshots" ? "/about#country-snapshots" : "/about";
   if (compact) {
     return (
       <footer
@@ -31,7 +32,7 @@ export function AppFooter({
         }
       >
         {name} · Built at the Pacific Community ·{" "}
-        <Link href="/about" className="hover:underline">
+        <Link href={aboutHref} className="hover:underline">
           About
         </Link>
       </footer>
@@ -57,7 +58,7 @@ export function AppFooter({
         </div>
 
         <nav className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs">
-          <Link href="/about" className="hover:text-white">
+          <Link href={aboutHref} className="hover:text-white">
             About
           </Link>
           <Link href="/gallery" className="hover:text-white">

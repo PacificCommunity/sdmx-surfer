@@ -58,13 +58,14 @@ The route model is simple but important. Some pages look very similar in the UI 
 These routes are intentionally reachable without authentication:
 
 - `/login`
+- `/about` (Data Surfer and Country Snapshots; the footer links here from every page)
 - `/gallery`
 - `/p/[id]`
 - `/api/public/dashboards`
 - `/api/public/dashboards/[id]`
 - `/api/auth/*`
 
-This is enforced in `proxy.ts`, which excludes `gallery`, `p(...)`, and `api/public` from auth middleware.
+This is enforced in `proxy.ts`, which excludes `login`, `about`, `gallery`, `p(...)`, and `api/public` from auth middleware.
 
 ### Authenticated routes
 

@@ -4,7 +4,7 @@ import { AppFooter } from "@/components/app-footer";
 
 export const metadata = {
   title: "About · Data Surfer",
-  description: "About Data Surfer and the people who built it.",
+  description: "About Data Surfer, Country Snapshots and the people who built them.",
 };
 
 export default function AboutPage() {
@@ -73,6 +73,30 @@ export default function AboutPage() {
 
           <p className="mt-8 text-sm text-on-surface-variant">
             All at the Pacific Community (SPC).
+          </p>
+        </section>
+
+        <section
+          id="country-snapshots"
+          className="mt-8 scroll-mt-24 rounded-[var(--radius-xl)] bg-surface-card p-8 shadow-ambient"
+        >
+          <p className="type-label-md text-on-tertiary-fixed-variant">
+            Sibling product
+          </p>
+          <h3 className="mt-1 font-[family-name:var(--font-display)] text-2xl font-bold tracking-tight text-primary">
+            Country Snapshots
+          </h3>
+          <p className="mt-4 text-sm leading-relaxed text-on-surface">
+            Curated statistical profiles of the 22 Pacific Island Countries and
+            Territories, organised in twelve themes from health and education to
+            oceans, governance and official development assistance. The indicator
+            list is maintained by SPC&apos;s Statistics for Development Division,
+            and every figure is read live from the Pacific Data Hub .Stat data
+            platform, with a link to its source dataset.
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-on-surface-variant">
+            Snapshots can be compared across countries, summarised regionally, and
+            opened in Data Surfer to explore further.
           </p>
         </section>
 
