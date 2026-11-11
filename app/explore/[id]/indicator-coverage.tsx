@@ -195,12 +195,16 @@ function CountsGrid({ grid }: { grid: Extract<IndicatorGrid, { detail: "counts" 
             {bins.map((b, i) => (
               <th
                 key={b.from}
-                className="relative h-4 font-normal text-on-surface-variant"
+                className="h-8 p-0 align-bottom font-normal text-on-surface-variant"
                 title={binLabel(b)}
               >
-                {/* Positioned out of flow so a label never widens its column. */}
+                {/* Set vertically: a horizontal four-digit year is wider than
+                    the column and runs into its neighbours. Upright, it is one
+                    line of text wide and never widens the column. */}
                 {i % labelEvery === 0 && (
-                  <span className="absolute bottom-0 left-0 whitespace-nowrap tabular-nums">{b.from}</span>
+                  <span className="inline-block rotate-180 whitespace-nowrap leading-none tabular-nums [writing-mode:vertical-rl]">
+                    {b.from}
+                  </span>
                 )}
               </th>
             ))}
