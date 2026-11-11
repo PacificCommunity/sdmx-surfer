@@ -753,25 +753,38 @@ export default function BuilderPage() {
               ))}
             </select>
 
-            {(saveState === "saving" || saveState === "saved") && (
+            {/* Always present and the same size, so autosave never shifts the
+                header: hollow = unsaved changes, grey = saving, blue = saved.
+                The words are in the tooltip and for screen readers. */}
+            <span
+              role="status"
+              title={
+                saveState === "saved"
+                  ? "All changes saved"
+                  : saveState === "saving"
+                    ? "Saving…"
+                    : "Not saved yet"
+              }
+              aria-label={
+                saveState === "saved"
+                  ? "All changes saved"
+                  : saveState === "saving"
+                    ? "Saving"
+                    : "Not saved yet"
+              }
+              className="flex h-7 w-5 cursor-default items-center justify-center"
+            >
               <span
-                title={saveState === "saved" ? "Session autosaved" : "Session is being autosaved"}
                 className={
-                  "ghost-border inline-flex items-center gap-1.5 rounded-full bg-surface-card px-3 py-1 text-xs font-semibold " +
+                  "h-2.5 w-2.5 rounded-full border-2 transition-colors duration-300 " +
                   (saveState === "saved"
-                    ? "text-primary"
-                    : "animate-pulse text-on-surface-variant")
+                    ? "border-primary bg-primary"
+                    : saveState === "saving"
+                      ? "border-on-surface-variant bg-on-surface-variant"
+                      : "border-on-surface-variant bg-transparent")
                 }
-              >
-                <span
-                  className={
-                    "h-2 w-2 rounded-full " +
-                    (saveState === "saved" ? "bg-primary" : "bg-on-surface-variant")
-                  }
-                />
-                {saveState === "saved" ? "Saved" : "Saving..."}
-              </span>
-            )}
+              />
+            </span>
 
             {/* Settings link */}
             <Link
