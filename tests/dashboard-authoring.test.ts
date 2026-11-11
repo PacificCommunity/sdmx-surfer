@@ -116,7 +116,7 @@ describe("dashboard authoring compiler", () => {
     expect(visual.xAxisConcept).toBe("GEO_PICT");
     expect(visual.data).toContain(", {GEO_PICT} | ");
     expect(visual.data).toContain("geonode.pacificdata.org");
-    expect(visual.data).toContain("EPSG:3857");
+    expect(visual.data).toContain("EPSG:3832");
     expect(visual.data).toContain("iso_ter1");
     expect(visual.data).toContain("dimensionAtObservation=AllDimensions");
   });

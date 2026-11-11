@@ -7,9 +7,12 @@ import {
   visualConfigSchema,
 } from "./dashboard-schema";
 
+// EPSG:3832 is Mercator centred on 150°E, so the Pacific sits in the middle of
+// the map instead of split across the antimeridian at its edges. The library
+// registers the projection and the tile grid geonode serves it with.
 const PACIFIC_EEZ_GEOJSON_URL =
-  "https://geonode.pacificdata.org/geoserver/gwc/service/tms/1.0.0/geonode%3Aglobal_eez_200nm_split@EPSG%3A3857@pbf/{z}/{x}/{-y}.pbf";
-const PACIFIC_EEZ_PROJECTION = "EPSG:3857";
+  "https://geonode.pacificdata.org/geoserver/gwc/service/tms/1.0.0/geonode%3Aglobal_eez_200nm_split@EPSG%3A3832@pbf/{z}/{x}/{-y}.pbf";
+const PACIFIC_EEZ_PROJECTION = "EPSG:3832";
 const PACIFIC_EEZ_JOIN_PROPERTY = "iso_ter1";
 const DEFAULT_VALUE_CONCEPT = "OBS_VALUE";
 

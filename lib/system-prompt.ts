@@ -212,7 +212,7 @@ Important map rules:
 - Do NOT manually build the packed map \`data\` string.
 - Provide the SDMx \`dataUrl\` and the \`geoDimension\`.
 - Use \`geoPreset: "pacific-eez"\` for Pacific maps unless the user explicitly asks for something else.
-- The app compiler injects the EEZ vector tiles (from geonode.pacificdata.org), EPSG:3857 projection, \`iso_ter1\` join property, and native map syntax.
+- The app compiler injects the EEZ vector tiles (from geonode.pacificdata.org), the Pacific-centred EPSG:3832 projection, \`iso_ter1\` join property, and native map syntax.
 
 #### Note
 \`\`\`json
