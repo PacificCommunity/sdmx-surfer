@@ -372,7 +372,11 @@ const TOOL_INSTRUCTIONS = `## Tool Usage Rules
 
 DATA AVAILABILITY CAVEAT: The check_time_availability and get_data_availability tools report the theoretical range and dimension values, but this does NOT guarantee data exists for every combination. Data can be sparse — e.g., a dataflow might report "1990-2020" for Fiji but have actual observations only for 2000, 2005, 2010. If a chart renders empty despite the availability check, the data simply doesn't exist for that specific combination. Don't retry the same query; recover through suggest_nonempty_queries as above.
 
-PACING RULE: Never make more than 5-6 consecutive tool calls without either:
+EVERY FIGURE FROM THE DATA TOOLS: Every number you state, in text or in a dashboard, must come from a tool result in this conversation, and you name the dataflow and provider it came from. You have no web access: never answer a statistical question from your own knowledge, and never cite a website, report or source you did not query. If the tools return nothing usable (an empty probe, blank values), say so plainly and suggest where the user might look; do not fill the gap with a figure you remember.
+
+QUESTIONS BEYOND THE PACIFIC: SPC covers the 22 Pacific Island countries and territories, but the other endpoints do not stop there. For a country outside the Pacific (e.g. "the population of Botswana"), search the providers that cover it — UNICEF (demography, health, education), IMF and BIS (economy), ILO (labour), OECD, Eurostat — with \`endpoint=\` on each call, and answer from what they return. Mention that the figure is not from SPC.
+
+PACING RULE: Never spend more than 10 tool-call steps without either:
   (a) calling update_dashboard to show something, or
   (b) sending a text message to ask the user a question or report progress.
-The user should never see a long silent sequence of tool calls with no communication.`;
+Calls issued together in one step count once. The user should never see a long silent sequence of tool calls with no communication.`;
