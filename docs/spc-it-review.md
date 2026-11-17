@@ -314,7 +314,11 @@ None of the items below involves non-public statistical data, because the servic
 
 1. **Admins can read prompt excerpts** for 3 months. This is intended, for quality review and abuse handling, and is disclosed on the About page. A separate, smaller "reviewer" role could narrow access further.
 2. **Admin-set passwords** are a stopgap that gives access before a proper sign-in integration exists. They will be removed once SPC SSO is in place.
-3. **`'unsafe-inline'` scripts in the CSP.** Next.js needs it for its bootstrap scripts, and markup stripping is the XSS defence. A nonce-based CSP is possible but makes every page dynamic; we will revisit it as the framework evolves.
+3. **`'unsafe-inline'` scripts in the CSP.** Next.js App Router writes each page's React Server Components payload as inline scripts, whose content differs from page to page. Without `'unsafe-inline'` those scripts are blocked and the page never becomes interactive.
+   - **Nonces** are the supported alternative: a fresh nonce per request, which Next.js stamps on its scripts. That forces every page to be rendered per request, including the pre-built sign-in, gallery and Country Snapshot pages. It also gives up CDN caching of HTML, at a cost in speed and hosting.
+   - **Next.js's hash-based option** (`experimental.sri`) does not avoid this. It covers script files, but not these inline payloads; a build with it and without `'unsafe-inline'` failed to hydrate.
+   - **Why the risk is small:** markup stripping and React's escaping keep injected markup out of pages, and the CSP still restricts script sources to this site and data connections to the registered providers.
+   - **Plan:** we would adopt nonces if SPC policy requires a strict script CSP.
 4. **OAuth email account linking** (`allowDangerousEmailAccountLinking`) lets one person sign in through different providers with the same email. GitHub and Entra are checked for a verified email. This will be reviewed as part of item 6.
 5. **Numbers in prose.** The model cannot supply plotted values, and the prompt steers figures into panels (§4.3). Text the model writes is not checked by code.
 6. **The authentication library.** `next-auth` v5 has been in beta since 2023. The Auth.js project became part of Better Auth in 2025, and Better Auth joined Vercel in 2026. Integrating SPC's sign-in (Entra SSO) is the natural moment to move to Better Auth rather than carry a beta into production. This is the largest planned piece of work. It also retires items 2 and 4, and we would like to plan it with SPC IT.
