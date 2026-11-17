@@ -24,6 +24,7 @@ import {
 import { USAGE_EPOCH, COST_TRUSTED_FROM } from "@/lib/admin-epoch";
 import { hasSignedUp } from "@/lib/admin-query";
 import { fetchGatewayCredits } from "@/lib/gateway-credits";
+import { adminAccountEmail } from "@/lib/account-deletion";
 
 /**
  * A zoneless usage_logs timestamp as a UTC ISO string. The column is written
@@ -87,10 +88,12 @@ export async function GET() {
   // rejects (null on any failure).
   const gatewayCreditsPromise = fetchGatewayCredits();
   try {
-    // Structural counts (all-time)
+    // Structural counts (all-time). Deleted accounts are not users any more;
+    // their rows remain only as owners of usage records.
     const [usersRow] = await db
       .select({ c: count(authUsers.id) })
-      .from(authUsers);
+      .from(authUsers)
+      .where(isNull(authUsers.deleted_at));
     const [sessionsRow] = await db
       .select({ c: count(dashboardSessions.id) })
       .from(dashboardSessions)
@@ -220,6 +223,7 @@ export async function GET() {
       .select({
         id: usageLogs.id,
         userEmail: authUsers.email,
+        userDeletedEmail: authUsers.deleted_email,
         model: usageLogs.model,
         provider: usageLogs.provider,
         keySource: usageLogs.key_source,
@@ -238,7 +242,7 @@ export async function GET() {
 
     const recentActivity: RecentActivityRow[] = recentRows.map((r) => ({
       id: r.id,
-      userEmail: r.userEmail,
+      userEmail: r.userEmail === null ? null : adminAccountEmail(r.userEmail, r.userDeletedEmail),
       model: r.model,
       provider: r.provider,
       keySource: r.keySource,
@@ -269,6 +273,7 @@ export async function GET() {
       .select({
         userId: usageLogs.user_id,
         userEmail: authUsers.email,
+        userDeletedEmail: authUsers.deleted_email,
         turns: count(usageLogs.id),
         costUsd: sum(usageLogs.cost_usd),
         lastTurnAt: utcIso(sql`max(${usageLogs.created_at})`),
@@ -276,12 +281,12 @@ export async function GET() {
       .from(usageLogs)
       .leftJoin(authUsers, eq(authUsers.id, usageLogs.user_id))
       .where(last24hWindow)
-      .groupBy(usageLogs.user_id, authUsers.email)
+      .groupBy(usageLogs.user_id, authUsers.email, authUsers.deleted_email)
       .orderBy(sql`coalesce(sum(${usageLogs.cost_usd}), 0) desc`)
       .limit(50);
     const last24hByUser: Last24hUserRow[] = last24hUserRows.map((r) => ({
       userId: r.userId,
-      userEmail: r.userEmail,
+      userEmail: r.userEmail === null ? null : adminAccountEmail(r.userEmail, r.userDeletedEmail),
       turns: Number(r.turns ?? 0),
       costUsd: r.costUsd === null ? null : Number(r.costUsd),
       lastTurnAt: r.lastTurnAt,

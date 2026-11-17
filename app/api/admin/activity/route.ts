@@ -182,7 +182,9 @@ export async function GET(): Promise<NextResponse> {
   const sessionsResult = await db.execute(sql`
     SELECT
       l.session_id AS session_id,
-      MAX(u.email) AS user_email,
+      -- Deleted accounts read as their kept address, marked; same rule as
+      -- adminAccountEmail in lib/account-deletion.ts.
+      MAX(COALESCE(u.deleted_email || ' (deleted)', u.email)) AS user_email,
       MIN(l.created_at) AS started_at,
       MAX(l.created_at) AS last_at,
       COUNT(*)::bigint AS turns,

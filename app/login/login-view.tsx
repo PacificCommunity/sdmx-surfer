@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 import { AppFooter } from "@/components/app-footer";
 import { BrandField } from "@/components/brand-field";
 import type { OAuthProviderInfo } from "@/lib/oauth-providers";
@@ -431,6 +432,17 @@ export function LoginView(props: LoginProps) {
           >
             <LoginForm {...props} />
           </Suspense>
+
+          <p className="mt-4 text-center text-xs text-text-muted">
+            Signing in means we keep some records about you.{" "}
+            <Link
+              href="/about#what-we-record"
+              className="text-on-surface-variant underline hover:text-primary"
+            >
+              See what we record
+            </Link>
+            .
+          </p>
 
           <AppFooter className="mt-6" compact />
         </div>

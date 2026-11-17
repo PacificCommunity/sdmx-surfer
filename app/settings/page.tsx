@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppFooter } from "@/components/app-footer";
+import { DangerZone } from "./danger-zone";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -14,6 +15,7 @@ interface KeyRecord {
   provider: Provider;
   modelPreference: string | null;
   updatedAt: string | null;
+  unreadable: boolean;
 }
 
 interface ProviderConfig {
@@ -91,6 +93,7 @@ function ProviderCard({ config, keyRecord, onSave, onRemove }: ProviderCardProps
   }, [keyRecord, config.models]);
 
   const isConfigured = Boolean(keyRecord);
+  const isUnreadable = keyRecord?.unreadable === true;
 
   async function handleSave() {
     if (!apiKey.trim()) return;
@@ -129,7 +132,11 @@ function ProviderCard({ config, keyRecord, onSave, onRemove }: ProviderCardProps
           </div>
         </div>
 
-        {isConfigured ? (
+        {isUnreadable ? (
+          <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+            Unreadable
+          </span>
+        ) : isConfigured ? (
           <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -142,6 +149,13 @@ function ProviderCard({ config, keyRecord, onSave, onRemove }: ProviderCardProps
           </span>
         )}
       </div>
+
+      {isUnreadable && (
+        <p role="alert" className="mb-4 rounded-[var(--radius-md)] bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          This key can no longer be read; please re-enter it. Until then, chats use the
+          platform model.
+        </p>
+      )}
 
       {/* Model preference */}
       <div className="mb-4">
@@ -172,7 +186,7 @@ function ProviderCard({ config, keyRecord, onSave, onRemove }: ProviderCardProps
           className="type-label-md mb-1.5 block text-on-surface-variant"
         >
           API key
-          {isConfigured && (
+          {isConfigured && !isUnreadable && (
             <span className="ml-2 font-normal normal-case text-on-surface-variant">
               (leave blank to keep existing)
             </span>
@@ -301,7 +315,7 @@ export default function SettingsPage() {
           </button>
           <div>
             <h1 className="type-headline-sm text-on-surface">Settings</h1>
-            <p className="type-label-md text-on-surface-variant">API key management</p>
+            <p className="type-label-md text-on-surface-variant">API keys and your account</p>
           </div>
         </div>
       </header>
@@ -355,6 +369,7 @@ export default function SettingsPage() {
             ))}
           </div>
         )}
+        <DangerZone />
         <AppFooter />
       </main>
     </div>

@@ -1,5 +1,6 @@
 import { db, usageLogs } from "@/lib/db";
-import { and, eq, gte } from "drizzle-orm";
+import { and, gte } from "drizzle-orm";
+import { usageOfPerson } from "@/lib/usage-caps";
 
 const DEFAULT_DAILY_TURNS = 10;
 
@@ -13,7 +14,7 @@ function dailyTurnCap(): number {
  * Count the signed-in user's usage_logs rows in the last 24 hours. Each
  * completed chat turn writes one row, so this equals the turn count — across
  * snapshot chat and the Surfer builder alike, since both log under the same
- * user id.
+ * user id, and across accounts the same person deleted (see usageOfPerson).
  */
 export async function checkTurnCap(userId: string): Promise<{
   allowed: boolean;
@@ -24,7 +25,7 @@ export async function checkTurnCap(userId: string): Promise<{
   const rows = await db
     .select({ id: usageLogs.id })
     .from(usageLogs)
-    .where(and(eq(usageLogs.user_id, userId), gte(usageLogs.created_at, since)));
+    .where(and(usageOfPerson(userId), gte(usageLogs.created_at, since)));
   const used = rows.length;
   const cap = dailyTurnCap();
   return { allowed: used < cap, used, cap };

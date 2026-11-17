@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import { db, dashboardSessions } from "@/lib/db";
-import { translateDashboardExtraOptions } from "@/lib/extra-options";
-import { stripDashboardMarkup, visualReferenceProblems } from "@/lib/dashboard-safety";
+import { sanitizeDashboard, visualReferenceProblems } from "@/lib/dashboard-safety";
 import type { SDMXDashboardConfig } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -62,24 +61,15 @@ export async function GET(
       );
     }
 
-    // Dashboards published before the move to ECharts carry Highcharts
-    // extraOptions.
-    const { config, dropped } = translateDashboardExtraOptions(
-      history[Math.min(pointer, history.length - 1)] as SDMXDashboardConfig,
-    );
-    if (dropped.length > 0) {
-      console.warn(
-        "[public-dashboard] " + row.id + ": dropped extraOptions keys with no ECharts equivalent:",
-        dropped,
-      );
-    }
+    const stored = history[Math.min(pointer, history.length - 1)] as SDMXDashboardConfig;
 
-    // Dashboards published before the URL and markup rules existed are held
-    // to them here: a panel fetching from an unregistered host becomes a
-    // note, and markup is stripped from all text.
-    const safeConfig = stripDashboardMarkup({
-      ...config,
-      rows: config.rows.map((row) => ({
+    // Dashboards published before the URL, markup and extraOptions rules
+    // existed are held to them here: a panel fetching from an unregistered
+    // host becomes a note, markup is stripped from all text, and extraOptions
+    // (Highcharts names included) are cut to presentation options.
+    const { config: safeConfig, droppedOptions } = sanitizeDashboard({
+      ...stored,
+      rows: stored.rows.map((row) => ({
         ...row,
         columns: row.columns.map((visual) =>
           visualReferenceProblems(visual).length === 0
@@ -95,6 +85,9 @@ export async function GET(
         ),
       })),
     });
+    if (droppedOptions.length > 0) {
+      console.warn("[public-dashboard] " + row.id + ": dropped extraOptions keys:", droppedOptions);
+    }
 
     return NextResponse.json(
       {

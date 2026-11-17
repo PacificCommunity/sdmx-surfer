@@ -20,7 +20,7 @@ import {
 } from "@/lib/tier2-knowledge";
 import { createRequestLogger } from "@/lib/logger";
 import { getDataflowName, resolveDataflowNamesFromConfig } from "@/lib/dataflow-names";
-import { dashboardReferenceProblems, stripDashboardMarkup } from "@/lib/dashboard-safety";
+import { dashboardReferenceProblems, droppedOptionsNotice, sanitizeDashboard } from "@/lib/dashboard-safety";
 import { loadCoverage } from "@/lib/coverage/load";
 import { queryCoverage } from "@/lib/coverage/query";
 import { sanitizeToolInputs } from "@/lib/sanitize-messages";
@@ -237,7 +237,7 @@ export async function POST(req: Request) {
                   ". Data URLs must come from build_data_url for a registered endpoint.",
               };
             }
-            const dashboard = stripDashboardMarkup(compiledConfig);
+            const { config: dashboard, droppedOptions } = sanitizeDashboard(compiledConfig);
             dashboard.dataflows = resolveDataflowNamesFromConfig(dashboard);
             dashboardEmitted = true;
             const result = {
@@ -245,7 +245,8 @@ export async function POST(req: Request) {
               dashboard,
               message:
                 "Dashboard updated. The preview now shows: " +
-                getConfigTitle(dashboard),
+                getConfigTitle(dashboard) +
+                droppedOptionsNotice(droppedOptions),
             };
             logger.recordToolCall(
               "update_dashboard",

@@ -5,7 +5,7 @@ import {
   dashboardToolConfigSchema,
 } from "@/lib/dashboard-authoring";
 import { resolveDataflowNamesFromConfig } from "@/lib/dataflow-names";
-import { dashboardReferenceProblems, stripDashboardMarkup } from "@/lib/dashboard-safety";
+import { dashboardReferenceProblems, droppedOptionsNotice, sanitizeDashboard } from "@/lib/dashboard-safety";
 import { getConfigTitle } from "@/lib/dashboard-schema";
 import { getMode, catalogueTool } from "./catalogue-access";
 import {
@@ -104,14 +104,15 @@ export function buildUpdateDashboardTool() {
             ". Data URLs must come from build_data_url for a registered endpoint.",
         };
       }
-      const dashboard = stripDashboardMarkup(compiled);
+      const { config: dashboard, droppedOptions } = sanitizeDashboard(compiled);
       dashboard.dataflows = resolveDataflowNamesFromConfig(dashboard);
       return {
         success: true,
         dashboard,
         message:
           "Dashboard updated. The preview now shows: " +
-          getConfigTitle(dashboard),
+          getConfigTitle(dashboard) +
+          droppedOptionsNotice(droppedOptions),
       };
     },
   });

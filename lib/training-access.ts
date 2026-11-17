@@ -26,6 +26,41 @@ export const TRAINEE_EMAIL_DOMAIN = "training.sdmxsurfer.net";
  */
 export const MAX_TRAINEES = 200;
 
+/** The auth_events row a wrong code leaves, which the throttle below counts. */
+export const TRAINING_CLAIM_DENIED_EVENT = "training_claim_denied";
+
+export const TRAINING_CLAIM_WINDOW_MS = 15 * 60 * 1000;
+
+/**
+ * Wrong codes allowed per address per window. Higher than a personal login
+ * would get because a workshop room usually shares one venue address, so every
+ * participant's typos land on the same count; a script guessing the code is
+ * held to 120 tries an hour from any one address.
+ */
+export const TRAINING_CLAIM_IP_FAILURE_LIMIT = 30;
+
+/**
+ * Wrong codes allowed across every address per window, so spreading guesses
+ * over many addresses buys no more than this. Generous enough that a full
+ * workshop's typos cannot reach it, though a deliberate flood can, which
+ * pauses claiming for one window rather than leaking the code.
+ */
+export const TRAINING_CLAIM_GLOBAL_FAILURE_LIMIT = 200;
+
+/**
+ * Should a claim be refused before its code is even compared? Checked ahead of
+ * the comparison so a throttled guesser learns nothing, right code or not.
+ */
+export function trainingClaimThrottled(failures: {
+  overall: number;
+  byIp: number;
+}): boolean {
+  return (
+    failures.overall >= TRAINING_CLAIM_GLOBAL_FAILURE_LIMIT ||
+    failures.byIp >= TRAINING_CLAIM_IP_FAILURE_LIMIT
+  );
+}
+
 const TRAINEE_ADDRESS = new RegExp(
   "^trainee-(\\d{2,3})@" + TRAINEE_EMAIL_DOMAIN.replace(/\./g, "\\.") + "$",
 );

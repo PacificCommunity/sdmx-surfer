@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
-import { contentSecurityPolicy } from "./lib/content-security-policy";
+import {
+  contentSecurityPolicy,
+  EMBED_FRAME_ANCESTORS,
+  SAME_ORIGIN_FRAME_ANCESTORS,
+} from "./lib/content-security-policy";
 
 const nextConfig: NextConfig = {
   // Pin the workspace root. A stray package-lock.json exists above this
@@ -18,13 +22,45 @@ const nextConfig: NextConfig = {
     "/api/chat": ["./models/dataflow-coverage.json"],
   },
   async headers() {
+    const isDevelopment = process.env.NODE_ENV !== "production";
+    const common = [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      {
+        key: "Permissions-Policy",
+        value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()",
+      },
+      // Locally the site is plain http on localhost, where HSTS would only
+      // pin a stale policy in the developer's browser.
+      ...(isDevelopment
+        ? []
+        : [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" }]),
+    ];
+    // The two sources are complementary, so each path gets exactly one CSP.
+    // Overriding a catch-all instead would not do: a later entry can replace
+    // the CSP but cannot remove X-Frame-Options, which has no allow-list form
+    // and would block the SPC embeds.
     return [
       {
-        source: "/:path*",
+        source: "/((?!p/.).*)",
         headers: [
+          ...common,
           {
             key: "Content-Security-Policy",
-            value: contentSecurityPolicy(process.env.NODE_ENV !== "production"),
+            value: contentSecurityPolicy(isDevelopment, SAME_ORIGIN_FRAME_ANCESTORS),
+          },
+          // For browsers that predate CSP frame-ancestors.
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+        ],
+      },
+      {
+        // Published dashboards, embeddable from SPC sites.
+        source: "/p/(.+)",
+        headers: [
+          ...common,
+          {
+            key: "Content-Security-Policy",
+            value: contentSecurityPolicy(isDevelopment, EMBED_FRAME_ANCESTORS),
           },
         ],
       },

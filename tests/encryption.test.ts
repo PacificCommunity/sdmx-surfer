@@ -1,5 +1,10 @@
-import { describe, it, expect, beforeAll } from "vitest";
-import { encryptApiKey, decryptApiKey } from "@/lib/encryption";
+import { describe, it, expect, beforeAll, afterEach } from "vitest";
+import {
+  encryptApiKey,
+  decryptApiKey,
+  decryptApiKeyWithGeneration,
+  isApiKeyReadable,
+} from "@/lib/encryption";
 
 beforeAll(() => {
   // Set a test secret — must be present for encryption to work
@@ -55,5 +60,65 @@ describe("encryption", () => {
     const longKey = "x".repeat(10000);
     const encrypted = encryptApiKey(longKey, "google");
     expect(decryptApiKey(encrypted, "google")).toBe(longKey);
+  });
+});
+
+describe("secret rotation", () => {
+  const OLD = "old-secret-for-vitest-at-least-16-chars";
+  const NEW = "new-secret-for-vitest-at-least-16-chars";
+
+  function encryptedWith(secret: string, plaintext: string, provider: string): string {
+    process.env.ENCRYPTION_SECRET = secret;
+    return encryptApiKey(plaintext, provider);
+  }
+
+  afterEach(() => {
+    process.env.ENCRYPTION_SECRET = "test-secret-for-vitest-at-least-16-chars";
+    delete process.env.ENCRYPTION_SECRET_PREVIOUS;
+  });
+
+  it("decrypts a key written under ENCRYPTION_SECRET_PREVIOUS", () => {
+    const stored = encryptedWith(OLD, "sk-old", "anthropic");
+    process.env.ENCRYPTION_SECRET = NEW;
+    process.env.ENCRYPTION_SECRET_PREVIOUS = OLD;
+
+    expect(decryptApiKey(stored, "anthropic")).toBe("sk-old");
+    expect(decryptApiKeyWithGeneration(stored, "anthropic")).toEqual({
+      plaintext: "sk-old",
+      generation: "previous",
+    });
+    expect(isApiKeyReadable(stored, "anthropic")).toBe(true);
+  });
+
+  it("reports the current secret for keys already on it", () => {
+    process.env.ENCRYPTION_SECRET_PREVIOUS = OLD;
+    const stored = encryptedWith(NEW, "sk-new", "openai");
+
+    expect(decryptApiKeyWithGeneration(stored, "openai").generation).toBe("current");
+  });
+
+  it("always encrypts with the current secret during a rotation", () => {
+    process.env.ENCRYPTION_SECRET_PREVIOUS = OLD;
+    const stored = encryptedWith(NEW, "sk-new", "google");
+    delete process.env.ENCRYPTION_SECRET_PREVIOUS;
+
+    expect(decryptApiKey(stored, "google")).toBe("sk-new");
+  });
+
+  it("fails when neither secret wrote the key", () => {
+    const stored = encryptedWith("some-other-secret-at-least-16-chars", "sk-x", "mistral");
+    process.env.ENCRYPTION_SECRET = NEW;
+    process.env.ENCRYPTION_SECRET_PREVIOUS = OLD;
+
+    expect(() => decryptApiKey(stored, "mistral")).toThrow();
+    expect(isApiKeyReadable(stored, "mistral")).toBe(false);
+  });
+
+  it("fails on an old key once ENCRYPTION_SECRET_PREVIOUS is removed", () => {
+    const stored = encryptedWith(OLD, "sk-old", "anthropic");
+    process.env.ENCRYPTION_SECRET = NEW;
+
+    expect(() => decryptApiKey(stored, "anthropic")).toThrow();
+    expect(isApiKeyReadable(stored, "anthropic")).toBe(false);
   });
 });

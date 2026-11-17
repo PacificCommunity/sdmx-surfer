@@ -30,6 +30,13 @@ export const authUsers = pgTable("auth_users", {
   password_hash: text("password_hash"),
   failed_attempts: integer("failed_attempts").notNull().default(0),
   locked_until: timestamp("locked_until"),
+  // Self-service account deletion (lib/account-deletion.ts). A deleted row
+  // stays as the anonymous owner of its usage_logs, which the budget still
+  // counts; `email` becomes a tombstone so the address can register again,
+  // and the real one is kept in `deleted_email` for the misuse-review window
+  // only (lib/retention.ts clears it).
+  deleted_at: timestamp("deleted_at"),
+  deleted_email: text("deleted_email"),
 });
 
 // ---------------------------------------------------------------------------
@@ -261,3 +268,27 @@ export const emailProofs = pgTable(
 );
 
 export type EmailProof = typeof emailProofs.$inferSelect;
+
+// ---------------------------------------------------------------------------
+// rate_limit_counters  (sliding-window request counters; see lib/rate-limit.ts)
+// ---------------------------------------------------------------------------
+//
+// Functions are stateless, so counters that must hold across instances live
+// here. `key_hash` is an HMAC-SHA256 (keyed with AUTH_SECRET) of the limited
+// key (a client IP), never the raw value. The primary key leads with
+// (bucket, window_start) so the same index serves the opportunistic purge of
+// expired windows.
+export const rateLimitCounters = pgTable(
+  "rate_limit_counters",
+  {
+    bucket: text("bucket").notNull(),
+    key_hash: text("key_hash").notNull(),
+    window_start: timestamp("window_start").notNull(),
+    count: integer("count").notNull().default(1),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.bucket, table.window_start, table.key_hash],
+    }),
+  ],
+);

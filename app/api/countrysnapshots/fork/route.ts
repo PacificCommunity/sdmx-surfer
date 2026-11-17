@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { checkCsrf } from "@/lib/csrf";
 import { db, dashboardSessions } from "@/lib/db";
 import { loginPathWithCallback } from "@/lib/login-redirect";
 import {
@@ -13,36 +14,42 @@ import {
   toNativeDashboardConfig,
 } from "@/lib/country-snapshots/config-builder";
 
+const SNAPSHOT_ROOT = "/countrysnapshots";
+
 /**
  * Fork a Country Snapshot into the authenticated Surfer space.
  *
  * Flow:
- *   1. Validate the country/theme params against the catalogue.
+ *   1. Validate the country/theme form fields against the catalogue.
  *   2. If there is no Surfer session (the snapshot pages require one, but
  *      the session may have expired), redirect to /login with a
- *      `callbackUrl` that round-trips back to this endpoint after sign-in.
+ *      `callbackUrl` pointing at the snapshot page the form was submitted
+ *      from. A POST cannot be replayed after sign-in, so the visitor lands
+ *      back on the snapshot and presses "Explore in Surfer" again.
  *   3. Build the dashboard config from (countries, theme) and insert a new
  *      dashboard_sessions row owned by the signed-in user, seeded with the
  *      config and a leading system note explaining the fork origin.
  *   4. Redirect into /builder?session=<id>.
  *
- * Accepts both GET (from a plain link) and POST (from a form). GET is the
- * common case because the overlay's "Explore in Surfer" link is a normal
- * anchor that lets the browser follow redirects, including the sign-in
- * round-trip.
+ * POST-only because it creates a row: a GET link could be triggered
+ * cross-site (img tag, prefetch) to fill a signed-in user's sessions. The
+ * overlay submits a plain form so the browser still follows the 303s.
  */
-export async function GET(req: Request) {
-  return handle(req);
-}
-
 export async function POST(req: Request) {
-  return handle(req);
-}
+  const csrfError = checkCsrf(req);
+  if (csrfError) return csrfError;
 
-async function handle(req: Request) {
-  const url = new URL(req.url);
-  const countryParam = url.searchParams.get("country") ?? "";
-  const themeSlug = url.searchParams.get("theme") ?? "";
+  let form: FormData;
+  try {
+    form = await req.formData();
+  } catch {
+    return NextResponse.json(
+      { error: "missing or invalid country/theme" },
+      { status: 400 },
+    );
+  }
+  const countryParam = formString(form, "country");
+  const themeSlug = formString(form, "theme");
   const codes = countryParam.split(",").map((c) => c.trim()).filter(Boolean);
 
   // Cap mirrors snapshotContextSchema's countryCodes max (30): regional pages
@@ -66,7 +73,10 @@ async function handle(req: Request) {
   const session = await auth();
   if (!session?.user?.userId) {
     return NextResponse.redirect(
-      new URL(loginPathWithCallback(url.pathname + url.search), req.url),
+      new URL(
+        loginPathWithCallback(snapshotReturnPath(formString(form, "returnTo"))),
+        req.url,
+      ),
       303,
     );
   }
@@ -136,4 +146,19 @@ async function handle(req: Request) {
     new URL(`/builder?session=${row.id}`, req.url),
     303,
   );
+}
+
+function formString(form: FormData, name: string): string {
+  const value = form.get(name);
+  return typeof value === "string" ? value : "";
+}
+
+// The sign-in round-trip may only land on a snapshot page: returnTo is
+// client-supplied, and anything else falls back to the snapshot index.
+function snapshotReturnPath(returnTo: string): string {
+  const rest = returnTo.slice(SNAPSHOT_ROOT.length);
+  return returnTo.startsWith(SNAPSHOT_ROOT) &&
+    (rest === "" || rest.startsWith("/") || rest.startsWith("?"))
+    ? returnTo
+    : SNAPSHOT_ROOT;
 }

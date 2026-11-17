@@ -39,14 +39,15 @@ one person from taking the whole budget.
 3. Then pick an ending:
    - `--park` revokes sign-in and keeps every dashboard. The accounts remain as
      the owners of what they built, so published dashboards stay in the gallery.
-   - `--delete` removes the accounts and everything they made.
+   - `--delete` deletes the accounts the same way Settings does: dashboards are
+     unpublished and erased after 30 days, and the usage records (with their
+     costs) are kept for the AI budget.
 
 Both only match the trainee subdomain, so real accounts are safe.
 
-Parking does not end sessions already open in a browser: nothing re-checks the
-allowlist after sign-in, so a tab left open keeps working until its cookie
-expires. Rotate `NEXTAUTH_SECRET` on the dev environment to cut those too,
-which signs out everyone on dev, yourself included.
+Both endings remove the trainees from the allowlist, and sessions are re-checked
+against it every 5 minutes, so open browser tabs are signed out within 5
+minutes. No secret rotation is needed.
 
 Put `AI_BUDGET_CAP_USD` back to its usual value as well. The cap is cumulative
 rather than daily, so a low training-day ceiling left in place will eventually

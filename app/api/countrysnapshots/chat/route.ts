@@ -7,6 +7,7 @@ import { sanitizeToolInputs } from "@/lib/sanitize-messages";
 import { createRequestLogger } from "@/lib/logger";
 import { db, dashboardSessions } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { checkCsrf } from "@/lib/csrf";
 import { type SnapshotContext } from "@/lib/country-snapshots/system-prompt";
 import {
   buildSystemMessages,
@@ -25,6 +26,9 @@ const STEP_LIMIT_INDEX = 25;
 export const maxDuration = 120;
 
 export async function POST(req: Request) {
+  const csrfError = checkCsrf(req);
+  if (csrfError) return csrfError;
+
   const session = await auth();
   if (!session?.user?.userId) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });

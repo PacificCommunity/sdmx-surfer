@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { SnapshotContext } from "@/lib/country-snapshots/system-prompt";
@@ -74,7 +74,11 @@ export function ChatOverlay({
   });
 
   const ctxKey = `${snapshotContext.countryCodes.join("+")}/${snapshotContext.themeSlug}`;
-  const forkHref = `/api/countrysnapshots/fork?country=${snapshotContext.countryCodes.join(",")}&theme=${snapshotContext.themeSlug}`;
+  // Both "Explore in Surfer" buttons submit the one fork form below (a <form>
+  // cannot nest inside the cap-reached <p>). Forking creates a session, so it
+  // is a POST; the browser follows the 303 into the builder like a link.
+  const forkFormId = useId();
+  const forkReturnToRef = useRef<HTMLInputElement>(null);
 
   return (
     <>
@@ -126,9 +130,13 @@ export function ChatOverlay({
             {capReached ? (
               <p className="rounded-md bg-amber-50 p-2 text-xs text-amber-800">
                 Daily chat limit reached.{" "}
-                <a href={forkHref} className="underline">
+                <button
+                  type="submit"
+                  form={forkFormId}
+                  className="cursor-pointer underline"
+                >
                   Explore in Surfer
-                </a>{" "}
+                </button>{" "}
                 to continue.
               </p>
             ) : null}
@@ -160,11 +168,38 @@ export function ChatOverlay({
             />
           </form>
 
-          <div className="border-t border-neutral-200 px-3 py-2 text-xs">
-            <a href={forkHref} className="text-on-secondary-container underline">
+          <form
+            id={forkFormId}
+            method="post"
+            action="/api/countrysnapshots/fork"
+            onSubmit={() => {
+              // Signed-out visitors are sent to /login and back to this page;
+              // the POST itself cannot be replayed after sign-in.
+              if (forkReturnToRef.current) {
+                forkReturnToRef.current.value =
+                  window.location.pathname + window.location.search;
+              }
+            }}
+            className="border-t border-neutral-200 px-3 py-2 text-xs"
+          >
+            <input
+              type="hidden"
+              name="country"
+              value={snapshotContext.countryCodes.join(",")}
+            />
+            <input
+              type="hidden"
+              name="theme"
+              value={snapshotContext.themeSlug}
+            />
+            <input type="hidden" name="returnTo" ref={forkReturnToRef} />
+            <button
+              type="submit"
+              className="cursor-pointer text-on-secondary-container underline"
+            >
               Explore in Surfer
-            </a>
-          </div>
+            </button>
+          </form>
         </aside>
       ) : null}
     </>

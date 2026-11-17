@@ -245,8 +245,11 @@ export default function BuilderPage() {
             { id: "ministral-8b-latest", label: "Ministral 8B (BYOK)" },
           ],
         };
+        // A key that no longer decrypts would only fall back to the platform model.
         const providers = new Set<string>(
-          (data.keys || []).map((k: { provider: string }) => k.provider),
+          (data.keys || [])
+            .filter((k: { unreadable?: boolean }) => !k.unreadable)
+            .map((k: { provider: string }) => k.provider),
         );
         for (const provider of providers) {
           const providerModels = BYOK_MODELS[provider];

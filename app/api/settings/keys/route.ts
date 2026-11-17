@@ -4,7 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, userApiKeys } from "@/lib/db";
 import { checkCsrf } from "@/lib/csrf";
-import { encryptApiKey } from "@/lib/encryption";
+import { encryptApiKey, isApiKeyReadable } from "@/lib/encryption";
 import { PLATFORM_MODELS } from "@/lib/platform-models";
 
 // ---------------------------------------------------------------------------
@@ -61,16 +61,20 @@ export async function GET() {
     const rows = await db
       .select({
         provider: userApiKeys.provider,
+        encryptedKey: userApiKeys.encrypted_key,
         modelPreference: userApiKeys.model_preference,
         updatedAt: userApiKeys.updated_at,
       })
       .from(userApiKeys)
       .where(eq(userApiKeys.user_id, userId));
 
+    // Chat replaces a key that no longer decrypts with the platform key; flag
+    // it so the settings page can ask the user to enter it again.
     const keys = rows.map((row) => ({
       provider: row.provider,
       modelPreference: row.modelPreference,
       updatedAt: row.updatedAt,
+      unreadable: !isApiKeyReadable(row.encryptedKey, row.provider),
     }));
 
     // Platform models available to everyone (no BYOK needed). Gateway-routed

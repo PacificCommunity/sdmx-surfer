@@ -251,6 +251,107 @@ describe("translateExtraOptions: other rows", () => {
   });
 });
 
+describe("translateExtraOptions: presentation only", () => {
+  it("keeps series style options", () => {
+    const options = {
+      series: {
+        stack: "total",
+        smooth: true,
+        showSymbol: false,
+        lineStyle: { width: 3, type: "dashed" },
+        itemStyle: { borderRadius: 4 },
+        label: { show: true, position: "top" },
+        barMaxWidth: 40,
+      },
+      grid: { left: 80 },
+      yAxis: { name: "USD millions", axisLabel: { formatter: "{value} %" }, min: 0 },
+      tooltip: { trigger: "axis" },
+    };
+    expect(translate(options)).toEqual({ extraOptions: options, dropped: [] });
+  });
+
+  it("drops series options that add or rename figures", () => {
+    const result = translate({
+      series: {
+        smooth: true,
+        data: [1, 2, 3],
+        name: "Made up",
+        type: "scatter",
+        encode: { y: "x" },
+        sampling: "average",
+        markLine: { data: [{ yAxis: 42 }], label: { formatter: "Target" } },
+        markPoint: { symbol: "pin" },
+        markArea: { silent: true },
+      },
+    });
+    expect(result.extraOptions).toEqual({ series: { smooth: true } });
+    expect(result.dropped).toEqual([
+      "series.data",
+      "series.name",
+      "series.type",
+      "series.encode.y",
+      "series.sampling",
+      "series.markLine.data",
+      "series.markLine.label.formatter",
+      "series.markPoint.symbol",
+      "series.markArea.silent",
+    ]);
+  });
+
+  it("drops formatters, rich text and data nested in kept options", () => {
+    const result = translate({
+      series: { label: { show: true, formatter: "{b}: 999", rich: { a: { color: "red" } } } },
+      tooltip: { axisPointer: { type: "shadow", label: { formatter: "42" } } },
+      aria: { enabled: true, label: { description: "GDP doubled." } },
+      toolbox: { feature: { dataView: { data: "x" } } },
+    });
+    expect(result.extraOptions).toEqual({
+      series: { label: { show: true } },
+      tooltip: { axisPointer: { type: "shadow" } },
+      aria: { enabled: true },
+    });
+    expect(result.dropped).toEqual([
+      "series.label.formatter",
+      "series.label.rich.a.color",
+      "tooltip.axisPointer.label.formatter",
+      "aria.label.description",
+      "toolbox.feature.dataView.data",
+    ]);
+  });
+
+  it("drops dataset, graphic and other top-level components that draw figures", () => {
+    const result = translate({
+      dataset: { source: [[1, 2]] },
+      graphic: { type: "text", style: { text: "Record high" } },
+      visualMap: { min: 0 },
+      grid: { top: 40 },
+    });
+    expect(result.extraOptions).toEqual({ grid: { top: 40 } });
+    expect(result.dropped).toEqual([
+      "dataset.source",
+      "graphic.type",
+      "graphic.style.text",
+      "visualMap.min",
+    ]);
+  });
+
+  it("drops remote images and axis formats that print extra digits", () => {
+    const result = translate({
+      series: { symbol: "image://https://evil.example/x.png", symbolSize: 8 },
+      legend: { icon: "image://https://evil.example/y.png" },
+      yAxis: { axisLabel: { formatter: "{value}0" } },
+      xAxis: { labels: { format: "{value}000" } },
+    });
+    expect(result.extraOptions).toEqual({ series: { symbolSize: 8 } });
+    expect(result.dropped).toEqual([
+      "series.symbol",
+      "legend.icon",
+      "yAxis.axisLabel.formatter",
+      "xAxis.labels.format",
+    ]);
+  });
+});
+
 describe("translateExtraOptions: idempotence", () => {
   const cases: Array<[string, Record<string, unknown>]> = [
     ["bar", { chart: { inverted: true }, plotOptions: { series: { stacking: "normal" } } }],

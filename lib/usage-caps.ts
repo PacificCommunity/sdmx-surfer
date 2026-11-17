@@ -80,6 +80,23 @@ export async function checkGlobalBudget(): Promise<{
 }
 
 /**
+ * usage_logs rows that belong to the person behind `userId`: this account and
+ * any account they deleted under the same address. Deleting an account keeps
+ * its usage rows (their cost stays in the global budget), and the address
+ * survives in `deleted_email` for the 3-month review window, so a person who
+ * deletes and re-registers cannot reset a per-user cap. Once the review window
+ * clears `deleted_email` the link is gone, long after any 24-hour cap window.
+ */
+export function usageOfPerson(userId: string) {
+  return sql`${usageLogs.user_id} in (
+    select ${userId}::text
+    union
+    select previous.id from auth_users previous
+    where previous.deleted_email = (select me.email from auth_users me where me.id = ${userId}::text)
+  )`;
+}
+
+/**
  * Per-user agent turns in the last rolling 24 hours. Each completed chat turn
  * writes one usage_logs row, so the row count equals the turn count.
  */
@@ -92,7 +109,7 @@ export async function checkDailyTurns(userId: string): Promise<{
   const rows = await db
     .select({ id: usageLogs.id })
     .from(usageLogs)
-    .where(and(eq(usageLogs.user_id, userId), gte(usageLogs.created_at, since)));
+    .where(and(usageOfPerson(userId), gte(usageLogs.created_at, since)));
   const cap = dailyTurnCap();
   return { allowed: rows.length < cap, used: rows.length, cap };
 }

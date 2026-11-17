@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   MAX_TRAINEES,
+  TRAINING_CLAIM_GLOBAL_FAILURE_LIMIT,
+  TRAINING_CLAIM_IP_FAILURE_LIMIT,
   codeMatches,
   pickFreeSlot,
   traineeEmail,
   traineeSlot,
+  trainingClaimThrottled,
   trainingEnabled,
 } from "@/lib/training-access";
 
@@ -80,5 +83,34 @@ describe("pickFreeSlot", () => {
   it("returns null once the pool is full, so a leaked code mints nothing", () => {
     const taken = Array.from({ length: MAX_TRAINEES }, (_, i) => i + 1);
     expect(pickFreeSlot(taken, () => 0)).toBeNull();
+  });
+});
+
+describe("trainingClaimThrottled", () => {
+  it("lets claims through below both limits", () => {
+    expect(
+      trainingClaimThrottled({
+        overall: TRAINING_CLAIM_GLOBAL_FAILURE_LIMIT - 1,
+        byIp: TRAINING_CLAIM_IP_FAILURE_LIMIT - 1,
+      }),
+    ).toBe(false);
+  });
+
+  it("stops one address once it reaches its limit", () => {
+    expect(
+      trainingClaimThrottled({ overall: 0, byIp: TRAINING_CLAIM_IP_FAILURE_LIMIT }),
+    ).toBe(true);
+  });
+
+  it("stops everyone once guesses spread over many addresses reach the global cap", () => {
+    expect(
+      trainingClaimThrottled({ overall: TRAINING_CLAIM_GLOBAL_FAILURE_LIMIT, byIp: 0 }),
+    ).toBe(true);
+  });
+
+  it("keeps the global cap above the per-address limit", () => {
+    expect(TRAINING_CLAIM_GLOBAL_FAILURE_LIMIT).toBeGreaterThan(
+      TRAINING_CLAIM_IP_FAILURE_LIMIT,
+    );
   });
 });

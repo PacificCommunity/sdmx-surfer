@@ -25,6 +25,8 @@ interface UserRecord {
   email: string;
   name: string | null;
   role: string;
+  /** Set for an account its owner deleted; `email` then reads "<address> (deleted)". */
+  deletedAt: string | null;
   createdAt: string | null;
   joinedAt: string | null;
   requestCount: number;
@@ -46,7 +48,11 @@ type UserSortKey =
 
 const USER_COLUMNS: SortableColumn<UserRecord, UserSortKey>[] = [
   { key: "email", getValue: (u) => u.email, defaultDir: "asc" },
-  { key: "role", getValue: (u) => (u.role === "admin" ? 1 : 0), defaultDir: "desc" },
+  {
+    key: "role",
+    getValue: (u) => (u.deletedAt ? -1 : u.role === "admin" ? 1 : 0),
+    defaultDir: "desc",
+  },
   { key: "sessions", getValue: (u) => u.sessionCount, defaultDir: "desc" },
   { key: "tokens", getValue: (u) => u.totalTokens, defaultDir: "desc" },
   { key: "cost", getValue: (u) => u.totalCostUsd, defaultDir: "desc" },
@@ -117,7 +123,8 @@ export default function UsersPage() {
         Users
       </h2>
       <p className="type-label-md mb-4 text-on-surface-variant">
-        All registered users and their usage statistics.
+        All registered users and their usage statistics. Deleted accounts stay
+        listed, marked, so their past use can be reviewed.
       </p>
 
       {users.length === 0 ? (
@@ -129,7 +136,7 @@ export default function UsersPage() {
       ) : (
         <div className="space-y-2">
           {(() => {
-            const totalUsers = users.length;
+            const totalUsers = users.filter((u) => !u.deletedAt).length;
             const totalSessions = users.reduce((s, u) => s + u.sessionCount, 0);
             const totalTokens = users.reduce((s, u) => s + u.totalTokens, 0);
             const totalCost = users.reduce(
@@ -269,7 +276,14 @@ export default function UsersPage() {
                       </div>
 
                       <div className="col-span-1">
-                        {user.role === "admin" ? (
+                        {user.deletedAt ? (
+                          <span
+                            className="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-700"
+                            title={"Deleted by its owner " + formatShortDate(user.deletedAt)}
+                          >
+                            Deleted
+                          </span>
+                        ) : user.role === "admin" ? (
                           <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
                             Admin
                           </span>
@@ -326,18 +340,20 @@ export default function UsersPage() {
                         className="col-span-2 flex justify-end"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <button
-                          type="button"
-                          onClick={() => void handleToggleRole(user)}
-                          disabled={togglingId === user.id}
-                          className="ghost-border rounded-full px-3 py-1 text-xs font-semibold text-on-surface-variant transition-colors hover:bg-surface-high disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {togglingId === user.id
-                            ? "..."
-                            : user.role === "admin"
-                              ? "Make User"
-                              : "Make Admin"}
-                        </button>
+                        {!user.deletedAt && (
+                          <button
+                            type="button"
+                            onClick={() => void handleToggleRole(user)}
+                            disabled={togglingId === user.id}
+                            className="ghost-border rounded-full px-3 py-1 text-xs font-semibold text-on-surface-variant transition-colors hover:bg-surface-high disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {togglingId === user.id
+                              ? "..."
+                              : user.role === "admin"
+                                ? "Make User"
+                                : "Make Admin"}
+                          </button>
+                        )}
                       </div>
                     </div>
 

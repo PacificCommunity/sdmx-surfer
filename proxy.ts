@@ -15,7 +15,10 @@ import { loginPathWithCallback } from "./lib/login-redirect";
 //
 // API requests keep Auth.js's default handling. /api/countrysnapshots stays
 // outside the matcher: its routes call auth() themselves and answer fetches
-// with a JSON 401 (the fork link builds its own relative /login round-trip).
+// with a JSON 401, except the fork POST form, which sends a signed-out user
+// to /login with the snapshot page they came from as the callback.
+// /api/cron is excluded too: Vercel Cron calls it without a session (Auth.js
+// would redirect it to /login), and the route checks its CRON_SECRET bearer.
 export default NextAuth({
   ...authConfig,
   callbacks: {
@@ -36,6 +39,6 @@ export default NextAuth({
 
 export const config = {
   matcher: [
-    "/((?!api/auth|api/public|api/sdmx-proxy|api/countrysnapshots|api/training|training(?:/|$)|_next/static|_next/image|favicon.ico|models/|brand/|login|about(?:/|$)|gallery(?:/|$)|p(?:/|$)).*)",
+    "/((?!api/auth|api/public|api/sdmx-proxy|api/countrysnapshots|api/training|api/cron|training(?:/|$)|_next/static|_next/image|favicon.ico|models/|brand/|login|about(?:/|$)|gallery(?:/|$)|p(?:/|$)).*)",
   ],
 };

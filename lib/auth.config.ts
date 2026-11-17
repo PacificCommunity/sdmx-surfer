@@ -29,6 +29,8 @@ declare module "@auth/core/jwt" {
   interface JWT {
     userId?: string;
     role?: string;
+    /** When lib/session-revalidation last confirmed the account (epoch ms). */
+    checkedAt?: number;
   }
 }
 
@@ -40,7 +42,13 @@ export const authConfig = {
   secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
 
   // JWT sessions (no database session table; works in the edge middleware).
-  session: { strategy: "jwt" },
+  // Seven days rather than Auth.js's thirty, so a stolen cookie or a session
+  // left open on a shared machine is useful for a week at most. The expiry
+  // rolls forward whenever the cookie is re-issued, so an active user is not
+  // signed out mid-week. Revocation within that week is handled in the Node
+  // `jwt` callback (lib/session-revalidation). updateAge throttles writes only
+  // for database sessions and is stated so the full lifetime policy is here.
+  session: { strategy: "jwt", maxAge: 7 * 24 * 60 * 60, updateAge: 24 * 60 * 60 },
 
   pages: {
     signIn: "/login",
@@ -62,7 +70,7 @@ export const authConfig = {
 
     // Copy userId/role from the token into the session. Edge-safe (no DB):
     // the values were baked into the token at sign-in by the jwt callback
-    // in lib/auth.ts.
+    // in lib/auth.ts, which in Node also refreshes the role periodically.
     session({ session, token }) {
       if (token.userId) {
         session.user.userId = token.userId as string;

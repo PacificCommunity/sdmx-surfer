@@ -29,6 +29,7 @@ import {
   proofSecretMatches,
 } from "@/lib/email-proof";
 import { requestIp } from "@/lib/request-ip";
+import { revalidateToken } from "@/lib/session-revalidation";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
@@ -58,8 +59,13 @@ async function sendMagicLink(params: {
 }): Promise<void> {
   const { identifier, url } = params;
 
-  // In development (no RESEND_API_KEY): log the link to the server console
+  // Without RESEND_API_KEY the link is printed for local development. Never
+  // in production: server logs are read by more people than the inbox, and a
+  // printed link is a live sign-in for whoever sees it.
   if (!process.env.RESEND_API_KEY) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("RESEND_API_KEY is not set; magic links cannot be sent.");
+    }
     console.log("\n" +
       "========================================\n" +
       "  MAGIC LINK for " + identifier + "\n" +
@@ -507,9 +513,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
 
     // On first sign-in (user object is present), fetch role from DB and store
-    // it in the token. Runs in the Node runtime only.
+    // it in the token. Afterwards, re-check the account every few minutes so
+    // a deleted, de-listed or demoted user does not keep a week-long session.
+    // Runs in the Node runtime only; the edge middleware merely decodes the
+    // token, which is enough because every API route calls auth() here.
     async jwt({ token, user }) {
-      if (user && user.email) {
+      if (!user) return revalidateToken(token, Date.now());
+
+      if (user.email) {
         const email = user.email.toLowerCase();
         const rows = await db
           .select({ id: authUsers.id, role: authUsers.role })
@@ -519,6 +530,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (rows.length > 0) {
           token.userId = rows[0].id;
           token.role = rows[0].role;
+          // The signIn callback has just run admission.
+          token.checkedAt = Date.now();
 
           // Restore the role on a break-glass account. This covers the case
           // the migration is most likely to produce: a provider returning a

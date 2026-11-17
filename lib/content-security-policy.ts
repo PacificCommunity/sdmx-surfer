@@ -10,7 +10,22 @@
 
 import { ENDPOINTS, MAP_LAYER_HOSTS } from "./endpoints-registry";
 
-export function contentSecurityPolicy(isDevelopment: boolean): string {
+// Published dashboards (/p/[id]) are embedded in SPC sites. Every other page
+// may only be framed by this site, which rules out clickjacking of the
+// builder, sign-in and admin pages.
+export const SAME_ORIGIN_FRAME_ANCESTORS: readonly string[] = ["'self'"];
+export const EMBED_FRAME_ANCESTORS: readonly string[] = [
+  "'self'",
+  "https://*.pacificdata.org",
+  "https://pacificdata.org",
+  "https://*.spc.int",
+  "https://spc.int",
+];
+
+export function contentSecurityPolicy(
+  isDevelopment: boolean,
+  frameAncestors: readonly string[],
+): string {
   const dataOrigins = [...ENDPOINTS.flatMap((e) => e.apiHosts), ...MAP_LAYER_HOSTS]
     .map((host) => "https://" + host)
     .join(" ");
@@ -27,5 +42,6 @@ export function contentSecurityPolicy(isDevelopment: boolean): string {
     "worker-src 'self' blob:",
     "object-src 'none'",
     "base-uri 'self'",
+    "frame-ancestors " + frameAncestors.join(" "),
   ].join("; ");
 }

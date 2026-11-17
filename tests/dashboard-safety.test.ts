@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   dashboardReferenceProblems,
   disallowedDataHosts,
-  stripDashboardMarkup,
+  droppedOptionsNotice,
+  sanitizeDashboard,
   stripMarkup,
   visualReferenceProblems,
 } from "@/lib/dashboard-safety";
@@ -66,18 +67,56 @@ describe("stripMarkup", () => {
   });
 });
 
-describe("stripDashboardMarkup", () => {
+describe("sanitizeDashboard", () => {
   it("cleans every text field and leaves data expressions alone", () => {
     const config = {
       id: "d",
       header: { title: { text: "<b>GDP</b>" } },
       rows: [{ columns: [{ id: "m", type: "map", data: SPC + ", {GEO_PICT} | " + EEZ, extraOptions: { tooltip: { formatter: "<img src=x onerror=alert(1)>{b}" } } }] }],
     };
-    expect(stripDashboardMarkup(config)).toEqual({
-      ...config,
-      header: { title: { text: "GDP" } },
-      rows: [{ columns: [{ ...config.rows[0].columns[0], extraOptions: { tooltip: { formatter: "{b}" } } }] }],
+    expect(sanitizeDashboard(config)).toEqual({
+      config: {
+        ...config,
+        header: { title: { text: "GDP" } },
+        rows: [{ columns: [{ ...config.rows[0].columns[0], extraOptions: { tooltip: { formatter: "{b}" } } }] }],
+      },
+      droppedOptions: [],
     });
+  });
+
+  it("holds chart extraOptions to presentation options and reports what it removed", () => {
+    const config = {
+      id: "d",
+      rows: [{
+        columns: [{
+          id: "gdp",
+          type: "line",
+          data: SPC,
+          extraOptions: {
+            grid: { left: 80 },
+            series: { smooth: true, data: [1, 2], markLine: { data: [{ yAxis: 42 }] } },
+            graphic: { type: "text", style: { text: "<b>Record</b>" } },
+          },
+        }],
+      }],
+    };
+    const { config: sanitized, droppedOptions } = sanitizeDashboard(config);
+    expect(sanitized.rows[0].columns[0].extraOptions).toEqual({
+      grid: { left: 80 },
+      series: { smooth: true },
+    });
+    expect(droppedOptions).toEqual([
+      "gdp: series.data",
+      "gdp: series.markLine.data",
+      "gdp: graphic.type",
+      "gdp: graphic.style.text",
+    ]);
+    expect(droppedOptionsNotice(droppedOptions)).toContain("gdp: series.data; gdp: series.markLine.data");
+    expect(droppedOptionsNotice([])).toBe("");
+  });
+
+  it("tolerates a malformed stored config", () => {
+    expect(sanitizeDashboard({ rows: "nope" })).toEqual({ config: { rows: "nope" }, droppedOptions: [] });
   });
 });
 

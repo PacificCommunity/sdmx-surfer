@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Mock the database module before importing model-router
 vi.mock("@/lib/db", () => ({
@@ -22,6 +22,7 @@ vi.mock("@/lib/encryption", () => ({
 
 import { getModelForUser } from "@/lib/model-router";
 import { db } from "@/lib/db";
+import { PLATFORM_MODELS } from "@/lib/platform-models";
 
 /** Build a mock chain: select().from().where().orderBy().limit() → rows */
 function mockDbRows(rows: unknown[]) {
@@ -36,12 +37,32 @@ function mockDbRows(rows: unknown[]) {
   });
 }
 
+/** Build the override path's chain: select().from().where().limit() → rows */
+function mockByokLookup(rows: unknown[]) {
+  (db.select as ReturnType<typeof vi.fn>).mockReturnValue({
+    from: vi.fn().mockReturnValue({
+      where: vi.fn().mockReturnValue({
+        limit: vi.fn().mockResolvedValue(rows),
+      }),
+    }),
+  });
+}
+
+function enableGateway() {
+  process.env.USE_AI_GATEWAY = "1";
+  process.env.AI_GATEWAY_API_KEY = "test-gateway-key";
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   process.env.ANTHROPIC_API_KEY = "test-anthropic-key";
   process.env.ENCRYPTION_SECRET = "test-secret-at-least-16-chars-long";
   delete process.env.USE_AI_GATEWAY;
   delete process.env.AI_GATEWAY_API_KEY;
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
 });
 
 describe("model-router", () => {
@@ -110,7 +131,8 @@ describe("model-router", () => {
       expect(config.modelId).toBe("gemini-3.1-pro-preview");
     });
 
-    it("skips corrupt BYOK key and falls through to platform Anthropic", async () => {
+    it("warns about a corrupt BYOK key and falls through to platform Anthropic", async () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
       mockDbRows([{
         provider: "anthropic",
         encrypted_key: "CORRUPT",
@@ -121,6 +143,31 @@ describe("model-router", () => {
 
       expect(config.providerId).toBe("anthropic");
       expect(config.modelId).toBe("claude-sonnet-5-5");
+      expect(warn).toHaveBeenCalledTimes(1);
+      const message = String(warn.mock.calls[0][0]);
+      expect(message).toContain("anthropic");
+      expect(message).toContain("user-with-corrupt-key");
+      expect(message).not.toContain("CORRUPT");
+    });
+
+    it("warns about a corrupt key for an explicit BYOK choice and uses the platform model", async () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      enableGateway();
+      mockByokLookup([{
+        provider: "anthropic",
+        encrypted_key: "CORRUPT",
+        model_preference: null,
+      }]);
+
+      const config = await getModelForUser("user-with-corrupt-key", {
+        provider: "anthropic",
+        model: "claude-opus-5-5",
+      });
+
+      expect(config.keySource).toBe("platform-gateway");
+      expect(config.modelId).toBe("claude-opus-5-5");
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(String(warn.mock.calls[0][0])).not.toContain("CORRUPT");
     });
 
     it("handles DB errors gracefully and falls back to platform Anthropic", async () => {
@@ -138,6 +185,96 @@ describe("model-router", () => {
 
       expect(config.providerId).toBe("anthropic");
       expect(config.modelId).toBe("claude-sonnet-5-5");
+    });
+  });
+
+  describe("AI Gateway retention controls", () => {
+    it("requests zero data retention and no prompt training for every ZDR-flagged platform model", async () => {
+      enableGateway();
+      mockByokLookup([]);
+
+      for (const m of PLATFORM_MODELS.filter((model) => model.zeroDataRetention)) {
+        const config = await getModelForUser("user-no-keys", {
+          provider: m.providerId,
+          model: m.modelId,
+        });
+
+        expect(config.keySource).toBe("platform-gateway");
+        expect(config.providerOptions?.gateway).toEqual({
+          zeroDataRetention: true,
+          disallowPromptTraining: true,
+        });
+      }
+    });
+
+    it("applies the flag to the default gateway model", async () => {
+      enableGateway();
+      mockDbRows([]);
+
+      const config = await getModelForUser("user-no-keys");
+
+      expect(config.modelId).toBe("gpt-6.1-terra");
+      expect(config.providerOptions?.gateway).toEqual({
+        zeroDataRetention: true,
+        disallowPromptTraining: true,
+      });
+    });
+
+    it("keeps a model without a ZDR provider, disallowing prompt training only", async () => {
+      enableGateway();
+      mockByokLookup([]);
+      PLATFORM_MODELS.push({
+        providerId: "google",
+        modelId: "test-no-zdr",
+        label: "Test",
+        description: "Test",
+        zeroDataRetention: false,
+      });
+      try {
+        const config = await getModelForUser("user-no-keys", {
+          provider: "google",
+          model: "test-no-zdr",
+        });
+
+        expect(config.keySource).toBe("platform-gateway");
+        expect(config.providerOptions).toEqual({
+          gateway: { disallowPromptTraining: true },
+        });
+      } finally {
+        PLATFORM_MODELS.pop();
+      }
+    });
+
+    it("disallows prompt training for an Anthropic model outside the catalog", async () => {
+      enableGateway();
+      mockByokLookup([]);
+
+      const config = await getModelForUser("user-no-keys", {
+        provider: "anthropic",
+        model: "claude-unlisted-1-0",
+      });
+
+      expect(config.keySource).toBe("platform-gateway");
+      expect(config.providerOptions).toEqual({
+        gateway: { disallowPromptTraining: true },
+      });
+    });
+
+    it("leaves BYOK requests without gateway options", async () => {
+      enableGateway();
+      mockByokLookup([{
+        provider: "anthropic",
+        encrypted_key: "fake-encrypted-anthropic-key",
+        model_preference: null,
+      }]);
+
+      const config = await getModelForUser("user-with-anthropic", {
+        provider: "anthropic",
+        model: "claude-opus-5-5",
+      });
+
+      expect(config.keySource).toBe("byok");
+      expect(config.providerOptions).toBeUndefined();
     });
   });
 

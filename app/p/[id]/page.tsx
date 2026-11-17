@@ -165,6 +165,10 @@ export default function PublicDashboardPage() {
               By {author}
             </p>
           )}
+          <p className="mt-3 max-w-3xl text-xs text-on-surface-variant">
+            The titles and notes on this dashboard were composed with an AI assistant. Every charted
+            figure is fetched directly from the statistical providers listed under Data Sources below.
+          </p>
         </div>
 
         <div className={DASHBOARD_CARD_SCROLL_CLASS}>

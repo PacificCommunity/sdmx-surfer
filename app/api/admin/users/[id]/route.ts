@@ -57,13 +57,18 @@ export async function PATCH(
 
   try {
     const [targetUser] = await db
-      .select({ id: authUsers.id, role: authUsers.role })
+      .select({ id: authUsers.id, role: authUsers.role, deletedAt: authUsers.deleted_at })
       .from(authUsers)
       .where(eq(authUsers.id, id))
       .limit(1);
 
     if (!targetUser) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    // A deleted account cannot sign in; a role on it would mean nothing and
+    // would make it count as an administrator.
+    if (targetUser.deletedAt) {
+      return NextResponse.json({ error: "This account has been deleted." }, { status: 409 });
     }
 
     // Prevent removing the last admin

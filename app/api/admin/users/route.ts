@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { db, authUsers, usageLogs, dashboardSessions, authEvents } from "@/lib/db";
 import { USAGE_EPOCH, COST_TRUSTED_FROM } from "@/lib/admin-epoch";
 import { deriveJoinedAt } from "@/lib/admin-query";
+import { adminAccountEmail } from "@/lib/account-deletion";
 
 // ---------------------------------------------------------------------------
 // GET /api/admin/users — list all users enriched with usage stats
@@ -40,6 +41,10 @@ export async function GET() {
         role: authUsers.role,
         createdAt: authUsers.created_at,
         emailVerified: authUsers.emailVerified,
+        // Deleted accounts stay listed, marked, so their past use can be
+        // reviewed; the address is shown for as long as it is kept.
+        deletedAt: authUsers.deleted_at,
+        deletedEmail: authUsers.deleted_email,
       })
       .from(authUsers);
 
@@ -149,7 +154,8 @@ export async function GET() {
       const firstActiveAt = activity?.firstActive || null;
       return {
         id: u.id,
-        email: u.email,
+        email: adminAccountEmail(u.email, u.deletedEmail),
+        deletedAt: u.deletedAt,
         name: u.name,
         role: u.role,
         createdAt: u.createdAt,

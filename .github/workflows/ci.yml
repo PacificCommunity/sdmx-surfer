@@ -1,0 +1,43 @@
+# Gate every pull request and every push to main on lint, tests and a
+# production build. `npm run dev` (Turbopack) and `npm run build` (webpack) use
+# different bundlers, so a change that works in dev can still fail the build;
+# this is where that gets caught before Vercel deploys it.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint
+
+      - run: npm test
+
+      # The build needs no real credentials: nothing connects to the database,
+      # the MCP gateway or a model provider at build time. A throwaway auth
+      # secret keeps Auth.js from warning while pages are compiled.
+      - run: npm run build
+        env:
+          AUTH_SECRET: ci-build-only-not-a-secret
+          NEXT_TELEMETRY_DISABLED: "1"

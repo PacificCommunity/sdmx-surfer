@@ -204,7 +204,7 @@ function rowToSessionData(row: Record<string, unknown>): SessionData {
   );
   if (stored.dropped.length > 0) {
     console.warn(
-      "[session] " + String(row.id) + ": dropped extraOptions keys with no ECharts equivalent:",
+      "[session] " + String(row.id) + ": dropped extraOptions keys (no ECharts equivalent, or not presentation-only):",
       stored.dropped,
     );
   }

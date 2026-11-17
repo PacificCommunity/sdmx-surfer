@@ -1,5 +1,6 @@
 /**
- * Translation of saved `extraOptions` from Highcharts option names to ECharts.
+ * The `extraOptions` a dashboard may carry: presentation-only ECharts options,
+ * with saved Highcharts option names translated.
  *
  * Dashboards saved under sdmx-dashboard-components 0.4.x carry Highcharts
  * options. 1.0 draws with ECharts and deep-merges `extraOptions` into the
@@ -7,16 +8,25 @@
  * stacking are lost), arrays are concatenated (a `yAxis: [...]` adds a second,
  * broken axis), and an object `series` is merged into every series.
  *
- * Every key is either translated, kept because it is already ECharts with the
- * same meaning, or dropped and reported. No array reaches the output except
- * the colour list. Translating already-translated options is a no-op.
+ * Every figure a chart shows must come from the SDMX query in `data`, but a
+ * deep-merged option can draw its own: series `data`, mark lines and points,
+ * a `dataset`, `graphic` text, or a label formatter that prints a made-up
+ * number. So the keys kept are an allowlist of layout and style options, and
+ * keys that carry data, replacement text or remote images are dropped at any
+ * depth.
+ *
+ * Every key is either translated, kept because it is an allowed ECharts
+ * option, or dropped and reported. No array reaches the output except the
+ * colour list. Translating already-translated options is a no-op.
  *
  * In 1.0 a `bar` is horizontal with the value axis on `xAxis`, while
  * Highcharts put the value axis on `yAxis` for every chart type, so Highcharts
  * axis keys move to the other axis for `bar`.
  *
- * Used by the load-time guard (stored sessions, published dashboards, configs
- * pasted into the JSON editor) and by scripts/migrate-extra-options.mts.
+ * Applied through sanitizeDashboard (lib/dashboard-safety.ts) wherever a
+ * config is emitted, saved or published, by the load-time guard (stored
+ * sessions, configs pasted into the JSON editor) and by
+ * scripts/migrate-extra-options.mts.
  */
 
 import type { SDMXDashboardConfig } from "./types";
@@ -135,8 +145,86 @@ const STEP_VALUES: Record<string, string> = {
   end: "end",
 };
 
-/** `{value}` placeholders only: a Highcharts number format (`{value:,.0f}`) has no ECharts string form. */
-const PLAIN_VALUE_FORMAT = /^[^{}]*(\{value\}[^{}]*)*$/;
+/**
+ * Series options merged into every series that only change how it is drawn.
+ * Not `data`, `name`, `type`, `encode` or `mark*`, which change what it shows;
+ * not `sampling`, which replaces points with averages or extremes.
+ */
+const ECHARTS_SERIES_KEYS: Record<string, true> = {
+  stack: true,
+  step: true,
+  smooth: true,
+  connectNulls: true,
+  showSymbol: true,
+  symbol: true,
+  symbolSize: true,
+  lineStyle: true,
+  itemStyle: true,
+  areaStyle: true,
+  label: true,
+  labelLine: true,
+  emphasis: true,
+  blur: true,
+  barWidth: true,
+  barMaxWidth: true,
+  barMinWidth: true,
+  barMinHeight: true,
+  barGap: true,
+  barCategoryGap: true,
+  showBackground: true,
+  backgroundStyle: true,
+  radius: true,
+  center: true,
+  roseType: true,
+  avoidLabelOverlap: true,
+  clockwise: true,
+  startAngle: true,
+  minAngle: true,
+  padAngle: true,
+  breadcrumb: true,
+  upperLabel: true,
+  roam: true,
+  nodeClick: true,
+  leafDepth: true,
+  silent: true,
+  animation: true,
+};
+
+/**
+ * Keys dropped at any depth of a kept option: they carry figures (`data`,
+ * `dataset`, `mark*`), replace the chart's own text with free text
+ * (`formatter`, `rich`, aria `description`, `graphic`), or load an image.
+ * An axis label `formatter` that is a plain `{value}` template is the one
+ * exception (see isValueTemplate).
+ */
+const NON_PRESENTATION_KEYS: Record<string, true> = {
+  data: true,
+  dataset: true,
+  encode: true,
+  markLine: true,
+  markPoint: true,
+  markArea: true,
+  graphic: true,
+  formatter: true,
+  valueFormatter: true,
+  rich: true,
+  description: true,
+  image: true,
+};
+
+/** ECharts fetches `image://<url>` symbols and icons from any host. */
+const IMAGE_URL = /^\s*image:\/\//i;
+
+/**
+ * `{value}` placeholders and text without digits: a Highcharts number format
+ * (`{value:,.0f}`) has no ECharts string form, and a digit next to the value
+ * (`{value}0`) would print a figure the data does not hold.
+ */
+const VALUE_TEMPLATE = /^[^{}\d]*(\{value\}[^{}\d]*)*$/;
+
+function isValueTemplate(value: unknown): value is string {
+  return typeof value === "string" && VALUE_TEMPLATE.test(value);
+}
 
 function isPlainObject(value: unknown): value is Options {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -206,13 +294,24 @@ class OptionsBuilder {
     node[leaf] = value;
   }
 
-  /** Copy an ECharts value leaf by leaf, dropping arrays. */
+  /**
+   * Copy an ECharts value leaf by leaf, dropping arrays, image URLs and
+   * non-presentation keys.
+   */
   keep(target: string[], value: unknown, source: string): void {
-    if (Array.isArray(value)) {
-      this.dropped.push(source);
+    const key = target[target.length - 1];
+    const parent = target[target.length - 2];
+    if (key === "formatter" && parent === "axisLabel" && isValueTemplate(value)) {
+      this.put(target, value, source);
+    } else if (
+      Array.isArray(value) ||
+      NON_PRESENTATION_KEYS[key] === true ||
+      (typeof value === "string" && IMAGE_URL.test(value))
+    ) {
+      this.drop(source, value);
     } else if (isPlainObject(value) && Object.keys(value).length > 0) {
-      for (const [key, child] of Object.entries(value)) {
-        this.keep([...target, key], child, source + "." + key);
+      for (const [childKey, child] of Object.entries(value)) {
+        this.keep([...target, childKey], child, source + "." + childKey);
       }
     } else if (value !== undefined) {
       this.put(target, value, source);
@@ -252,11 +351,7 @@ function translateAxis(
         if (isPlainObject(value)) {
           for (const [labelKey, labelValue] of Object.entries(value)) {
             const labelPath = path + "." + labelKey;
-            if (
-              labelKey === "format" &&
-              typeof labelValue === "string" &&
-              PLAIN_VALUE_FORMAT.test(labelValue)
-            ) {
+            if (labelKey === "format" && isValueTemplate(labelValue)) {
               b.put([target, "axisLabel", "formatter"], labelValue, labelPath);
             } else if (labelKey === "rotation" && typeof labelValue === "number") {
               b.put([target, "axisLabel", "rotate"], labelValue, labelPath);
@@ -410,7 +505,14 @@ export function translateExtraOptions(
         // The object form is ECharts (merged into every series); Highcharts
         // `series` is an array of data.
         if (isPlainObject(value)) {
-          b.keep(["series"], value, key);
+          for (const [seriesKey, seriesValue] of Object.entries(value)) {
+            const path = "series." + seriesKey;
+            if (ECHARTS_SERIES_KEYS[seriesKey] === true) {
+              b.keep(["series", seriesKey], seriesValue, path);
+            } else {
+              b.drop(path, seriesValue);
+            }
+          }
         } else {
           b.drop(key, value);
         }
@@ -456,7 +558,8 @@ export function translateExtraOptions(
           b.keep([key], value, key);
         } else {
           // Includes chart, credits, exporting, accessibility, title and
-          // subtitle, which the library builds itself.
+          // subtitle, which the library builds itself, and dataset, graphic,
+          // visualMap and timeline, which add or recolour figures.
           b.drop(key, value);
         }
     }

@@ -55,6 +55,13 @@ export function toGatewaySlug(providerId: string, modelId: string): string {
 //     step with fabricated args). Forcing one-call-per-step restores the
 //     standard agent loop. Verified via scripts/smoke-gateway.ts.
 //
+//   - Gateway (platform key only): vendor retention controls. Models flagged
+//     zeroDataRetention in lib/platform-models.ts route only to providers with
+//     a ZDR agreement; the rest still run but only on providers that do not
+//     train on prompts. A model missing from the catalog gets the latter
+//     rather than risk failing with no_zdr_providers_available. BYOK paths never
+//     touch the gateway and stay under the user's own provider agreement.
+//
 // NOTE on Anthropic prompt caching: a call-level
 // `anthropic.cacheControl` used to live here. It was a silent no-op —
 // @ai-sdk/anthropic only reads cacheControl from MESSAGE-level (or
@@ -62,11 +69,41 @@ export function toGatewaySlug(providerId: string, modelId: string): string {
 // Cache breakpoints are now set where they work: on the system message in
 // the chat routes (see app/api/countrysnapshots/chat/route.ts). Do not
 // re-add cacheControl here expecting it to do something.
-function providerOptionsFor(providerId: string): ProviderOptions | undefined {
+function providerOptionsFor(
+  providerId: string,
+  gatewayModelId?: string,
+): ProviderOptions | undefined {
+  const options: ProviderOptions = {};
   if (providerId === "mistral") {
-    return { mistral: { parallelToolCalls: false } };
+    options.mistral = { parallelToolCalls: false };
   }
-  return undefined;
+  if (gatewayModelId !== undefined) {
+    options.gateway = findPlatformModel(providerId, gatewayModelId)?.zeroDataRetention
+      ? { zeroDataRetention: true, disallowPromptTraining: true }
+      : { disallowPromptTraining: true };
+  }
+  return Object.keys(options).length > 0 ? options : undefined;
+}
+
+// A stored key that no longer decrypts (secret rotated without the previous
+// one configured, or a corrupt row) must not take the chat down: the request
+// continues on the platform key. Warn so the failure is visible in logs; the
+// settings page marks the key unreadable so the user can re-enter it. Never
+// log key material.
+function decryptStoredKey(
+  encrypted: string,
+  providerId: string,
+  userId: string,
+): string | null {
+  try {
+    return decryptApiKey(encrypted, providerId);
+  } catch {
+    console.warn(
+      "[model-router] BYOK " + providerId + " key for user " + userId +
+        " cannot be decrypted; using the platform key",
+    );
+    return null;
+  }
 }
 
 // Platform-key path for any provider in PLATFORM_MODELS, routed through the
@@ -77,7 +114,7 @@ function platformViaGateway(providerId: string, modelId: string): ModelConfig {
     modelId,
     providerId,
     keySource: "platform-gateway",
-    providerOptions: providerOptionsFor(providerId),
+    providerOptions: providerOptionsFor(providerId, modelId),
   };
 }
 
@@ -149,13 +186,8 @@ export async function getModelForUser(
     const providerId = row.provider;
     const modelId = row.model_preference ?? DEFAULT_MODELS[providerId] ?? "";
 
-    let apiKey: string;
-    try {
-      apiKey = decryptApiKey(row.encrypted_key, providerId);
-    } catch {
-      // Decryption failed — never log key material, skip this row
-      continue;
-    }
+    const apiKey = decryptStoredKey(row.encrypted_key, providerId, userId);
+    if (apiKey === null) continue;
 
     if (providerId === "anthropic") {
       const provider = createAnthropic({ apiKey });
@@ -231,7 +263,8 @@ async function tryByokProvider(
 
     if (rows.length === 0) return null;
 
-    const apiKey = decryptApiKey(rows[0].encrypted_key, providerId);
+    const apiKey = decryptStoredKey(rows[0].encrypted_key, providerId, userId);
+    if (apiKey === null) return null;
 
     if (providerId === "anthropic") {
       const provider = createAnthropic({ apiKey });
@@ -277,7 +310,7 @@ async function tryByokProvider(
       };
     }
   } catch {
-    // Decryption or DB error — skip
+    // DB error — skip
   }
   return null;
 }

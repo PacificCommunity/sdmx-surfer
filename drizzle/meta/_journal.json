@@ -64,6 +64,20 @@
       "when": 1793927494818,
       "tag": "0008_petite_black_widow",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794876309574,
+      "tag": "0009_dusty_shinko_yamashiro",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794877392875,
+      "tag": "0010_overjoyed_raza",
+      "breakpoints": true
     }
   ]
 }

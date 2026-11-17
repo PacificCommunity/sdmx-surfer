@@ -739,7 +739,13 @@ The `encrypted_key` column in `user_api_keys` contains only the base64-encoded c
 
 ### Key rotation
 
-If `ENCRYPTION_SECRET` is rotated, all existing `encrypted_key` values become unreadable. A migration script must re-encrypt existing keys with the new secret before rotating the environment variable.
+Decryption tries `ENCRYPTION_SECRET`, then `ENCRYPTION_SECRET_PREVIOUS` when set; encryption always uses `ENCRYPTION_SECRET`. To rotate:
+1. Move the old value to `ENCRYPTION_SECRET_PREVIOUS` and set a new `ENCRYPTION_SECRET`.
+2. Redeploy.
+3. Run `npx tsx scripts/rotate-encryption-secret.ts --apply`.
+4. Remove `ENCRYPTION_SECRET_PREVIOUS` once a dry run reports no rows left.
+
+A key that neither secret can read is flagged `unreadable` in Settings; requests fall back to the platform key.
 
 ---
 
@@ -1036,47 +1042,58 @@ Public dashboards and the public gallery itself are no longer Phase 3 items — 
 
 ## 19. Deployment Architecture
 
+This section matches §2.1 of `docs/spc-it-review.md`; keep the two in step.
+
 ### Services
 
-| Service | Platform | Notes |
-|---------|----------|-------|
-| Next.js app | Vercel | App Router; `maxDuration = 300` requires Vercel Pro |
-| PostgreSQL database | Vercel Postgres (Neon) | Connection pooling via `@vercel/postgres` |
-| MCP gateway | Railway | Docker container from `sdmx-mcp-gateway` repo |
-| Email delivery | Resend | Transactional magic link emails |
+| Piece | Hosted on | Notes |
+|-------|-----------|-------|
+| Source code | GitHub, `PacificCommunity/sdmx-surfer` | `main` is production. `.github/workflows/ci.yml` runs lint, tests and the build on every pull request and every push to `main`. `.github/workflows/refresh-index.yml` rebuilds `models/dataflow-index.json` and `models/dataflow-coverage.json` daily (16:10 UTC) and commits them; it holds `MCP_GATEWAY_URL`, `MCP_AUTH_TOKEN` and `GOOGLE_AI_API_KEY` as repository secrets |
+| Next.js app | Vercel (paid plan) | Production `sdmxsurfer.net` builds from `main`. Development `sdmx-surfer.vercel.app` builds from `dev`, against its own database branch, with a banner pointing to production. Functions run in Sydney (`"regions": ["syd1"]` in `vercel.json`). The paid plan is needed for `maxDuration = 300` on the agent route and for zero-data-retention routing on AI Gateway |
+| PostgreSQL | Neon, AWS `ap-southeast-2` (Sydney) | Separate branches for production and development. `lib/db/index.ts` uses `drizzle-orm/neon-http` (no transactions) |
+| MCP gateway | Railway, Singapore (`asia-southeast1`), project `sdmx-mcp-gateway` | Docker image of the public `Baffelan/sdmx-mcp-gateway` repo; stateless. Exposes `/mcp` and requires `Authorization: Bearer $MCP_AUTH_TOKEN`, sent by `lib/mcp-client.ts` |
+| Email | Resend | Sign-in links from `surfer@sdmxsurfer.net`. The receiving domain `in.sdmxsurfer.net` serves the email-proof sign-up, built but switched off |
+| DNS | Hover | `sdmxsurfer.net` is the interim domain; the target is `surfer.pacificdata.org` |
+| Language models | Vercel AI Gateway (OpenAI, Anthropic, Google) | Same Vercel team; every request asks for zero data retention and no prompt training (`providerOptionsFor` in `lib/model-router.ts`) |
 
 ### Vercel configuration
 
-The agent loop route sets `export const maxDuration = 300` — this is a 5-minute timeout to accommodate long multi-step discovery workflows. Vercel Pro or Enterprise is required for `maxDuration > 60`.
+`vercel.json` holds the function region (`syd1`) and the daily retention cron (`30 3 * * *` UTC → `GET /api/cron/retention`, authenticated with `CRON_SECRET`). `next.config.ts` holds the security headers and bundles the two `models/*.json` indexes into `/api/explore` and `/api/chat` through `outputFileTracingIncludes`.
 
-Vercel environment variables required for production:
+Production environment variables (see `.env.example` for comments):
 
-```
-NEXTAUTH_URL=https://your-app.vercel.app
-NEXTAUTH_SECRET=<openssl rand -base64 32>
-POSTGRES_URL=<from Vercel Postgres dashboard>
-GOOGLE_AI_API_KEY=<platform free-tier key>
-RESEND_API_KEY=<from resend.com>
-EMAIL_FROM=noreply@yourdomain.com
-ENCRYPTION_SECRET=<openssl rand -base64 32>
-MCP_GATEWAY_URL=https://your-gateway.railway.app/mcp
-MCP_AUTH_TOKEN=<shared secret for gateway auth>
-```
+| Group | Variables |
+|-------|-----------|
+| Core | `NEXTAUTH_URL`, `NEXTAUTH_SECRET` (or `AUTH_SECRET`), `DATABASE_URL` (or `POSTGRES_URL*`), `ENCRYPTION_SECRET`, `ENCRYPTION_SECRET_PREVIOUS` (only during a rotation), `CRON_SECRET` |
+| MCP and data | `MCP_GATEWAY_URL`, `MCP_AUTH_TOKEN`, `MCP_TOOL_ALLOWLIST`, `SDMX_STATSNZ_KEY` |
+| Models | `USE_AI_GATEWAY`, `AI_GATEWAY_API_KEY`, `ANTHROPIC_API_KEY` (direct fallback), `GOOGLE_AI_API_KEY` (embeddings) |
+| Sign-in | `AUTH_GOOGLE_ID`/`_SECRET`, `AUTH_MICROSOFT_ENTRA_ID_ID`/`_SECRET`, `AUTH_GITHUB_ID`/`_SECRET`, `AUTH_BOOTSTRAP_ADMINS`, `AUTH_OPEN_SIGNUP_PROVIDERS`, `UNVERIFIED_SIGNUP_DOMAINS` |
+| Email | `RESEND_API_KEY` (required in production: magic links refuse to fall back to logging), `EMAIL_FROM`, `INBOUND_EMAIL_DOMAIN`, `RESEND_WEBHOOK_SECRET`, `RESEND_RECEIVING_API_KEY` |
+| Caps and features | `OPEN_TIER_DAILY_TURNS`, `OPEN_TIER_MAX_DASHBOARDS`, `AI_BUDGET_CAP_USD`, `AI_BUDGET_EPOCH`, `SNAPSHOT_CHAT_DAILY_TURNS`, `INCLUDE_COUNTRY_SNAPSHOTS`, `SNAPSHOT_CATALOGUE_MODE`, `TRAINING_MODE`, `TRAINING_ACCESS_CODE` |
+
+### Release procedure
+
+1. Merge to `dev`. Vercel deploys `sdmx-surfer.vercel.app`; check the change there against the development database branch.
+2. If the release adds migrations, back up the production database first (`pg_dump`), then apply the new `drizzle/NNNN_*.sql` files in order. Compare `drizzle/meta/_journal.json` with what the database already has before you start.
+3. Set any new environment variables in the Vercel project for Production.
+4. Fast-forward `main` to `dev`. Vercel deploys production.
+5. Check `x-vercel-id` on a production API response (it should read `…::syd1::…`) and smoke-test the changed surfaces.
 
 ### Railway (MCP gateway)
 
-The `sdmx-mcp-gateway` runs as a Docker container on Railway. It exposes `/mcp` as the HTTP MCP endpoint. The `MCP_AUTH_TOKEN` environment variable on the Vercel side is sent as a `Authorization: Bearer` header on every MCP request; the gateway must validate this token.
+The gateway is deployed from its own repository. It exposes `/mcp` over HTTPS and rejects calls without the bearer token. Rotate `MCP_AUTH_TOKEN` on Railway and Vercel together.
 
 ### Build commands
 
 ```bash
-npm run build          # Next.js production build (uses --webpack, not turbopack)
-npm run build-index    # Build semantic search index for explore page
+npm run build          # Next.js production build (webpack; dev uses Turbopack)
+npm run build-index    # rebuild models/dataflow-index.json (needs the MCP gateway)
+npm run build-coverage # refresh models/dataflow-coverage.json
 ```
 
 ### Semantic search index
 
-The explore page uses a local ONNX embedding model (`granite-embedding-small-r2`) to provide semantic search over dataflows. The embedding index is pre-built at deploy time via `scripts/build-index.ts` and served from `public/models/`. It does not require a separate service.
+`/explore` and the agent's catalogue search use `models/dataflow-index.json`. It holds dataflow metadata and Google `gemini-embedding-001` embeddings (`lib/embeddings.ts`), built by `scripts/build-index.ts` and refreshed daily by GitHub Actions. A search query is embedded at request time with the same model, so `GOOGLE_AI_API_KEY` must be set in production.
 
 ---
 
@@ -1089,5 +1106,5 @@ The explore page uses a local ONNX embedding model (`granite-embedding-small-r2`
 5. **Live HTML export requires HTTP server** — ES module imports don't work from `file://` protocol.
 6. **Prompt caching only for Anthropic** — Gemini and OpenAI users pay full input token cost on every request turn, making long conversations proportionally more expensive.
 7. **No institutional curation of public dashboards** — sessions can be published to `/p/[id]` and appear in `/gallery`, but there is no editorial review, featured-status workflow, or moderation queue. Admins can inspect and unpublish via `/admin` but cannot promote/demote dashboards within the gallery.
-8. **ENCRYPTION_SECRET rotation requires migration** — rotating the master encryption secret invalidates all stored BYOK keys. There is no automated migration path yet.
+8. **ENCRYPTION_SECRET rotation is a two-step procedure.** Set `ENCRYPTION_SECRET_PREVIOUS`, then run `scripts/rotate-encryption-secret.ts --apply` (§11). Rotating without the previous secret set makes stored BYOK keys unreadable; they are then flagged in Settings.
 9. **No undo/redo persistence across page loads** — the undo stack is in memory (React state); it is not serialized to the database session. Reloading the page clears the undo history (the latest config is preserved).

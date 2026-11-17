@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { checkCsrf } from "@/lib/csrf";
 
 export async function POST(req: Request) {
+  const csrfError = checkCsrf(req);
+  if (csrfError) return csrfError;
+
   const session = await auth();
   if (!session?.user?.userId) {
     return NextResponse.json({ ok: false }, { status: 401 });

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { declaresOversizeBody, readCappedBody } from "@/lib/capped-body";
 import { PROXIED_HOSTS } from "@/lib/proxied-hosts";
+import { consumeRateLimit, type RateLimitPolicy } from "@/lib/rate-limit";
+import { requestIp } from "@/lib/request-ip";
 
 // ---------------------------------------------------------------------------
 // GET /api/sdmx-proxy?url=… — forward SDMx fetches for hosts that either need
@@ -15,8 +18,21 @@ import { PROXIED_HOSTS } from "@/lib/proxied-hosts";
 //     become an open forwarder for unrelated URLs on the same domain.
 //   - https required on the target URL.
 //   - Loose Origin/Referer check — blocks requests with no browser context.
+//     Scripts can forge these headers, so it is not what protects the keys.
+//   - Per-IP rate limit on key-bearing hosts, so a script can't spend SPC's
+//     subscription quota. Only CDN misses reach this function, so repeat views
+//     of a published dashboard mostly don't count.
+//   - Response-size cap on every host, so one request can't exhaust function
+//     memory or bandwidth.
 //   - Cache-Control gated on status: long cache for 2xx, brief for 4xx, no
 //     cache for 5xx, so a transient upstream error doesn't poison the edge.
+
+// Generous for a dashboard with dozens of panels refreshed several times.
+const KEYED_HOST_LIMIT = 120;
+const KEYED_HOST_WINDOW_MS = 10 * 60 * 1000;
+
+// SDMx JSON for a dashboard panel is typically well under 1 MB.
+const MAX_RESPONSE_BYTES = 20 * 1024 * 1024;
 
 function logProxy(fields: Record<string, unknown>) {
   console.info("sdmx-proxy " + JSON.stringify(fields));
@@ -59,6 +75,14 @@ function cacheControlFor(status: number): string {
     return "public, max-age=0, s-maxage=60";
   }
   return "no-store";
+}
+
+function keyedHostPolicy(host: string): RateLimitPolicy {
+  return {
+    bucket: "sdmx-proxy:" + host,
+    limit: KEYED_HOST_LIMIT,
+    windowMs: KEYED_HOST_WINDOW_MS,
+  };
 }
 
 export async function GET(req: NextRequest) {
@@ -108,6 +132,34 @@ export async function GET(req: NextRequest) {
         { status: 500 },
       );
     }
+
+    // Vercel sets x-forwarded-for itself, so the IP can't be spoofed there. No
+    // IP means we're not behind Vercel (local dev), where there's no quota to
+    // protect from strangers.
+    const ip = requestIp(req);
+    if (ip) {
+      const decision = await consumeRateLimit(keyedHostPolicy(parsed.host), ip);
+      if (!decision.allowed) {
+        logProxy({
+          host: parsed.host,
+          path: parsed.pathname,
+          reason: config.reason,
+          status: 429,
+          ms: Date.now() - started,
+        });
+        return NextResponse.json(
+          { error: "rate limited" },
+          {
+            status: 429,
+            headers: {
+              "Retry-After": String(decision.retryAfterSeconds),
+              "Cache-Control": "no-store",
+            },
+          },
+        );
+      }
+    }
+
     outgoingHeaders[config.key.header] = keyValue;
   }
 
@@ -129,6 +181,50 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  // Buffered rather than streamed so an oversize body still gets a clean 502
+  // instead of a truncated 200 the CDN might cache.
+  let body: Uint8Array<ArrayBuffer> | null = null;
+  try {
+    if (
+      declaresOversizeBody(
+        upstream.headers.get("content-length"),
+        MAX_RESPONSE_BYTES,
+      )
+    ) {
+      await upstream.body?.cancel().catch(() => {});
+    } else {
+      body = await readCappedBody(upstream.body, MAX_RESPONSE_BYTES);
+    }
+  } catch (err) {
+    logProxy({
+      host: parsed.host,
+      path: parsed.pathname,
+      reason: config.reason,
+      status: 502,
+      ms: Date.now() - started,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return NextResponse.json(
+      { error: "upstream fetch failed" },
+      { status: 502 },
+    );
+  }
+
+  if (!body) {
+    logProxy({
+      host: parsed.host,
+      path: parsed.pathname,
+      reason: config.reason,
+      status: 502,
+      ms: Date.now() - started,
+      error: "upstream response too large",
+    });
+    return NextResponse.json(
+      { error: "upstream response too large" },
+      { status: 502 },
+    );
+  }
+
   logProxy({
     host: parsed.host,
     path: parsed.pathname,
@@ -137,7 +233,7 @@ export async function GET(req: NextRequest) {
     ms: Date.now() - started,
   });
 
-  return new Response(upstream.body, {
+  return new Response(body, {
     status: upstream.status,
     headers: {
       "Content-Type":

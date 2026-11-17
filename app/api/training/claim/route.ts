@@ -1,17 +1,21 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { like } from "drizzle-orm";
+import { and, count, eq, gte, like } from "drizzle-orm";
 import { randomInt } from "node:crypto";
 import { db, allowedEmails, authEvents, authUsers } from "@/lib/db";
 import { checkCsrf } from "@/lib/csrf";
 import { hashPassword } from "@/lib/password";
 import { generatePassphrase } from "@/lib/passphrase";
+import { requestIp } from "@/lib/request-ip";
 import {
   TRAINEE_EMAIL_DOMAIN,
+  TRAINING_CLAIM_DENIED_EVENT,
+  TRAINING_CLAIM_WINDOW_MS,
   codeMatches,
   pickFreeSlot,
   traineeEmail,
   traineeSlot,
+  trainingClaimThrottled,
   trainingEnabled,
 } from "@/lib/training-access";
 
@@ -45,11 +49,47 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
 
+  // The code is shared by the whole room, so guessing it is the one attack
+  // this route invites. Wrong codes are counted from auth_events, per address
+  // and overall, like the unverified signup throttle.
+  const ip = requestIp(req);
+  const recentDenials = and(
+    eq(authEvents.event_type, TRAINING_CLAIM_DENIED_EVENT),
+    gte(authEvents.created_at, new Date(Date.now() - TRAINING_CLAIM_WINDOW_MS)),
+  );
+  const [overall] = await db
+    .select({ count: count(authEvents.id) })
+    .from(authEvents)
+    .where(recentDenials);
+  const [byIp] = ip
+    ? await db
+        .select({ count: count(authEvents.id) })
+        .from(authEvents)
+        .where(and(recentDenials, eq(authEvents.ip, ip)))
+    : [];
+  if (
+    trainingClaimThrottled({
+      overall: Number(overall?.count ?? 0),
+      byIp: Number(byIp?.count ?? 0),
+    })
+  ) {
+    return NextResponse.json(
+      {
+        error: "Too many wrong codes. Wait 15 minutes, then try again.",
+        message: "Training claims are paused after repeated wrong codes.",
+      },
+      { status: 429 },
+    );
+  }
+
   if (!codeMatches(parsed.data.code, process.env.TRAINING_ACCESS_CODE)) {
     await db
       .insert(authEvents)
-      .values({ email: "", event_type: "training_claim_denied" })
-      .catch(() => {});
+      .values({ email: "", event_type: TRAINING_CLAIM_DENIED_EVENT, ip })
+      .catch((err: unknown) => {
+        // A lost row only weakens the throttle; the caller still gets a 401.
+        console.error("[training] could not record a denied claim", err);
+      });
     return NextResponse.json({ error: "That code is not right." }, { status: 401 });
   }
 
@@ -95,6 +135,7 @@ export async function POST(req: Request) {
         user_id: created[0].id,
         email,
         event_type: "training_claim",
+        ip,
         metadata: { slot },
       })
       .catch(() => {});

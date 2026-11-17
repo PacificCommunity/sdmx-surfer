@@ -2,7 +2,7 @@
 //
 // Dashboards are written by the model, by users in the JSON editor, and
 // copied from published dashboards, and every viewer's browser acts on them.
-// Two rules keep a crafted config from turning that against the viewer:
+// Three rules keep a crafted config from turning that against the viewer:
 //
 //   1. Data references (`data`) may only fetch from the registered SDMX
 //      providers (lib/endpoints-registry.ts) and the map layer hosts below.
@@ -10,9 +10,14 @@
 //   2. Text carries no HTML. The library writes map titles and tooltips with
 //      innerHTML and ECharts renders tooltip formatter strings as HTML, so
 //      markup in a config would run in the viewer's page.
+//   3. Every charted figure comes from the SDMX query. `extraOptions` is
+//      deep-merged into each chart, so it is held to presentation options
+//      (lib/extra-options.ts) and cannot draw figures of its own.
 
 import { z } from "zod";
 import { detectEndpoint, MAP_LAYER_HOSTS } from "@/lib/endpoints-registry";
+import { translateDashboardExtraOptions } from "@/lib/extra-options";
+import type { SDMXDashboardConfig } from "@/lib/types";
 
 // Base for resolving relative references, so the parser tells a same-origin
 // reference (host stays "relative.invalid") from one to another host.
@@ -125,9 +130,33 @@ function stripMarkupDeep(value: unknown, key: string): unknown {
   return value;
 }
 
-/** The config with markup removed from every text field (all but `data`). */
-export function stripDashboardMarkup<T>(config: T): T {
-  // Only strings are replaced, so the result has the input's shape.
-  const stripped = stripMarkupDeep(config, "") as T;
-  return stripped;
+export interface SanitizedDashboard<T> {
+  config: T;
+  /** "<visual id>: <key path>" for every extraOptions key removed. */
+  droppedOptions: string[];
+}
+
+/**
+ * The config with extraOptions held to presentation options and markup
+ * removed from every text field (all but `data`). Tolerates malformed stored
+ * configs.
+ */
+export function sanitizeDashboard<T>(config: T): SanitizedDashboard<T> {
+  const { config: presentable, dropped } = translateDashboardExtraOptions(
+    config as unknown as SDMXDashboardConfig,
+  );
+  // Only extraOptions keys are removed and strings replaced, so the result
+  // has the input's shape.
+  return { config: stripMarkupDeep(presentable, "") as T, droppedOptions: dropped };
+}
+
+/** What the model is told about removed extraOptions keys; empty when none. */
+export function droppedOptionsNotice(droppedOptions: string[]): string {
+  if (droppedOptions.length === 0) return "";
+  return (
+    " Removed from extraOptions, which takes presentation options only (layout, axes, " +
+    "colours, series style) and cannot add figures, text or images: " +
+    droppedOptions.join("; ") +
+    "."
+  );
 }

@@ -4,7 +4,7 @@ import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, dashboardSessions } from "@/lib/db";
 import { checkCsrf } from "@/lib/csrf";
-import { stripDashboardMarkup } from "@/lib/dashboard-safety";
+import { sanitizeDashboard } from "@/lib/dashboard-safety";
 
 export const maxDuration = 25;
 
@@ -111,7 +111,7 @@ export async function POST(req: Request) {
       user_id: userId,
       title: title ?? "Untitled",
       messages: messages ?? [],
-      config_history: stripDashboardMarkup(configHistory ?? []),
+      config_history: (configHistory ?? []).map((entry) => sanitizeDashboard(entry).config),
       config_pointer: configPointer ?? -1,
     };
 
