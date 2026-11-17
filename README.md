@@ -20,10 +20,10 @@ Access is limited to approved organisation domains and invited users. Users sign
 | Git | any | Cloning repositories |
 
 You also need:
-- A **Google AI API key** (free tier via [Google AI Studio](https://aistudio.google.com/)) — primary model for pilot users without BYOK keys
+- A **Google AI API key** ([Google AI Studio](https://aistudio.google.com/)) for the catalogue embeddings (`gemini-embedding-001`)
+- A model provider: a **Vercel AI Gateway** key (`AI_GATEWAY_API_KEY` with `USE_AI_GATEWAY=1`, as in production) or an **Anthropic API key** for the direct path
 - A **Resend account** with a verified sender domain for magic-link emails
-- A **PostgreSQL database** — Vercel Postgres (Neon) recommended; any Postgres-compatible URL works locally
-- An **Anthropic API key** (optional — development fallback if no Google key is set)
+- A **PostgreSQL database**: Neon in deployment; any Postgres URL works locally
 
 ## Quick Start
 
@@ -38,11 +38,12 @@ uv run python main_server.py --transport streamable-http --host 0.0.0.0 --port 8
 cd dashboarder
 cp .env.example .env.local
 # Edit .env.local — set at minimum:
-#   DATABASE_URL, NEXTAUTH_SECRET, RESEND_API_KEY, EMAIL_FROM, GOOGLE_AI_API_KEY, ENCRYPTION_SECRET
+#   DATABASE_URL, NEXTAUTH_SECRET, RESEND_API_KEY, EMAIL_FROM, GOOGLE_AI_API_KEY, ENCRYPTION_SECRET,
+#   and either AI_GATEWAY_API_KEY + USE_AI_GATEWAY=1 or ANTHROPIC_API_KEY
 npm install
 
-# 3. Push the database schema
-npx drizzle-kit push
+# 3. Apply the database migrations
+npx drizzle-kit migrate
 
 # 4. Add yourself as the first admin user
 npx tsx scripts/add-pilot-user.ts you@example.com --admin
@@ -55,99 +56,28 @@ npm run dev
 
 ### Build the semantic search index (optional but recommended)
 
-The `/explore` page uses a local embedding model to power semantic search. Build the index once (requires the MCP gateway running):
+The `/explore` page and the agent's catalogue search use a pre-built index. A daily GitHub Action refreshes it; to rebuild locally (requires the MCP gateway and `GOOGLE_AI_API_KEY`):
 
 ```bash
 npm run build-index
 ```
 
-This fetches all dataflows, embeds their descriptions with `granite-embedding-small-r2`, and writes `models/dataflow-index.json`. Re-run whenever the dataflow catalogue changes.
+This fetches the Pacific Data Hub dataflows, embeds their descriptions with Google's `gemini-embedding-001`, and writes `models/dataflow-index.json`.
 
 ## Repository Layout
 
-```
-dashboarder/
-├── app/
-│   ├── layout.tsx                  # Root layout (CSS imports)
-│   ├── globals.css                 # Tailwind v4 + Oceanic design tokens
-│   ├── page.tsx                    # Welcome / session list (requires auth)
-│   ├── login/
-│   │   └── page.tsx                # Magic-link sign-in page
-│   ├── builder/
-│   │   └── page.tsx                # Main split-pane view (chat + preview)
-│   ├── explore/
-│   │   ├── page.tsx                # SDMx data catalogue with semantic search
-│   │   └── [id]/page.tsx           # Dataflow detail + dimension explorer
-│   ├── dashboard/
-│   │   └── [id]/page.tsx           # Private presentation view for an authenticated session
-│   ├── p/
-│   │   └── [id]/page.tsx           # Public presentation view for a published dashboard
-│   ├── gallery/
-│   │   └── page.tsx                # Public gallery of published dashboards
-│   ├── admin/
-│   │   └── page.tsx                # Admin: invite management + user usage (admin only)
-│   ├── settings/
-│   │   └── page.tsx                # BYOK key management per provider
-│   └── api/
-│       ├── auth/[...nextauth]/     # NextAuth magic-link handler
-│       ├── chat/route.ts           # Agent loop: streamText + MCP + tools
-│       ├── sessions/               # Session CRUD (GET list, POST create, GET/PUT/DELETE by id, publish sub-route)
-│       ├── explore/                # Dataflow catalogue + semantic search API
-│       ├── admin/
-│       │   ├── users/              # User list + role management (admin only)
-│       │   └── invites/            # Invite allowlist CRUD (admin only)
-│       └── settings/keys/          # BYOK key store/delete
-├── components/
-│   ├── chat-panel.tsx              # Chat UI (message list, input, suggestions)
-│   ├── message-bubble.tsx          # Message rendering with markdown + tables
-│   └── dashboard-preview.tsx       # Preview, JSON editor, inspector, export
-├── lib/
-│   ├── auth.ts                     # NextAuth config (Email provider + Resend adapter)
-│   ├── model-router.ts             # Model selection: BYOK > free-tier Google > env fallback
-│   ├── system-prompt.ts            # AI system prompt (strategy + schema + examples)
-│   ├── dashboard-authoring.ts      # Authoring schema + compiler (intent -> native config)
-│   ├── dashboard-schema.ts         # Native sdmx-dashboard-components config types
-│   ├── dashboard-examples.ts       # Working example configs for few-shot prompting
-│   ├── types.ts                    # Shared TypeScript types
-│   ├── encryption.ts               # AES-GCM BYOK key encryption/decryption
-│   ├── embeddings.ts               # Granite embedding model (semantic search)
-│   ├── export-dashboard.ts         # PDF, HTML, JSON export
-│   ├── session.ts                  # Session persistence helpers (DB-backed)
-│   ├── use-config-history.ts       # Undo/redo hook
-│   ├── tier2-knowledge.ts          # Session knowledge extraction for context
-│   ├── logger.ts                   # Database-backed request logging
-│   ├── mcp-client.ts               # MCP transport config (HTTP + auth token)
-│   ├── csrf.ts                     # CSRF token helpers
-│   └── db/
-│       ├── index.ts                # Drizzle ORM client (Vercel Postgres)
-│       └── schema.ts               # DB schema: auth_users, dashboard_sessions, usage_logs, user_api_keys, allowed_emails
-├── scripts/
-│   ├── add-pilot-user.ts           # CLI: add email to allowlist (optionally as admin)
-│   └── build-index.ts              # CLI: build semantic search index from MCP gateway
-├── models/
-│   ├── granite-embedding-small-r2/ # Local ONNX embedding model (not committed)
-│   └── dataflow-index.json         # Pre-built semantic search index (not committed)
-├── tests/
-│   ├── model-router.test.ts        # Vitest: model selection logic
-│   └── dashboard-authoring.test.ts # Vitest: authoring schema compiler
-├── patches/
-│   └── sdmx-dashboard-components+0.4.5.patch
-├── proxy.ts                        # NextAuth middleware (public exceptions include /login, /gallery, /p/*, /api/public/*)
-├── logs/                           # Legacy local chat logs from the earlier JSONL logger (gitignored)
-├── docs/
-│   ├── architecture.mmd            # Mermaid source for architecture diagram
-│   ├── current-architecture.md     # Implemented route/access/publication model
-│   └── technical-reference.md      # Detailed technical internals
-├── stitch_assets/                  # UI mockups and design system spec
-├── CLAUDE.md                       # Instructions for Claude Code
-├── .env.example                    # Environment template
-├── .env.local                      # Secrets (gitignored)
-├── drizzle.config.ts               # Drizzle ORM config
-├── next.config.ts
-├── tsconfig.json
-├── postcss.config.mjs
-└── package.json
-```
+| Path | What lives there |
+|------|------------------|
+| `app/` | App Router pages (`/`, `/builder`, `/explore`, `/gallery`, `/dashboard/[id]`, `/p/[id]`, `/settings`, `/admin`, `/about`, `/login`, `/countrysnapshots`) and API routes under `app/api/` (agent loop in `app/api/chat/route.ts`) |
+| `components/` | Client UI; PDH chrome in `app-header.tsx`, `app-footer.tsx`, `brand-field.tsx` |
+| `lib/` | Server logic: auth, model routing, MCP client and tool policy, dashboard schema/compiler/safety, retention, rate limiting, Drizzle schema (`lib/db/`), coverage, Country Snapshots |
+| `drizzle/` | SQL migrations generated by drizzle-kit |
+| `models/` | `dataflow-index.json` and `dataflow-coverage.json`, refreshed daily by CI |
+| `scripts/` | Index building, imports, user and key maintenance |
+| `tests/` | Vitest suites |
+| `docs/` | Architecture, technical reference, SPC IT review |
+
+`AGENTS.md` has the detailed map, conventions and patterns.
 
 ## Architecture
 
@@ -181,12 +111,12 @@ flowchart TB
 
   subgraph ModelRouter["Model Router"]
     direction TB
-    BYOK["BYOK key\n(Anthropic / OpenAI / Google)"]
-    Free["Free tier\nGemini 3 Flash"]
-    Env["Env fallback\nAnthropic"]
+    Gateway["Platform models\nVercel AI Gateway\n(zero data retention)"]
+    BYOK["BYOK key\n(Anthropic / OpenAI / Google / Mistral)"]
+    Env["Direct fallback\nAnthropic"]
   end
 
-  subgraph DB["Vercel Postgres (Neon)"]
+  subgraph DB["Neon Postgres (Sydney)"]
     Sessions["dashboard_sessions"]
     UsageLogs["usage_logs"]
     ApiKeys["user_api_keys"]
@@ -210,7 +140,7 @@ flowchart TB
   PS -.->|"system prompt\noverride"| ST
   ST --> ModelRouter
   ModelRouter --> BYOK
-  ModelRouter --> Free
+  ModelRouter --> Gateway
   ModelRouter --> Env
   ST -->|"tool calls\n(streamable-http + token)"| MCP
   MCP --- Tools
@@ -266,10 +196,10 @@ flowchart TB
 - Admin role for invite and user management
 
 ### Multi-model support
-- **Free tier:** Gemini 3 Flash Preview on the platform Google AI key — no setup required for invited users
-- **BYOK (Bring Your Own Key):** users can add Anthropic, OpenAI, or Google API keys in `/settings`; keys are encrypted at rest with AES-GCM
+- **Platform models:** OpenAI, Anthropic and Google models through Vercel AI Gateway, with zero data retention and no prompt training requested on every call (`lib/platform-models.ts`)
+- **BYOK (Bring Your Own Key):** users can add Anthropic, OpenAI, Google or Mistral API keys in `/settings`; keys are encrypted at rest with AES-256-GCM
 - Model picker in the builder header to switch provider/model mid-session
-- Model router: BYOK takes priority, falls back to free tier, then to env-level Anthropic key
+- Model router (`lib/model-router.ts`): a readable BYOK key takes priority, then platform models through the gateway, then the direct Anthropic path when the gateway is off
 
 ### Conversational dashboard building
 - Natural language requests produce live SDMx dashboards
@@ -293,7 +223,7 @@ flowchart TB
 - Loading skeleton matching the dashboard grid layout
 
 ### Session persistence (database-backed)
-- Conversation history, dashboard config, and undo stack saved to Vercel Postgres per user
+- Conversation history, dashboard config, and undo stack saved to Postgres per user
 - Survives page refresh and works across devices
 - Session list on the welcome page; up to 20 sessions per user
 - Sessions auto-titled from the first user message
@@ -317,7 +247,7 @@ flowchart TB
 ### Semantic search in `/explore`
 - Data catalogue browser listing all SDMx dataflows on Pacific Data Hub
 - Short queries use keyword filtering; three or more words trigger semantic search
-- Semantic search powered by `ibm-granite/granite-embedding-small-english-r2` (47M params, 384 dims, ONNX quantized), running server-side on CPU — no external API call
+- Semantic search compares the query's `gemini-embedding-001` embedding (Google) with the pre-built index, so the search phrase is sent to Google
 - Country filter shows which dataflows have data for a selected Pacific territory
 
 ### Export
@@ -345,52 +275,7 @@ flowchart TB
 
 ## Environment Variables
 
-Copy `.env.example` to `.env.local` and fill in all required values:
-
-```bash
-# ── AI model providers ──────────────────────────────────────────────────────
-
-# Google AI API key — primary free-tier model (Gemini 3 Flash)
-# Get one at https://aistudio.google.com/
-GOOGLE_AI_API_KEY=
-
-# Anthropic API key — optional dev/env fallback
-ANTHROPIC_API_KEY=
-
-# ── MCP gateway ─────────────────────────────────────────────────────────────
-
-# URL of the sdmx-mcp-gateway (streamable-http transport)
-MCP_GATEWAY_URL=http://localhost:8000/mcp
-
-# Shared auth token for the gateway — set the same value as MCP_AUTH_TOKEN on Railway
-MCP_AUTH_TOKEN=
-
-# ── Database (Vercel Postgres / Neon) ───────────────────────────────────────
-
-# Full Postgres connection string
-DATABASE_URL=
-
-# ── NextAuth ────────────────────────────────────────────────────────────────
-
-# Generate with: openssl rand -base64 32
-NEXTAUTH_SECRET=
-
-# Public base URL of the app
-NEXTAUTH_URL=http://localhost:3000
-
-# ── Resend (magic-link email) ───────────────────────────────────────────────
-
-# Get one at https://resend.com/
-RESEND_API_KEY=
-
-# Verified Resend sender address
-EMAIL_FROM=
-
-# ── BYOK key encryption ─────────────────────────────────────────────────────
-
-# 32-byte hex secret — generate with: openssl rand -hex 32
-ENCRYPTION_SECRET=
-```
+Copy `.env.example` to `.env.local` and fill in the values; every variable is commented there. `docs/technical-reference.md` §19 groups them by purpose for production.
 
 ## Development
 
@@ -398,54 +283,37 @@ ENCRYPTION_SECRET=
 npm run dev         # Start dev server (Turbopack)
 npm run build       # Production build (Webpack)
 npm run lint        # ESLint
-npm run test        # Run Vitest test suite (unit tests)
-npm run build-index # Build semantic search index (requires MCP gateway at localhost:8000)
+npm run test        # Vitest suite
+npm run build-index # Build semantic search index (requires the MCP gateway)
 ```
 
 ### Tests
 
-Tests use [Vitest](https://vitest.dev/) and live in `tests/`:
-
-- `tests/model-router.test.ts` — model selection logic (BYOK, free tier, env fallback)
-- `tests/dashboard-authoring.test.ts` — authoring schema compiler (intent visuals to native config)
+Tests use [Vitest](https://vitest.dev/) and live in `tests/` (one file per `lib/` module, plus `tests/country-snapshots/`). CI runs lint, tests and the build on every pull request and push to `main`.
 
 ### Auth middleware
 
-`proxy.ts` at the project root is the NextAuth middleware. It protects every route except `/api/auth/*`, `/_next/*`, `/favicon.ico`, `/models/*`, and `/login`.
+`proxy.ts` at the project root is the Auth.js middleware. It protects every route except the public ones listed in its `matcher` (sign-in, about, gallery, published dashboards, public APIs, the SDMx relay, Country Snapshots, training and the cron route).
 
 ### Database migrations
 
 ```bash
-npx drizzle-kit push     # Apply schema to the database (development)
-npx drizzle-kit generate # Generate migration SQL files
+npx drizzle-kit generate # Generate migration SQL from lib/db/schema.ts
+npx drizzle-kit migrate  # Apply pending migrations (records them in drizzle.__drizzle_migrations)
 npx drizzle-kit studio   # Open Drizzle Studio to browse data
 ```
 
-The schema is defined in `lib/db/schema.ts` and includes:
+Back up production before migrating it; see the release procedure in `docs/technical-reference.md` §19.
 
-| Table | Purpose |
-|-------|---------|
-| `auth_users` | Registered users with role (`user`/`admin`) |
-| `auth_accounts` | NextAuth OAuth accounts (future use) |
-| `auth_verification_tokens` | Magic-link tokens |
-| `allowed_emails` | Invite allowlist |
-| `dashboard_sessions` | Per-user sessions (messages + config history) |
-| `usage_logs` | Per-request token and model usage |
-| `user_api_keys` | Encrypted BYOK keys per provider |
+The schema is defined in `lib/db/schema.ts`; `docs/current-architecture.md` §5 describes the persistence model.
 
 ## Deployment
 
 ### Vercel (Next.js app)
 
-1. Connect the repository to a Vercel project
-2. Add a **Vercel Postgres** database from the Vercel dashboard (Neon-backed); this auto-sets `POSTGRES_URL` and related env vars
-3. Set all other environment variables in the Vercel project settings (see Environment Variables section above — use production values for `NEXTAUTH_URL`, `MCP_GATEWAY_URL`, etc.)
-4. Deploy; the build runs `next build`
-5. After first deploy, push the schema and create the first admin user locally:
+Production (`sdmxsurfer.net`) builds from `main`; the development deployment (`sdmx-surfer.vercel.app`) builds from `dev`. Functions run in Sydney (`vercel.json`), next to the Neon database. See `docs/technical-reference.md` §19 for services, environment variables and the release procedure. To create the first admin user:
 
 ```bash
-# Point at the production DB (use the Vercel Postgres connection string)
-DATABASE_URL=<prod-connection-string> npx drizzle-kit push
 npx tsx scripts/add-pilot-user.ts admin@example.com --admin
 ```
 
@@ -462,15 +330,7 @@ npx tsx scripts/add-pilot-user.ts admin@example.com --admin
 
 ## Design System
 
-The UI implements the **Oceanic Data-Scapes** design system (`stitch_assets/stitch/oceanic_logic/DESIGN.md`):
-
-- **No 1px borders** — regions separated via tonal surface shifts
-- **Surface hierarchy:** base `#f7fafc` -> low `#f1f4f6` -> card `#ffffff` -> high `#e5e9eb`
-- **Primary palette:** Deep Sea `#004467`, Reef Teal `#006970`, Lagoon `#6fd6df`
-- **Typography:** Manrope (headlines) + Inter (interface/data)
-- **Glassmorphism:** 85% opacity + 20px backdrop-blur for app bar
-- **Ambient shadows:** `0 12px 40px rgba(24,28,30,0.06)`
-- **Ocean gradient:** 135deg `#004467` -> `#005c8a` for primary CTAs
+The UI follows the **Pacific Data Hub visual identity** (guidelines V1.0, 2025); see `docs/pdh-visual-alignment.md`. Tokens live in `app/globals.css` and are mirrored in `lib/brand-theme.ts`. The earlier "Oceanic Data-Scapes" mockups in `stitch_assets/` are superseded.
 
 ## Troubleshooting
 
@@ -487,7 +347,7 @@ Check that `RESEND_API_KEY` is set and `EMAIL_FROM` is a verified Resend sender.
 The data URL is malformed or returned no data. The error is auto-sent to the AI for fixing. Check that `probe_data_url` is being used before `update_dashboard` — the system prompt instructs the agent to probe first.
 
 ### Semantic search returns no results
-The index has not been built. Run `npm run build-index` with the MCP gateway running. Check that `models/granite-embedding-small-r2/` exists (ONNX model files must be downloaded separately — see `lib/embeddings.ts` for the model ID).
+The index is missing or stale, or `GOOGLE_AI_API_KEY` is not set (queries are embedded at request time). Run `npm run build-index` with the MCP gateway running.
 
 ### Dashboard shows "Loading..." forever
 Check the browser Network tab — SDMx REST requests to `stats-sdmx-disseminate.pacificdata.org` may be failing (CORS or network).
@@ -498,7 +358,7 @@ rm -rf .next && npm run dev
 ```
 
 ### Database connection errors
-Ensure `DATABASE_URL` is set and the Postgres instance is reachable. For Vercel Postgres locally, use the "Direct connection" string (not the pooled one) for `drizzle-kit push`.
+Ensure `DATABASE_URL` is set and the Neon branch is reachable. Use the direct (non-pooler) connection string for `drizzle-kit migrate` and `pg_dump`.
 
 ## Technical Reference
 

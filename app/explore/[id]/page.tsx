@@ -680,6 +680,11 @@ function MermaidDiagram({ code }: { code: string }) {
         mermaid.initialize({
           startOnLoad: false,
           theme: "base",
+          // Mermaid 12 defaults to the "neo" look and the ELK layout. ELK did
+          // not finish laying out a full dataflow structure diagram in our
+          // test, and the classic look is what the brand theme was tuned on.
+          look: "classic",
+          layout: "dagre",
           // Mermaid cannot read CSS variables, so this is the one place that
           // needs literal values. They come from BRAND_THEME rather than being
           // typed in again, so the diagram follows the palette instead of

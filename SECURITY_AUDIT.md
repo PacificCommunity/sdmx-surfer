@@ -1,12 +1,57 @@
 # Security Audit — sdmx/dashboarder
 
-**Date:** 2026-06-08 (last full audit); updated 2026-06-16
+**Date:** 2026-11-17 (current); earlier audits 2026-05-20, 2026-06-08, 2026-06-16 below
 **Stack:** Next.js 16 + React 19 + Drizzle + Auth.js v5, deployed to Vercel
 **Auditor:** automated (`npm audit`, `npm outdated`) plus manual exposure review
 
+## Current state (2026-11-17)
+
+| Severity | Before (all deps) | After (all deps) | After (production deps, `--omit=dev`) |
+|---|---|---|---|
+| Critical | 6 | **0** | **0** |
+| High | 13 | **0** | **0** |
+| Moderate | 21 | 6 | **0** |
+| Low | 11 | **0** | **0** |
+| **Total** | **51** | **6** | **0** |
+
+**Production dependencies have no known advisories.** The six remaining moderates are in development and maintenance tooling only (§A.3).
+
+### A.1 What the November audit found
+
+Advisories had accumulated since June, including critical ones in packages on the request path:
+- `next` 16.2.7: a middleware/proxy bypass that needs Turbopack (production builds use webpack), plus several denial-of-service issues.
+- `next-auth` / `@auth/core`: an email-normalisation homoglyph bypass, and existence checks that fail open on configuration errors.
+- `dompurify`, through `mermaid` and `jspdf`: a cross-realm sanitisation bypass.
+- `proxy-addr`: IPv4-mapped IPv6 trust bypass.
+- Highs in `zod`, `postcss`, `ws`, `sharp`, `adm-zip` (via `onnxruntime-node`) and others.
+
+### A.2 What we changed
+
+1. `npm audit fix` (non-breaking). Resolved versions: `next` 16.4.6, `next-auth` 5.0.0-beta.32, `@auth/core` 0.41.3, `@auth/drizzle-adapter` 1.11.3, `dompurify` 3.4.18, `zod` 4.6.7, `postcss` 8.5.33, `proxy-addr` 2.0.8.
+2. Removed two unused direct dependencies: `onnxruntime-node`, left over from the abandoned local embedding model, which also drops the `adm-zip` chain; and `ts-deepmerge`.
+3. Upgraded `mermaid` 11 → 12.3.0, which fixes `katex`'s prototype-pollution advisory. `/explore` pins the classic look and the dagre layout. Mermaid 12's default ELK layout did not finish rendering a full dataflow structure diagram in our test; classic/dagre rendered it at once.
+4. Added an npm `overrides` entry, `qs ^6.16.2`. `friendly-words` (used for generated passphrases) declares `express` as a dependency, which pulled in a vulnerable `qs`. Our code never loads `express`.
+
+Verified: `npm run lint` (0 errors), `npm test` (577 tests, 45 files), `npm run build`. CI (`.github/workflows/ci.yml`) now runs all three on every push to `main` and on every pull request.
+
+### A.3 Remaining advisories (dev and maintenance tooling only)
+
+| Advisory | Chain | Why there is no production exposure |
+|---|---|---|
+| `esbuild ≤ 0.24.2` (GHSA-67mh-4wv8-2f99), moderate, 4 entries | `drizzle-kit` → `@esbuild-kit/*` → `esbuild` | `drizzle-kit` runs only on a maintainer's machine, to generate and apply migrations. The vulnerable code is esbuild's dev server, which is never started. The only offered fix downgrades drizzle-kit to 0.18, which is incompatible |
+| `uuid < 11.1.1` (GHSA-w5hq-g745-h8pq), moderate, 2 entries | `exceljs` → `uuid` | `exceljs` is a devDependency, used only by `scripts/import-country-snapshots.ts` to read SPC's own indicator workbook. The bug needs a caller-supplied buffer to `v3`/`v5`/`v6` |
+
+### A.4 Going forward
+
+Run `npm audit --omit=dev` before each release; any high or critical blocks the release. The full `npm audit` should only ever list the tooling entries above.
+
+---
+
+## Earlier audits (kept as history)
+
 > **Update 2026-06-16 — Auth.js v5 migration landed.** Migrated `next-auth 4 → 5` and removed `nodemailer` entirely (`npm ls nodemailer` → empty). This resolves §3.1 (the nodemailer chain and its low-severity `@auth/core` / `@auth/drizzle-adapter` echoes) and §3.2 (`next-auth → uuid`). The magic-link flow now uses a custom Resend `email` provider that never imports nodemailer. Remaining items are dev-tooling (`esbuild` via drizzle-kit/tsx — surfaced as high after this date by new advisories, no production runtime path) and build-time (`postcss` via next, `uuid` via exceljs). Re-run `npm audit` for the current count.
 
-## Headline
+### Headline (June 2026)
 
 | Severity | 2026-05-20 (initial) | 2026-05-20 (post-fix) | 2026-06-08 (today, pre) | 2026-06-08 (today, post) |
 |---|---|---|---|---|
@@ -15,7 +60,7 @@
 | Low | 3 | 3 | 2 | **2** |
 | **Total** | **15** | **10** | **16** | **11** |
 
-Zero high-severity advisories remain. Every remaining moderate has been classified by production exposure (see §3). Build, lint, and tests verified clean.
+Zero high-severity advisories remained in June. Every remaining moderate was classified by production exposure (see §3).
 
 ## 1. What changed today
 
@@ -102,3 +147,5 @@ None of these are security-blocking.
 
 - **2026-05-20** — Initial audit. Closed 1 high (npm audit fix). Documented 10 residual issues with mitigations.
 - **2026-06-08** — Drift sweep. Reduced from 16 to 11 via patch bumps to `resend`, `next`, `next-auth`, and the qs autofix. Classified all remaining items by production exposure. Verified clean build, lint, tests.
+- **2026-06-16** — Auth.js v5 migration removed `nodemailer` and the `next-auth → uuid` chain.
+- **2026-11-17** — Drift sweep. 51 → 6 (0 in production dependencies) via `npm audit fix`, removal of unused `onnxruntime-node` and `ts-deepmerge`, `mermaid` 12.3, and a `qs` override. Verified lint, tests and build; CI now enforces them.

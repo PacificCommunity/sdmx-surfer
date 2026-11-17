@@ -20,8 +20,9 @@ Documentation staleness has bitten this repo before, so the split is explicit.
 - `docs/technical-reference.md`: lower-level internals.
 - `docs/pdh-visual-alignment.md`: the visual identity, with page references into the PDH guidelines.
 - `docs/prototype-to-production.md`: the path from alpha to a public service, including the governance questions that gate it.
-- `docs/sdmx-dashboard-components-improvements.md`: the library debt we carry as patches, written up for upstreaming.
-- `vendor/README.md`: why two dependencies are local tarballs.
+- `docs/sdmx-dashboard-components-improvements.md`: the library fixes written up for upstreaming.
+- `docs/spc-it-review.md`: the security and responsible-AI briefing for SPC IT, with the list of fixed and open gaps.
+- `SECURITY_AUDIT.md`: dependency audit history; `npm audit --omit=dev` must stay clean.
 - `README.md`: setup and running.
 
 **Dated records. Read them as history, not as instructions:**
@@ -43,7 +44,7 @@ Documentation staleness has bitten this repo before, so the split is explicit.
 - `public/brand/`: the committed PDH web assets (logos, wordmarks, domain pictograms, pattern).
 - `scripts/`: index building, data imports, audits.
 - `tests/`: vitest suites.
-- `vendor/`: local tarballs of the two forked SDMx libraries.
+- `.github/workflows/`: `ci.yml` (lint, tests, build) and `refresh-index.yml` (daily index refresh).
 - `brand/` and `web_assets/`: gitignored local working material. The full PDH package (~300 MB of `.ai`, `.pdf`, `.idml` and licensed fonts) lives in SharePoint and is deliberately not committed.
 
 ## Stack and Commands
@@ -63,7 +64,7 @@ npm run build-coverage  # refresh models/dataflow-coverage.json
 
 ## Conventions
 
-- **The two SDMx libraries in `vendor/` are local forks.** Fixes made there are debt; they belong upstream, and `docs/sdmx-dashboard-components-improvements.md` is where they are written up.
+- **The two SDMx libraries come from npm** (`sdmx-dashboard-components`, `sdmx-json-parser`, both SPC's). Fixes we need belong upstream; `docs/sdmx-dashboard-components-improvements.md` is where they are written up. When a dependency's contents change under the same version, clear the build cache (see `docs/sdmx-dashboard-components-1.0-integration.md`).
 - **`lib/brand-theme.ts` mirrors the CSS tokens** for contexts that cannot read them (the dashboard component theme, PDF and image export). Change one and change the other.
 - **Naming.** The standard is styled **SDMx** in prose. Identifiers keep the old spelling because they are names rather than prose: `SDMXDashboard` and its config types belong to `sdmx-dashboard-components`, `SDMX_ENDPOINT` and `SDMX_STATSNZ_KEY` are environment variables, and `SDMX-JSON` is a format name published under the old styling. The repository, the package and the domains are still `sdmx-surfer` / `sdmxsurfer.net`; only the product is Data Surfer.
 

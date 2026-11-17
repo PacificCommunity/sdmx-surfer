@@ -53,11 +53,10 @@
     "html2canvas": "^1.4.1",
     "html2canvas-pro": "^2.0.4",
     "jspdf": "^4.2.1",
-    "mermaid": "^11.13.0",
+    "mermaid": "^12.3.0",
     "next": "^16.2.7",
     "next-auth": "^5.0.0-beta.31",
     "ol": "^8.2.0",
-    "onnxruntime-node": "^1.24.3",
     "postcss": "^8.5.8",
     "proj4": "^2.20.4",
     "react": "^19.2.4",
@@ -70,7 +69,6 @@
     "sdmx-dashboard-components": "1.0.0-rc.2",
     "sdmx-json-parser": "^0.4.2",
     "tailwindcss": "^4.2.2",
-    "ts-deepmerge": "^7.0.3",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
@@ -80,5 +78,8 @@
     "exceljs": "^4.4.0",
     "tsx": "^4.21.0",
     "vitest": "^4.1.1"
+  },
+  "overrides": {
+    "qs": "^6.16.2"
   }
 }

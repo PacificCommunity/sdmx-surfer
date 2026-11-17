@@ -185,7 +185,7 @@ Built on **Auth.js v5**:
 
 ### 5.4 Dependencies
 
-`SECURITY_AUDIT.md` records the npm audit history. At the last full review it showed zero high-severity advisories. The remaining moderate ones were in build-time or dev-only tooling (drizzle-kit's esbuild, Next's nested postcss) and in the Country Snapshots import script (`exceljs`). We removed `nodemailer` entirely during the Auth.js v5 migration. We would welcome SPC's standard dependency scanning on the repository.
+`SECURITY_AUDIT.md` records the npm audit history. The audit for this review (17 November 2026) found 51 advisories that had built up since June, 6 of them critical. They included `next` and `@auth/core`. We fixed them all within existing version ranges, removed two unused dependencies, upgraded `mermaid`, and pinned one transitive package. **`npm audit --omit=dev` now reports zero advisories for production dependencies.** Six moderate advisories remain, all in maintenance tooling that never runs in production: drizzle-kit's bundled esbuild, and the workbook reader used by an import script. Each is explained in `SECURITY_AUDIT.md`. From now on, a high or critical production advisory blocks a release. We would welcome SPC's standard dependency scanning on the repository.
 
 ## 6. What we store, and who can see it
 
@@ -230,7 +230,7 @@ Deleting and re-registering also does not reset the per-user daily limit: for th
 
 ## 7. Testing and quality
 
-**Automated tests:** 545 Vitest tests in 44 files, all passing (`npm test`, run for this report). A GitHub Actions workflow (`.github/workflows/ci.yml`) runs lint, the tests and the production build on every pull request and every push to `main`. The tests concentrate on the logic where mistakes are costly:
+**Automated tests:** 577 Vitest tests in 45 files, all passing (`npm test`, run for this report). A GitHub Actions workflow (`.github/workflows/ci.yml`) runs lint, the tests and the production build on every pull request and every push to `main`. The tests concentrate on the logic where mistakes are costly:
 - admission and sign-up policy, login redirects, email proof, CSRF and IP helpers;
 - encryption round-trips and tamper detection;
 - model routing, BYOK fallback, zero-data-retention options and key rotation;
