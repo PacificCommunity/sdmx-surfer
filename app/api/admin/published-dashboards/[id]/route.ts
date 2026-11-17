@@ -8,7 +8,7 @@ export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const csrfError = checkCsrf(req);
+  const csrfError = checkCsrf(req, { strict: true });
   if (csrfError) return csrfError;
 
   const session = await auth();
