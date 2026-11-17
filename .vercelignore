@@ -1,6 +1,9 @@
-# Exclude ONNX model files from deployment (too large for serverless)
-# Only the pre-built index (dataflow-index.json) is needed at runtime
-models/granite-embedding-small-r2/
-
 # Maintenance and smoke-test scripts — run locally, never served.
 scripts/
+
+# Tests run in CI, not on Vercel. Some import scripts/, which is excluded
+# above, so uploading them would fail the build's type check.
+tests/
+
+# Leftover local embedding model; the app embeds with gemini-embedding-001.
+models/granite-embedding-small-r2/

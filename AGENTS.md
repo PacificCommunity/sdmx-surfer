@@ -46,7 +46,7 @@ flowchart LR
 - `drizzle/`: SQL migrations (`0000`–`0010_<drizzle-tag>.sql`, plus `meta/`).
 - `models/`: generated JSON indexes (tracked). `models/granite-embedding-small-r2/` is untracked and unused.
 - `data/country-snapshots/`: source XLSX, `dataflow-dimensions.json`, import reports.
-- `scripts/`: ops and data tooling. Run with `npx tsx`. Excluded from `tsconfig` and from Vercel deploys.
+- `scripts/`: ops and data tooling. Run with `npx tsx`. Excluded from `tsconfig` and from Vercel uploads (`.vercelignore`). `tests/` is excluded from Vercel uploads too, because `next build` type-checks every included file and some tests import `scripts/`.
 - `tests/`: all Vitest suites.
 - `docs/`: see "Important Files" for which docs to trust.
 
