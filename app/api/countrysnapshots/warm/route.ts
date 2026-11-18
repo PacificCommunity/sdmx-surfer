@@ -5,6 +5,7 @@ import { mcpTransportConfig } from "@/lib/mcp-client";
 import { getModelForUser } from "@/lib/model-router";
 import { auth } from "@/lib/auth";
 import { checkCsrf } from "@/lib/csrf";
+import { chatDisabled, chatDisabledResponse } from "@/lib/chat-availability";
 import {
   buildStableSystemMessage,
   buildSnapshotTools,
@@ -53,6 +54,8 @@ export async function POST(req: Request) {
   if (!session?.user?.userId) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  if (chatDisabled()) return chatDisabledResponse();
 
   let mode: SnapshotChatMode;
   try {

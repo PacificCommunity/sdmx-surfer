@@ -17,6 +17,7 @@ import {
 } from "@/lib/country-snapshots/chat-assembly";
 import { checkTurnCap } from "@/lib/country-snapshots/turn-cap";
 import { checkGlobalBudget } from "@/lib/usage-caps";
+import { chatDisabled, chatDisabledResponse } from "@/lib/chat-availability";
 
 // Per-page snapshot chats are read-only and tightly capped. The index
 // (entry-page) mode is a full builder agent and needs more room.
@@ -34,6 +35,8 @@ export async function POST(req: Request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
   const userId = session.user.userId;
+
+  if (chatDisabled()) return chatDisabledResponse();
 
   // Global AI budget circuit breaker applies everywhere, snapshots included.
   const budget = await checkGlobalBudget();

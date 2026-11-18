@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { BrandField } from "@/components/brand-field";
 import type { UIMessage, ChatStatus } from "ai";
 import { MessageBubble } from "./message-bubble";
+import { CHAT_DISABLED_MESSAGE, isChatDisabledError } from "@/lib/chat-availability";
 
 interface ChatPanelProps {
   messages: UIMessage[];
@@ -126,8 +127,14 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard,
 
           {error && (
             <div className="rounded-[var(--radius-xl)] bg-red-50 px-4 py-3 text-xs text-red-700">
-              The reply stopped because of an error. Send your message again to retry.
-              <span className="mt-1 block font-mono text-[11px] text-red-600">{error}</span>
+              {isChatDisabledError(error) ? (
+                CHAT_DISABLED_MESSAGE
+              ) : (
+                <>
+                  The reply stopped because of an error. Send your message again to retry.
+                  <span className="mt-1 block font-mono text-[11px] text-red-600">{error}</span>
+                </>
+              )}
             </div>
           )}
 
@@ -207,6 +214,9 @@ export function ChatPanel({ messages, status, sendMessage, onStop, hasDashboard,
             </button>
           )}
         </div>
+        <p className="mt-2 text-[11px] leading-snug text-on-surface-variant">
+          Don&apos;t enter confidential or personal information. Messages are processed by an AI provider and short excerpts are kept for 3 months.
+        </p>
       </form>
     </div>
   );

@@ -7,6 +7,7 @@ import type { SDMXDashboardConfig } from "@/lib/types";
 import { SDMXDashboardDynamic } from "@/components/sdmx-dashboard-dynamic";
 import { ChatMarkdown } from "./chat-markdown";
 import { CHAT_UI_THROTTLE_MS } from "@/lib/chat-ui";
+import { CHAT_DISABLED_MESSAGE, isChatDisabledError } from "@/lib/chat-availability";
 
 // Curated examples. Kept regionally-neutral and varied across themes.
 const EXAMPLES = [
@@ -227,6 +228,10 @@ export function ChatStarter() {
             Ask
           </button>
         </form>
+        <p className="mt-1 text-xs text-neutral-500">
+          Don&apos;t enter confidential or personal information. Messages are
+          processed by an AI provider and short excerpts are kept for 3 months.
+        </p>
 
         {messages.length === 0 ? (
           <div className="mt-3 flex flex-wrap gap-2">
@@ -280,7 +285,11 @@ export function ChatStarter() {
         ) : null}
         {error && !capReached ? (
           <p className="mt-3 rounded-md bg-red-50 p-2 text-xs text-red-800">
-            Couldn&apos;t reach the assistant. Try again in a moment.
+            {isChatDisabledError(error.message) ? (
+              CHAT_DISABLED_MESSAGE
+            ) : (
+              <>Couldn&apos;t reach the assistant. Try again in a moment.</>
+            )}
           </p>
         ) : null}
       </div>

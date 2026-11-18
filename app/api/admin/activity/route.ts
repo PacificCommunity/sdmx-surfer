@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { db, authEvents } from "@/lib/db";
 import { USAGE_EPOCH } from "@/lib/admin-epoch";
 import { extractDataSources } from "@/lib/data-explorer-url";
+import { requestIp } from "@/lib/request-ip";
 
 // ---------------------------------------------------------------------------
 // GET /api/admin/activity — usage analytics for the Activity admin tab.
@@ -48,7 +49,7 @@ interface ActivityResponse {
   sessions: SessionRow[];
 }
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(req: Request): Promise<NextResponse> {
   const session = await auth();
   if (!session?.user?.userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -237,6 +238,23 @@ export async function GET(): Promise<NextResponse> {
     topTools: toRanked(toolsResult.rows as Record<string, unknown>[]),
     sessions: sessionRows,
   };
+
+  // The response carries users' prompt excerpts, so each view is audited.
+  // A failed audit write only warns: an audit-table outage must not take the
+  // admin panel down with it, and the warning still leaves a trace in the
+  // function logs.
+  try {
+    await db.insert(authEvents).values({
+      user_id: session.user.userId,
+      email: session.user.email ?? "",
+      event_type: "admin_viewed_excerpts",
+      actor_user_id: session.user.userId,
+      ip: requestIp(req),
+      metadata: { endpoint: "/api/admin/activity" },
+    });
+  } catch (err) {
+    console.warn("[admin/activity] could not record excerpt view", err);
+  }
 
   return NextResponse.json(response);
 }

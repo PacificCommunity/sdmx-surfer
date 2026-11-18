@@ -5,6 +5,7 @@ import { getModelForUser, STREAM_TIMEOUT } from "@/lib/model-router";
 import { auth } from "@/lib/auth";
 import { checkCsrf } from "@/lib/csrf";
 import { checkChatAllowed } from "@/lib/usage-caps";
+import { chatDisabled, chatDisabledResponse } from "@/lib/chat-availability";
 import { z } from "zod";
 import {
   getConfigTitle,
@@ -101,6 +102,8 @@ export async function POST(req: Request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
   const userId = session.user.userId;
+
+  if (chatDisabled()) return chatDisabledResponse();
 
   // Usage caps: global AI budget (everyone) + per-user daily turns (open tier;
   // admins exempt). Refuse before any model spend if a limit is reached.

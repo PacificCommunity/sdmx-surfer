@@ -153,7 +153,12 @@ export function PublishDialog({
           </p>
         )}
 
-        <div className="mt-6 flex items-center justify-end gap-3">
+        <p className="mt-6 text-xs text-on-surface-variant">
+          You are publishing under the author name above. Check each panel&apos;s
+          data source before publishing.
+        </p>
+
+        <div className="mt-3 flex items-center justify-end gap-3">
           <button
             type="button"
             onClick={onClose}

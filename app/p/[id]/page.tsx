@@ -166,8 +166,9 @@ export default function PublicDashboardPage() {
             </p>
           )}
           <p className="mt-3 max-w-3xl text-xs text-on-surface-variant">
-            The titles and notes on this dashboard were composed with an AI assistant. Every charted
-            figure is fetched directly from the statistical providers listed under Data Sources below.
+            This dashboard was created by a Data Surfer user and is not an official SPC publication.
+            Its titles and notes were composed with an AI assistant. Every charted figure is fetched
+            directly from the statistical providers listed under Data Sources below.
           </p>
         </div>
 

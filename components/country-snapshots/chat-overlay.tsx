@@ -6,6 +6,7 @@ import { DefaultChatTransport } from "ai";
 import type { SnapshotContext } from "@/lib/country-snapshots/system-prompt";
 import { ChatMarkdown } from "./chat-markdown";
 import { CHAT_UI_THROTTLE_MS } from "@/lib/chat-ui";
+import { CHAT_DISABLED_MESSAGE, isChatDisabledError } from "@/lib/chat-availability";
 
 export function ChatOverlay({
   snapshotContext,
@@ -142,7 +143,11 @@ export function ChatOverlay({
             ) : null}
             {error && !capReached ? (
               <p className="rounded-md bg-red-50 p-2 text-xs text-red-800">
-                Couldn&apos;t reach the assistant. Try again in a moment.
+                {isChatDisabledError(error.message) ? (
+                  CHAT_DISABLED_MESSAGE
+                ) : (
+                  <>Couldn&apos;t reach the assistant. Try again in a moment.</>
+                )}
               </p>
             ) : null}
           </div>
@@ -166,6 +171,11 @@ export function ChatOverlay({
               className="w-full rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
               autoComplete="off"
             />
+            <p className="mt-1 text-xs text-neutral-500">
+              Don&apos;t enter confidential or personal information. Messages
+              are processed by an AI provider and short excerpts are kept for 3
+              months.
+            </p>
           </form>
 
           <form
